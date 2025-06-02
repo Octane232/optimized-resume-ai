@@ -105,7 +105,7 @@ const ExecutiveTemplate: React.FC<ExecutiveTemplateProps> = ({ data, scale = 1 }
             <div className="grid grid-cols-1 gap-2">
               {data.certifications.map((cert, index) => (
                 <div key={index} className="flex items-center p-2 border-l-4 border-gray-400 bg-gray-50">
-                  <span className="font-medium">{cert}</span>
+                  <span className="font-medium">{cert.name} - {cert.issuer}</span>
                 </div>
               ))}
             </div>

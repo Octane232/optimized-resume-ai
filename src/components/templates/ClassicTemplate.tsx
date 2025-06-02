@@ -89,7 +89,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, scale = 1 }) =>
             {data.certifications.map((cert, index) => (
               <div key={index} className="flex items-center">
                 <span className="w-2 h-2 bg-gray-800 rounded-full mr-2"></span>
-                {cert}
+                {cert.name} - {cert.issuer}
               </div>
             ))}
           </div>

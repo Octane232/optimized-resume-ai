@@ -51,7 +51,11 @@ export const classicResueSample: ResumeData = {
       endYear: "2016"
     }
   ],
-  certifications: ["Google Analytics Certified", "HubSpot Content Marketing Certified", "Facebook Blueprint Certified"]
+  certifications: [
+    { name: "Google Analytics Certified", issuer: "Google", date: "2023" },
+    { name: "HubSpot Content Marketing Certified", issuer: "HubSpot", date: "2022" },
+    { name: "Facebook Blueprint Certified", issuer: "Meta", date: "2023" }
+  ]
 };
 
 export const modernResumeSample: ResumeData = {
@@ -311,5 +315,9 @@ export const techResumeSample: ResumeData = {
       technologies: ["Go", "Redis", "Kafka", "PostgreSQL"]
     }
   ],
-  certifications: ["AWS Solutions Architect", "Certified Kubernetes Administrator", "TensorFlow Developer Certificate"]
+  certifications: [
+    { name: "AWS Solutions Architect", issuer: "Amazon Web Services", date: "2023" },
+    { name: "Certified Kubernetes Administrator", issuer: "Cloud Native Computing Foundation", date: "2022" },
+    { name: "TensorFlow Developer Certificate", issuer: "Google", date: "2023" }
+  ]
 };

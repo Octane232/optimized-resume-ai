@@ -147,7 +147,7 @@ const TechTemplate: React.FC<TechTemplateProps> = ({ data, scale = 1 }) => {
                 {data.certifications.map((cert, index) => (
                   <div key={index} className="flex items-center mb-2">
                     <span className="text-green-400 mr-2">✓</span>
-                    <span className="text-gray-300 text-sm">{cert}</span>
+                    <span className="text-gray-300 text-sm">{cert.name} - {cert.issuer}</span>
                   </div>
                 ))}
               </div>

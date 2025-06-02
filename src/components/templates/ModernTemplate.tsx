@@ -128,7 +128,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, scale = 1 }) => {
                 {data.certifications.map((cert, index) => (
                   <li key={index} className="flex items-center">
                     <span className="w-2 h-2 bg-blue-400 rounded-full mr-3"></span>
-                    {cert}
+                    {cert.name} - {cert.issuer}
                   </li>
                 ))}
               </ul>
