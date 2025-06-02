@@ -1,233 +1,213 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ResumeData, JobDescription, ResumeAnalysis } from '@/types/resume';
+import { ResumeData } from '@/types/resume';
 
 interface AIFeaturesProps {
-  resumeData?: ResumeData;
+  resumeData: ResumeData | null;
 }
 
 const AIFeatures: React.FC<AIFeaturesProps> = ({ resumeData }) => {
-  const [jobDescription, setJobDescription] = useState('');
-  const [analysis, setAnalysis] = useState<ResumeAnalysis | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [activeFeature, setActiveFeature] = useState<string>('job-search');
 
-  const analyzeResume = async () => {
-    if (!jobDescription || !resumeData) return;
-    
-    setIsAnalyzing(true);
-    // Simulate AI analysis
-    setTimeout(() => {
-      const mockAnalysis: ResumeAnalysis = {
-        matchScore: 78,
-        missingKeywords: ['project management', 'agile', 'stakeholder management'],
-        suggestions: [
-          'Add quantifiable achievements to your experience section',
-          'Include more industry-specific keywords',
-          'Highlight leadership experience more prominently'
-        ],
-        strengthAreas: ['Technical skills', 'Education background', 'Project experience'],
-        improvementAreas: ['Soft skills', 'Industry keywords', 'Achievement metrics']
-      };
-      setAnalysis(mockAnalysis);
-      setIsAnalyzing(false);
-    }, 2000);
-  };
-
-  const rewriteAchievement = (text: string) => {
-    // Mock AI achievement rewriter
-    const improvements = {
-      'Managed social media': 'Grew Instagram audience by 43% in 4 months using targeted content strategies',
-      'Led team': 'Successfully led cross-functional team of 8 members, delivering projects 20% ahead of schedule',
-      'Improved sales': 'Increased quarterly sales by 35% through implementation of data-driven customer acquisition strategies'
-    };
-    return improvements[text as keyof typeof improvements] || text + ' (AI-enhanced version)';
-  };
+  const features = [
+    {
+      id: 'job-search',
+      title: 'AI Job Search',
+      icon: '🎯',
+      description: 'Automatically find and apply to jobs that match your profile',
+      badge: 'Auto Apply'
+    },
+    {
+      id: 'job-matcher',
+      title: 'Job Description Matcher',
+      icon: '🔍',
+      description: 'Paste a job description to see how well your resume matches',
+      badge: 'ATS Optimization'
+    },
+    {
+      id: 'achievement-rewriter',
+      title: 'Achievement Rewriter',
+      icon: '✨',
+      description: 'Transform basic job duties into powerful achievements',
+      badge: 'Impact Boost'
+    },
+    {
+      id: 'linkedin-optimizer',
+      title: 'LinkedIn Optimizer',
+      icon: '💼',
+      description: 'Generate optimized LinkedIn headline and summary',
+      badge: 'Personal Brand'
+    },
+    {
+      id: 'skill-analyzer',
+      title: 'Skill Gap Analyzer',
+      icon: '📊',
+      description: 'Identify missing skills and get learning recommendations',
+      badge: 'Career Growth'
+    },
+    {
+      id: 'interview-prep',
+      title: 'Interview Prep',
+      icon: '🎤',
+      description: 'Generate likely interview questions and suggested answers',
+      badge: 'Interview Ready'
+    }
+  ];
 
   return (
     <div className="space-y-6">
-      {/* Job Description Matcher */}
+      {/* AI Job Search Feature */}
+      <Card className="border-2 border-green-200 bg-green-50">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center">
+              <span className="text-2xl mr-2">🎯</span>
+              AI Job Search Engine
+            </CardTitle>
+            <Badge className="bg-green-100 text-green-800">New</Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-gray-600">
+            Our AI continuously searches for jobs that match your profile and applies automatically.
+          </p>
+          
+          <div className="grid grid-cols-2 gap-3 text-xs">
+            <div className="bg-white p-3 rounded border">
+              <div className="font-semibold text-green-600">500+</div>
+              <div className="text-gray-600">Companies Monitored</div>
+            </div>
+            <div className="bg-white p-3 rounded border">
+              <div className="font-semibold text-green-600">24/7</div>
+              <div className="text-gray-600">Job Scanning</div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium">Job Preferences</label>
+            <select className="w-full p-2 border rounded-lg text-sm">
+              <option>Software Engineer</option>
+              <option>Product Manager</option>
+              <option>Data Scientist</option>
+              <option>Marketing Manager</option>
+            </select>
+            <select className="w-full p-2 border rounded-lg text-sm">
+              <option>Remote</option>
+              <option>San Francisco, CA</option>
+              <option>New York, NY</option>
+              <option>Austin, TX</option>
+            </select>
+          </div>
+
+          <Button className="w-full bg-green-600 hover:bg-green-700">
+            Start Automatic Job Search
+          </Button>
+          
+          <p className="text-xs text-gray-500 text-center">
+            ✅ We'll find jobs, match them to your profile, and apply for you
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Other AI Features */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            🔍 Job Description Matcher
-            <Badge variant="outline">AI-Powered</Badge>
-          </CardTitle>
+          <CardTitle>AI Career Tools</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <textarea
-              className="w-full h-32 p-3 border rounded-lg resize-none"
-              placeholder="Paste the job description here to get AI-powered optimization suggestions..."
-              value={jobDescription}
-              onChange={(e) => setJobDescription(e.target.value)}
-            />
-            <Button 
-              onClick={analyzeResume} 
-              disabled={!jobDescription || !resumeData || isAnalyzing}
-              className="w-full"
+        <CardContent className="space-y-3">
+          {features.slice(1).map((feature) => (
+            <div
+              key={feature.id}
+              className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                activeFeature === feature.id
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+              onClick={() => setActiveFeature(feature.id)}
             >
-              {isAnalyzing ? 'Analyzing...' : 'Analyze Resume Match'}
-            </Button>
-            
-            {analysis && (
-              <div className="mt-6 space-y-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg font-semibold">Match Score:</span>
-                  <Badge variant={analysis.matchScore > 70 ? "default" : "destructive"}>
-                    {analysis.matchScore}%
-                  </Badge>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center">
+                  <span className="text-lg mr-2">{feature.icon}</span>
+                  <span className="font-medium text-sm">{feature.title}</span>
                 </div>
-                
-                <div>
-                  <h4 className="font-semibold mb-2">Missing Keywords:</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {analysis.missingKeywords.map((keyword, index) => (
-                      <Badge key={index} variant="outline">{keyword}</Badge>
-                    ))}
-                  </div>
-                </div>
-                
-                <div>
-                  <h4 className="font-semibold mb-2">AI Suggestions:</h4>
-                  <ul className="space-y-1 text-sm">
-                    {analysis.suggestions.map((suggestion, index) => (
-                      <li key={index} className="flex items-start">
-                        <span className="text-green-500 mr-2">•</span>
-                        {suggestion}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                <Badge variant="outline" className="text-xs">
+                  {feature.badge}
+                </Badge>
               </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* AI Achievement Rewriter */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            🧠 AI Achievement Rewriter
-            <Badge variant="outline">Beta</Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <p className="text-sm text-gray-600">
-              Transform generic job descriptions into quantifiable achievements that stand out to recruiters.
-            </p>
-            <div className="grid gap-4">
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <div className="text-sm text-gray-600 mb-1">Before:</div>
-                <div className="text-sm">"Managed social media"</div>
-              </div>
-              <div className="p-3 bg-green-50 rounded-lg">
-                <div className="text-sm text-green-600 mb-1">After (AI-Enhanced):</div>
-                <div className="text-sm font-medium">"Grew Instagram audience by 43% in 4 months using targeted content strategies"</div>
-              </div>
+              <p className="text-xs text-gray-600">{feature.description}</p>
             </div>
-            <Button className="w-full" variant="outline">
-              Try Achievement Rewriter
-            </Button>
-          </div>
+          ))}
         </CardContent>
       </Card>
 
-      {/* Skill Gap Analyzer */}
+      {/* Active Feature Interface */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            🛠 Skill Gap Analyzer
-            <Badge variant="outline">Career Growth</Badge>
+          <CardTitle className="text-lg">
+            {features.find(f => f.id === activeFeature)?.title}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <p className="text-sm text-gray-600">
-              Discover skills you're missing for your target role and get personalized learning recommendations.
-            </p>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center p-2 bg-red-50 rounded">
-                <span className="text-sm">Python Programming</span>
-                <Badge variant="destructive" className="text-xs">Missing</Badge>
-              </div>
-              <div className="flex justify-between items-center p-2 bg-yellow-50 rounded">
-                <span className="text-sm">Data Analysis</span>
-                <Badge variant="outline" className="text-xs">Beginner</Badge>
-              </div>
-              <div className="flex justify-between items-center p-2 bg-green-50 rounded">
-                <span className="text-sm">Project Management</span>
-                <Badge variant="default" className="text-xs">Advanced</Badge>
-              </div>
-            </div>
-            <Button className="w-full" variant="outline">
-              Analyze Skill Gaps
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Interview Prep Generator */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            🎯 AI Interview Prep
-            <Badge variant="outline">Interview Ready</Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <p className="text-sm text-gray-600">
-              Get personalized interview questions and suggested answers based on your resume and target role.
-            </p>
-            <div className="p-3 bg-blue-50 rounded-lg">
-              <div className="text-sm font-medium text-blue-800 mb-2">Sample Question:</div>
-              <div className="text-sm text-blue-700">
-                "Tell me about a time when you had to manage a difficult project with tight deadlines."
-              </div>
-            </div>
-            <Button className="w-full" variant="outline">
-              Generate Interview Questions
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* LinkedIn Optimizer */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            🔗 LinkedIn Profile Optimizer
-            <Badge variant="outline">Personal Brand</Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <p className="text-sm text-gray-600">
-              Auto-generate optimized LinkedIn headline and summary that matches your resume.
-            </p>
+          {activeFeature === 'job-matcher' && (
             <div className="space-y-3">
-              <div className="p-3 bg-linkedin-50 rounded-lg border border-blue-200">
-                <div className="text-sm font-medium text-blue-800 mb-1">Suggested Headline:</div>
-                <div className="text-sm text-blue-700">
-                  "Senior Marketing Manager | Digital Strategy Expert | Driving 40% Growth in Lead Generation"
-                </div>
+              <textarea
+                className="w-full p-3 border rounded-lg text-sm"
+                rows={4}
+                placeholder="Paste job description here..."
+              />
+              <Button className="w-full">Analyze Match</Button>
+            </div>
+          )}
+
+          {activeFeature === 'achievement-rewriter' && (
+            <div className="space-y-3">
+              <input
+                className="w-full p-2 border rounded-lg text-sm"
+                placeholder="e.g., Managed social media accounts"
+              />
+              <Button className="w-full">Rewrite Achievement</Button>
+              <div className="p-3 bg-gray-50 rounded text-sm">
+                <strong>AI Suggestion:</strong> "Grew Instagram audience by 43% in 4 months using targeted content strategies"
               </div>
-              <div className="p-3 bg-linkedin-50 rounded-lg border border-blue-200">
-                <div className="text-sm font-medium text-blue-800 mb-1">Summary Preview:</div>
-                <div className="text-sm text-blue-700">
-                  "Results-driven marketing professional with 8+ years of experience developing and executing integrated marketing campaigns..."
+            </div>
+          )}
+
+          {activeFeature === 'linkedin-optimizer' && (
+            <div className="space-y-3">
+              <Button className="w-full">Generate LinkedIn Content</Button>
+              <div className="space-y-2 text-sm">
+                <div className="p-3 bg-gray-50 rounded">
+                  <strong>Headline:</strong> "Senior Software Engineer | React & Node.js Expert | Building Scalable Web Applications"
+                </div>
+                <div className="p-3 bg-gray-50 rounded">
+                  <strong>Summary:</strong> "Passionate software engineer with 5+ years of experience..."
                 </div>
               </div>
             </div>
-            <Button className="w-full" variant="outline">
-              Optimize LinkedIn Profile
-            </Button>
-          </div>
+          )}
+
+          {activeFeature === 'skill-analyzer' && (
+            <div className="space-y-3">
+              <textarea
+                className="w-full p-3 border rounded-lg text-sm"
+                rows={3}
+                placeholder="Paste target job description..."
+              />
+              <Button className="w-full">Analyze Skills Gap</Button>
+            </div>
+          )}
+
+          {activeFeature === 'interview-prep' && (
+            <div className="space-y-3">
+              <input
+                className="w-full p-2 border rounded-lg text-sm"
+                placeholder="Job title (e.g., Senior Software Engineer)"
+              />
+              <Button className="w-full">Generate Interview Questions</Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
