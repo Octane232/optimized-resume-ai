@@ -149,13 +149,13 @@ const ResumesShowcase = () => {
   const displayedResumes = showAll ? filteredResumes : filteredResumes.slice(0, 6);
 
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="py-20 bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
             Professional Resume Templates
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
             Choose from our collection of professionally designed, ATS-optimized resume templates. 
             Each template is crafted by career experts and loved by hiring managers.
           </p>
@@ -182,7 +182,7 @@ const ResumesShowcase = () => {
             return (
               <Card 
                 key={resume.id} 
-                className="group hover:shadow-xl transition-all duration-300 bg-white border-0 shadow-md overflow-hidden animate-fade-in"
+                className="group hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 border-0 shadow-md overflow-hidden animate-fade-in"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div className="relative">
@@ -193,7 +193,7 @@ const ResumesShowcase = () => {
                     </Badge>
                   )}
                   
-                  <div className="relative overflow-hidden bg-gray-100 h-64">
+                  <div className="relative overflow-hidden bg-gray-100 dark:bg-gray-700 h-64">
                     <div className="w-full h-full p-2 overflow-hidden">
                       <TemplateComponent data={resume.data} scale={0.3} />
                     </div>
@@ -217,32 +217,32 @@ const ResumesShowcase = () => {
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <h3 className="font-semibold text-lg text-gray-900 mb-1">
+                      <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-1">
                         {resume.title}
                       </h3>
-                      <Badge variant="outline" className="text-xs">
+                      <Badge variant="outline" className="text-xs border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300">
                         {resume.category}
                       </Badge>
                     </div>
-                    <div className="flex items-center text-sm text-gray-600">
+                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                       <Star className="w-4 h-4 text-amber-400 mr-1" />
                       {resume.rating}
                     </div>
                   </div>
                   
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
                     {resume.description}
                   </p>
                   
-                  <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
-                    <span className="bg-gray-100 px-2 py-1 rounded">
+                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-500 mb-4">
+                    <span className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded">
                       {resume.industry}
                     </span>
-                    <span>{resume.experience}</span>
+                    <span className="text-gray-600 dark:text-gray-400">{resume.experience}</span>
                   </div>
                   
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-gray-500 dark:text-gray-500">
                       {resume.downloads} downloads
                     </span>
                     <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
