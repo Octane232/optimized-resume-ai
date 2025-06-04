@@ -21,31 +21,40 @@ const Footer = () => {
         { label: 'For Individuals', href: '/for-individuals' },
         { label: 'For Students', href: '/for-students' },
         { label: 'For Enterprises', href: '#enterprise' },
-        { label: 'For Recruiters', href: '#recruiters' },
-        { label: 'Integrations', href: '#integrations' }
+        { label: 'For Recruiters', href: '#resources' },
+        { label: 'Integrations', href: '#resources' }
       ]
     },
     {
       title: 'Resources',
       links: [
-        { label: 'Help Center', href: '#help' },
-        { label: 'Career Blog', href: '#blog' },
-        { label: 'Resume Examples', href: '#examples' },
-        { label: 'Interview Tips', href: '#interviews' },
-        { label: 'API Documentation', href: '#api' }
+        { label: 'Help Center', href: '#resources' },
+        { label: 'Career Blog', href: '#resources' },
+        { label: 'Resume Examples', href: '#resources' },
+        { label: 'Interview Tips', href: '#resources' },
+        { label: 'API Documentation', href: '#resources' }
       ]
     },
     {
       title: 'Company',
       links: [
         { label: 'About Us', href: '/about-us' },
-        { label: 'Careers', href: '#careers' },
-        { label: 'Press Kit', href: '#press' },
+        { label: 'Careers', href: '#resources' },
+        { label: 'Press Kit', href: '#resources' },
         { label: 'Contact', href: '/contact' },
-        { label: 'Security', href: '#security' }
+        { label: 'Security', href: '#resources' }
       ]
     }
   ];
+
+  const scrollToSection = (href: string) => {
+    if (href.startsWith('#')) {
+      const element = document.querySelector(href);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
 
   return (
     <footer className="bg-gray-900 text-white">
@@ -95,12 +104,12 @@ const Footer = () => {
                         {link.label}
                       </Link>
                     ) : (
-                      <a 
-                        href={link.href} 
-                        className="text-gray-400 hover:text-white transition-colors text-sm"
+                      <button 
+                        onClick={() => scrollToSection(link.href)}
+                        className="text-gray-400 hover:text-white transition-colors text-sm text-left"
                       >
                         {link.label}
-                      </a>
+                      </button>
                     )}
                   </li>
                 ))}

@@ -12,7 +12,7 @@ const ComingSoonSection = () => {
   ];
 
   return (
-    <section className="py-16 bg-gradient-to-r from-navy-600 to-navy-700">
+    <section id="enterprise" className="py-16 bg-gradient-to-r from-navy-600 to-navy-700">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="text-center text-white">
           <div className="inline-block bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
@@ -20,12 +20,12 @@ const ComingSoonSection = () => {
           </div>
           
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Apply to Jobs with One Click
+            Enterprise Solutions
           </h2>
           
           <p className="text-xl text-navy-100 max-w-2xl mx-auto mb-8">
-            Soon you'll be able to apply directly to thousands of jobs across all major platforms 
-            with your AI-optimized resume.
+            Soon we'll offer enterprise-grade solutions for teams and organizations 
+            to streamline their hiring and talent acquisition process.
           </p>
 
           <div className="flex flex-wrap justify-center items-center gap-8 mb-8">

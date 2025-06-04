@@ -1,161 +1,77 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { ArrowRight, CheckCircle } from 'lucide-react';
+import { CheckCircle, Clock, Target, BarChart3, FileText, Search } from 'lucide-react';
 
 const BenefitsSection = () => {
   const benefits = [
     {
-      icon: '🤖',
-      title: 'AI-Powered Resume Optimization',
-      description: 'Advanced algorithms analyze job descriptions and optimize your resume for maximum ATS compatibility and recruiter appeal.',
-      badge: 'AI Technology',
-      metrics: '98% ATS Pass Rate'
+      icon: FileText,
+      title: 'AI-Powered Resume Creation',
+      description: 'Generate professional, ATS-optimized resumes tailored to specific job requirements with our advanced AI technology.',
+      gradient: 'from-blue-500 to-cyan-500'
     },
     {
-      icon: '🎯',
-      title: 'Intelligent Job Matching',
-      description: 'Our platform continuously scans 500+ job boards and company websites to find opportunities that perfectly match your profile.',
-      badge: 'Job Discovery',
-      metrics: '10,000+ Jobs Daily'
+      icon: Search,
+      title: 'Smart Job Discovery',
+      description: 'Our platform finds and presents job opportunities that match your skills, experience, and career goals.',
+      gradient: 'from-green-500 to-emerald-500'
     },
     {
-      icon: '⚡',
-      title: 'Automated Applications',
-      description: 'Apply to multiple relevant positions automatically while maintaining personalization and quality standards.',
-      badge: 'Automation',
-      metrics: '50+ Applications/Day'
+      icon: Target,
+      title: 'Targeted Job Matching',
+      description: 'Get matched with positions that align perfectly with your background and career aspirations.',
+      gradient: 'from-purple-500 to-violet-500'
     },
     {
-      icon: '📊',
-      title: 'Advanced Analytics Dashboard',
-      description: 'Track application success rates, interview conversion, and optimize your job search strategy with actionable insights.',
-      badge: 'Analytics',
-      metrics: 'Real-time Tracking'
+      icon: Clock,
+      title: 'Save Time & Effort',
+      description: 'Streamline your job search process and focus on what matters most - preparing for interviews.',
+      gradient: 'from-orange-500 to-red-500'
     },
     {
-      icon: '🎨',
-      title: 'Professional Template Library',
-      description: 'Access 100+ industry-specific templates designed by career experts and approved by hiring managers.',
-      badge: 'Design',
-      metrics: '100+ Templates'
+      icon: BarChart3,
+      title: 'Track Your Progress',
+      description: 'Monitor your job search performance with detailed analytics and insights to optimize your strategy.',
+      gradient: 'from-pink-500 to-rose-500'
     },
     {
-      icon: '💼',
-      title: 'Enterprise-Grade Career Coaching',
-      description: 'Get personalized interview preparation, salary negotiation strategies, and career advancement guidance.',
-      badge: 'Coaching',
-      metrics: '24/7 AI Support'
+      icon: CheckCircle,
+      title: 'Higher Success Rate',
+      description: 'Increase your chances of landing interviews with professionally crafted resumes and strategic job targeting.',
+      gradient: 'from-indigo-500 to-purple-500'
     }
   ];
 
   return (
-    <section className="py-24 bg-gray-50">
+    <section id="features" className="py-16 bg-gray-50">
       <div className="container mx-auto px-4 lg:px-8">
-        <div className="text-center mb-20">
-          <Badge className="mb-4 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-50">
-            Enterprise Features
-          </Badge>
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Complete Career Acceleration Platform
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Why Choose AI Resume Pro?
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Beyond resume building—we're your complete career partner with enterprise-grade tools 
-            designed to accelerate your professional growth and job search success.
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Transform your job search with AI-powered tools designed for modern professionals
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {benefits.map((benefit, index) => (
-            <Card 
+            <div 
               key={index} 
-              className="group hover:shadow-2xl transition-all duration-500 border-0 shadow-lg hover:-translate-y-3 bg-white relative overflow-hidden"
+              className="bg-white rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 group animate-fade-in border border-gray-100"
+              style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <CardContent className="p-8">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-purple-50 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-500"></div>
-                <div className="relative z-10">
-                  <div className="text-4xl mb-4">{benefit.icon}</div>
-                  <div className="flex items-center justify-between mb-4">
-                    <Badge className="bg-gray-100 text-gray-700 hover:bg-gray-100 text-xs">
-                      {benefit.badge}
-                    </Badge>
-                    <span className="text-xs font-medium text-blue-600">{benefit.metrics}</span>
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">
-                    {benefit.title}
-                  </h3>
-                  <p className="text-gray-600 leading-relaxed mb-4">
-                    {benefit.description}
-                  </p>
-                  <div className="flex items-center text-blue-600 text-sm font-medium group-hover:translate-x-1 transition-transform duration-300">
-                    <span>Learn more</span>
-                    <ArrowRight className="ml-1 h-4 w-4" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Enterprise Feature Showcase */}
-        <div className="bg-gradient-to-r from-gray-900 to-blue-900 rounded-3xl p-8 md:p-16 text-white relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20"></div>
-          <div className="relative z-10">
-            <div className="grid md:grid-cols-2 gap-12 items-center">
-              <div>
-                <Badge className="mb-6 bg-white/20 text-white hover:bg-white/20 border-white/30">
-                  🚀 Advanced Job Search Engine
-                </Badge>
-                <h3 className="text-4xl font-bold mb-6">
-                  We Don't Just Build Resumes—We Land You Jobs
-                </h3>
-                <p className="text-blue-100 mb-8 text-lg leading-relaxed">
-                  Our enterprise-grade AI scans thousands of job postings daily across 500+ companies, 
-                  intelligently matches them to your profile, and automatically submits applications 
-                  while you sleep. Wake up to interview invitations, not endless job searching.
-                </p>
-                <div className="grid grid-cols-2 gap-6 mb-8">
-                  <div className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-400 mr-3" />
-                    <span className="text-sm">500+ Partner Companies</span>
-                  </div>
-                  <div className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-400 mr-3" />
-                    <span className="text-sm">24/7 Job Monitoring</span>
-                  </div>
-                  <div className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-400 mr-3" />
-                    <span className="text-sm">Smart Application Timing</span>
-                  </div>
-                  <div className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-400 mr-3" />
-                    <span className="text-sm">Interview Scheduling</span>
-                  </div>
-                </div>
+              <div className={`inline-flex p-3 rounded-lg bg-gradient-to-r ${benefit.gradient} mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                <benefit.icon className="h-6 w-6 text-white" />
               </div>
-              <div className="text-center">
-                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
-                  <div className="text-7xl mb-4">🎯</div>
-                  <h4 className="text-2xl font-bold mb-4">Job Search Success</h4>
-                  <div className="space-y-3 text-blue-100">
-                    <div className="flex justify-between">
-                      <span>Interview Rate:</span>
-                      <span className="font-bold text-green-400">3x Higher</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Time to Hire:</span>
-                      <span className="font-bold text-green-400">60% Faster</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Salary Increase:</span>
-                      <span className="font-bold text-green-400">25% Average</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                {benefit.title}
+              </h3>
+              <p className="text-gray-600 leading-relaxed">
+                {benefit.description}
+              </p>
             </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>

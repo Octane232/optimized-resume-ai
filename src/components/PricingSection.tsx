@@ -30,9 +30,10 @@ const PricingSection = () => {
         'Advanced AI customization',
         'Cover letter generator',
         'Multiple resume versions',
+        'Job discovery & matching',
         'Priority support'
       ],
-      buttonText: 'Start Pro Trial',
+      buttonText: 'Start 7-Day Free Trial',
       popular: true
     },
     {
@@ -48,7 +49,7 @@ const PricingSection = () => {
         'Resume analytics',
         'Priority phone support'
       ],
-      buttonText: 'Get Pro+ Now',
+      buttonText: 'Start 7-Day Free Trial',
       popular: false
     }
   ];
@@ -61,7 +62,7 @@ const PricingSection = () => {
             Choose Your Plan
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Start free, upgrade when you need more features
+            Start with a 7-day free trial, upgrade when you need more features
           </p>
         </div>
 
