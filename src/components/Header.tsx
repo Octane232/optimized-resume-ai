@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Menu, X, User, Settings, Bell } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -16,7 +16,7 @@ const Header = () => {
 
   return (
     <header className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-md border-b border-gray-200 z-50 shadow-sm">
-      <div className="container mx-auto px-4 lg:px-8">
+      <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center space-x-2">
@@ -47,14 +47,6 @@ const Header = () => {
             <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
               Start Free Trial
             </Button>
-            <div className="flex items-center space-x-2 ml-4 border-l border-gray-200 pl-4">
-              <Button variant="ghost" size="sm" className="p-2">
-                <Bell className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="p-2">
-                <User className="h-4 w-4" />
-              </Button>
-            </div>
           </div>
 
           {/* Mobile Menu Button */}

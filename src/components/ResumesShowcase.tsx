@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, Download, Star } from 'lucide-react';
+import { Eye, Download, Star, ChevronDown, ChevronUp } from 'lucide-react';
 
 // Import templates
 import ClassicTemplate from '@/components/templates/ClassicTemplate';
@@ -24,11 +25,12 @@ import {
 
 const ResumesShowcase = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [showAll, setShowAll] = useState(false);
 
   const categories = ['All', 'Classic', 'Modern', 'Creative', 'Executive', 'Tech'];
 
   const resumes = [
-    // Classic Category - 10 templates
+    // Classic Category
     {
       id: 1,
       category: 'Classic',
@@ -54,7 +56,6 @@ const ResumesShowcase = () => {
       template: ClassicTemplate2,
       data: classicResueSample
     },
-    // ... continue with 8 more classic templates
     {
       id: 3,
       category: 'Classic',
@@ -67,94 +68,8 @@ const ResumesShowcase = () => {
       template: ExecutiveTemplate,
       data: executiveResumeSample
     },
-    {
-      id: 4,
-      category: 'Classic',
-      title: 'Traditional Professional',
-      description: 'Clean, timeless design perfect for conservative industries',
-      industry: 'Finance',
-      experience: 'Senior Level',
-      rating: 4.9,
-      downloads: '12.3k',
-      template: ClassicTemplate,
-      data: classicResueSample,
-      featured: true
-    },
-    {
-      id: 5,
-      category: 'Classic',
-      title: 'Centered Elegance',
-      description: 'Sophisticated center-aligned layout for formal presentations',
-      industry: 'Law',
-      experience: 'Senior Level',
-      rating: 4.8,
-      downloads: '8.9k',
-      template: ClassicTemplate2,
-      data: classicResueSample
-    },
-    {
-      id: 6,
-      category: 'Classic',
-      title: 'Corporate Executive',
-      description: 'Formal layout ideal for C-suite positions',
-      industry: 'Corporate',
-      experience: 'Executive',
-      rating: 4.8,
-      downloads: '8.7k',
-      template: ExecutiveTemplate,
-      data: executiveResumeSample
-    },
-    {
-      id: 7,
-      category: 'Classic',
-      title: 'Traditional Professional',
-      description: 'Clean, timeless design perfect for conservative industries',
-      industry: 'Finance',
-      experience: 'Senior Level',
-      rating: 4.9,
-      downloads: '12.3k',
-      template: ClassicTemplate,
-      data: classicResueSample,
-      featured: true
-    },
-    {
-      id: 8,
-      category: 'Classic',
-      title: 'Centered Elegance',
-      description: 'Sophisticated center-aligned layout for formal presentations',
-      industry: 'Law',
-      experience: 'Senior Level',
-      rating: 4.8,
-      downloads: '8.9k',
-      template: ClassicTemplate2,
-      data: classicResueSample
-    },
-    {
-      id: 9,
-      category: 'Classic',
-      title: 'Corporate Executive',
-      description: 'Formal layout ideal for C-suite positions',
-      industry: 'Corporate',
-      experience: 'Executive',
-      rating: 4.8,
-      downloads: '8.7k',
-      template: ExecutiveTemplate,
-      data: executiveResumeSample
-    },
-    {
-      id: 10,
-      category: 'Classic',
-      title: 'Corporate Executive',
-      description: 'Formal layout ideal for C-suite positions',
-      industry: 'Corporate',
-      experience: 'Executive',
-      rating: 4.8,
-      downloads: '8.7k',
-      template: ExecutiveTemplate,
-      data: executiveResumeSample
-    },
     
-    // Modern Category - 10 templates
+    // Modern Category
     {
       id: 11,
       category: 'Modern',
@@ -180,109 +95,8 @@ const ResumesShowcase = () => {
       template: ModernTemplate2,
       data: modernResumeSample
     },
-    // ... continue with 8 more modern templates
-    {
-      id: 13,
-      category: 'Modern',
-      title: 'Minimalist Pro',
-      description: 'Clean lines and modern typography for contemporary roles',
-      industry: 'Marketing',
-      experience: 'Mid-Level',
-      rating: 4.9,
-      downloads: '15.2k',
-      template: ModernTemplate,
-      data: modernResumeSample,
-      featured: true
-    },
-    {
-      id: 14,
-      category: 'Modern',
-      title: 'Split Column',
-      description: 'Efficient two-column layout maximizing space utilization',
-      industry: 'Consulting',
-      experience: 'Mid-Level',
-      rating: 4.7,
-      downloads: '11.4k',
-      template: ModernTemplate2,
-      data: modernResumeSample
-    },
-    {
-      id: 15,
-      category: 'Modern',
-      title: 'Minimalist Pro',
-      description: 'Clean lines and modern typography for contemporary roles',
-      industry: 'Marketing',
-      experience: 'Mid-Level',
-      rating: 4.9,
-      downloads: '15.2k',
-      template: ModernTemplate,
-      data: modernResumeSample,
-      featured: true
-    },
-    {
-      id: 16,
-      category: 'Modern',
-      title: 'Split Column',
-      description: 'Efficient two-column layout maximizing space utilization',
-      industry: 'Consulting',
-      experience: 'Mid-Level',
-      rating: 4.7,
-      downloads: '11.4k',
-      template: ModernTemplate2,
-      data: modernResumeSample
-    },
-    {
-      id: 17,
-      category: 'Modern',
-      title: 'Minimalist Pro',
-      description: 'Clean lines and modern typography for contemporary roles',
-      industry: 'Marketing',
-      experience: 'Mid-Level',
-      rating: 4.9,
-      downloads: '15.2k',
-      template: ModernTemplate,
-      data: modernResumeSample,
-      featured: true
-    },
-    {
-      id: 18,
-      category: 'Modern',
-      title: 'Split Column',
-      description: 'Efficient two-column layout maximizing space utilization',
-      industry: 'Consulting',
-      experience: 'Mid-Level',
-      rating: 4.7,
-      downloads: '11.4k',
-      template: ModernTemplate2,
-      data: modernResumeSample
-    },
-    {
-      id: 19,
-      category: 'Modern',
-      title: 'Minimalist Pro',
-      description: 'Clean lines and modern typography for contemporary roles',
-      industry: 'Marketing',
-      experience: 'Mid-Level',
-      rating: 4.9,
-      downloads: '15.2k',
-      template: ModernTemplate,
-      data: modernResumeSample,
-      featured: true
-    },
-    {
-      id: 20,
-      category: 'Modern',
-      title: 'Split Column',
-      description: 'Efficient two-column layout maximizing space utilization',
-      industry: 'Consulting',
-      experience: 'Mid-Level',
-      rating: 4.7,
-      downloads: '11.4k',
-      template: ModernTemplate2,
-      data: modernResumeSample
-    },
     
-    // Creative Category - 10 templates
+    // Creative Category
     {
       id: 21,
       category: 'Creative',
@@ -296,126 +110,8 @@ const ResumesShowcase = () => {
       data: creativeResumeSample,
       featured: true
     },
-    // ... continue with 9 more creative templates
-    {
-      id: 22,
-      category: 'Creative',
-      title: 'Designer Portfolio',
-      description: 'Vibrant and creative layout for design professionals',
-      industry: 'Design',
-      experience: 'Mid-Level',
-      rating: 4.8,
-      downloads: '11.4k',
-      template: CreativeTemplate,
-      data: creativeResumeSample,
-      featured: true
-    },
-    {
-      id: 23,
-      category: 'Creative',
-      title: 'Designer Portfolio',
-      description: 'Vibrant and creative layout for design professionals',
-      industry: 'Design',
-      experience: 'Mid-Level',
-      rating: 4.8,
-      downloads: '11.4k',
-      template: CreativeTemplate,
-      data: creativeResumeSample,
-      featured: true
-    },
-    {
-      id: 24,
-      category: 'Creative',
-      title: 'Designer Portfolio',
-      description: 'Vibrant and creative layout for design professionals',
-      industry: 'Design',
-      experience: 'Mid-Level',
-      rating: 4.8,
-      downloads: '11.4k',
-      template: CreativeTemplate,
-      data: creativeResumeSample,
-      featured: true
-    },
-    {
-      id: 25,
-      category: 'Creative',
-      title: 'Designer Portfolio',
-      description: 'Vibrant and creative layout for design professionals',
-      industry: 'Design',
-      experience: 'Mid-Level',
-      rating: 4.8,
-      downloads: '11.4k',
-      template: CreativeTemplate,
-      data: creativeResumeSample,
-      featured: true
-    },
-    {
-      id: 26,
-      category: 'Creative',
-      title: 'Designer Portfolio',
-      description: 'Vibrant and creative layout for design professionals',
-      industry: 'Design',
-      experience: 'Mid-Level',
-      rating: 4.8,
-      downloads: '11.4k',
-      template: CreativeTemplate,
-      data: creativeResumeSample,
-      featured: true
-    },
-    {
-      id: 27,
-      category: 'Creative',
-      title: 'Designer Portfolio',
-      description: 'Vibrant and creative layout for design professionals',
-      industry: 'Design',
-      experience: 'Mid-Level',
-      rating: 4.8,
-      downloads: '11.4k',
-      template: CreativeTemplate,
-      data: creativeResumeSample,
-      featured: true
-    },
-    {
-      id: 28,
-      category: 'Creative',
-      title: 'Designer Portfolio',
-      description: 'Vibrant and creative layout for design professionals',
-      industry: 'Design',
-      experience: 'Mid-Level',
-      rating: 4.8,
-      downloads: '11.4k',
-      template: CreativeTemplate,
-      data: creativeResumeSample,
-      featured: true
-    },
-    {
-      id: 29,
-      category: 'Creative',
-      title: 'Designer Portfolio',
-      description: 'Vibrant and creative layout for design professionals',
-      industry: 'Design',
-      experience: 'Mid-Level',
-      rating: 4.8,
-      downloads: '11.4k',
-      template: CreativeTemplate,
-      data: creativeResumeSample,
-      featured: true
-    },
-    {
-      id: 30,
-      category: 'Creative',
-      title: 'Designer Portfolio',
-      description: 'Vibrant and creative layout for design professionals',
-      industry: 'Design',
-      experience: 'Mid-Level',
-      rating: 4.8,
-      downloads: '11.4k',
-      template: CreativeTemplate,
-      data: creativeResumeSample,
-      featured: true
-    },
     
-    // Executive Category - 10 templates
+    // Executive Category
     {
       id: 31,
       category: 'Executive',
@@ -429,246 +125,10 @@ const ResumesShowcase = () => {
       data: executiveResumeSample,
       featured: true
     },
-    // ... continue with 9 more executive templates
-    {
-      id: 32,
-      category: 'Executive',
-      title: 'CEO Excellence',
-      description: 'Premium design for top-tier executive positions',
-      industry: 'Technology',
-      experience: 'Executive',
-      rating: 4.9,
-      downloads: '6.1k',
-      template: ExecutiveTemplate,
-      data: executiveResumeSample,
-      featured: true
-    },
-    {
-      id: 33,
-      category: 'Executive',
-      title: 'CEO Excellence',
-      description: 'Premium design for top-tier executive positions',
-      industry: 'Technology',
-      experience: 'Executive',
-      rating: 4.9,
-      downloads: '6.1k',
-      template: ExecutiveTemplate,
-      data: executiveResumeSample,
-      featured: true
-    },
-    {
-      id: 34,
-      category: 'Executive',
-      title: 'CEO Excellence',
-      description: 'Premium design for top-tier executive positions',
-      industry: 'Technology',
-      experience: 'Executive',
-      rating: 4.9,
-      downloads: '6.1k',
-      template: ExecutiveTemplate,
-      data: executiveResumeSample,
-      featured: true
-    },
-    {
-      id: 35,
-      category: 'Executive',
-      title: 'CEO Excellence',
-      description: 'Premium design for top-tier executive positions',
-      industry: 'Technology',
-      experience: 'Executive',
-      rating: 4.9,
-      downloads: '6.1k',
-      template: ExecutiveTemplate,
-      data: executiveResumeSample,
-      featured: true
-    },
-    {
-      id: 36,
-      category: 'Executive',
-      title: 'CEO Excellence',
-      description: 'Premium design for top-tier executive positions',
-      industry: 'Technology',
-      experience: 'Executive',
-      rating: 4.9,
-      downloads: '6.1k',
-      template: ExecutiveTemplate,
-      data: executiveResumeSample,
-      featured: true
-    },
-    {
-      id: 37,
-      category: 'Executive',
-      title: 'CEO Excellence',
-      description: 'Premium design for top-tier executive positions',
-      industry: 'Technology',
-      experience: 'Executive',
-      rating: 4.9,
-      downloads: '6.1k',
-      template: ExecutiveTemplate,
-      data: executiveResumeSample,
-      featured: true
-    },
-    {
-      id: 38,
-      category: 'Executive',
-      title: 'CEO Excellence',
-      description: 'Premium design for top-tier executive positions',
-      industry: 'Technology',
-      experience: 'Executive',
-      rating: 4.9,
-      downloads: '6.1k',
-      template: ExecutiveTemplate,
-      data: executiveResumeSample,
-      featured: true
-    },
-    {
-      id: 39,
-      category: 'Executive',
-      title: 'CEO Excellence',
-      description: 'Premium design for top-tier executive positions',
-      industry: 'Technology',
-      experience: 'Executive',
-      rating: 4.9,
-      downloads: '6.1k',
-      template: ExecutiveTemplate,
-      data: executiveResumeSample,
-      featured: true
-    },
-    {
-      id: 40,
-      category: 'Executive',
-      title: 'CEO Excellence',
-      description: 'Premium design for top-tier executive positions',
-      industry: 'Technology',
-      experience: 'Executive',
-      rating: 4.9,
-      downloads: '6.1k',
-      template: ExecutiveTemplate,
-      data: executiveResumeSample,
-      featured: true
-    },
     
-    // Tech Category - 10 templates
+    // Tech Category
     {
       id: 41,
-      category: 'Tech',
-      title: 'Software Engineer',
-      description: 'Tech-focused design highlighting technical skills',
-      industry: 'Software',
-      experience: 'Senior Level',
-      rating: 4.9,
-      downloads: '18.7k',
-      template: TechTemplate,
-      data: techResumeSample,
-      featured: true
-    },
-    // ... continue with 9 more tech templates
-    {
-      id: 42,
-      category: 'Tech',
-      title: 'Software Engineer',
-      description: 'Tech-focused design highlighting technical skills',
-      industry: 'Software',
-      experience: 'Senior Level',
-      rating: 4.9,
-      downloads: '18.7k',
-      template: TechTemplate,
-      data: techResumeSample,
-      featured: true
-    },
-    {
-      id: 43,
-      category: 'Tech',
-      title: 'Software Engineer',
-      description: 'Tech-focused design highlighting technical skills',
-      industry: 'Software',
-      experience: 'Senior Level',
-      rating: 4.9,
-      downloads: '18.7k',
-      template: TechTemplate,
-      data: techResumeSample,
-      featured: true
-    },
-    {
-      id: 44,
-      category: 'Tech',
-      title: 'Software Engineer',
-      description: 'Tech-focused design highlighting technical skills',
-      industry: 'Software',
-      experience: 'Senior Level',
-      rating: 4.9,
-      downloads: '18.7k',
-      template: TechTemplate,
-      data: techResumeSample,
-      featured: true
-    },
-    {
-      id: 45,
-      category: 'Tech',
-      title: 'Software Engineer',
-      description: 'Tech-focused design highlighting technical skills',
-      industry: 'Software',
-      experience: 'Senior Level',
-      rating: 4.9,
-      downloads: '18.7k',
-      template: TechTemplate,
-      data: techResumeSample,
-      featured: true
-    },
-    {
-      id: 46,
-      category: 'Tech',
-      title: 'Software Engineer',
-      description: 'Tech-focused design highlighting technical skills',
-      industry: 'Software',
-      experience: 'Senior Level',
-      rating: 4.9,
-      downloads: '18.7k',
-      template: TechTemplate,
-      data: techResumeSample,
-      featured: true
-    },
-    {
-      id: 47,
-      category: 'Tech',
-      title: 'Software Engineer',
-      description: 'Tech-focused design highlighting technical skills',
-      industry: 'Software',
-      experience: 'Senior Level',
-      rating: 4.9,
-      downloads: '18.7k',
-      template: TechTemplate,
-      data: techResumeSample,
-      featured: true
-    },
-    {
-      id: 48,
-      category: 'Tech',
-      title: 'Software Engineer',
-      description: 'Tech-focused design highlighting technical skills',
-      industry: 'Software',
-      experience: 'Senior Level',
-      rating: 4.9,
-      downloads: '18.7k',
-      template: TechTemplate,
-      data: techResumeSample,
-      featured: true
-    },
-    {
-      id: 49,
-      category: 'Tech',
-      title: 'Software Engineer',
-      description: 'Tech-focused design highlighting technical skills',
-      industry: 'Software',
-      experience: 'Senior Level',
-      rating: 4.9,
-      downloads: '18.7k',
-      template: TechTemplate,
-      data: techResumeSample,
-      featured: true
-    },
-    {
-      id: 50,
       category: 'Tech',
       title: 'Software Engineer',
       description: 'Tech-focused design highlighting technical skills',
@@ -686,9 +146,11 @@ const ResumesShowcase = () => {
     ? resumes 
     : resumes.filter(resume => resume.category === selectedCategory);
 
+  const displayedResumes = showAll ? filteredResumes : filteredResumes.slice(0, 6);
+
   return (
     <section className="py-20 bg-gray-50">
-      <div className="container mx-auto px-4 lg:px-8">
+      <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Professional Resume Templates
@@ -714,8 +176,8 @@ const ResumesShowcase = () => {
         </div>
 
         {/* Resume Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {filteredResumes.map((resume, index) => {
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {displayedResumes.map((resume, index) => {
             const TemplateComponent = resume.template;
             return (
               <Card 
@@ -743,7 +205,7 @@ const ResumesShowcase = () => {
                           <Eye className="w-4 h-4 mr-2" />
                           Preview
                         </Button>
-                        <Button size="sm" className="bg-navy-600 hover:bg-navy-700">
+                        <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
                           <Download className="w-4 h-4 mr-2" />
                           Use Template
                         </Button>
@@ -783,7 +245,7 @@ const ResumesShowcase = () => {
                     <span className="text-sm text-gray-500">
                       {resume.downloads} downloads
                     </span>
-                    <Button size="sm" className="bg-navy-600 hover:bg-navy-700">
+                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
                       Use Template
                     </Button>
                   </div>
@@ -793,17 +255,41 @@ const ResumesShowcase = () => {
           })}
         </div>
 
+        {/* Show More/Less Button */}
+        {filteredResumes.length > 6 && (
+          <div className="text-center mt-12">
+            <Button
+              onClick={() => setShowAll(!showAll)}
+              variant="outline"
+              size="lg"
+              className="px-8 py-3"
+            >
+              {showAll ? (
+                <>
+                  <ChevronUp className="w-4 h-4 mr-2" />
+                  Show Less
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="w-4 h-4 mr-2" />
+                  Show More Templates ({filteredResumes.length - 6} more)
+                </>
+              )}
+            </Button>
+          </div>
+        )}
+
         {/* CTA Section */}
         <div className="text-center mt-16">
-          <div className="bg-gradient-to-r from-navy-600 to-navy-700 rounded-2xl p-8 text-white">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white">
             <h3 className="text-2xl font-bold mb-4">
               Can't Find the Perfect Template?
             </h3>
-            <p className="text-navy-100 mb-6 max-w-2xl mx-auto">
+            <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
               Our AI can create a completely custom resume design based on your industry, 
               experience level, and personal preferences.
             </p>
-            <Button size="lg" className="bg-white text-navy-600 hover:bg-gray-100">
+            <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
               Create Custom Resume with AI
             </Button>
           </div>

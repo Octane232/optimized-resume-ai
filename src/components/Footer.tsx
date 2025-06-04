@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Linkedin, Twitter, Github, Mail } from 'lucide-react';
 
 const Footer = () => {
@@ -7,18 +8,18 @@ const Footer = () => {
     {
       title: 'Product',
       links: [
-        { label: 'Resume Builder', href: '#builder' },
-        { label: 'Job Search', href: '#jobs' },
-        { label: 'Templates', href: '#templates' },
-        { label: 'AI Features', href: '#ai' },
-        { label: 'Analytics', href: '#analytics' }
+        { label: 'Resume Builder', href: '/resume-builder' },
+        { label: 'Job Search', href: '/job-search' },
+        { label: 'Templates', href: '/templates' },
+        { label: 'AI Features', href: '/ai-features' },
+        { label: 'Analytics', href: '/analytics' }
       ]
     },
     {
       title: 'Solutions',
       links: [
-        { label: 'For Individuals', href: '#individual' },
-        { label: 'For Students', href: '#students' },
+        { label: 'For Individuals', href: '/for-individuals' },
+        { label: 'For Students', href: '/for-students' },
         { label: 'For Enterprises', href: '#enterprise' },
         { label: 'For Recruiters', href: '#recruiters' },
         { label: 'Integrations', href: '#integrations' }
@@ -37,23 +38,19 @@ const Footer = () => {
     {
       title: 'Company',
       links: [
-        { label: 'About Us', href: '#about' },
+        { label: 'About Us', href: '/about-us' },
         { label: 'Careers', href: '#careers' },
         { label: 'Press Kit', href: '#press' },
-        { label: 'Contact', href: '#contact' },
+        { label: 'Contact', href: '/contact' },
         { label: 'Security', href: '#security' }
       ]
     }
   ];
 
-  const trustedLogos = [
-    'Google', 'Microsoft', 'Amazon', 'Apple', 'Meta', 'Netflix'
-  ];
-
   return (
     <footer className="bg-gray-900 text-white">
       {/* Main Footer Content */}
-      <div className="container mx-auto px-4 lg:px-8 py-16">
+      <div className="container mx-auto px-4 lg:px-8 py-16 max-w-7xl">
         <div className="grid md:grid-cols-5 gap-12">
           {/* Company Info */}
           <div className="md:col-span-1">
@@ -90,12 +87,21 @@ const Footer = () => {
               <ul className="space-y-3">
                 {section.links.map((link, linkIndex) => (
                   <li key={linkIndex}>
-                    <a 
-                      href={link.href} 
-                      className="text-gray-400 hover:text-white transition-colors text-sm"
-                    >
-                      {link.label}
-                    </a>
+                    {link.href.startsWith('/') ? (
+                      <Link 
+                        to={link.href} 
+                        className="text-gray-400 hover:text-white transition-colors text-sm"
+                      >
+                        {link.label}
+                      </Link>
+                    ) : (
+                      <a 
+                        href={link.href} 
+                        className="text-gray-400 hover:text-white transition-colors text-sm"
+                      >
+                        {link.label}
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -106,7 +112,7 @@ const Footer = () => {
 
       {/* Bottom Bar */}
       <div className="border-t border-gray-800">
-        <div className="container mx-auto px-4 lg:px-8 py-8">
+        <div className="container mx-auto px-4 lg:px-8 py-8 max-w-7xl">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
               <p className="text-gray-400 text-sm">
