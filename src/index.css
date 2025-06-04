@@ -90,7 +90,11 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground font-sans transition-colors duration-300;
+  }
+
+  html {
+    scroll-behavior: smooth;
   }
 }
 
@@ -109,6 +113,18 @@
 
 .gradient-text {
   background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Dark mode enhancements */
+.dark .gradient-bg {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+}
+
+.dark .gradient-text {
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

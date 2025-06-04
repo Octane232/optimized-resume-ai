@@ -43,13 +43,13 @@ const ResourcesSection = () => {
   ];
 
   return (
-    <section className="py-16 bg-white">
+    <section className="py-16 bg-white dark:bg-gray-800 transition-colors duration-300">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Comprehensive Career Resources
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             Everything you need to accelerate your career journey, from expert guidance to powerful tools and insights.
           </p>
         </div>
@@ -58,24 +58,24 @@ const ResourcesSection = () => {
           {resources.map((resource, index) => (
             <div 
               key={index} 
-              className="bg-gray-50 rounded-xl p-6 hover:shadow-lg transition-all duration-300 group border border-gray-100"
+              className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 hover:shadow-lg transition-all duration-300 group border border-gray-100 dark:border-gray-600 hover:border-gray-200 dark:hover:border-gray-500"
             >
               <div className="flex items-center mb-4">
                 <div className="p-3 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 mr-4 group-hover:scale-110 transition-transform duration-300">
                   <resource.icon className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
                   {resource.title}
                 </h3>
               </div>
               
-              <p className="text-gray-600 mb-6 leading-relaxed">
+              <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
                 {resource.description}
               </p>
 
               <div className="space-y-2">
                 {resource.features.map((feature, featureIndex) => (
-                  <div key={featureIndex} className="flex items-center text-sm text-gray-700">
+                  <div key={featureIndex} className="flex items-center text-sm text-gray-700 dark:text-gray-300">
                     <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mr-3"></div>
                     {feature}
                   </div>
@@ -83,7 +83,7 @@ const ResourcesSection = () => {
               </div>
 
               <div className="mt-6">
-                <button className="text-blue-600 font-semibold hover:text-blue-700 transition-colors">
+                <button className="text-blue-600 dark:text-blue-400 font-semibold hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
                   Learn More →
                 </button>
               </div>
