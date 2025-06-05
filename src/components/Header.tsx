@@ -93,8 +93,8 @@ const Header = () => {
             <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
               Sign In
             </Button>
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
-              Start 7-Day Free Trial
+            <Button asChild size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+              <Link to="/dashboard">Dashboard</Link>
             </Button>
           </div>
 
@@ -134,8 +134,8 @@ const Header = () => {
                 <Button variant="ghost" size="sm" className="justify-start">
                   Sign In
                 </Button>
-                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
-                  Start 7-Day Free Trial
+                <Button asChild size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                  <Link to="/dashboard">Dashboard</Link>
                 </Button>
               </div>
             </nav>

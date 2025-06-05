@@ -15,6 +15,7 @@ import ForIndividuals from "./pages/ForIndividuals";
 import ForStudents from "./pages/ForStudents";
 import AboutUs from "./pages/AboutUs";
 import Contact from "./pages/Contact";
+import Dashboard from "./pages/Dashboard";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/resume-builder" element={<ResumeBuilder />} />
           <Route path="/job-search" element={<JobSearch />} />
           <Route path="/templates" element={<Templates />} />
