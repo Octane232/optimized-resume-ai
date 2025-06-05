@@ -52,10 +52,17 @@ const Header = () => {
     <header className="fixed top-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 z-50 shadow-sm transition-colors duration-300">
       <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
+          {/* Logo - REPLACE THIS SECTION WITH YOUR LOGO */}
           <Link to="/" className="flex items-center space-x-2">
+            {/* 
+              LOGO PLACEMENT INSTRUCTIONS:
+              Replace the content below with your logo SVG or image:
+              <img src="/path/to/your/logo.svg" alt="AI Resume Pro" className="w-8 h-8" />
+              OR for inline SVG:
+              <svg className="w-8 h-8">...your SVG code...</svg>
+            */}
             <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">AR</span>
+              <span className="text-white font-bold text-xs">LOGO</span>
             </div>
             <h1 className="text-xl font-bold text-gray-900 dark:text-white">AI Resume Pro</h1>
           </Link>

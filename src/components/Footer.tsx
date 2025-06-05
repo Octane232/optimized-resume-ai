@@ -63,9 +63,17 @@ const Footer = () => {
         <div className="grid md:grid-cols-5 gap-12">
           {/* Company Info */}
           <div className="md:col-span-1">
+            {/* Logo - REPLACE THIS SECTION WITH YOUR LOGO */}
             <div className="flex items-center space-x-2 mb-6">
+              {/* 
+                LOGO PLACEMENT INSTRUCTIONS:
+                Replace the content below with your logo SVG or image:
+                <img src="/path/to/your/logo.svg" alt="AI Resume Pro" className="w-8 h-8" />
+                OR for inline SVG:
+                <svg className="w-8 h-8">...your SVG code...</svg>
+              */}
               <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">AR</span>
+                <span className="text-white font-bold text-xs">LOGO</span>
               </div>
               <h2 className="text-xl font-bold">AI Resume Pro</h2>
             </div>

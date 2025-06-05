@@ -10,7 +10,7 @@ const TestimonialsSection = () => {
       company: 'TechCorp',
       content: 'AI Resume Pro helped me land my dream job! The AI-generated resume was perfectly tailored to the position, and I got 3 interviews within a week.',
       rating: 5,
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face'
+      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=100&h=100&fit=crop&crop=face'
     },
     {
       name: 'Michael Chen',
@@ -26,7 +26,7 @@ const TestimonialsSection = () => {
       company: 'Global Industries',
       content: 'I loved how easy it was to customize my resume for different job applications. The AI suggestions helped me highlight the right skills.',
       rating: 5,
-      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=100&h=100&fit=crop&crop=face'
+      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face'
     }
   ];
 

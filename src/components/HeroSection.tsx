@@ -21,6 +21,13 @@ const HeroSection = () => {
     'Real-time feedback'
   ];
 
+  const scrollToTemplates = () => {
+    const element = document.querySelector('#templates');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 overflow-hidden">
       {/* Background Elements */}
@@ -64,6 +71,7 @@ const HeroSection = () => {
             <Button 
               variant="outline" 
               size="lg" 
+              onClick={scrollToTemplates}
               className="px-8 py-4 text-lg font-semibold rounded-xl border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300"
             >
               View Templates
