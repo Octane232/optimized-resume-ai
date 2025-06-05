@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, CheckCircle, Users, Award, Clock } from 'lucide-react';
+import { ArrowRight, CheckCircle, Users, Award, Clock, Sparkles } from 'lucide-react';
 
 const HeroSection = () => {
   const trustedCompanies = [
@@ -29,76 +29,93 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 overflow-hidden">
-      {/* Background Elements */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-      <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-      <div className="absolute top-40 right-10 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-      <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+    <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 overflow-hidden">
+      {/* Modern Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-400/20 to-purple-600/20 rounded-full filter blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-r from-purple-400/20 to-pink-600/20 rounded-full filter blur-3xl animate-pulse animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full filter blur-3xl"></div>
+      </div>
+
+      {/* Grid Pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]"></div>
 
       <div className="container mx-auto px-4 lg:px-8 relative z-10 pt-20">
-        <div className="text-center max-w-5xl mx-auto">
+        <div className="text-center max-w-6xl mx-auto">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50 rounded-full mb-8 animate-fade-in">
+            <Sparkles className="h-4 w-4 text-blue-600" />
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">AI-Powered Career Platform</span>
+          </div>
+
           {/* Main Headline */}
-          <div className="mb-8 animate-fade-in">
-            <h1 className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+          <div className="mb-12 animate-fade-in">
+            <h1 className="text-6xl md:text-8xl font-extrabold text-slate-900 dark:text-white mb-8 leading-[0.9] tracking-tight">
               Land Your{' '}
-              <span className="gradient-text">
+              <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
                 Dream Job
               </span>{' '}
-              with AI
+              Faster
             </h1>
-            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Create professional, ATS-optimized resumes in minutes. Our AI analyzes job descriptions and tailors your resume for maximum impact.
+            <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-300 mb-10 max-w-4xl mx-auto leading-relaxed font-medium">
+              Create professional, ATS-optimized resumes in minutes with our AI technology. 
+              <br className="hidden md:block" />
+              Join thousands who landed their dream roles.
             </p>
           </div>
 
-          {/* Benefits List */}
-          <div className="flex flex-wrap justify-center gap-4 mb-8 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            {benefits.map((benefit, index) => (
-              <div key={index} className="flex items-center bg-white dark:bg-gray-800 rounded-full px-4 py-2 shadow-sm border border-gray-100 dark:border-gray-700">
-                <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{benefit}</span>
-              </div>
-            ))}
-          </div>
-
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-            <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group">
-              Start Your 7-Day Free Trial
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-10 py-6 text-lg font-semibold rounded-2xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 group border-0">
+              Start Free Trial
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Button>
             <Button 
               variant="outline" 
               size="lg" 
               onClick={scrollToTemplates}
-              className="px-8 py-4 text-lg font-semibold rounded-xl border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300"
+              className="px-10 py-6 text-lg font-semibold rounded-2xl border-2 border-slate-200 dark:border-slate-600 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm hover:bg-white dark:hover:bg-slate-700 hover:border-blue-300 dark:hover:border-blue-400 transition-all duration-300 transform hover:scale-105"
             >
               View Templates
             </Button>
           </div>
 
+          {/* Benefits Pills */}
+          <div className="flex flex-wrap justify-center gap-3 mb-16 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+            {benefits.map((benefit, index) => (
+              <div key={index} className="flex items-center bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-full px-5 py-3 border border-slate-200/50 dark:border-slate-700/50 hover:bg-white dark:hover:bg-slate-700 transition-all duration-300 group">
+                <CheckCircle className="h-4 w-4 text-emerald-500 mr-2 group-hover:scale-110 transition-transform" />
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{benefit}</span>
+              </div>
+            ))}
+          </div>
+
           {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16 animate-fade-in" style={{ animationDelay: '0.6s' }}>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20 animate-fade-in" style={{ animationDelay: '0.6s' }}>
             {stats.map((stat, index) => (
               <div key={index} className="text-center group">
-                <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg mb-3 group-hover:scale-110 transition-transform duration-300">
-                  <stat.icon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
+                  <div className="relative bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50 rounded-2xl p-8 group-hover:bg-white dark:group-hover:bg-slate-700 transition-all duration-300">
+                    <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl mb-4 group-hover:scale-110 transition-transform duration-300">
+                      <stat.icon className="h-7 w-7 text-white" />
+                    </div>
+                    <div className="text-4xl font-bold text-slate-900 dark:text-white mb-2">{stat.value}</div>
+                    <div className="text-slate-600 dark:text-slate-400 font-medium">{stat.label}</div>
+                  </div>
                 </div>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">{stat.value}</div>
-                <div className="text-gray-600 dark:text-gray-400 font-medium">{stat.label}</div>
               </div>
             ))}
           </div>
 
           {/* Trusted Companies */}
           <div className="animate-fade-in" style={{ animationDelay: '0.8s' }}>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 font-medium">
-              Trusted by professionals at top companies
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-8 font-medium">
+              Trusted by professionals at top companies worldwide
             </p>
-            <div className="flex flex-wrap justify-center items-center gap-8 opacity-60 dark:opacity-50">
+            <div className="flex flex-wrap justify-center items-center gap-8 lg:gap-12">
               {trustedCompanies.map((company, index) => (
-                <div key={index} className="text-lg font-semibold text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-300">
+                <div key={index} className="text-xl font-bold text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors duration-300 cursor-default">
                   {company}
                 </div>
               ))}
