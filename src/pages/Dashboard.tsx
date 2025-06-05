@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
-import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
+import { SidebarProvider } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/dashboard/AppSidebar';
 import DashboardMain from '@/components/dashboard/DashboardMain';
 import MyResumes from '@/components/dashboard/MyResumes';
 import CreateResume from '@/components/dashboard/CreateResume';
@@ -31,12 +32,16 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex w-full">
-      <DashboardSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-      <main className="flex-1 overflow-auto">
-        {renderContent()}
-      </main>
-    </div>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+        <AppSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+        <main className="flex-1 overflow-auto">
+          <div className="p-8">
+            {renderContent()}
+          </div>
+        </main>
+      </div>
+    </SidebarProvider>
   );
 };
 

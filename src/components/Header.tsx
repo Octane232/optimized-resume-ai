@@ -94,7 +94,7 @@ const Header = () => {
               Sign In
             </Button>
             <Button asChild size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
-              <Link to="/dashboard">Dashboard</Link>
+              <Link to="/dashboard">Get Started</Link>
             </Button>
           </div>
 
@@ -135,7 +135,7 @@ const Header = () => {
                   Sign In
                 </Button>
                 <Button asChild size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
-                  <Link to="/dashboard">Dashboard</Link>
+                  <Link to="/dashboard">Get Started</Link>
                 </Button>
               </div>
             </nav>
