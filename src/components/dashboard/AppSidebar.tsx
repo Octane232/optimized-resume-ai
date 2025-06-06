@@ -7,11 +7,9 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { 
   LayoutDashboard, 
@@ -21,8 +19,6 @@ import {
   CreditCard, 
   Settings as SettingsIcon, 
   LogOut,
-  Sparkles,
-  Crown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -49,28 +45,6 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
 
   return (
     <Sidebar className="border-r border-slate-200/60 dark:border-slate-700/60 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
-      <SidebarHeader className="border-b border-slate-200/60 dark:border-slate-700/60 p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
-                <Crown className="w-2.5 h-2.5 text-white" />
-              </div>
-            </div>
-            <div>
-              <h1 className="text-lg font-bold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
-                AI Resume Pro
-              </h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Professional Plan</p>
-            </div>
-          </div>
-          <SidebarTrigger className="h-8 w-8 hover:bg-slate-100 dark:hover:bg-slate-800" />
-        </div>
-      </SidebarHeader>
-
       <SidebarContent className="p-4">
         <SidebarGroup>
           <SidebarGroupContent>
