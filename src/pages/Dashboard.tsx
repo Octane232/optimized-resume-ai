@@ -37,12 +37,12 @@ const Dashboard = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      <div className="min-h-screen flex w-full bg-gradient-to-br from-background via-background/95 to-muted/30">
         <AppSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col">
           <DashboardHeader activeTab={activeTab} setActiveTab={setActiveTab} />
           <main className="flex-1 overflow-auto">
-            <div className="p-8">
+            <div className="p-6">
               {renderContent()}
             </div>
           </main>
