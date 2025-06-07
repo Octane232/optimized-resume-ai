@@ -3,10 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Sun, Moon, Sparkles, Crown, Bell, Search } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 
-const DashboardHeader = () => {
+interface DashboardHeaderProps {
+  activeTab?: string;
+  setActiveTab?: (tab: string) => void;
+}
+
+const DashboardHeader = ({ activeTab, setActiveTab }: DashboardHeaderProps) => {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
@@ -38,9 +42,12 @@ const DashboardHeader = () => {
           <SidebarTrigger className="h-10 w-10 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors" />
           
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-4">
+          <button 
+            onClick={() => setActiveTab?.('dashboard')}
+            className="flex items-center gap-4 group transition-all duration-300 hover:scale-105"
+          >
             <div className="relative">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-blue-500/25 transition-all duration-300">
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
               <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
@@ -53,7 +60,7 @@ const DashboardHeader = () => {
               </h1>
               <p className="text-xs text-slate-500 dark:text-slate-400">Professional Edition</p>
             </div>
-          </Link>
+          </button>
         </div>
 
         {/* Search Bar */}

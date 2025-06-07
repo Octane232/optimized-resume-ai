@@ -40,7 +40,7 @@ const Dashboard = () => {
       <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
         <AppSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
         <div className="flex-1 flex flex-col overflow-hidden">
-          <DashboardHeader />
+          <DashboardHeader activeTab={activeTab} setActiveTab={setActiveTab} />
           <main className="flex-1 overflow-auto">
             <div className="p-8">
               {renderContent()}
