@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   LayoutDashboard,
@@ -95,18 +96,20 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
   ];
 
   return (
-    <Sidebar className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-r border-slate-200/60 dark:border-slate-700/60">
+    <Sidebar className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border-r border-white/20 dark:border-slate-700/20 shadow-2xl shadow-slate-900/10">
       <SidebarHeader className="px-6 pt-6 pb-4">
         <Link to="/" className="flex items-center gap-4">
           <div className="relative">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <Brain className="w-5 h-5 text-white" />
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 rounded-3xl flex items-center justify-center shadow-xl shadow-blue-500/25">
+              <Brain className="w-6 h-6 text-white" />
             </div>
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full border-2 border-white dark:border-slate-900 shadow-lg"></div>
           </div>
           <div>
-            <h1 className="text-lg font-bold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
               AI Interview Pro
             </h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Professional Suite</p>
           </div>
         </Link>
       </SidebarHeader>
@@ -114,36 +117,50 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
       <SidebarContent className="px-4">
         {/* Navigation Menu */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">
+          <SidebarGroupLabel className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4 px-2">
             Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
+            <SidebarMenu className="space-y-2">
               {menuItems.map((item) => {
                 const isActive = activeTab === item.id;
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton 
                       onClick={() => setActiveTab(item.id)}
-                      className={`group relative w-full px-4 py-3 rounded-xl transition-all duration-200 hover:bg-slate-100/60 dark:hover:bg-slate-800/60 ${
+                      className={`group relative w-full px-4 py-4 rounded-2xl transition-all duration-300 ${
                         isActive 
-                          ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10 text-blue-600 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/50 shadow-sm' 
-                          : 'text-slate-700 dark:text-slate-300'
+                          ? 'bg-gradient-to-r from-blue-500/15 via-purple-500/15 to-indigo-500/15 backdrop-blur-xl text-blue-600 dark:text-blue-400 border border-blue-200/30 dark:border-blue-800/30 shadow-lg shadow-blue-500/10' 
+                          : 'text-slate-700 dark:text-slate-300 hover:bg-white/40 dark:hover:bg-slate-800/40 hover:backdrop-blur-xl hover:shadow-md'
                       }`}
                     >
-                      <div className="flex items-center gap-3">
-                        <item.icon className={`w-5 h-5 ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'}`} />
-                        <div className="text-left">
-                          <div className={`font-medium ${isActive ? 'text-blue-700 dark:text-blue-300' : 'text-slate-700 dark:text-slate-300'}`}>
+                      <div className="flex items-center gap-4">
+                        <div className={`p-2 rounded-xl transition-all duration-300 ${
+                          isActive 
+                            ? 'bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg shadow-blue-500/25' 
+                            : 'bg-slate-100 dark:bg-slate-800 group-hover:bg-gradient-to-r group-hover:from-blue-500 group-hover:to-purple-600'
+                        }`}>
+                          <item.icon className={`w-5 h-5 transition-colors ${
+                            isActive 
+                              ? 'text-white' 
+                              : 'text-slate-500 dark:text-slate-400 group-hover:text-white'
+                          }`} />
+                        </div>
+                        <div className="text-left flex-1">
+                          <div className={`font-semibold text-sm ${
+                            isActive 
+                              ? 'text-blue-700 dark:text-blue-300' 
+                              : 'text-slate-700 dark:text-slate-300'
+                          }`}>
                             {item.title}
                           </div>
-                          <div className="text-xs text-slate-500 dark:text-slate-400">
+                          <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                             {item.description}
                           </div>
                         </div>
                       </div>
                       {isActive && (
-                        <div className="absolute right-2 w-2 h-2 bg-blue-500 rounded-full"></div>
+                        <div className="absolute right-3 w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full shadow-lg"></div>
                       )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -155,18 +172,20 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
 
         {/* Stats Section */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">
-            Statistics
+          <SidebarGroupLabel className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4 px-2">
+            Quick Stats
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-3">
               {stats.map((stat) => (
-                <div key={stat.label} className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700/50">
-                  <div className="flex items-center gap-2">
-                    <stat.icon className={`w-4 h-4 text-slate-500 dark:text-slate-400`} />
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{stat.value}</span>
+                <div key={stat.label} className="p-4 rounded-2xl bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl border border-white/20 dark:border-slate-700/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className={`p-2 rounded-xl bg-gradient-to-r ${stat.color} shadow-lg`}>
+                      <stat.icon className="w-4 h-4 text-white" />
+                    </div>
                   </div>
-                  <div className="text-xs text-slate-500 dark:text-slate-400">{stat.label}</div>
+                  <div className="text-lg font-bold text-slate-900 dark:text-white">{stat.value}</div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">{stat.label}</div>
                 </div>
               ))}
             </div>
@@ -175,31 +194,34 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
       </SidebarContent>
 
       {/* Footer Section */}
-      <SidebarFooter className="px-6 py-4 mt-auto">
-        <div className="flex items-center justify-between mb-4">
+      <SidebarFooter className="px-6 py-6 mt-auto border-t border-white/10 dark:border-slate-700/10">
+        <div className="flex items-center justify-between mb-6 p-4 bg-white/30 dark:bg-slate-800/30 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-slate-700/20">
           <div className="flex items-center gap-3">
-            <Avatar className="w-8 h-8">
-              <AvatarImage src="https://github.com/shadcn.png" alt="John Doe" />
-              <AvatarFallback>JD</AvatarFallback>
-            </Avatar>
+            <div className="relative">
+              <Avatar className="w-10 h-10 ring-2 ring-white/20 dark:ring-slate-700/20">
+                <AvatarImage src="https://github.com/shadcn.png" alt="John Doe" />
+                <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold">JD</AvatarFallback>
+              </Avatar>
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full border-2 border-white dark:border-slate-900"></div>
+            </div>
             <div className="text-sm">
-              <p className="font-medium text-slate-900 dark:text-white">John Doe</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Pro Account</p>
+              <p className="font-semibold text-slate-900 dark:text-white">John Doe</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Premium Member</p>
             </div>
           </div>
-          <Badge className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 border-0 text-white text-xs">
+          <Badge className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 border-0 text-white text-xs font-semibold px-3 py-1 shadow-lg">
             Pro
           </Badge>
         </div>
         <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-          <div className="flex gap-3">
+          <div className="flex gap-4">
             {footerLinks.map((link) => (
-              <a key={link.label} href={link.href} className="hover:underline">
+              <a key={link.label} href={link.href} className="hover:text-slate-700 dark:hover:text-slate-300 transition-colors font-medium">
                 {link.label}
               </a>
             ))}
           </div>
-          <p>&copy; {new Date().getFullYear()}</p>
+          <p className="font-medium">&copy; {new Date().getFullYear()}</p>
         </div>
       </SidebarFooter>
     </Sidebar>

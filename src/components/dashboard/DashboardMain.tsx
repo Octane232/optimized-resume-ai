@@ -95,12 +95,6 @@ const DashboardMain = () => {
     "Use consistent formatting throughout your document"
   ];
 
-  const upcomingFeatures = [
-    { title: 'LinkedIn Integration', description: 'Import your profile data automatically', eta: 'Coming Soon', progress: 85 },
-    { title: 'Interview Preparation', description: 'AI-powered interview questions based on your resume', eta: 'Next Week', progress: 95 },
-    { title: 'Job Matching', description: 'Find jobs that match your skills perfectly', eta: '2 Weeks', progress: 60 }
-  ];
-
   return (
     <div className="space-y-8 pb-8">
       {/* Hero Section */}
@@ -209,7 +203,7 @@ const DashboardMain = () => {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        {/* Recent Resumes */}
+        {/* Recent Resumes - Enhanced */}
         <div className="xl:col-span-2">
           <Card className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg rounded-2xl">
             <CardHeader className="border-b border-slate-200/60 dark:border-slate-700/60 pb-6">
@@ -287,41 +281,6 @@ const DashboardMain = () => {
         {/* Right Sidebar */}
         <div className="space-y-6">
           <ActivityFeed />
-          
-          {/* Coming Soon Features */}
-          <Card className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg rounded-2xl">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-r from-violet-500 to-purple-600 rounded-xl">
-                  <Zap className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold">Coming Soon</h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 font-normal">Exciting features in development</p>
-                </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {upcomingFeatures.map((feature, index) => (
-                <div key={index} className="p-4 bg-gradient-to-r from-slate-50/50 to-white/50 dark:from-slate-800/30 dark:to-slate-700/30 rounded-xl border border-slate-200/50 dark:border-slate-700/50">
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-semibold text-sm text-slate-900 dark:text-white">{feature.title}</h4>
-                    <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-0">
-                      {feature.eta}
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">{feature.description}</p>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-500">Progress</span>
-                      <span className="font-medium text-slate-700 dark:text-slate-300">{feature.progress}%</span>
-                    </div>
-                    <Progress value={feature.progress} className="h-1.5" />
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
         </div>
       </div>
 
