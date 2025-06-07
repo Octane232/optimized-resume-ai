@@ -7,6 +7,7 @@ import DashboardMain from '@/components/dashboard/DashboardMain';
 import MyResumes from '@/components/dashboard/MyResumes';
 import CreateResume from '@/components/dashboard/CreateResume';
 import JobFinder from '@/components/dashboard/JobFinder';
+import InterviewPrep from '@/components/dashboard/InterviewPrep';
 import Billing from '@/components/dashboard/Billing';
 import Settings from '@/components/dashboard/Settings';
 
@@ -23,6 +24,8 @@ const Dashboard = () => {
         return <CreateResume />;
       case 'job-finder':
         return <JobFinder />;
+      case 'interview-prep':
+        return <InterviewPrep />;
       case 'billing':
         return <Billing />;
       case 'settings':

@@ -1,160 +1,374 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, Crown, CreditCard, Download } from 'lucide-react';
+import { Check, Crown, CreditCard, Download, Star, Zap, Shield, Headphones, Sparkles, TrendingUp, Users, Award } from 'lucide-react';
 
 const Billing = () => {
+  const [billingCycle, setBillingCycle] = useState('monthly');
+
   const currentPlan = {
     name: 'Pro',
     price: '$19/month',
     features: ['Unlimited resumes', 'AI-powered content', 'Premium templates', 'Priority support'],
-    nextBilling: '2024-02-15'
+    nextBilling: '2024-02-15',
+    status: 'active'
   };
 
   const plans = [
     {
       name: 'Free',
-      price: '$0',
-      period: 'forever',
-      features: ['3 resumes max', 'Basic templates', 'Standard support'],
-      current: false
+      price: billingCycle === 'monthly' ? '$0' : '$0',
+      period: billingCycle === 'monthly' ? 'forever' : 'forever',
+      originalPrice: null,
+      features: [
+        '3 resumes max',
+        'Basic templates',
+        'Standard support',
+        'PDF download',
+        'Basic customization'
+      ],
+      current: false,
+      popular: false,
+      color: 'from-slate-500 to-slate-600',
+      icon: Shield,
+      description: 'Perfect for getting started'
     },
     {
       name: 'Pro',
-      price: '$19',
-      period: 'per month',
-      features: ['Unlimited resumes', 'AI-powered content', 'Premium templates', 'Priority support'],
+      price: billingCycle === 'monthly' ? '$19' : '$190',
+      period: billingCycle === 'monthly' ? 'per month' : 'per year',
+      originalPrice: billingCycle === 'yearly' ? '$228' : null,
+      features: [
+        'Unlimited resumes',
+        'AI-powered content generation',
+        'Premium templates',
+        'Priority support',
+        'Advanced customization',
+        'Multiple formats (PDF, DOCX)',
+        'Interview preparation',
+        'Job matching'
+      ],
       current: true,
-      popular: true
+      popular: true,
+      color: 'from-blue-500 to-purple-600',
+      icon: Sparkles,
+      description: 'Most popular for professionals',
+      savings: billingCycle === 'yearly' ? 'Save $38' : null
     },
     {
       name: 'Enterprise',
-      price: '$49',
-      period: 'per month',
-      features: ['Everything in Pro', 'Team collaboration', 'Advanced analytics', 'Custom branding'],
-      current: false
+      price: billingCycle === 'monthly' ? '$49' : '$490',
+      period: billingCycle === 'monthly' ? 'per month' : 'per year',
+      originalPrice: billingCycle === 'yearly' ? '$588' : null,
+      features: [
+        'Everything in Pro',
+        'Team collaboration',
+        'Advanced analytics',
+        'Custom branding',
+        'Dedicated support',
+        'API access',
+        'Bulk resume generation',
+        'Custom integrations'
+      ],
+      current: false,
+      popular: false,
+      color: 'from-emerald-500 to-teal-600',
+      icon: Users,
+      description: 'For teams and organizations',
+      savings: billingCycle === 'yearly' ? 'Save $98' : null
     }
   ];
 
   const invoices = [
-    { id: 'INV-001', date: '2024-01-15', amount: '$19.00', status: 'Paid' },
-    { id: 'INV-002', date: '2023-12-15', amount: '$19.00', status: 'Paid' },
-    { id: 'INV-003', date: '2023-11-15', amount: '$19.00', status: 'Paid' },
+    { 
+      id: 'INV-001', 
+      date: '2024-01-15', 
+      amount: '$19.00', 
+      status: 'Paid',
+      description: 'Pro Plan - Monthly',
+      paymentMethod: '•••• 4242'
+    },
+    { 
+      id: 'INV-002', 
+      date: '2023-12-15', 
+      amount: '$19.00', 
+      status: 'Paid',
+      description: 'Pro Plan - Monthly',
+      paymentMethod: '•••• 4242'
+    },
+    { 
+      id: 'INV-003', 
+      date: '2023-11-15', 
+      amount: '$19.00', 
+      status: 'Paid',
+      description: 'Pro Plan - Monthly',
+      paymentMethod: '•••• 4242'
+    },
+  ];
+
+  const usageStats = [
+    { label: 'Resumes Created', value: '12', max: '∞', color: 'from-blue-500 to-blue-600' },
+    { label: 'AI Generations', value: '48', max: '∞', color: 'from-purple-500 to-purple-600' },
+    { label: 'Downloads', value: '26', max: '∞', color: 'from-emerald-500 to-emerald-600' },
+    { label: 'Templates Used', value: '8', max: '15', color: 'from-orange-500 to-orange-600' }
   ];
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Billing & Plans</h1>
-        <p className="text-slate-600 dark:text-slate-400">Manage your subscription and billing information</p>
+    <div className="space-y-8">
+      <div className="text-center space-y-4">
+        <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 rounded-2xl border border-purple-200/50 dark:border-purple-800/50">
+          <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
+            <Crown className="w-4 h-4 text-white" />
+          </div>
+          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Billing & Subscription</span>
+        </div>
+        
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 dark:from-white dark:via-slate-100 dark:to-slate-200 bg-clip-text text-transparent">
+          Manage Your Plan
+        </h1>
+        <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+          Upgrade, downgrade, or manage your subscription and billing information
+        </p>
       </div>
 
       {/* Current Plan */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Crown className="w-5 h-5 text-yellow-500" />
-            Current Plan: {currentPlan.name}
+      <Card className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl rounded-2xl">
+        <CardHeader className="border-b border-slate-200/60 dark:border-slate-700/60">
+          <CardTitle className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl">
+              <Crown className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold">Current Plan: {currentPlan.name}</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 font-normal">Active subscription</p>
+            </div>
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <div className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-                {currentPlan.price}
+        <CardContent className="p-6">
+          <div className="grid lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="text-3xl font-bold text-slate-900 dark:text-white">
+                  {currentPlan.price}
+                </div>
+                <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-0">
+                  {currentPlan.status}
+                </Badge>
               </div>
-              <p className="text-slate-600 dark:text-slate-400 mb-4">
-                Next billing date: {currentPlan.nextBilling}
+              
+              <p className="text-slate-600 dark:text-slate-400 mb-6">
+                Next billing date: <span className="font-semibold">{currentPlan.nextBilling}</span>
               </p>
-              <ul className="space-y-2">
+              
+              <div className="grid md:grid-cols-2 gap-4">
                 {currentPlan.features.map((feature, index) => (
-                  <li key={index} className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-green-500" />
-                    <span className="text-sm">{feature}</span>
-                  </li>
+                  <div key={index} className="flex items-center gap-3">
+                    <div className="w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center">
+                      <Check className="w-3 h-3 text-white" />
+                    </div>
+                    <span className="text-sm text-slate-700 dark:text-slate-300">{feature}</span>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
+            
             <div className="flex flex-col gap-3">
-              <Button variant="outline">
+              <Button variant="outline" className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl">
                 <CreditCard className="w-4 h-4 mr-2" />
                 Update Payment Method
               </Button>
-              <Button variant="outline">Cancel Subscription</Button>
+              <Button variant="outline" className="border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl">
+                Cancel Subscription
+              </Button>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Available Plans */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Available Plans</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-3 gap-6">
-            {plans.map((plan, index) => (
-              <div key={index} className={`relative p-6 rounded-lg border-2 ${
-                plan.current 
-                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-                  : 'border-slate-200 dark:border-slate-700'
-              }`}>
-                {plan.popular && (
-                  <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-blue-600">
-                    Most Popular
-                  </Badge>
-                )}
-                <div className="text-center mb-4">
-                  <h3 className="text-xl font-bold">{plan.name}</h3>
-                  <div className="text-3xl font-bold text-slate-900 dark:text-white">
-                    {plan.price}
-                  </div>
-                  <p className="text-slate-600 dark:text-slate-400">{plan.period}</p>
+      {/* Usage Statistics */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {usageStats.map((stat, index) => (
+          <Card key={index} className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 rounded-2xl">
+            <CardContent className="p-4">
+              <div className="text-center">
+                <div className={`w-12 h-12 bg-gradient-to-r ${stat.color} rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg`}>
+                  <TrendingUp className="w-6 h-6 text-white" />
                 </div>
-                <ul className="space-y-2 mb-6">
-                  {plan.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-green-500" />
-                      <span className="text-sm">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Button 
-                  className={`w-full ${plan.current ? 'bg-green-600 hover:bg-green-700' : ''}`}
-                  disabled={plan.current}
-                >
-                  {plan.current ? 'Current Plan' : `Upgrade to ${plan.name}`}
-                </Button>
+                <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
+                  {stat.value}
+                  <span className="text-sm text-slate-500 dark:text-slate-400 ml-1">/ {stat.max}</span>
+                </div>
+                <div className="text-xs text-slate-600 dark:text-slate-400">{stat.label}</div>
               </div>
-            ))}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Billing Toggle */}
+      <div className="flex justify-center">
+        <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 rounded-2xl p-2 shadow-lg">
+          <div className="flex gap-2">
+            <Button
+              variant={billingCycle === 'monthly' ? 'default' : 'ghost'}
+              onClick={() => setBillingCycle('monthly')}
+              className={`px-6 rounded-xl font-semibold transition-all ${
+                billingCycle === 'monthly'
+                  ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
+                  : 'hover:bg-slate-50 dark:hover:bg-slate-800'
+              }`}
+            >
+              Monthly
+            </Button>
+            <Button
+              variant={billingCycle === 'yearly' ? 'default' : 'ghost'}
+              onClick={() => setBillingCycle('yearly')}
+              className={`px-6 rounded-xl font-semibold transition-all ${
+                billingCycle === 'yearly'
+                  ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
+                  : 'hover:bg-slate-50 dark:hover:bg-slate-800'
+              }`}
+            >
+              Yearly
+              <Badge className="ml-2 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-0 text-xs">
+                Save 17%
+              </Badge>
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Available Plans */}
+      <Card className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl rounded-2xl">
+        <CardHeader className="border-b border-slate-200/60 dark:border-slate-700/60">
+          <CardTitle className="text-2xl font-bold text-center">Choose Your Plan</CardTitle>
+        </CardHeader>
+        <CardContent className="p-8">
+          <div className="grid lg:grid-cols-3 gap-8">
+            {plans.map((plan, index) => {
+              const Icon = plan.icon;
+              return (
+                <div key={index} className={`relative p-8 rounded-2xl border-2 transition-all duration-300 hover:-translate-y-2 ${
+                  plan.current 
+                    ? 'border-blue-500 bg-gradient-to-br from-blue-50/50 to-purple-50/50 dark:from-blue-950/30 dark:to-purple-950/30 shadow-xl' 
+                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-xl'
+                }`}>
+                  {plan.popular && (
+                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                      <Badge className="bg-gradient-to-r from-orange-400 to-pink-500 text-white px-4 py-2 rounded-full shadow-lg border-0">
+                        <Star className="w-3 h-3 mr-1" />
+                        Most Popular
+                      </Badge>
+                    </div>
+                  )}
+                  
+                  <div className="text-center mb-6">
+                    <div className={`w-16 h-16 bg-gradient-to-r ${plan.color} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg`}>
+                      <Icon className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">{plan.name}</h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">{plan.description}</p>
+                    
+                    <div className="mb-4">
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="text-4xl font-bold text-slate-900 dark:text-white">
+                          {plan.price}
+                        </div>
+                        {plan.originalPrice && (
+                          <div className="text-lg line-through text-slate-500 dark:text-slate-400">
+                            {plan.originalPrice}
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-slate-600 dark:text-slate-400 mt-1">{plan.period}</p>
+                      {plan.savings && (
+                        <Badge className="mt-2 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-0">
+                          {plan.savings}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <ul className="space-y-3 mb-8">
+                    {plan.features.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-center gap-3">
+                        <div className="w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <Check className="w-3 h-3 text-white" />
+                        </div>
+                        <span className="text-sm text-slate-700 dark:text-slate-300">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  
+                  <Button 
+                    className={`w-full py-3 rounded-xl font-semibold transition-all duration-300 ${
+                      plan.current 
+                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                        : `bg-gradient-to-r ${plan.color} hover:shadow-lg text-white`
+                    }`}
+                    disabled={plan.current}
+                  >
+                    {plan.current ? (
+                      <>
+                        <Crown className="w-5 h-5 mr-2" />
+                        Current Plan
+                      </>
+                    ) : (
+                      <>
+                        <Zap className="w-5 h-5 mr-2" />
+                        {plan.name === 'Free' ? 'Downgrade to Free' : `Upgrade to ${plan.name}`}
+                      </>
+                    )}
+                  </Button>
+                </div>
+              );
+            })}
           </div>
         </CardContent>
       </Card>
 
       {/* Invoice History */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Invoice History</CardTitle>
+      <Card className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl rounded-2xl">
+        <CardHeader className="border-b border-slate-200/60 dark:border-slate-700/60">
+          <CardTitle className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl">
+              <CreditCard className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold">Billing History</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 font-normal">Your payment history and invoices</p>
+            </div>
+          </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
+        <CardContent className="p-6">
+          <div className="space-y-4">
             {invoices.map((invoice) => (
-              <div key={invoice.id} className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                <div className="flex items-center gap-4">
-                  <div>
-                    <p className="font-medium">{invoice.id}</p>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">{invoice.date}</p>
+              <div key={invoice.id} className="flex items-center justify-between p-6 bg-gradient-to-r from-slate-50/50 to-white/50 dark:from-slate-800/30 dark:to-slate-700/30 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                <div className="flex items-center gap-6">
+                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <CreditCard className="w-6 h-6 text-white" />
                   </div>
-                  <Badge variant="outline" className="text-green-600 border-green-600">
-                    {invoice.status}
-                  </Badge>
+                  <div>
+                    <div className="flex items-center gap-3 mb-1">
+                      <p className="font-semibold text-slate-900 dark:text-white">{invoice.id}</p>
+                      <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 text-xs">
+                        {invoice.status}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">{invoice.description}</p>
+                    <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-500 mt-1">
+                      <span>{invoice.date}</span>
+                      <span>•</span>
+                      <span>{invoice.paymentMethod}</span>
+                    </div>
+                  </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="font-medium">{invoice.amount}</span>
-                  <Button variant="outline" size="sm">
-                    <Download className="w-4 h-4 mr-1" />
+                  <span className="text-xl font-bold text-slate-900 dark:text-white">{invoice.amount}</span>
+                  <Button variant="outline" size="sm" className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl">
+                    <Download className="w-4 h-4 mr-2" />
                     Download
                   </Button>
                 </div>
