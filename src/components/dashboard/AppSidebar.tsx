@@ -14,6 +14,7 @@ import {
   Sparkles,
   Bell,
   HelpCircle,
+  ChevronRight,
 } from "lucide-react";
 import {
   Sidebar,
@@ -27,6 +28,7 @@ import {
   SidebarFooter,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -42,42 +44,49 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
       id: "dashboard",
       icon: LayoutDashboard,
       badge: null,
+      description: "Overview & Analytics",
     },
     {
       title: "My Resumes",
       id: "my-resumes", 
       icon: FileText,
       badge: "3",
+      description: "Manage Documents",
     },
     {
       title: "Create Resume",
       id: "create-resume",
       icon: Plus,
       badge: null,
+      description: "Build New Resume",
     },
     {
       title: "Job Finder",
       id: "job-finder",
       icon: Search,
       badge: "New",
+      description: "Discover Opportunities",
     },
     {
       title: "Interview Prep",
       id: "interview-prep",
       icon: Brain,
       badge: null,
+      description: "Practice & Improve",
     },
     {
       title: "Billing",
       id: "billing",
       icon: CreditCard,
       badge: null,
+      description: "Subscription & Plans",
     },
     {
       title: "Settings",
       id: "settings",
       icon: Settings,
       badge: null,
+      description: "Preferences & Account",
     }
   ];
 
@@ -86,152 +95,200 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
       title: "Help & Support",
       id: "help",
       icon: HelpCircle,
+      description: "Get Assistance",
     }
   ];
 
   const handleLogout = () => {
-    // Add logout logic here
     console.log("Logging out...");
-    // You can add actual logout functionality here
   };
 
   return (
-    <Sidebar className="bg-white/10 dark:bg-black/10 backdrop-blur-xl border-r border-white/20 dark:border-white/10">
+    <Sidebar className="bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 border-r border-slate-200/60 dark:border-slate-700/60 shadow-xl">
       {/* Header */}
-      <SidebarHeader className="p-6 border-b border-white/10">
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <Sparkles className="w-5 h-5 text-white" />
+      <SidebarHeader className="p-8 border-b border-slate-200/60 dark:border-slate-700/60">
+        <div className="flex items-center gap-4">
+          <div className="relative group">
+            <div className="w-12 h-12 bg-gradient-to-br from-indigo-600 via-purple-600 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300">
+              <Sparkles className="w-6 h-6 text-white" />
             </div>
-            <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
-              <Crown className="w-2 h-2 text-white" />
+            <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center shadow-md">
+              <Crown className="w-3 h-3 text-white" />
             </div>
           </div>
-          <div>
-            <h2 className="text-lg font-bold text-foreground">AI Resume Pro</h2>
-            <div className="flex items-center gap-2">
-              <Badge className="text-xs bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 border-0">
+          <div className="flex-1">
+            <h2 className="text-xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
+              AI Resume Pro
+            </h2>
+            <div className="flex items-center gap-2 mt-1">
+              <Badge className="text-xs bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 border-0 shadow-md">
                 <Crown className="w-3 h-3 mr-1" />
-                Pro
+                Professional
               </Badge>
             </div>
           </div>
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="py-6">
-        {/* Main Navigation */}
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu className="space-y-2 px-4">
-              {menuItems.map((item) => {
-                const isActive = activeTab === item.id;
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton 
-                      onClick={() => setActiveTab(item.id)}
-                      className={`group w-full px-4 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 text-sm font-medium relative ${
-                        isActive 
-                          ? 'bg-white/20 dark:bg-white/15 backdrop-blur-xl text-primary border border-white/30 shadow-xl' 
-                          : 'text-foreground/80 hover:bg-white/15 dark:hover:bg-white/10 hover:backdrop-blur-xl hover:text-foreground hover:shadow-lg'
-                      }`}
-                    >
-                      <div className={`p-2.5 rounded-lg transition-all duration-300 ${
-                        isActive 
-                          ? 'bg-primary/20 text-primary shadow-lg' 
-                          : 'bg-muted/50 text-muted-foreground group-hover:bg-primary/15 group-hover:text-primary'
-                      }`}>
-                        <item.icon className="w-4 h-4" />
-                      </div>
-                      <span className={`flex-1 font-semibold ${
-                        isActive 
-                          ? 'text-primary' 
-                          : 'text-foreground/80 group-hover:text-foreground'
-                      }`}>
-                        {item.title}
-                      </span>
-                      {item.badge && (
-                        <Badge 
-                          className={`text-xs px-2 py-0.5 ${
-                            item.badge === "New" 
-                              ? "bg-green-500/20 text-green-300 border-green-500/30" 
-                              : "bg-blue-500/20 text-blue-300 border-blue-500/30"
-                          }`}
-                        >
-                          {item.badge}
-                        </Badge>
-                      )}
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+      <SidebarContent className="py-2">
+        <ScrollArea className="h-full px-2">
+          {/* Main Navigation */}
+          <SidebarGroup>
+            <div className="px-4 py-3">
+              <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                Workspace
+              </h3>
+            </div>
+            <SidebarGroupContent>
+              <SidebarMenu className="space-y-1">
+                {menuItems.map((item) => {
+                  const isActive = activeTab === item.id;
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton 
+                        onClick={() => setActiveTab(item.id)}
+                        className={`group relative mx-2 px-4 py-4 rounded-xl transition-all duration-300 flex items-center gap-4 text-sm font-medium overflow-hidden ${
+                          isActive 
+                            ? 'bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/50 dark:to-purple-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200/50 dark:border-indigo-800/50 shadow-lg' 
+                            : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-100'
+                        }`}
+                      >
+                        {/* Active indicator */}
+                        {isActive && (
+                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-indigo-500 to-purple-600 rounded-r-full" />
+                        )}
+                        
+                        <div className={`p-3 rounded-xl transition-all duration-300 ${
+                          isActive 
+                            ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg' 
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/30 group-hover:text-indigo-600 dark:group-hover:text-indigo-400'
+                        }`}>
+                          <item.icon className="w-5 h-5" />
+                        </div>
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className={`font-semibold ${
+                            isActive 
+                              ? 'text-indigo-700 dark:text-indigo-300' 
+                              : 'text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-slate-100'
+                          }`}>
+                            {item.title}
+                          </div>
+                          <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            {item.description}
+                          </div>
+                        </div>
 
-        <SidebarSeparator className="my-4 mx-4" />
+                        {item.badge && (
+                          <Badge 
+                            className={`text-xs px-2.5 py-1 font-medium ${
+                              item.badge === "New" 
+                                ? "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800" 
+                                : "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800"
+                            }`}
+                          >
+                            {item.badge}
+                          </Badge>
+                        )}
 
-        {/* Support Section */}
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu className="space-y-2 px-4">
-              {supportItems.map((item) => {
-                const isActive = activeTab === item.id;
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton 
-                      onClick={() => setActiveTab(item.id)}
-                      className={`group w-full px-4 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 text-sm font-medium ${
-                        isActive 
-                          ? 'bg-white/20 dark:bg-white/15 backdrop-blur-xl text-primary border border-white/30 shadow-xl' 
-                          : 'text-foreground/80 hover:bg-white/15 dark:hover:bg-white/10 hover:backdrop-blur-xl hover:text-foreground hover:shadow-lg'
-                      }`}
-                    >
-                      <div className={`p-2.5 rounded-lg transition-all duration-300 ${
-                        isActive 
-                          ? 'bg-primary/20 text-primary shadow-lg' 
-                          : 'bg-muted/50 text-muted-foreground group-hover:bg-primary/15 group-hover:text-primary'
-                      }`}>
-                        <item.icon className="w-4 h-4" />
-                      </div>
-                      <span className={`font-semibold ${
-                        isActive 
-                          ? 'text-primary' 
-                          : 'text-foreground/80 group-hover:text-foreground'
-                      }`}>
-                        {item.title}
-                      </span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+                        {isActive && (
+                          <ChevronRight className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+                        )}
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          <SidebarSeparator className="my-6 mx-6 bg-slate-200 dark:bg-slate-700" />
+
+          {/* Support Section */}
+          <SidebarGroup>
+            <div className="px-4 py-3">
+              <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                Support
+              </h3>
+            </div>
+            <SidebarGroupContent>
+              <SidebarMenu className="space-y-1">
+                {supportItems.map((item) => {
+                  const isActive = activeTab === item.id;
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton 
+                        onClick={() => setActiveTab(item.id)}
+                        className={`group relative mx-2 px-4 py-4 rounded-xl transition-all duration-300 flex items-center gap-4 text-sm font-medium ${
+                          isActive 
+                            ? 'bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/50 dark:to-purple-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200/50 dark:border-indigo-800/50 shadow-lg' 
+                            : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-100'
+                        }`}
+                      >
+                        <div className={`p-3 rounded-xl transition-all duration-300 ${
+                          isActive 
+                            ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg' 
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/30 group-hover:text-indigo-600 dark:group-hover:text-indigo-400'
+                        }`}>
+                          <item.icon className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className={`font-semibold ${
+                            isActive 
+                              ? 'text-indigo-700 dark:text-indigo-300' 
+                              : 'text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-slate-100'
+                          }`}>
+                            {item.title}
+                          </div>
+                          <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            {item.description}
+                          </div>
+                        </div>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </ScrollArea>
       </SidebarContent>
 
       {/* Footer with User Profile */}
-      <SidebarFooter className="p-4 border-t border-white/10">
+      <SidebarFooter className="p-6 border-t border-slate-200/60 dark:border-slate-700/60">
         {/* Notification Banner */}
-        <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-xl border border-white/20 rounded-xl p-3 mb-4">
-          <div className="flex items-center gap-2">
-            <Bell className="w-4 h-4 text-blue-400" />
-            <span className="text-xs text-foreground/80">
-              2 new resume suggestions
-            </span>
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200/50 dark:border-blue-800/50 rounded-xl p-4 mb-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
+              <Bell className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <div className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                2 new suggestions
+              </div>
+              <div className="text-xs text-slate-600 dark:text-slate-400">
+                Resume improvements available
+              </div>
+            </div>
           </div>
         </div>
 
         {/* User Profile */}
-        <div className="bg-white/10 dark:bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl p-4">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-sm font-semibold text-white">JD</span>
+        <div className="bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 border border-slate-200/60 dark:border-slate-700/60 rounded-xl p-5 shadow-lg">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="relative">
+              <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
+                <span className="text-lg font-bold text-white">JD</span>
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-400 border-2 border-white dark:border-slate-900 rounded-full"></div>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground truncate">John Doe</p>
-              <p className="text-xs text-foreground/60 truncate">john@example.com</p>
+              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">John Doe</p>
+              <p className="text-xs text-slate-600 dark:text-slate-400 truncate">john@example.com</p>
+              <div className="flex items-center gap-2 mt-1">
+                <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Online</span>
+              </div>
             </div>
           </div>
           
@@ -239,18 +296,18 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-start h-8 text-xs text-foreground/80 hover:text-foreground hover:bg-white/10"
+              className="w-full justify-start h-10 text-sm text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
             >
-              <User className="w-3 h-3 mr-2" />
+              <User className="w-4 h-4 mr-3" />
               Profile Settings
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={handleLogout}
-              className="w-full justify-start h-8 text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10"
+              className="w-full justify-start h-10 text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg"
             >
-              <LogOut className="w-3 h-3 mr-2" />
+              <LogOut className="w-4 h-4 mr-3" />
               Sign Out
             </Button>
           </div>
