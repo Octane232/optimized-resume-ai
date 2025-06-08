@@ -64,31 +64,31 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
   ];
 
   return (
-    <Sidebar className="bg-white/5 dark:bg-black/5 backdrop-blur-xl border-r border-white/10 dark:border-white/5">
-      <SidebarContent className="px-6 py-8">
+    <Sidebar className="bg-white/10 dark:bg-black/10 backdrop-blur-xl border-r border-white/20 dark:border-white/10">
+      <SidebarContent className="py-8">
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-3">
+            <SidebarMenu className="space-y-4 px-4">
               {menuItems.map((item) => {
                 const isActive = activeTab === item.id;
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton 
                       onClick={() => setActiveTab(item.id)}
-                      className={`group w-full px-4 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 ${
+                      className={`group w-full px-6 py-4 rounded-2xl transition-all duration-300 flex items-center gap-4 text-base font-medium ${
                         isActive 
-                          ? 'bg-white/15 dark:bg-white/10 backdrop-blur-xl text-primary border border-white/20 shadow-lg' 
-                          : 'text-foreground/80 hover:bg-white/10 dark:hover:bg-white/5 hover:backdrop-blur-xl hover:text-foreground'
+                          ? 'bg-white/20 dark:bg-white/15 backdrop-blur-xl text-primary border border-white/30 shadow-xl' 
+                          : 'text-foreground/80 hover:bg-white/15 dark:hover:bg-white/10 hover:backdrop-blur-xl hover:text-foreground hover:shadow-lg'
                       }`}
                     >
-                      <div className={`p-2 rounded-lg transition-all duration-300 ${
+                      <div className={`p-3 rounded-xl transition-all duration-300 ${
                         isActive 
-                          ? 'bg-primary/20 text-primary' 
-                          : 'bg-muted/50 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary'
+                          ? 'bg-primary/20 text-primary shadow-lg' 
+                          : 'bg-muted/50 text-muted-foreground group-hover:bg-primary/15 group-hover:text-primary'
                       }`}>
-                        <item.icon className="w-4 h-4" />
+                        <item.icon className="w-5 h-5" />
                       </div>
-                      <span className={`font-medium text-sm ${
+                      <span className={`font-semibold ${
                         isActive 
                           ? 'text-primary' 
                           : 'text-foreground/80 group-hover:text-foreground'
