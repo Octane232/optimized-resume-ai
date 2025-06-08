@@ -9,16 +9,16 @@ const HeroSection = () => {
   ];
 
   const stats = [
-    { icon: Users, value: '50K+', label: 'Active Users' },
-    { icon: Award, value: '95%', label: 'Success Rate' },
-    { icon: Clock, value: '2 min', label: 'Average Time' }
+    { icon: Users, value: '50K+', label: 'Resumes Created' },
+    { icon: Award, value: '95%', label: 'ATS Pass Rate' },
+    { icon: Clock, value: '2 min', label: 'Average Build Time' }
   ];
 
   const benefits = [
-    'AI-powered resume optimization',
-    'ATS-friendly templates',
-    'Job-specific customization',
-    'Real-time feedback'
+    'AI-powered resume writing',
+    'ATS-optimized templates',
+    'Professional formatting',
+    'Instant PDF download'
   ];
 
   const scrollToTemplates = () => {
@@ -45,29 +45,29 @@ const HeroSection = () => {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50 rounded-full mb-8 animate-fade-in">
             <Sparkles className="h-4 w-4 text-blue-600" />
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">AI-Powered Career Platform</span>
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">AI Resume Builder Platform</span>
           </div>
 
           {/* Main Headline */}
           <div className="mb-12 animate-fade-in">
             <h1 className="text-6xl md:text-8xl font-extrabold text-slate-900 dark:text-white mb-8 leading-[0.9] tracking-tight">
-              Land Your{' '}
+              Create Perfect{' '}
               <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
-                Dream Job
+                AI Resumes
               </span>{' '}
-              Faster
+              in Minutes
             </h1>
             <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-300 mb-10 max-w-4xl mx-auto leading-relaxed font-medium">
-              Create professional, ATS-optimized resumes in minutes with our AI technology. 
+              Build professional, ATS-optimized resumes with our advanced AI technology. 
               <br className="hidden md:block" />
-              Join thousands who landed their dream roles.
+              Join thousands of professionals who landed their dream jobs.
             </p>
           </div>
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16 animate-fade-in" style={{ animationDelay: '0.2s' }}>
             <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-10 py-6 text-lg font-semibold rounded-2xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 group border-0">
-              Start Free Trial
+              Build My Resume
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Button>
             <Button 

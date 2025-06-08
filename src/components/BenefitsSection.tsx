@@ -1,43 +1,43 @@
 
 import React from 'react';
-import { CheckCircle, Clock, Target, BarChart3, FileText, Search } from 'lucide-react';
+import { CheckCircle, Clock, Target, BarChart3, FileText, Brain } from 'lucide-react';
 
 const BenefitsSection = () => {
   const benefits = [
     {
       icon: FileText,
-      title: 'AI-Powered Resume Creation',
-      description: 'Generate professional, ATS-optimized resumes tailored to specific job requirements with our advanced AI technology.',
+      title: 'AI-Powered Resume Writing',
+      description: 'Generate professional resume content tailored to your industry and experience level with advanced AI technology.',
       gradient: 'from-blue-500 to-cyan-500'
     },
     {
-      icon: Search,
-      title: 'Smart Job Discovery',
-      description: 'Our platform finds and presents job opportunities that match your skills, experience, and career goals.',
+      icon: Target,
+      title: 'ATS-Optimized Templates',
+      description: 'Choose from professionally designed templates that pass Applicant Tracking Systems and get you noticed.',
       gradient: 'from-green-500 to-emerald-500'
     },
     {
-      icon: Target,
-      title: 'Targeted Job Matching',
-      description: 'Get matched with positions that align perfectly with your background and career aspirations.',
+      icon: Brain,
+      title: 'Smart Content Suggestions',
+      description: 'Get intelligent recommendations for keywords, phrases, and achievements that make your resume stand out.',
       gradient: 'from-purple-500 to-violet-500'
     },
     {
       icon: Clock,
-      title: 'Save Time & Effort',
-      description: 'Streamline your job search process and focus on what matters most - preparing for interviews.',
+      title: 'Build Resumes in Minutes',
+      description: 'Create professional resumes quickly with our streamlined AI-powered builder and instant formatting.',
       gradient: 'from-orange-500 to-red-500'
     },
     {
       icon: BarChart3,
-      title: 'Track Your Progress',
-      description: 'Monitor your job search performance with detailed analytics and insights to optimize your strategy.',
+      title: 'Performance Analytics',
+      description: 'Track how your resume performs with detailed insights and optimization suggestions for better results.',
       gradient: 'from-pink-500 to-rose-500'
     },
     {
       icon: CheckCircle,
-      title: 'Higher Success Rate',
-      description: 'Increase your chances of landing interviews with professionally crafted resumes and strategic job targeting.',
+      title: 'Job Search Tools',
+      description: 'Access additional features like job matching and interview preparation to complete your career journey.',
       gradient: 'from-indigo-500 to-purple-500'
     }
   ];
@@ -50,7 +50,7 @@ const BenefitsSection = () => {
             Why Choose AI Resume Pro?
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Transform your job search with AI-powered tools designed for modern professionals
+            Create standout resumes with AI-powered tools designed for modern professionals
           </p>
         </div>
 
