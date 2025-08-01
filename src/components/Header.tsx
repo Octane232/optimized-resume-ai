@@ -90,11 +90,11 @@ const Header = () => {
             >
               {isDark ? <Sun size={18} /> : <Moon size={18} />}
             </Button>
-            <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-              Sign In
+            <Button asChild variant="ghost" size="sm" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+              <Link to="/auth">Sign In</Link>
             </Button>
             <Button asChild size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
-              <Link to="/dashboard">Get Started</Link>
+              <Link to="/auth">Get Started</Link>
             </Button>
           </div>
 
@@ -131,11 +131,11 @@ const Header = () => {
                   {isDark ? <Sun size={18} className="mr-2" /> : <Moon size={18} className="mr-2" />}
                   {isDark ? 'Light Mode' : 'Dark Mode'}
                 </Button>
-                <Button variant="ghost" size="sm" className="justify-start">
-                  Sign In
+                <Button asChild variant="ghost" size="sm" className="justify-start">
+                  <Link to="/auth">Sign In</Link>
                 </Button>
                 <Button asChild size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
-                  <Link to="/dashboard">Get Started</Link>
+                  <Link to="/auth">Get Started</Link>
                 </Button>
               </div>
             </nav>
