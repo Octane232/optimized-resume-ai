@@ -49,22 +49,15 @@ const Header = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 z-50 shadow-sm transition-colors duration-300">
+    <header className="fixed top-0 left-0 right-0 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 z-50 transition-colors duration-300">
       <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
         <div className="flex items-center justify-between h-16">
-          {/* Logo - REPLACE THIS SECTION WITH YOUR LOGO */}
-          <Link to="/" className="flex items-center space-x-2">
-            {/* 
-              LOGO PLACEMENT INSTRUCTIONS:
-              Replace the content below with your logo SVG or image:
-              <img src="/path/to/your/logo.svg" alt="AI Resume Pro" className="w-8 h-8" />
-              OR for inline SVG:
-              <svg className="w-8 h-8">...your SVG code...</svg>
-            */}
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xs">LOGO</span>
+          {/* Logo */}
+          <Link to="/" className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">R</span>
             </div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">AI Resume Pro</h1>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Resume Pro</h1>
           </Link>
 
           {/* Desktop Navigation */}
@@ -73,7 +66,7 @@ const Header = () => {
               <button
                 key={item.label}
                 onClick={() => scrollToSection(item.href)}
-                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 font-medium text-sm"
+                className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 font-medium text-sm"
               >
                 {item.label}
               </button>
@@ -86,14 +79,14 @@ const Header = () => {
               variant="ghost"
               size="sm"
               onClick={toggleTheme}
-              className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
             >
               {isDark ? <Sun size={18} /> : <Moon size={18} />}
             </Button>
-            <Button asChild variant="ghost" size="sm" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+            <Button asChild variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
               <Link to="/auth">Sign In</Link>
             </Button>
-            <Button asChild size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+            <Button asChild size="sm" className="saas-button">
               <Link to="/auth">Get Started</Link>
             </Button>
           </div>
@@ -110,7 +103,7 @@ const Header = () => {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200 dark:border-gray-700 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md">
+          <div className="md:hidden py-4 border-t border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md">
             <nav className="flex flex-col space-y-3">
               {navItems.map((item) => (
                 <button
@@ -121,12 +114,12 @@ const Header = () => {
                   {item.label}
                 </button>
               ))}
-              <div className="flex flex-col space-y-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex flex-col space-y-2 pt-4 border-t border-gray-200 dark:border-gray-800">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={toggleTheme}
-                  className="justify-start text-gray-600 dark:text-gray-300"
+                  className="justify-start text-gray-600 dark:text-gray-400"
                 >
                   {isDark ? <Sun size={18} className="mr-2" /> : <Moon size={18} className="mr-2" />}
                   {isDark ? 'Light Mode' : 'Dark Mode'}
@@ -134,7 +127,7 @@ const Header = () => {
                 <Button asChild variant="ghost" size="sm" className="justify-start">
                   <Link to="/auth">Sign In</Link>
                 </Button>
-                <Button asChild size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                <Button asChild size="sm" className="saas-button">
                   <Link to="/auth">Get Started</Link>
                 </Button>
               </div>
