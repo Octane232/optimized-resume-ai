@@ -37,7 +37,7 @@ const DashboardMain = () => {
         .from('profiles')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       // Fetch resumes
       const { data: resumesData } = await supabase
