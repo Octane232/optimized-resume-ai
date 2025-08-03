@@ -1,98 +1,154 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Download, User, Crown, Plus, Lightbulb, TrendingUp, Star, Zap, Target, Clock, Award, Calendar, ArrowRight } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { FileText, Download, User, Crown, Plus, Lightbulb, TrendingUp, Star, Zap, Target, Clock, Award, Calendar, ArrowRight, Eye } from 'lucide-react';
 import OnboardingFlow from './OnboardingFlow';
 import ResumePreview from './ResumePreview';
 import TemplateGallery from './TemplateGallery';
 import ActivityFeed from './ActivityFeed';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const DashboardMain = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
-  const [profileCompletion, setProfileCompletion] = useState(75);
+  const [profile, setProfile] = useState<any>(null);
+  const [resumes, setResumes] = useState<any[]>([]);
+  const [analytics, setAnalytics] = useState<any[]>([]);
+  const [subscription, setSubscription] = useState<any>(null);
+  const [aiTips, setAiTips] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Fetch profile
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      // Fetch resumes
+      const { data: resumesData } = await supabase
+        .from('resumes')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('updated_at', { ascending: false });
+
+      // Fetch analytics
+      const { data: analyticsData } = await supabase
+        .from('resume_analytics')
+        .select('*')
+        .eq('user_id', user.id);
+
+      // Fetch subscription
+      const { data: subscriptionData } = await supabase
+        .from('user_subscriptions')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      // Fetch AI tips
+      const { data: tipsData } = await supabase
+        .from('ai_tips')
+        .select('*')
+        .eq('is_active', true)
+        .limit(3);
+
+      setProfile(profileData);
+      setResumes(resumesData || []);
+      setAnalytics(analyticsData || []);
+      setSubscription(subscriptionData);
+      setAiTips(tipsData || []);
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load dashboard data",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-32" />
+          ))}
+        </div>
+        <Skeleton className="h-48" />
+        <Skeleton className="h-64" />
+      </div>
+    );
+  }
+
+  const totalDownloads = analytics.reduce((sum: number, item: any) => sum + (item.downloads || 0), 0);
+  const totalViews = analytics.reduce((sum: number, item: any) => sum + (item.views || 0), 0);
+  const profileCompletion = profile?.profile_completion || 0;
 
   const stats = [
     { 
       title: 'Total Resumes', 
-      value: '3', 
+      value: resumes.length.toString(), 
       icon: FileText, 
       color: 'bg-gradient-to-r from-primary to-primary/80', 
       bgColor: 'bg-primary/5', 
-      change: '+2 this week',
+      change: resumes.length > 0 ? 'Keep building!' : 'Create your first resume',
       trend: 'up'
     },
     { 
       title: 'Downloads', 
-      value: '12', 
+      value: totalDownloads.toString(), 
       icon: Download, 
       color: 'bg-gradient-to-r from-emerald-500 to-emerald-600', 
       bgColor: 'bg-emerald-50 dark:bg-emerald-950/20', 
-      change: '+5 this month',
+      change: 'Total downloads',
       trend: 'up'
     },
     { 
-      title: 'Profile Score', 
-      value: `${profileCompletion}%`, 
-      icon: User, 
+      title: 'Views', 
+      value: totalViews.toString(), 
+      icon: Eye, 
       color: 'bg-gradient-to-r from-amber-500 to-amber-600', 
       bgColor: 'bg-amber-50 dark:bg-amber-950/20', 
-      change: 'Complete to 100%',
+      change: 'Total views',
       trend: 'neutral'
     },
     { 
       title: 'Plan Status', 
-      value: 'Pro', 
+      value: subscription?.plan_name || 'Free', 
       icon: Crown, 
       color: 'bg-gradient-to-r from-purple-500 to-purple-600', 
       bgColor: 'bg-purple-50 dark:bg-purple-950/20', 
-      change: 'Unlimited resumes',
+      change: subscription?.plan_status === 'active' ? 'Active plan' : 'Inactive',
       trend: 'neutral'
     },
   ];
 
-  const recentResumes = [
-    { 
-      id: 1,
-      name: 'Software Engineer Resume', 
-      lastModified: '2 hours ago', 
-      format: 'PDF', 
-      status: 'Published',
-      completion: 95,
-      template: 'Modern Professional',
-      views: 24
-    },
-    { 
-      id: 2,
-      name: 'Marketing Manager CV', 
-      lastModified: '1 day ago', 
-      format: 'DOCX', 
-      status: 'Draft',
-      completion: 80,
-      template: 'Creative Designer',
-      views: 12
-    },
-    { 
-      id: 3,
-      name: 'Data Analyst Resume', 
-      lastModified: '3 days ago', 
-      format: 'PDF', 
-      status: 'Published',
-      completion: 100,
-      template: 'Executive Summary',
-      views: 31
-    },
-  ];
-
-  const aiTips = [
+  const defaultTips = [
     "Use action verbs to start your bullet points for more impact",
     "Quantify your achievements with specific numbers and percentages",
     "Tailor your resume keywords to match job descriptions",
     "Keep your resume to 1-2 pages for optimal readability",
     "Use consistent formatting throughout your document"
   ];
+
+  const currentTips = aiTips.length > 0 ? aiTips : defaultTips.map(tip => ({ description: tip }));
 
   return (
     <div className="space-y-8 pb-8">
@@ -111,7 +167,7 @@ const DashboardMain = () => {
                   
                   <h1 className="text-4xl lg:text-5xl font-bold text-foreground leading-tight">
                     Ready to land your 
-                    <span className="gradient-text"> dream job</span>?
+                    <span className="gradient-text"> dream job</span>, {profile?.full_name || 'User'}?
                   </h1>
                   
                   <p className="text-xl text-muted-foreground leading-relaxed">
@@ -142,7 +198,7 @@ const DashboardMain = () => {
                   <div>
                     <h3 className="font-semibold text-foreground mb-1">💡 Pro Tip</h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      {aiTips[Math.floor(Math.random() * aiTips.length)]}
+                      {currentTips[Math.floor(Math.random() * currentTips.length)]?.description}
                     </p>
                   </div>
                 </div>
@@ -224,54 +280,60 @@ const DashboardMain = () => {
             </CardHeader>
             <CardContent className="p-6">
               <div className="space-y-4">
-                {recentResumes.map((resume, index) => (
-                  <div key={index} className="group relative overflow-hidden bg-accent/20 rounded-2xl border border-border/50 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                    <div className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="w-14 h-14 gradient-bg rounded-2xl flex items-center justify-center shadow-lg">
-                            <FileText className="w-7 h-7 text-white" />
+                {resumes.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <FileText className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                    <h3 className="text-lg font-medium mb-2">No resumes yet</h3>
+                    <p className="mb-6">Create your first resume to get started on your career journey</p>
+                    <Button onClick={() => setShowTemplates(true)} className="rounded-xl">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create Resume
+                    </Button>
+                  </div>
+                ) : (
+                  resumes.slice(0, 3).map((resume, index) => (
+                    <div key={resume.id} className="group relative overflow-hidden bg-accent/20 rounded-2xl border border-border/50 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                      <div className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="w-14 h-14 gradient-bg rounded-2xl flex items-center justify-center shadow-lg">
+                              <FileText className="w-7 h-7 text-white" />
+                            </div>
+                            <div className="space-y-2">
+                              <h3 className="font-semibold text-foreground text-lg">{resume.title}</h3>
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                <span>Modified {new Date(resume.updated_at).toLocaleDateString()}</span>
+                                <span>•</span>
+                                <span>{resume.template_name || 'Classic'}</span>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <Badge variant="outline" className="text-xs">
+                                  {resume.template_name || 'Classic Template'}
+                                </Badge>
+                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                  resume.is_public 
+                                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                                    : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                }`}>
+                                  {resume.is_public ? 'Public' : 'Private'}
+                                </span>
+                              </div>
+                            </div>
                           </div>
-                          <div className="space-y-2">
-                            <h3 className="font-semibold text-foreground text-lg">{resume.name}</h3>
-                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                              <span>Modified {resume.lastModified}</span>
-                              <span>•</span>
-                              <span>{resume.format}</span>
-                              <span>•</span>
-                              <span>{resume.views} views</span>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <Badge variant="outline" className="text-xs">
-                                {resume.template}
-                              </Badge>
-                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                resume.status === 'Published' 
-                                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                                  : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                              }`}>
-                                {resume.status}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <Progress value={resume.completion} className="w-24 h-2" />
-                              <span className="text-xs text-muted-foreground font-medium">{resume.completion}% complete</span>
-                            </div>
+                          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            <Button variant="outline" size="sm" className="rounded-xl">
+                              Edit
+                            </Button>
+                            <Button variant="outline" size="sm" className="rounded-xl">
+                              <Download className="w-4 h-4 mr-1" />
+                              Download
+                            </Button>
                           </div>
-                        </div>
-                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                          <Button variant="outline" size="sm" className="rounded-xl">
-                            Edit
-                          </Button>
-                          <Button variant="outline" size="sm" className="rounded-xl">
-                            <Download className="w-4 h-4 mr-1" />
-                            Download
-                          </Button>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>

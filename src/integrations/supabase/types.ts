@@ -14,32 +14,121 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_tips: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string
+          id: string
+          is_active: boolean | null
+          is_global: boolean | null
+          title: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          is_active?: boolean | null
+          is_global?: boolean | null
+          title: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          is_active?: boolean | null
+          is_global?: boolean | null
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
           created_at: string
           full_name: string | null
           id: string
+          location: string | null
+          phone: string | null
+          profile_completion: number | null
           updated_at: string
           user_id: string
+          website: string | null
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
+          location?: string | null
+          phone?: string | null
+          profile_completion?: number | null
           updated_at?: string
           user_id: string
+          website?: string | null
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
+          location?: string | null
+          phone?: string | null
+          profile_completion?: number | null
           updated_at?: string
           user_id?: string
+          website?: string | null
         }
         Relationships: []
+      }
+      resume_analytics: {
+        Row: {
+          created_at: string
+          downloads: number | null
+          id: string
+          resume_id: string | null
+          updated_at: string
+          user_id: string
+          views: number | null
+        }
+        Insert: {
+          created_at?: string
+          downloads?: number | null
+          id?: string
+          resume_id?: string | null
+          updated_at?: string
+          user_id: string
+          views?: number | null
+        }
+        Update: {
+          created_at?: string
+          downloads?: number | null
+          id?: string
+          resume_id?: string | null
+          updated_at?: string
+          user_id?: string
+          views?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resume_analytics_resume_id_fkey"
+            columns: ["resume_id"]
+            isOneToOne: false
+            referencedRelation: "resumes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       resumes: {
         Row: {
@@ -69,6 +158,75 @@ export type Database = {
           is_public?: boolean | null
           template_name?: string | null
           title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_activities: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          metadata: Json | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_subscriptions: {
+        Row: {
+          billing_cycle: string | null
+          created_at: string
+          expires_at: string | null
+          features: Json | null
+          id: string
+          plan_name: string
+          plan_status: string
+          price: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          billing_cycle?: string | null
+          created_at?: string
+          expires_at?: string | null
+          features?: Json | null
+          id?: string
+          plan_name?: string
+          plan_status?: string
+          price?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          billing_cycle?: string | null
+          created_at?: string
+          expires_at?: string | null
+          features?: Json | null
+          id?: string
+          plan_name?: string
+          plan_status?: string
+          price?: number | null
           updated_at?: string
           user_id?: string
         }
