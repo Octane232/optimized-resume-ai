@@ -1,62 +1,80 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { FileText, Download, Edit, Eye, Clock, TrendingUp } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { formatDistanceToNow } from 'date-fns';
 
 const ActivityFeed = () => {
-  const activities = [
-    {
-      id: 1,
-      type: 'created',
-      title: 'Software Engineer Resume',
-      description: 'New resume created',
-      time: '2 hours ago',
-      icon: FileText,
-      color: 'from-blue-500 to-blue-600',
-      bgColor: 'from-blue-50/50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/30'
-    },
-    {
-      id: 2,
-      type: 'downloaded',
-      title: 'Marketing Resume',
-      description: 'Downloaded as PDF',
-      time: '5 hours ago',
-      icon: Download,
-      color: 'from-emerald-500 to-emerald-600',
-      bgColor: 'from-emerald-50/50 to-emerald-100/50 dark:from-emerald-950/30 dark:to-emerald-900/30'
-    },
-    {
-      id: 3,
-      type: 'edited',
-      title: 'Data Analyst CV',
-      description: 'Skills section updated',
-      time: '1 day ago',
-      icon: Edit,
-      color: 'from-amber-500 to-amber-600',
-      bgColor: 'from-amber-50/50 to-amber-100/50 dark:from-amber-950/30 dark:to-amber-900/30'
-    },
-    {
-      id: 4,
-      type: 'viewed',
-      title: 'Portfolio Review',
-      description: '12 new profile views',
-      time: '2 days ago',
-      icon: Eye,
-      color: 'from-purple-500 to-purple-600',
-      bgColor: 'from-purple-50/50 to-purple-100/50 dark:from-purple-950/30 dark:to-purple-900/30'
-    },
-    {
-      id: 5,
-      type: 'achievement',
-      title: 'Profile Milestone',
-      description: '75% completion reached',
-      time: '3 days ago',
-      icon: TrendingUp,
-      color: 'from-rose-500 to-rose-600',
-      bgColor: 'from-rose-50/50 to-rose-100/50 dark:from-rose-950/30 dark:to-rose-900/30'
+  const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchActivities();
+  }, []);
+
+  const fetchActivities = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('user_activities')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+
+      const formattedActivities = data?.map(activity => ({
+        id: activity.id,
+        type: activity.type,
+        title: activity.title,
+        description: activity.description,
+        time: formatDistanceToNow(new Date(activity.created_at), { addSuffix: true }),
+        icon: getIconForType(activity.type),
+        color: getColorForType(activity.type),
+        bgColor: getBgColorForType(activity.type)
+      })) || [];
+
+      setActivities(formattedActivities);
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const getIconForType = (type) => {
+    switch (type) {
+      case 'created': return FileText;
+      case 'downloaded': return Download;
+      case 'edited': return Edit;
+      case 'viewed': return Eye;
+      case 'achievement': return TrendingUp;
+      default: return FileText;
+    }
+  };
+
+  const getColorForType = (type) => {
+    switch (type) {
+      case 'created': return 'from-blue-500 to-blue-600';
+      case 'downloaded': return 'from-emerald-500 to-emerald-600';
+      case 'edited': return 'from-amber-500 to-amber-600';
+      case 'viewed': return 'from-purple-500 to-purple-600';
+      case 'achievement': return 'from-rose-500 to-rose-600';
+      default: return 'from-blue-500 to-blue-600';
+    }
+  };
+
+  const getBgColorForType = (type) => {
+    switch (type) {
+      case 'created': return 'from-blue-50/50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/30';
+      case 'downloaded': return 'from-emerald-50/50 to-emerald-100/50 dark:from-emerald-950/30 dark:to-emerald-900/30';
+      case 'edited': return 'from-amber-50/50 to-amber-100/50 dark:from-amber-950/30 dark:to-amber-900/30';
+      case 'viewed': return 'from-purple-50/50 to-purple-100/50 dark:from-purple-950/30 dark:to-purple-900/30';
+      case 'achievement': return 'from-rose-50/50 to-rose-100/50 dark:from-rose-950/30 dark:to-rose-900/30';
+      default: return 'from-blue-50/50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/30';
+    }
+  };
 
   return (
     <Card className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg rounded-2xl">
@@ -72,7 +90,27 @@ const ActivityFeed = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {activities.map((activity) => {
+        {loading ? (
+          <div className="space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="animate-pulse">
+                <div className="flex items-start gap-4 p-4">
+                  <div className="w-10 h-10 bg-slate-200 dark:bg-slate-700 rounded-xl"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-3/4"></div>
+                    <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-1/2"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : activities.length === 0 ? (
+          <div className="text-center py-8">
+            <Clock className="w-12 h-12 mx-auto text-slate-400 mb-4" />
+            <p className="text-slate-500 dark:text-slate-400">No recent activity</p>
+          </div>
+        ) : (
+          activities.map((activity) => {
           const Icon = activity.icon;
           return (
             <div 
@@ -103,7 +141,7 @@ const ActivityFeed = () => {
               </div>
             </div>
           );
-        })}
+        }))}
       </CardContent>
     </Card>
   );

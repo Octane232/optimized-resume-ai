@@ -1,119 +1,173 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Check, Crown, CreditCard, Download, Star, Zap, Shield, Headphones, Sparkles, TrendingUp, Users, Award } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { formatDistanceToNow } from 'date-fns';
 
 const Billing = () => {
   const [billingCycle, setBillingCycle] = useState('monthly');
+  const [currentPlan, setCurrentPlan] = useState(null);
+  const [plans, setPlans] = useState([]);
+  const [invoices, setInvoices] = useState([]);
+  const [usageStats, setUsageStats] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const currentPlan = {
-    name: 'Pro',
-    price: '$19/month',
-    features: ['Unlimited resumes', 'AI-powered content', 'Premium templates', 'Priority support'],
-    nextBilling: '2024-02-15',
-    status: 'active'
+  useEffect(() => {
+    fetchBillingData();
+  }, []);
+
+  const fetchBillingData = async () => {
+    try {
+      // Fetch subscription plans
+      const { data: plansData, error: plansError } = await supabase
+        .from('subscription_plans')
+        .select('*')
+        .order('price_monthly', { ascending: true });
+
+      if (plansError) throw plansError;
+
+      // Fetch user subscription
+      const { data: subscriptionData, error: subscriptionError } = await supabase
+        .from('user_subscriptions')
+        .select('*')
+        .single();
+
+      if (subscriptionError && subscriptionError.code !== 'PGRST116') {
+        throw subscriptionError;
+      }
+
+      // Fetch invoices
+      const { data: invoicesData, error: invoicesError } = await supabase
+        .from('billing_invoices')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (invoicesError) throw invoicesError;
+
+      // Fetch usage stats
+      const { data: usageData, error: usageError } = await supabase
+        .from('user_usage_stats')
+        .select('*')
+        .single();
+
+      if (usageError && usageError.code !== 'PGRST116') {
+        throw usageError;
+      }
+
+      // Process and set data
+      const formattedPlans = plansData?.map(plan => ({
+        name: plan.name,
+        monthlyPrice: plan.price_monthly,
+        yearlyPrice: plan.price_yearly,
+        price: billingCycle === 'monthly' ? `$${plan.price_monthly}` : `$${plan.price_yearly}`,
+        period: billingCycle === 'monthly' ? 'per month' : 'per year',
+        originalPrice: billingCycle === 'yearly' && plan.price_monthly ? 
+          `$${plan.price_monthly * 12}` : null,
+        features: plan.features || [],
+        icon: getIconForPlan(plan.icon_name),
+        color: plan.color_class || 'from-slate-500 to-slate-600',
+        popular: plan.is_popular,
+        current: subscriptionData?.plan_name === plan.name,
+        description: plan.description || '',
+        savings: billingCycle === 'yearly' && plan.price_monthly ? 
+          `Save $${(plan.price_monthly * 12) - plan.price_yearly}` : null
+      })) || [];
+
+      const formattedInvoices = invoicesData?.map(invoice => ({
+        id: invoice.invoice_number,
+        date: new Date(invoice.created_at).toLocaleDateString(),
+        amount: `$${parseFloat(invoice.amount.toString()).toFixed(2)}`,
+        status: invoice.status,
+        description: invoice.description,
+        paymentMethod: invoice.payment_method || '•••• 4242'
+      })) || [];
+
+      const currentSubscription = subscriptionData ? {
+        name: subscriptionData.plan_name,
+        price: `$${subscriptionData.price}/${subscriptionData.billing_cycle}`,
+        nextBilling: subscriptionData.expires_at ? 
+          new Date(subscriptionData.expires_at).toLocaleDateString() : 'N/A',
+        features: subscriptionData.features || [],
+        status: subscriptionData.plan_status
+      } : {
+        name: 'Free',
+        price: '$0/month',
+        nextBilling: 'N/A',
+        features: ['3 resumes max', 'Basic templates', 'Standard support'],
+        status: 'active'
+      };
+
+      const currentUsage = usageData ? [
+        { 
+          label: 'Resumes Created', 
+          value: usageData.resumes_created?.toString() || '0', 
+          max: currentSubscription.name === 'Free' ? '3' : '∞', 
+          color: 'from-blue-500 to-blue-600' 
+        },
+        { 
+          label: 'AI Generations', 
+          value: usageData.ai_generations?.toString() || '0', 
+          max: currentSubscription.name === 'Free' ? '10' : '∞', 
+          color: 'from-purple-500 to-purple-600' 
+        },
+        { 
+          label: 'Downloads', 
+          value: usageData.downloads?.toString() || '0', 
+          max: '∞', 
+          color: 'from-emerald-500 to-emerald-600' 
+        },
+        { 
+          label: 'Templates Used', 
+          value: usageData.templates_used?.toString() || '0', 
+          max: currentSubscription.name === 'Free' ? '5' : '∞', 
+          color: 'from-orange-500 to-orange-600' 
+        }
+      ] : [];
+
+      setPlans(formattedPlans);
+      setCurrentPlan(currentSubscription);
+      setInvoices(formattedInvoices);
+      setUsageStats(currentUsage);
+    } catch (error) {
+      console.error('Error fetching billing data:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const plans = [
-    {
-      name: 'Free',
-      price: billingCycle === 'monthly' ? '$0' : '$0',
-      period: billingCycle === 'monthly' ? 'forever' : 'forever',
-      originalPrice: null,
-      features: [
-        '3 resumes max',
-        'Basic templates',
-        'Standard support',
-        'PDF download',
-        'Basic customization'
-      ],
-      current: false,
-      popular: false,
-      color: 'from-slate-500 to-slate-600',
-      icon: Shield,
-      description: 'Perfect for getting started'
-    },
-    {
-      name: 'Pro',
-      price: billingCycle === 'monthly' ? '$19' : '$190',
-      period: billingCycle === 'monthly' ? 'per month' : 'per year',
-      originalPrice: billingCycle === 'yearly' ? '$228' : null,
-      features: [
-        'Unlimited resumes',
-        'AI-powered content generation',
-        'Premium templates',
-        'Priority support',
-        'Advanced customization',
-        'Multiple formats (PDF, DOCX)',
-        'Interview preparation',
-        'Job matching'
-      ],
-      current: true,
-      popular: true,
-      color: 'from-blue-500 to-purple-600',
-      icon: Sparkles,
-      description: 'Most popular for professionals',
-      savings: billingCycle === 'yearly' ? 'Save $38' : null
-    },
-    {
-      name: 'Enterprise',
-      price: billingCycle === 'monthly' ? '$49' : '$490',
-      period: billingCycle === 'monthly' ? 'per month' : 'per year',
-      originalPrice: billingCycle === 'yearly' ? '$588' : null,
-      features: [
-        'Everything in Pro',
-        'Team collaboration',
-        'Advanced analytics',
-        'Custom branding',
-        'Dedicated support',
-        'API access',
-        'Bulk resume generation',
-        'Custom integrations'
-      ],
-      current: false,
-      popular: false,
-      color: 'from-emerald-500 to-teal-600',
-      icon: Users,
-      description: 'For teams and organizations',
-      savings: billingCycle === 'yearly' ? 'Save $98' : null
+  const getIconForPlan = (iconName) => {
+    switch (iconName) {
+      case 'Shield': return Shield;
+      case 'Sparkles': return Sparkles;
+      case 'Users': return Users;
+      default: return Shield;
     }
-  ];
+  };
 
-  const invoices = [
-    { 
-      id: 'INV-001', 
-      date: '2024-01-15', 
-      amount: '$19.00', 
-      status: 'Paid',
-      description: 'Pro Plan - Monthly',
-      paymentMethod: '•••• 4242'
-    },
-    { 
-      id: 'INV-002', 
-      date: '2023-12-15', 
-      amount: '$19.00', 
-      status: 'Paid',
-      description: 'Pro Plan - Monthly',
-      paymentMethod: '•••• 4242'
-    },
-    { 
-      id: 'INV-003', 
-      date: '2023-11-15', 
-      amount: '$19.00', 
-      status: 'Paid',
-      description: 'Pro Plan - Monthly',
-      paymentMethod: '•••• 4242'
-    },
-  ];
-
-  const usageStats = [
-    { label: 'Resumes Created', value: '12', max: '∞', color: 'from-blue-500 to-blue-600' },
-    { label: 'AI Generations', value: '48', max: '∞', color: 'from-purple-500 to-purple-600' },
-    { label: 'Downloads', value: '26', max: '∞', color: 'from-emerald-500 to-emerald-600' },
-    { label: 'Templates Used', value: '8', max: '15', color: 'from-orange-500 to-orange-600' }
-  ];
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i} className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50">
+            <CardHeader>
+              <div className="animate-pulse">
+                <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-1/4 mb-2"></div>
+                <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-1/3"></div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="animate-pulse space-y-4">
+                <div className="h-24 bg-slate-200 dark:bg-slate-700 rounded-xl"></div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -141,7 +195,7 @@ const Billing = () => {
               <Crown className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold">Current Plan: {currentPlan.name}</h2>
+              <h2 className="text-xl font-bold">Current Plan: {currentPlan?.name || 'Free'}</h2>
               <p className="text-sm text-slate-500 dark:text-slate-400 font-normal">Active subscription</p>
             </div>
           </CardTitle>
@@ -151,19 +205,19 @@ const Billing = () => {
             <div className="lg:col-span-2">
               <div className="flex items-center gap-4 mb-6">
                 <div className="text-3xl font-bold text-slate-900 dark:text-white">
-                  {currentPlan.price}
+                  {currentPlan?.price || '$0/month'}
                 </div>
                 <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-0">
-                  {currentPlan.status}
+                  {currentPlan?.status || 'active'}
                 </Badge>
               </div>
               
               <p className="text-slate-600 dark:text-slate-400 mb-6">
-                Next billing date: <span className="font-semibold">{currentPlan.nextBilling}</span>
+                Next billing date: <span className="font-semibold">{currentPlan?.nextBilling || 'N/A'}</span>
               </p>
               
               <div className="grid md:grid-cols-2 gap-4">
-                {currentPlan.features.map((feature, index) => (
+                {currentPlan?.features?.map((feature, index) => (
                   <div key={index} className="flex items-center gap-3">
                     <div className="w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center">
                       <Check className="w-3 h-3 text-white" />
@@ -344,36 +398,43 @@ const Billing = () => {
         </CardHeader>
         <CardContent className="p-6">
           <div className="space-y-4">
-            {invoices.map((invoice) => (
-              <div key={invoice.id} className="flex items-center justify-between p-6 bg-gradient-to-r from-slate-50/50 to-white/50 dark:from-slate-800/30 dark:to-slate-700/30 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                <div className="flex items-center gap-6">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <CreditCard className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-3 mb-1">
-                      <p className="font-semibold text-slate-900 dark:text-white">{invoice.id}</p>
-                      <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 text-xs">
-                        {invoice.status}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">{invoice.description}</p>
-                    <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-500 mt-1">
-                      <span>{invoice.date}</span>
-                      <span>•</span>
-                      <span>{invoice.paymentMethod}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-xl font-bold text-slate-900 dark:text-white">{invoice.amount}</span>
-                  <Button variant="outline" size="sm" className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl">
-                    <Download className="w-4 h-4 mr-2" />
-                    Download
-                  </Button>
-                </div>
+            {invoices.length === 0 ? (
+              <div className="text-center py-8">
+                <CreditCard className="w-12 h-12 mx-auto text-slate-400 mb-4" />
+                <p className="text-slate-500 dark:text-slate-400">No invoices yet</p>
               </div>
-            ))}
+            ) : (
+              invoices.map((invoice) => (
+                <div key={invoice.id} className="flex items-center justify-between p-6 bg-gradient-to-r from-slate-50/50 to-white/50 dark:from-slate-800/30 dark:to-slate-700/30 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                  <div className="flex items-center gap-6">
+                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <CreditCard className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-3 mb-1">
+                        <p className="font-semibold text-slate-900 dark:text-white">{invoice.id}</p>
+                        <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 text-xs">
+                          {invoice.status}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">{invoice.description}</p>
+                      <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-500 mt-1">
+                        <span>{invoice.date}</span>
+                        <span>•</span>
+                        <span>{invoice.paymentMethod}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className="text-xl font-bold text-slate-900 dark:text-white">{invoice.amount}</span>
+                    <Button variant="outline" size="sm" className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl">
+                      <Download className="w-4 h-4 mr-2" />
+                      Download
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </CardContent>
       </Card>

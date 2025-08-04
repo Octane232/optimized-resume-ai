@@ -50,6 +50,78 @@ export type Database = {
         }
         Relationships: []
       }
+      billing_invoices: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string
+          id: string
+          invoice_number: string
+          payment_method: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description: string
+          id?: string
+          invoice_number: string
+          payment_method?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string
+          id?: string
+          invoice_number?: string
+          payment_method?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      connected_services: {
+        Row: {
+          color_class: string | null
+          created_at: string
+          icon_name: string | null
+          id: string
+          is_connected: boolean | null
+          service_description: string | null
+          service_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color_class?: string | null
+          created_at?: string
+          icon_name?: string | null
+          id?: string
+          is_connected?: boolean | null
+          service_description?: string | null
+          service_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color_class?: string | null
+          created_at?: string
+          icon_name?: string | null
+          id?: string
+          is_connected?: boolean | null
+          service_description?: string | null
+          service_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -163,6 +235,48 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_plans: {
+        Row: {
+          color_class: string | null
+          created_at: string
+          description: string | null
+          features: Json | null
+          icon_name: string | null
+          id: string
+          is_popular: boolean | null
+          name: string
+          price_monthly: number | null
+          price_yearly: number | null
+          updated_at: string
+        }
+        Insert: {
+          color_class?: string | null
+          created_at?: string
+          description?: string | null
+          features?: Json | null
+          icon_name?: string | null
+          id?: string
+          is_popular?: boolean | null
+          name: string
+          price_monthly?: number | null
+          price_yearly?: number | null
+          updated_at?: string
+        }
+        Update: {
+          color_class?: string | null
+          created_at?: string
+          description?: string | null
+          features?: Json | null
+          icon_name?: string | null
+          id?: string
+          is_popular?: boolean | null
+          name?: string
+          price_monthly?: number | null
+          price_yearly?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_activities: {
         Row: {
           created_at: string
@@ -227,6 +341,39 @@ export type Database = {
           plan_name?: string
           plan_status?: string
           price?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_usage_stats: {
+        Row: {
+          ai_generations: number | null
+          created_at: string
+          downloads: number | null
+          id: string
+          resumes_created: number | null
+          templates_used: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_generations?: number | null
+          created_at?: string
+          downloads?: number | null
+          id?: string
+          resumes_created?: number | null
+          templates_used?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_generations?: number | null
+          created_at?: string
+          downloads?: number | null
+          id?: string
+          resumes_created?: number | null
+          templates_used?: number | null
           updated_at?: string
           user_id?: string
         }

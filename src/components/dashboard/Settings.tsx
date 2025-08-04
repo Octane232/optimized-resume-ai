@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,14 +6,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { User, Mail, Lock, Palette, Bell, Globe, Shield, Trash2, Download, Upload, Settings as SettingsIcon, Sparkles, Brain, Target } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const Settings = () => {
   const [profileData, setProfileData] = useState({
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    phone: '+1 (555) 123-4567',
-    location: 'San Francisco, CA'
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    location: ''
   });
 
   const [preferences, setPreferences] = useState({
@@ -28,29 +28,99 @@ const Settings = () => {
     autoSave: true
   });
 
-  const connectedServices = [
-    {
-      name: 'Gmail',
-      description: 'Send resumes directly to employers',
-      connected: true,
-      icon: Mail,
-      color: 'from-red-500 to-red-600'
-    },
-    {
-      name: 'Google Drive',
-      description: 'Backup and sync your resumes',
-      connected: false,
-      icon: Upload,
-      color: 'from-blue-500 to-blue-600'
-    },
-    {
-      name: 'Dropbox',
-      description: 'Cloud storage integration',
-      connected: false,
-      icon: Download,
-      color: 'from-indigo-500 to-indigo-600'
+  const [connectedServices, setConnectedServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchSettingsData();
+  }, []);
+
+  const fetchSettingsData = async () => {
+    try {
+      // Fetch user profile
+      const { data: profileDataResult, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .single();
+
+      if (profileError && profileError.code !== 'PGRST116') {
+        throw profileError;
+      }
+
+      // Fetch connected services
+      const { data: servicesData, error: servicesError } = await supabase
+        .from('connected_services')
+        .select('*')
+        .order('service_name');
+
+      if (servicesError) throw servicesError;
+
+      // Get current user email
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (profileDataResult) {
+        const fullName = profileDataResult.full_name || '';
+        const nameParts = fullName.split(' ');
+        setProfileData({
+          firstName: nameParts[0] || '',
+          lastName: nameParts.slice(1).join(' ') || '',
+          email: user?.email || '',
+          phone: profileDataResult.phone || '',
+          location: profileDataResult.location || ''
+        });
+      } else if (user) {
+        setProfileData(prev => ({
+          ...prev,
+          email: user.email || ''
+        }));
+      }
+
+      const formattedServices = servicesData?.map(service => ({
+        id: service.id,
+        name: service.service_name,
+        description: service.service_description,
+        connected: service.is_connected,
+        icon: getIconForService(service.icon_name),
+        color: service.color_class || 'from-slate-500 to-slate-600'
+      })) || [];
+
+      setConnectedServices(formattedServices);
+    } catch (error) {
+      console.error('Error fetching settings data:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const getIconForService = (iconName) => {
+    switch (iconName) {
+      case 'Mail': return Mail;
+      case 'Upload': return Upload;
+      case 'Download': return Download;
+      default: return Mail;
+    }
+  };
+
+  const updateConnectedService = async (serviceId, connected) => {
+    try {
+      const { error } = await supabase
+        .from('connected_services')
+        .update({ is_connected: connected })
+        .eq('id', serviceId);
+
+      if (error) throw error;
+
+      setConnectedServices(prev => 
+        prev.map(service => 
+          service.id === serviceId 
+            ? { ...service, connected }
+            : service
+        )
+      );
+    } catch (error) {
+      console.error('Error updating connected service:', error);
+    }
+  };
 
   const aiSettings = [
     {
@@ -78,6 +148,29 @@ const Settings = () => {
       key: 'atsOptimization'
     }
   ];
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        {[...Array(6)].map((_, i) => (
+          <Card key={i} className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50">
+            <CardHeader>
+              <div className="animate-pulse">
+                <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-1/4 mb-2"></div>
+                <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-1/3"></div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="animate-pulse space-y-4">
+                <div className="h-10 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                <div className="h-10 bg-slate-200 dark:bg-slate-700 rounded"></div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -138,6 +231,7 @@ const Settings = () => {
                     value={profileData.email}
                     onChange={(e) => setProfileData({...profileData, email: e.target.value})}
                     className="bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-xl"
+                    disabled
                   />
                 </div>
                 <div>
@@ -362,17 +456,6 @@ const Settings = () => {
                   onCheckedChange={(checked) => setPreferences({...preferences, marketingEmails: checked})}
                 />
               </div>
-              
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-slate-900 dark:text-white">Auto-Save</p>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Automatically save changes</p>
-                </div>
-                <Switch 
-                  checked={preferences.autoSave}
-                  onCheckedChange={(checked) => setPreferences({...preferences, autoSave: checked})}
-                />
-              </div>
             </CardContent>
           </Card>
 
@@ -380,7 +463,7 @@ const Settings = () => {
           <Card className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl rounded-2xl">
             <CardHeader className="border-b border-slate-200/60 dark:border-slate-700/60">
               <CardTitle className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl">
+                <div className="p-2 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl">
                   <Globe className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -390,37 +473,23 @@ const Settings = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
-              {connectedServices.map((service, index) => {
+              {connectedServices.map((service) => {
                 const Icon = service.icon;
                 return (
-                  <div key={index} className="flex items-center justify-between p-4 bg-gradient-to-r from-slate-50/50 to-white/50 dark:from-slate-800/30 dark:to-slate-700/30 rounded-xl border border-slate-200/50 dark:border-slate-700/50">
-                    <div className="flex items-center gap-3">
+                  <div key={service.id} className="flex items-center justify-between p-4 bg-gradient-to-r from-slate-50/50 to-white/50 dark:from-slate-800/30 dark:to-slate-700/30 rounded-xl border border-slate-200/50 dark:border-slate-700/50">
+                    <div className="flex items-center gap-4">
                       <div className={`w-10 h-10 bg-gradient-to-r ${service.color} rounded-xl flex items-center justify-center shadow-lg`}>
                         <Icon className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium text-slate-900 dark:text-white">{service.name}</p>
-                          {service.connected && (
-                            <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-0 text-xs">
-                              Connected
-                            </Badge>
-                          )}
-                        </div>
+                        <p className="font-semibold text-slate-900 dark:text-white">{service.name}</p>
                         <p className="text-sm text-slate-600 dark:text-slate-400">{service.description}</p>
                       </div>
                     </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className={`rounded-xl ${
-                        service.connected 
-                          ? 'border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
-                          : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'
-                      }`}
-                    >
-                      {service.connected ? 'Disconnect' : 'Connect'}
-                    </Button>
+                    <Switch
+                      checked={service.connected}
+                      onCheckedChange={(checked) => updateConnectedService(service.id, checked)}
+                    />
                   </div>
                 );
               })}
