@@ -3,12 +3,16 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Zap, Clock, Award, Wand2, Edit, Sparkles, Brain, Target, Users, Palette, Download, Star, Loader2 } from 'lucide-react';
+import { FileText, Zap, Clock, Award, Wand2, Edit, Sparkles, Brain, Target, Users, Palette, Download, Star, Loader2, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import TemplatePreview from './TemplatePreview';
+import TemplateThumbnail from './TemplateThumbnail';
 
 const CreateResume = () => {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [previewTemplate, setPreviewTemplate] = useState(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [step, setStep] = useState('templates'); // templates, builder, preview
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -244,10 +248,11 @@ const CreateResume = () => {
                       </div>
                     )}
                     
-                    <div className="w-full h-56 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 rounded-xl border-2 border-slate-200 dark:border-slate-600 flex items-center justify-center shadow-lg mb-4 overflow-hidden">
-                      <div className={`w-16 h-16 bg-gradient-to-r ${template.color_class || 'from-slate-500 to-slate-600'} rounded-2xl flex items-center justify-center shadow-lg`}>
-                        <FileText className="w-8 h-8 text-white" />
-                      </div>
+                    <div className="w-full h-56 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 rounded-xl border-2 border-slate-200 dark:border-slate-600 shadow-lg mb-4 overflow-hidden relative">
+                      <TemplateThumbnail 
+                        htmlContent={template.html_content} 
+                        className="absolute inset-0"
+                      />
                     </div>
 
                     <div className="flex items-center justify-between mb-2">
@@ -280,10 +285,28 @@ const CreateResume = () => {
                     </div>
                     
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl"
+                        onClick={() => {
+                          setPreviewTemplate(template);
+                          setIsPreviewOpen(true);
+                        }}
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
                         Preview
                       </Button>
-                      <Button className={`flex-1 bg-gradient-to-r ${template.color_class || 'from-slate-500 to-slate-600'} hover:shadow-lg text-white font-semibold rounded-xl transition-all duration-300`}>
+                      <Button 
+                        className={`flex-1 bg-gradient-to-r ${template.color_class || 'from-slate-500 to-slate-600'} hover:shadow-lg text-white font-semibold rounded-xl transition-all duration-300`}
+                        onClick={() => {
+                          setSelectedTemplate(template);
+                          toast({
+                            title: "Template Selected",
+                            description: `${template.name} template has been selected.`,
+                          });
+                        }}
+                      >
                         Use Template
                       </Button>
                     </div>
@@ -294,6 +317,20 @@ const CreateResume = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Template Preview Modal */}
+      <TemplatePreview
+        template={previewTemplate}
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        onUseTemplate={() => {
+          setSelectedTemplate(previewTemplate);
+          toast({
+            title: "Template Selected",
+            description: `${previewTemplate?.name} template has been selected.`,
+          });
+        }}
+      />
     </div>
   );
 };
