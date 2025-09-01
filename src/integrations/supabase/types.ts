@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "13.0.4"
@@ -202,6 +202,54 @@ export type Database = {
           },
         ]
       }
+      resume_templates: {
+        Row: {
+          category: string
+          color_class: string | null
+          created_at: string
+          description: string | null
+          downloads: number | null
+          features: Json | null
+          html_content: string
+          id: string
+          is_popular: boolean | null
+          name: string
+          preview_image: string | null
+          rating: number | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          color_class?: string | null
+          created_at?: string
+          description?: string | null
+          downloads?: number | null
+          features?: Json | null
+          html_content: string
+          id?: string
+          is_popular?: boolean | null
+          name: string
+          preview_image?: string | null
+          rating?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          color_class?: string | null
+          created_at?: string
+          description?: string | null
+          downloads?: number | null
+          features?: Json | null
+          html_content?: string
+          id?: string
+          is_popular?: boolean | null
+          name?: string
+          preview_image?: string | null
+          rating?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       resumes: {
         Row: {
           content: Json | null
@@ -314,7 +362,7 @@ export type Database = {
           expires_at: string | null
           features: Json | null
           id: string
-          plan_name: string
+          plan_id: string
           plan_status: string
           price: number | null
           updated_at: string
@@ -326,7 +374,7 @@ export type Database = {
           expires_at?: string | null
           features?: Json | null
           id?: string
-          plan_name?: string
+          plan_id: string
           plan_status?: string
           price?: number | null
           updated_at?: string
@@ -338,13 +386,21 @@ export type Database = {
           expires_at?: string | null
           features?: Json | null
           id?: string
-          plan_name?: string
+          plan_id?: string
           plan_status?: string
           price?: number | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_usage_stats: {
         Row: {

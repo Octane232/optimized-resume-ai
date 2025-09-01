@@ -1,88 +1,44 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Zap, Clock, Award, Wand2, Edit, Sparkles, Brain, Target, Users, Palette, Download, Star } from 'lucide-react';
+import { FileText, Zap, Clock, Award, Wand2, Edit, Sparkles, Brain, Target, Users, Palette, Download, Star, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
 
 const CreateResume = () => {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [step, setStep] = useState('templates'); // templates, builder, preview
+  const [templates, setTemplates] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  const templates = [
-    {
-      id: 1,
-      name: 'Modern Professional',
-      description: 'Clean, ATS-friendly design perfect for tech and business roles',
-      preview: '/api/placeholder/300/400',
-      category: 'Professional',
-      popular: true,
-      features: ['ATS-Optimized', 'Modern Design', 'Customizable Colors'],
-      color: 'from-blue-500 to-blue-600',
-      rating: 4.9,
-      downloads: '12.3k'
-    },
-    {
-      id: 2,
-      name: 'Creative Designer',
-      description: 'Eye-catching layout ideal for creative and design positions',
-      preview: '/api/placeholder/300/400',
-      category: 'Creative',
-      popular: false,
-      features: ['Visual Appeal', 'Portfolio Section', 'Creative Layout'],
-      color: 'from-purple-500 to-pink-600',
-      rating: 4.7,
-      downloads: '8.9k'
-    },
-    {
-      id: 3,
-      name: 'Executive Summary',
-      description: 'Sophisticated template for leadership and C-level roles',
-      preview: '/api/placeholder/300/400',
-      category: 'Executive',
-      popular: true,
-      features: ['Executive Style', 'Leadership Focus', 'Professional'],
-      color: 'from-emerald-500 to-teal-600',
-      rating: 4.8,
-      downloads: '15.7k'
-    },
-    {
-      id: 4,
-      name: 'Tech Specialist',
-      description: 'Developer-focused template with skills and project emphasis',
-      preview: '/api/placeholder/300/400',
-      category: 'Technical',
-      popular: false,
-      features: ['Skills Matrix', 'Project Showcase', 'Tech-Focused'],
-      color: 'from-orange-500 to-red-600',
-      rating: 4.6,
-      downloads: '6.2k'
-    },
-    {
-      id: 5,
-      name: 'Minimalist Pro',
-      description: 'Simple, elegant design that highlights your content',
-      preview: '/api/placeholder/300/400',
-      category: 'Minimalist',
-      popular: false,
-      features: ['Clean Layout', 'Content Focus', 'Timeless Design'],
-      color: 'from-slate-500 to-slate-600',
-      rating: 4.5,
-      downloads: '9.1k'
-    },
-    {
-      id: 6,
-      name: 'Academic Scholar',
-      description: 'Perfect for academic, research, and education roles',
-      preview: '/api/placeholder/300/400',
-      category: 'Academic',
-      popular: false,
-      features: ['Research Focus', 'Publication List', 'Academic Style'],
-      color: 'from-indigo-500 to-purple-600',
-      rating: 4.4,
-      downloads: '4.8k'
+  useEffect(() => {
+    fetchTemplates();
+  }, []);
+
+  const fetchTemplates = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('resume_templates')
+        .select('*')
+        .order('rating', { ascending: false });
+
+      if (error) throw error;
+
+      setTemplates(data || []);
+    } catch (error) {
+      console.error('Error fetching templates:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load templates. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   const features = [
     { 
@@ -145,7 +101,7 @@ const CreateResume = () => {
     }
   ];
 
-  const categories = ['All', 'Professional', 'Creative', 'Executive', 'Technical', 'Minimalist', 'Academic'];
+  const categories = ['All', 'Modern', 'Simple', 'Tech', 'Creative'];
   const [selectedCategory, setSelectedCategory] = useState('All');
 
   const filteredTemplates = selectedCategory === 'All' 
@@ -272,64 +228,70 @@ const CreateResume = () => {
             ))}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredTemplates.map((template) => (
-              <div key={template.id} className="group cursor-pointer">
-                <div className="relative bg-white dark:bg-slate-800 rounded-2xl p-6 mb-4 group-hover:shadow-2xl transition-all duration-300 group-hover:-translate-y-2 border border-slate-200/50 dark:border-slate-700/50">
-                  {template.popular && (
-                    <div className="absolute -top-3 -right-3 bg-gradient-to-r from-orange-400 to-pink-500 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg z-10">
-                      <Star className="w-3 h-3 inline mr-1" />
-                      Popular
-                    </div>
-                  )}
-                  
-                  <div className="w-full h-56 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 rounded-xl border-2 border-slate-200 dark:border-slate-600 flex items-center justify-center shadow-lg mb-4 overflow-hidden">
-                    <div className={`w-16 h-16 bg-gradient-to-r ${template.color} rounded-2xl flex items-center justify-center shadow-lg`}>
-                      <FileText className="w-8 h-8 text-white" />
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="outline" className="text-xs border-slate-300 dark:border-slate-600">
-                      {template.category}
-                    </Badge>
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1">
-                        <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                        <span className="text-xs font-medium text-slate-600 dark:text-slate-400">{template.rating}</span>
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredTemplates.map((template) => (
+                <div key={template.id} className="group cursor-pointer">
+                  <div className="relative bg-white dark:bg-slate-800 rounded-2xl p-6 mb-4 group-hover:shadow-2xl transition-all duration-300 group-hover:-translate-y-2 border border-slate-200/50 dark:border-slate-700/50">
+                    {template.is_popular && (
+                      <div className="absolute -top-3 -right-3 bg-gradient-to-r from-orange-400 to-pink-500 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg z-10">
+                        <Star className="w-3 h-3 inline mr-1" />
+                        Popular
                       </div>
-                      <span className="text-xs text-slate-500">•</span>
-                      <span className="text-xs text-slate-600 dark:text-slate-400">{template.downloads}</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-2">{template.name}</h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-3">{template.description}</p>
+                    )}
                     
-                    <div className="flex flex-wrap gap-1 mb-4">
-                      {template.features.map((feature, index) => (
-                        <Badge key={index} variant="outline" className="text-xs border-slate-300 dark:border-slate-600 px-2 py-1">
-                          {feature}
-                        </Badge>
-                      ))}
+                    <div className="w-full h-56 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 rounded-xl border-2 border-slate-200 dark:border-slate-600 flex items-center justify-center shadow-lg mb-4 overflow-hidden">
+                      <div className={`w-16 h-16 bg-gradient-to-r ${template.color_class || 'from-slate-500 to-slate-600'} rounded-2xl flex items-center justify-center shadow-lg`}>
+                        <FileText className="w-8 h-8 text-white" />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge variant="outline" className="text-xs border-slate-300 dark:border-slate-600">
+                        {template.category}
+                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
+                          <Star className="w-3 h-3 text-yellow-500 fill-current" />
+                          <span className="text-xs font-medium text-slate-600 dark:text-slate-400">{template.rating}</span>
+                        </div>
+                        <span className="text-xs text-slate-500">•</span>
+                        <span className="text-xs text-slate-600 dark:text-slate-400">{template.downloads > 1000 ? `${(template.downloads / 1000).toFixed(1)}k` : template.downloads}</span>
+                      </div>
                     </div>
                   </div>
                   
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl">
-                      Preview
-                    </Button>
-                    <Button className={`flex-1 bg-gradient-to-r ${template.color} hover:shadow-lg text-white font-semibold rounded-xl transition-all duration-300`}>
-                      Use Template
-                    </Button>
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-2">{template.name}</h3>
+                      <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-3">{template.description}</p>
+                      
+                      <div className="flex flex-wrap gap-1 mb-4">
+                        {(Array.isArray(template.features) ? template.features : []).map((feature, index) => (
+                          <Badge key={index} variant="outline" className="text-xs border-slate-300 dark:border-slate-600 px-2 py-1">
+                            {feature}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" className="flex-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl">
+                        Preview
+                      </Button>
+                      <Button className={`flex-1 bg-gradient-to-r ${template.color_class || 'from-slate-500 to-slate-600'} hover:shadow-lg text-white font-semibold rounded-xl transition-all duration-300`}>
+                        Use Template
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

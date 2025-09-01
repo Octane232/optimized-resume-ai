@@ -70,7 +70,7 @@ const Billing = () => {
         icon: getIconForPlan(plan.icon_name),
         color: plan.color_class || 'from-slate-500 to-slate-600',
         popular: plan.is_popular,
-        current: subscriptionData?.plan_name === plan.name,
+        current: subscriptionData?.plan_id === plan.id,
         description: plan.description || '',
         savings: billingCycle === 'yearly' && plan.price_monthly ? 
           `Save $${(plan.price_monthly * 12) - plan.price_yearly}` : null
@@ -85,12 +85,16 @@ const Billing = () => {
         paymentMethod: invoice.payment_method || '•••• 4242'
       })) || [];
 
-      const currentSubscription = subscriptionData ? {
-        name: subscriptionData.plan_name,
+      // Find the plan details for the current subscription
+      const currentPlanDetails = subscriptionData ? 
+        plansData?.find(plan => plan.id === subscriptionData.plan_id) : null;
+
+      const currentSubscription = currentPlanDetails ? {
+        name: currentPlanDetails.name,
         price: `$${subscriptionData.price}/${subscriptionData.billing_cycle}`,
         nextBilling: subscriptionData.expires_at ? 
           new Date(subscriptionData.expires_at).toLocaleDateString() : 'N/A',
-        features: subscriptionData.features || [],
+        features: currentPlanDetails.features || [],
         status: subscriptionData.plan_status
       } : {
         name: 'Free',
