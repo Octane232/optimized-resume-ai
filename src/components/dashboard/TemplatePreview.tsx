@@ -231,7 +231,7 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({
         `;
       }
 
-      console.log('Final HTML to render:', finalHTML.substring(0, 500) + '...');
+  console.log('Final HTML to render:', finalHTML);
 
       // Write to iframe
       const iframeDoc = iframeRef.current.contentDocument || iframeRef.current.contentWindow?.document;
