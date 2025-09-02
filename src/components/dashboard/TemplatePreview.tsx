@@ -181,46 +181,11 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       // Clean up any remaining placeholders
       processedHtml = processedHtml.replace(/{{[^}]*}}/g, '');
 
-      // Create complete HTML document with proper structure
-      const completeHtml = `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Resume Preview</title>
-          <style>
-            * {
-              margin: 0;
-              padding: 0;
-              box-sizing: border-box;
-            }
-            body {
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-              -webkit-font-smoothing: antialiased;
-              -moz-osx-font-smoothing: grayscale;
-              background: white;
-              color: #1a1a1a;
-              line-height: 1.6;
-            }
-            @media print {
-              body {
-                background: white;
-              }
-            }
-          </style>
-        </head>
-        <body>
-          ${processedHtml}
-        </body>
-        </html>
-      `;
-
-      // Write to iframe
+      // Write directly to iframe - the HTML should already contain all necessary styles
       const iframeDoc = iframeRef.current.contentDocument || iframeRef.current.contentWindow?.document;
       if (iframeDoc) {
         iframeDoc.open();
-        iframeDoc.write(completeHtml);
+        iframeDoc.write(processedHtml);
         iframeDoc.close();
       }
     }

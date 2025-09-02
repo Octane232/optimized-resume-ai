@@ -77,7 +77,9 @@ const TemplateThumbnail: React.FC<TemplateThumbnailProps> = ({
         </html>
       `;
 
-      const iframeDoc = iframeRef.current.contentDocument || iframeRef.current.contentWindow?.document;
+      const iframeDoc =
+        iframeRef.current.contentDocument ||
+        iframeRef.current.contentWindow?.document;
       if (iframeDoc) {
         iframeDoc.open();
         iframeDoc.write(thumbnailHtml);
