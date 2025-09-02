@@ -24,6 +24,8 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({
 
   useEffect(() => {
     if (template && iframeRef.current) {
+      console.log('Template HTML content:', template.html_content);
+      
       // Sample data for preview
       const sampleData = {
         fullName: 'John Smith',
@@ -89,103 +91,153 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({
         portfolioUrl: 'https://johnsmith.dev'
       };
 
-      // Process template with sample data
-      let processedHtml = template.html_content || '';
+      // Check if template.html_content is a complete HTML document or just a fragment
+      const isCompleteHTML = template.html_content?.includes('<!DOCTYPE') || template.html_content?.includes('<html');
       
-      // Replace simple placeholders
-      Object.entries(sampleData).forEach(([key, value]) => {
-        if (typeof value === 'string') {
-          const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
-          processedHtml = processedHtml.replace(regex, value);
-        }
-      });
-
-      // Handle experiences array
-      processedHtml = processedHtml.replace(/{{#experiences}}[\s\S]*?{{\/experiences}}/g, (match) => {
-        let result = '';
-        sampleData.experiences.forEach(exp => {
-          let expBlock = match
-            .replace(/{{#experiences}}/g, '')
-            .replace(/{{\/experiences}}/g, '');
-          
-          Object.entries(exp).forEach(([key, value]) => {
-            if (typeof value === 'string') {
-              expBlock = expBlock.replace(new RegExp(`{{\\s*${key}\\s*}}`, 'g'), value);
-            } else if (Array.isArray(value) && key === 'achievements') {
-              expBlock = expBlock.replace(/{{#achievements}}[\s\S]*?{{\/achievements}}/g, (achMatch) => {
-                return value.map(ach => 
-                  achMatch
-                    .replace(/{{#achievements}}/g, '')
-                    .replace(/{{\/achievements}}/g, '')
-                    .replace(/{{\.}}/g, ach)
-                ).join('');
-              });
-            }
-          });
-          result += expBlock;
+      let finalHTML = '';
+      
+      if (isCompleteHTML) {
+        // If it's complete HTML, just replace the placeholders
+        finalHTML = template.html_content || '';
+        
+        // Replace simple placeholders
+        Object.entries(sampleData).forEach(([key, value]) => {
+          if (typeof value === 'string') {
+            const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
+            finalHTML = finalHTML.replace(regex, value);
+          }
         });
-        return result;
-      });
 
-      // Handle education array
-      processedHtml = processedHtml.replace(/{{#education}}[\s\S]*?{{\/education}}/g, (match) => {
-        let result = '';
-        sampleData.education.forEach(edu => {
-          let eduBlock = match
-            .replace(/{{#education}}/g, '')
-            .replace(/{{\/education}}/g, '');
-          
-          Object.entries(edu).forEach(([key, value]) => {
-            eduBlock = eduBlock.replace(new RegExp(`{{\\s*${key}\\s*}}`, 'g'), value);
+        // Handle arrays (experiences, education, skills, projects)
+        // Handle experiences array
+        finalHTML = finalHTML.replace(/{{#experiences}}[\s\S]*?{{\/experiences}}/g, (match) => {
+          let result = '';
+          sampleData.experiences.forEach(exp => {
+            let expBlock = match
+              .replace(/{{#experiences}}/g, '')
+              .replace(/{{\/experiences}}/g, '');
+            
+            Object.entries(exp).forEach(([key, value]) => {
+              if (typeof value === 'string') {
+                expBlock = expBlock.replace(new RegExp(`{{\\s*${key}\\s*}}`, 'g'), value);
+              } else if (Array.isArray(value) && key === 'achievements') {
+                expBlock = expBlock.replace(/{{#achievements}}[\s\S]*?{{\/achievements}}/g, (achMatch) => {
+                  return value.map(ach => 
+                    achMatch
+                      .replace(/{{#achievements}}/g, '')
+                      .replace(/{{\/achievements}}/g, '')
+                      .replace(/{{\.}}/g, ach)
+                  ).join('');
+                });
+              }
+            });
+            result += expBlock;
           });
-          result += eduBlock;
+          return result;
         });
-        return result;
-      });
 
-      // Handle skills array
-      processedHtml = processedHtml.replace(/{{#skills}}[\s\S]*?{{\/skills}}/g, (match) => {
-        return sampleData.skills.map(skill => 
-          match
-            .replace(/{{#skills}}/g, '')
-            .replace(/{{\/skills}}/g, '')
-            .replace(/{{\.}}/g, skill)
-        ).join('');
-      });
-
-      // Handle projects array
-      processedHtml = processedHtml.replace(/{{#projects}}[\s\S]*?{{\/projects}}/g, (match) => {
-        let result = '';
-        sampleData.projects.forEach(project => {
-          let projBlock = match
-            .replace(/{{#projects}}/g, '')
-            .replace(/{{\/projects}}/g, '');
-          
-          Object.entries(project).forEach(([key, value]) => {
-            projBlock = projBlock.replace(new RegExp(`{{\\s*${key}\\s*}}`, 'g'), value);
+        // Handle education array
+        finalHTML = finalHTML.replace(/{{#education}}[\s\S]*?{{\/education}}/g, (match) => {
+          let result = '';
+          sampleData.education.forEach(edu => {
+            let eduBlock = match
+              .replace(/{{#education}}/g, '')
+              .replace(/{{\/education}}/g, '');
+            
+            Object.entries(edu).forEach(([key, value]) => {
+              eduBlock = eduBlock.replace(new RegExp(`{{\\s*${key}\\s*}}`, 'g'), value);
+            });
+            result += eduBlock;
           });
-          result += projBlock;
+          return result;
         });
-        return result;
-      });
 
-      // Handle portfolio section (if exists)
-      processedHtml = processedHtml.replace(/{{#portfolio}}[\s\S]*?{{\/portfolio}}/g, (match) => {
-        return match
-          .replace(/{{#portfolio}}/g, '')
-          .replace(/{{\/portfolio}}/g, '')
-          .replace(/{{\\s*portfolioDescription\\s*}}/g, sampleData.portfolioDescription)
-          .replace(/{{\\s*portfolioUrl\\s*}}/g, sampleData.portfolioUrl);
-      });
+        // Handle skills array
+        finalHTML = finalHTML.replace(/{{#skills}}[\s\S]*?{{\/skills}}/g, (match) => {
+          return sampleData.skills.map(skill => 
+            match
+              .replace(/{{#skills}}/g, '')
+              .replace(/{{\/skills}}/g, '')
+              .replace(/{{\.}}/g, skill)
+          ).join('');
+        });
 
-      // Clean up any remaining placeholders
-      processedHtml = processedHtml.replace(/{{[^}]*}}/g, '');
+        // Handle projects array
+        finalHTML = finalHTML.replace(/{{#projects}}[\s\S]*?{{\/projects}}/g, (match) => {
+          let result = '';
+          sampleData.projects.forEach(project => {
+            let projBlock = match
+              .replace(/{{#projects}}/g, '')
+              .replace(/{{\/projects}}/g, '');
+            
+            Object.entries(project).forEach(([key, value]) => {
+              projBlock = projBlock.replace(new RegExp(`{{\\s*${key}\\s*}}`, 'g'), value);
+            });
+            result += projBlock;
+          });
+          return result;
+        });
 
-      // Write directly to iframe - the HTML should already contain all necessary styles
+        // Clean up any remaining placeholders
+        finalHTML = finalHTML.replace(/{{[^}]*}}/g, '');
+      } else {
+        // If it's just a fragment, wrap it in a complete HTML document
+        console.log('Template is a fragment, wrapping in complete HTML');
+        
+        // Process the fragment first
+        let processedFragment = template.html_content || '';
+        
+        // Replace placeholders (same as above but for fragment)
+        Object.entries(sampleData).forEach(([key, value]) => {
+          if (typeof value === 'string') {
+            const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
+            processedFragment = processedFragment.replace(regex, value);
+          }
+        });
+        
+        // Clean up any remaining placeholders for now
+        processedFragment = processedFragment.replace(/{{#\w+}}[\s\S]*?{{\/\w+}}/g, '');
+        processedFragment = processedFragment.replace(/{{[^}]*}}/g, '');
+        
+        // Wrap in complete HTML
+        finalHTML = `
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Resume Preview</title>
+            <style>
+              * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+              }
+              body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+                background: white;
+                color: #1a1a1a;
+                line-height: 1.6;
+                padding: 20px;
+              }
+            </style>
+          </head>
+          <body>
+            ${processedFragment}
+          </body>
+          </html>
+        `;
+      }
+
+      console.log('Final HTML to render:', finalHTML.substring(0, 500) + '...');
+
+      // Write to iframe
       const iframeDoc = iframeRef.current.contentDocument || iframeRef.current.contentWindow?.document;
       if (iframeDoc) {
         iframeDoc.open();
-        iframeDoc.write(processedHtml);
+        iframeDoc.write(finalHTML);
         iframeDoc.close();
       }
     }
