@@ -28,9 +28,9 @@ const TemplateThumbnail: React.FC<TemplateThumbnailProps> = ({ htmlContent, clas
       };
 
       // Simple replacement for thumbnail
-      let processedHtml = htmlContent;
+      let processedHtml = htmlContent || '';
       Object.entries(miniData).forEach(([key, value]) => {
-        const regex = new RegExp(`{{${key}}}`, 'g');
+        const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
         processedHtml = processedHtml.replace(regex, value);
       });
 
@@ -38,24 +38,39 @@ const TemplateThumbnail: React.FC<TemplateThumbnailProps> = ({ htmlContent, clas
       processedHtml = processedHtml.replace(/{{#\w+}}[\s\S]*?{{\/\w+}}/g, '');
       processedHtml = processedHtml.replace(/{{[^}]+}}/g, '...');
 
-      // Add scale transform for thumbnail
+      // Create complete HTML document for thumbnail with scaling
       const thumbnailHtml = `
         <!DOCTYPE html>
         <html>
         <head>
+          <meta charset="UTF-8">
           <style>
-            body {
-              transform: scale(0.25);
-              transform-origin: top left;
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            html, body {
               width: 400%;
               height: 400%;
               overflow: hidden;
+              transform: scale(0.25);
+              transform-origin: top left;
+            }
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+              -webkit-font-smoothing: antialiased;
+              -moz-osx-font-smoothing: grayscale;
+              background: white;
+              color: #1a1a1a;
+              line-height: 1.6;
               pointer-events: none;
+              user-select: none;
             }
           </style>
         </head>
         <body>
-          ${processedHtml.replace(/<html[^>]*>|<\/html>|<head>[\s\S]*?<\/head>|<body[^>]*>|<\/body>/gi, '')}
+          ${processedHtml}
         </body>
         </html>
       `;

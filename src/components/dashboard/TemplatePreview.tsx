@@ -89,35 +89,35 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({
         portfolioUrl: 'https://johnsmith.dev'
       };
 
-      // Process template with sample data (simple replacement for preview)
-      let processedHtml = template.html_content;
+      // Process template with sample data
+      let processedHtml = template.html_content || '';
       
       // Replace simple placeholders
       Object.entries(sampleData).forEach(([key, value]) => {
         if (typeof value === 'string') {
-          const regex = new RegExp(`{{${key}}}`, 'g');
+          const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
           processedHtml = processedHtml.replace(regex, value);
         }
       });
 
-      // Handle arrays (simple version for preview)
+      // Handle experiences array
       processedHtml = processedHtml.replace(/{{#experiences}}[\s\S]*?{{\/experiences}}/g, (match) => {
         let result = '';
         sampleData.experiences.forEach(exp => {
           let expBlock = match
-            .replace('{{#experiences}}', '')
-            .replace('{{/experiences}}', '');
+            .replace(/{{#experiences}}/g, '')
+            .replace(/{{\/experiences}}/g, '');
           
           Object.entries(exp).forEach(([key, value]) => {
             if (typeof value === 'string') {
-              expBlock = expBlock.replace(new RegExp(`{{${key}}}`, 'g'), value);
+              expBlock = expBlock.replace(new RegExp(`{{\\s*${key}\\s*}}`, 'g'), value);
             } else if (Array.isArray(value) && key === 'achievements') {
               expBlock = expBlock.replace(/{{#achievements}}[\s\S]*?{{\/achievements}}/g, (achMatch) => {
                 return value.map(ach => 
                   achMatch
-                    .replace('{{#achievements}}', '')
-                    .replace('{{/achievements}}', '')
-                    .replace('{{.}}', ach)
+                    .replace(/{{#achievements}}/g, '')
+                    .replace(/{{\/achievements}}/g, '')
+                    .replace(/{{\.}}/g, ach)
                 ).join('');
               });
             }
@@ -127,62 +127,100 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({
         return result;
       });
 
-      // Handle education
+      // Handle education array
       processedHtml = processedHtml.replace(/{{#education}}[\s\S]*?{{\/education}}/g, (match) => {
         let result = '';
         sampleData.education.forEach(edu => {
           let eduBlock = match
-            .replace('{{#education}}', '')
-            .replace('{{/education}}', '');
+            .replace(/{{#education}}/g, '')
+            .replace(/{{\/education}}/g, '');
           
           Object.entries(edu).forEach(([key, value]) => {
-            eduBlock = eduBlock.replace(new RegExp(`{{${key}}}`, 'g'), value);
+            eduBlock = eduBlock.replace(new RegExp(`{{\\s*${key}\\s*}}`, 'g'), value);
           });
           result += eduBlock;
         });
         return result;
       });
 
-      // Handle skills
+      // Handle skills array
       processedHtml = processedHtml.replace(/{{#skills}}[\s\S]*?{{\/skills}}/g, (match) => {
         return sampleData.skills.map(skill => 
           match
-            .replace('{{#skills}}', '')
-            .replace('{{/skills}}', '')
-            .replace('{{.}}', skill)
+            .replace(/{{#skills}}/g, '')
+            .replace(/{{\/skills}}/g, '')
+            .replace(/{{\.}}/g, skill)
         ).join('');
       });
 
-      // Handle projects
+      // Handle projects array
       processedHtml = processedHtml.replace(/{{#projects}}[\s\S]*?{{\/projects}}/g, (match) => {
         let result = '';
         sampleData.projects.forEach(project => {
           let projBlock = match
-            .replace('{{#projects}}', '')
-            .replace('{{/projects}}', '');
+            .replace(/{{#projects}}/g, '')
+            .replace(/{{\/projects}}/g, '');
           
           Object.entries(project).forEach(([key, value]) => {
-            projBlock = projBlock.replace(new RegExp(`{{${key}}}`, 'g'), value);
+            projBlock = projBlock.replace(new RegExp(`{{\\s*${key}\\s*}}`, 'g'), value);
           });
           result += projBlock;
         });
         return result;
       });
 
-      // Handle portfolio section
+      // Handle portfolio section (if exists)
       processedHtml = processedHtml.replace(/{{#portfolio}}[\s\S]*?{{\/portfolio}}/g, (match) => {
         return match
-          .replace('{{#portfolio}}', '')
-          .replace('{{/portfolio}}', '')
-          .replace('{{portfolioDescription}}', sampleData.portfolioDescription)
-          .replace('{{portfolioUrl}}', sampleData.portfolioUrl);
+          .replace(/{{#portfolio}}/g, '')
+          .replace(/{{\/portfolio}}/g, '')
+          .replace(/{{\\s*portfolioDescription\\s*}}/g, sampleData.portfolioDescription)
+          .replace(/{{\\s*portfolioUrl\\s*}}/g, sampleData.portfolioUrl);
       });
+
+      // Clean up any remaining placeholders
+      processedHtml = processedHtml.replace(/{{[^}]*}}/g, '');
+
+      // Create complete HTML document with proper structure
+      const completeHtml = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Resume Preview</title>
+          <style>
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+              -webkit-font-smoothing: antialiased;
+              -moz-osx-font-smoothing: grayscale;
+              background: white;
+              color: #1a1a1a;
+              line-height: 1.6;
+            }
+            @media print {
+              body {
+                background: white;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          ${processedHtml}
+        </body>
+        </html>
+      `;
 
       // Write to iframe
       const iframeDoc = iframeRef.current.contentDocument || iframeRef.current.contentWindow?.document;
       if (iframeDoc) {
         iframeDoc.open();
-        iframeDoc.write(processedHtml);
+        iframeDoc.write(completeHtml);
         iframeDoc.close();
       }
     }
