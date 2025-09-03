@@ -23,8 +23,12 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
-    if (template && iframeRef.current) {
-      console.log('Template HTML content:', template.html_content);
+    console.log('Template in useEffect:', template);
+    console.log('IframeRef current:', iframeRef.current);
+    
+    if (template && template.html_content && iframeRef.current) {
+      console.log('Template HTML content length:', template.html_content?.length);
+      console.log('Template HTML content preview:', template.html_content?.substring(0, 200));
       
       // Sample data for preview
       const sampleData = {
@@ -234,11 +238,20 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({
   console.log('Final HTML to render:', finalHTML);
 
       // Write to iframe
-      const iframeDoc = iframeRef.current.contentDocument || iframeRef.current.contentWindow?.document;
-      if (iframeDoc) {
-        iframeDoc.open();
-        iframeDoc.write(finalHTML);
-        iframeDoc.close();
+      try {
+        const iframeDoc = iframeRef.current.contentDocument || iframeRef.current.contentWindow?.document;
+        console.log('IframeDoc available:', !!iframeDoc);
+        
+        if (iframeDoc) {
+          iframeDoc.open();
+          iframeDoc.write(finalHTML);
+          iframeDoc.close();
+          console.log('Successfully wrote HTML to iframe');
+        } else {
+          console.error('Could not access iframe document');
+        }
+      } catch (error) {
+        console.error('Error writing to iframe:', error);
       }
     }
   }, [template]);
