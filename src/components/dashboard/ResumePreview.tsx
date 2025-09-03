@@ -1,8 +1,8 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from 'react';
 
 interface TemplatePreviewProps {
   template: {
-    html_content: string;
+    html_content?: string;
   } | null;
 }
 
@@ -10,71 +10,139 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ template }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
-    if (!template?.html_content || !iframeRef.current) {
-      console.warn("Missing template or iframe");
+    if (!template || !template.html_content || !iframeRef.current) {
+      console.log("Missing data for preview:", {
+        hasTemplate: !!template,
+        hasHtmlContent: !!template?.html_content,
+        hasIframe: !!iframeRef.current,
+      });
       return;
     }
 
-    // Sample data to replace placeholders
+    // Sample data for placeholders
     const sampleData = {
-      fullName: "John Smith",
-      title: "Software Engineer",
-      email: "john@example.com",
-      phone: "(555) 123-4567",
-      location: "San Francisco, CA",
-      linkedin: "linkedin.com/in/john",
-      github: "github.com/john",
-      portfolio: "johnsmith.dev",
-      summary:
-        "Experienced software engineer with expertise in web development.",
-      skills: ["React", "Node.js", "TypeScript"],
+      fullName: 'John Smith',
+      title: 'Software Engineer',
+      email: 'john@example.com',
+      phone: '(555) 123-4567',
+      location: 'San Francisco, CA',
+      linkedin: 'linkedin.com/in/john',
+      github: 'github.com/john',
+      portfolio: 'johnsmith.dev',
+      summary: 'Experienced software engineer with expertise in web development.',
+      programmingLanguages: 'JavaScript, Python',
+      frameworks: 'React, Node.js',
+      tools: 'Git, Docker',
+      databases: 'PostgreSQL, MongoDB',
+      experiences: [
+        {
+          position: 'Frontend Developer',
+          company: 'Tech Corp',
+          location: 'NY',
+          startDate: '2020',
+          endDate: '2023',
+          achievements: ['Built scalable UI', 'Improved performance'],
+        },
+      ],
+      education: [
+        {
+          degree: 'BSc Computer Science',
+          institution: 'MIT',
+          graduationDate: '2019',
+        },
+      ],
+      skills: ['Problem Solving', 'Teamwork'],
+      projects: [
+        {
+          name: 'Portfolio Website',
+          technologies: 'React, Tailwind',
+          description: 'Personal portfolio showcasing projects.',
+        },
+      ],
     };
 
     let finalHTML = template.html_content;
 
-    // Replace placeholders like {{fullName}}
+    // Replace placeholders (simple values)
     Object.entries(sampleData).forEach(([key, value]) => {
-      if (typeof value === "string") {
-        finalHTML = finalHTML.replace(
-          new RegExp(`{{\\s*${key}\\s*}}`, "g"),
-          value
-        );
+      if (typeof value === 'string') {
+        const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
+        finalHTML = finalHTML.replace(regex, value);
       }
     });
 
-    // Clean up unfilled placeholders
-    finalHTML = finalHTML.replace(/{{[^}]+}}/g, "");
-
-    // Wrap in full HTML if it’s a fragment
-    if (!finalHTML.includes("<html")) {
-      finalHTML = `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-          <meta charset="UTF-8" />
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              color: #1a1a1a;
-              padding: 20px;
+    // Handle experiences array
+    finalHTML = finalHTML.replace(/{{#experiences}}[\s\S]*?{{\/experiences}}/g, (match) => {
+      return sampleData.experiences
+        .map((exp) => {
+          let expBlock = match.replace(/{{#experiences}}|{{\/experiences}}/g, '');
+          Object.entries(exp).forEach(([key, value]) => {
+            if (typeof value === 'string') {
+              expBlock = expBlock.replace(new RegExp(`{{\\s*${key}\\s*}}`, 'g'), value);
+            } else if (Array.isArray(value) && key === 'achievements') {
+              expBlock = expBlock.replace(/{{#achievements}}[\s\S]*?{{\/achievements}}/g, (achMatch) =>
+                value
+                  .map((ach) =>
+                    achMatch.replace(/{{#achievements}}|{{\/achievements}}/g, '').replace(/{{\.}}/g, ach)
+                  )
+                  .join('')
+              );
             }
-          </style>
-        </head>
-        <body>
-          ${finalHTML}
-        </body>
-        </html>
-      `;
-    }
+          });
+          return expBlock;
+        })
+        .join('');
+    });
 
-    const iframeDoc =
-      iframeRef.current.contentDocument ||
-      iframeRef.current.contentWindow?.document;
+    // Handle education array
+    finalHTML = finalHTML.replace(/{{#education}}[\s\S]*?{{\/education}}/g, (match) => {
+      return sampleData.education
+        .map((edu) => {
+          let eduBlock = match.replace(/{{#education}}|{{\/education}}/g, '');
+          Object.entries(edu).forEach(([key, value]) => {
+            eduBlock = eduBlock.replace(new RegExp(`{{\\s*${key}\\s*}}`, 'g'), value);
+          });
+          return eduBlock;
+        })
+        .join('');
+    });
 
-    if (iframeDoc) {
+    // Handle skills array
+    finalHTML = finalHTML.replace(/{{#skills}}[\s\S]*?{{\/skills}}/g, (match) => {
+      return sampleData.skills
+        .map((skill) => match.replace(/{{#skills}}|{{\/skills}}/g, '').replace(/{{\.}}/g, skill))
+        .join('');
+    });
+
+    // Handle projects array
+    finalHTML = finalHTML.replace(/{{#projects}}[\s\S]*?{{\/projects}}/g, (match) => {
+      return sampleData.projects
+        .map((proj) => {
+          let projBlock = match.replace(/{{#projects}}|{{\/projects}}/g, '');
+          Object.entries(proj).forEach(([key, value]) => {
+            projBlock = projBlock.replace(new RegExp(`{{\\s*${key}\\s*}}`, 'g'), value);
+          });
+          return projBlock;
+        })
+        .join('');
+    });
+
+    // Remove any leftover {{placeholders}}
+    finalHTML = finalHTML.replace(/{{[^}]+}}/g, '');
+
+    // Write final HTML to iframe
+    try {
+      const iframeDoc = iframeRef.current.contentDocument || iframeRef.current.contentWindow?.document;
+      if (!iframeDoc) {
+        console.error('❌ Could not access iframe document');
+        return;
+      }
       iframeDoc.open();
       iframeDoc.write(finalHTML);
       iframeDoc.close();
+      console.log('✅ Template rendered successfully');
+    } catch (err) {
+      console.error('❌ Error writing to iframe:', err);
     }
   }, [template]);
 
@@ -83,10 +151,8 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ template }) => {
   return (
     <iframe
       ref={iframeRef}
-      title="Template Preview"
       className="w-full h-[600px] border rounded"
-      // 👇 NO sandbox here, so scripts and CSS will run
-      style={{ background: "white" }}
+      title="Template Preview"
     />
   );
 };
