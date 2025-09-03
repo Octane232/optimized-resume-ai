@@ -1,322 +1,129 @@
-import React, { useEffect, useRef } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { X, Download, Eye } from 'lucide-react';
+"use client";
+
+import { useEffect, useRef } from "react";
 
 interface TemplatePreviewProps {
   template: {
+    id: string;
     name: string;
-    html_content: string;
     category: string;
+    html_content: string | null;
   } | null;
-  isOpen: boolean;
-  onClose: () => void;
-  onUseTemplate?: () => void;
+  resumeData: {
+    fullName?: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+    summary?: string;
+    experiences?: { title: string; company: string; startDate: string; endDate: string; description: string }[];
+    education?: { degree: string; school: string; startDate: string; endDate: string }[];
+    skills?: string[];
+    projects?: { name: string; description: string }[];
+  } | null;
 }
 
-const TemplatePreview: React.FC<TemplatePreviewProps> = ({ 
-  template, 
-  isOpen, 
-  onClose,
-  onUseTemplate 
-}) => {
+export default function TemplatePreview({ template, resumeData }: TemplatePreviewProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
-    console.log('Template in useEffect:', template);
-    console.log('IframeRef current:', iframeRef.current);
-    
-    if (!template || !template.html_content || !iframeRef.current) {
-      console.log('Missing requirements:', { 
-        hasTemplate: !!template, 
-        hasHtmlContent: !!template?.html_content,
-        hasIframe: !!iframeRef.current 
+    if (!template || !template.html_content || !iframeRef.current || !resumeData) return;
+
+    let finalHTML = template.html_content;
+
+    // 🔹 Simple placeholder replacements
+    finalHTML = finalHTML.replace(/{{\s*fullName\s*}}/g, resumeData.fullName || "");
+    finalHTML = finalHTML.replace(/{{\s*email\s*}}/g, resumeData.email || "");
+    finalHTML = finalHTML.replace(/{{\s*phone\s*}}/g, resumeData.phone || "");
+    finalHTML = finalHTML.replace(/{{\s*address\s*}}/g, resumeData.address || "");
+    finalHTML = finalHTML.replace(/{{\s*summary\s*}}/g, resumeData.summary || "");
+
+    // 🔹 Experiences
+    if (Array.isArray(resumeData.experiences)) {
+      let expHTML = "";
+      resumeData.experiences.forEach((exp) => {
+        expHTML += `
+          <div class="experience">
+            <h3>${exp.title || ""} - ${exp.company || ""}</h3>
+            <p>${exp.startDate || ""} - ${exp.endDate || ""}</p>
+            <p>${exp.description || ""}</p>
+          </div>
+        `;
       });
-      return;
+      finalHTML = finalHTML.replace(/{{\s*#each experiences\s*}}[\s\S]*{{\s*\/each\s*}}/g, expHTML);
     }
 
-    // Add a small delay to ensure iframe is fully mounted
-    const renderContent = () => {
-      console.log('Starting to render template content');
-      console.log('Template HTML content length:', template.html_content?.length);
-      console.log('Template HTML content preview:', template.html_content?.substring(0, 200));
-      
-      // Sample data for preview
-      const sampleData = {
-        fullName: 'John Smith',
-        title: 'Senior Software Engineer',
-        email: 'john.smith@email.com',
-        phone: '(555) 123-4567',
-        location: 'San Francisco, CA',
-        linkedin: 'linkedin.com/in/johnsmith',
-        github: 'github.com/johnsmith',
-        portfolio: 'johnsmith.dev',
-        summary: 'Experienced software engineer with 8+ years developing scalable web applications. Passionate about clean code, system architecture, and mentoring junior developers. Proven track record of leading teams and delivering high-quality software solutions.',
-        experiences: [
-          {
-            position: 'Senior Software Engineer',
-            company: 'TechCorp Inc',
-            location: 'San Francisco, CA',
-            startDate: 'Jan 2020',
-            endDate: 'Present',
-            achievements: [
-              'Led development of microservices architecture serving 2M+ users',
-              'Reduced API response time by 60% through optimization',
-              'Mentored team of 5 junior developers'
-            ]
-          },
-          {
-            position: 'Software Engineer',
-            company: 'StartupXYZ',
-            location: 'Mountain View, CA',
-            startDate: 'Jun 2018',
-            endDate: 'Dec 2019',
-            achievements: [
-              'Built real-time collaboration features using WebSockets',
-              'Implemented CI/CD pipeline reducing deployment time by 70%',
-              'Developed RESTful APIs serving mobile and web clients'
-            ]
-          }
-        ],
-        education: [
-          {
-            degree: 'Bachelor of Science in Computer Science',
-            institution: 'University of California, Berkeley',
-            graduationDate: '2016'
-          }
-        ],
-        skills: ['JavaScript', 'TypeScript', 'React', 'Node.js', 'Python', 'AWS', 'Docker', 'PostgreSQL', 'GraphQL', 'Redis'],
-        programmingLanguages: 'JavaScript, TypeScript, Python, Go, Java',
-        frameworks: 'React, Next.js, Express, Django, Spring Boot',
-        tools: 'Git, Docker, Kubernetes, Jenkins, AWS, GCP',
-        databases: 'PostgreSQL, MongoDB, Redis, Elasticsearch',
-        projects: [
-          {
-            name: 'E-commerce Platform',
-            technologies: 'React, Node.js, PostgreSQL, Redis',
-            description: 'Built a scalable e-commerce platform handling 100K+ daily transactions with real-time inventory management'
-          },
-          {
-            name: 'Real-time Analytics Dashboard',
-            technologies: 'React, WebSockets, D3.js, ElasticSearch',
-            description: 'Developed analytics dashboard providing real-time insights for business metrics with sub-second latency'
-          }
-        ],
-        portfolioDescription: 'Check out my latest projects including open-source contributions and personal experiments',
-        portfolioUrl: 'https://johnsmith.dev'
-      };
-
-      // Process the HTML content
-      let finalHTML = template.html_content || '';
-      
-      // Replace simple placeholders
-      Object.entries(sampleData).forEach(([key, value]) => {
-        if (typeof value === 'string') {
-          const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
-          finalHTML = finalHTML.replace(regex, value);
-        }
+    // 🔹 Education
+    if (Array.isArray(resumeData.education)) {
+      let eduHTML = "";
+      resumeData.education.forEach((edu) => {
+        eduHTML += `
+          <div class="education">
+            <h3>${edu.degree || ""} - ${edu.school || ""}</h3>
+            <p>${edu.startDate || ""} - ${edu.endDate || ""}</p>
+          </div>
+        `;
       });
+      finalHTML = finalHTML.replace(/{{\s*#each education\s*}}[\s\S]*{{\s*\/each\s*}}/g, eduHTML);
+    }
 
-      // Handle arrays (experiences, education, skills, projects)
-      // Handle experiences array
-      finalHTML = finalHTML.replace(/{{#experiences}}[\s\S]*?{{\/experiences}}/g, (match) => {
-        let result = '';
-        sampleData.experiences.forEach(exp => {
-          let expBlock = match
-            .replace(/{{#experiences}}/g, '')
-            .replace(/{{\/experiences}}/g, '');
-          
-          Object.entries(exp).forEach(([key, value]) => {
-            if (typeof value === 'string') {
-              expBlock = expBlock.replace(new RegExp(`{{\\s*${key}\\s*}}`, 'g'), value);
-            } else if (Array.isArray(value) && key === 'achievements') {
-              expBlock = expBlock.replace(/{{#achievements}}[\s\S]*?{{\/achievements}}/g, (achMatch) => {
-                return value.map(ach => 
-                  achMatch
-                    .replace(/{{#achievements}}/g, '')
-                    .replace(/{{\/achievements}}/g, '')
-                    .replace(/{{\.}}/g, ach)
-                ).join('');
-              });
-            }
-          });
-          result += expBlock;
-        });
-        return result;
+    // 🔹 Projects
+    if (Array.isArray(resumeData.projects)) {
+      let projHTML = "";
+      resumeData.projects.forEach((proj) => {
+        projHTML += `
+          <div class="project">
+            <h3>${proj.name || ""}</h3>
+            <p>${proj.description || ""}</p>
+          </div>
+        `;
       });
+      finalHTML = finalHTML.replace(/{{\s*#each projects\s*}}[\s\S]*{{\s*\/each\s*}}/g, projHTML);
+    }
 
-      // Handle education array
-      finalHTML = finalHTML.replace(/{{#education}}[\s\S]*?{{\/education}}/g, (match) => {
-        let result = '';
-        sampleData.education.forEach(edu => {
-          let eduBlock = match
-            .replace(/{{#education}}/g, '')
-            .replace(/{{\/education}}/g, '');
-          
-          Object.entries(edu).forEach(([key, value]) => {
-            eduBlock = eduBlock.replace(new RegExp(`{{\\s*${key}\\s*}}`, 'g'), value);
-          });
-          result += eduBlock;
-        });
-        return result;
-      });
+    // 🔹 Skills
+    if (Array.isArray(resumeData.skills)) {
+      const skillsHTML = resumeData.skills.map((skill) => `<li>${skill}</li>`).join("");
+      finalHTML = finalHTML.replace(/{{\s*#each skills\s*}}[\s\S]*{{\s*\/each\s*}}/g, `<ul>${skillsHTML}</ul>`);
+    }
 
-      // Handle skills array
-      finalHTML = finalHTML.replace(/{{#skills}}[\s\S]*?{{\/skills}}/g, (match) => {
-        return sampleData.skills.map(skill => 
-          match
-            .replace(/{{#skills}}/g, '')
-            .replace(/{{\/skills}}/g, '')
-            .replace(/{{\.}}/g, skill)
-        ).join('');
-      });
+    // 🔹 Cleanup remaining placeholders
+    finalHTML = finalHTML.replace(/{{[^}]*}}/g, "");
 
-      // Handle projects array
-      finalHTML = finalHTML.replace(/{{#projects}}[\s\S]*?{{\/projects}}/g, (match) => {
-        let result = '';
-        sampleData.projects.forEach(project => {
-          let projBlock = match
-            .replace(/{{#projects}}/g, '')
-            .replace(/{{\/projects}}/g, '');
-          
-          Object.entries(project).forEach(([key, value]) => {
-            projBlock = projBlock.replace(new RegExp(`{{\\s*${key}\\s*}}`, 'g'), value);
-          });
-          result += projBlock;
-        });
-        return result;
-      });
-
-      // Clean up any remaining placeholders
-      finalHTML = finalHTML.replace(/{{[^}]*}}/g, '');
-
-      // Check if it's complete HTML or needs wrapping
-      const isCompleteHTML = finalHTML.includes('<!DOCTYPE') || finalHTML.includes('<html');
-      
-      if (!isCompleteHTML) {
-        console.log('Wrapping HTML fragment in complete document');
-        finalHTML = `
-          <!DOCTYPE html>
-          <html lang="en">
+    // 🔹 Write to iframe safely
+    const iframe = iframeRef.current;
+    if (iframe?.contentDocument) {
+      iframe.contentDocument.open();
+      iframe.contentDocument.write(`
+        <!DOCTYPE html>
+        <html>
           <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Resume Preview</title>
             <style>
-              * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-              }
-              body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-                -webkit-font-smoothing: antialiased;
-                -moz-osx-font-smoothing: grayscale;
-                background: white;
-                color: #1a1a1a;
-                line-height: 1.6;
-                padding: 20px;
-              }
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              h3 { margin: 0; }
+              p { margin: 2px 0; }
             </style>
           </head>
           <body>
             ${finalHTML}
           </body>
-          </html>
-        `;
-      }
-
-      console.log('Final HTML length:', finalHTML.length);
-      console.log('Writing to iframe...');
-
-      // Write to iframe
-      try {
-        const iframe = iframeRef.current;
-        if (!iframe) {
-          console.error('Iframe ref lost');
-          return;
-        }
-
-        const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-        console.log('IframeDoc available:', !!iframeDoc);
-        
-        if (iframeDoc) {
-          iframeDoc.open();
-          iframeDoc.write(finalHTML);
-          iframeDoc.close();
-          console.log('Successfully wrote HTML to iframe');
-        } else {
-          console.error('Could not access iframe document');
-        }
-      } catch (error) {
-        console.error('Error writing to iframe:', error);
-      }
-    };
-
-    // Give iframe time to mount properly
-    const timeoutId = setTimeout(renderContent, 100);
-    
-    return () => clearTimeout(timeoutId);
-  }, [template]);
-
-  if (!template) return null;
+        </html>
+      `);
+      iframe.contentDocument.close();
+    }
+  }, [template, resumeData]);
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl h-[90vh] p-0 overflow-hidden">
-        <DialogHeader className="px-6 py-4 border-b">
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl font-semibold">
-              {template.name} - Preview
-            </DialogTitle>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  const iframe = iframeRef.current;
-                  if (iframe && iframe.contentWindow) {
-                    iframe.contentWindow.print();
-                  }
-                }}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Download PDF
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => {
-                  onUseTemplate?.();
-                  onClose();
-                }}
-                className="bg-gradient-to-r from-blue-500 to-purple-600 text-white"
-              >
-                <Eye className="h-4 w-4 mr-2" />
-                Use This Template
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onClose}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </DialogHeader>
-        <div className="flex-1 bg-slate-100 dark:bg-slate-900 p-8 overflow-auto">
-          <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-xl">
-            <iframe
-              ref={iframeRef}
-              className="w-full h-[1200px] border-0 rounded-lg"
-              title="Template Preview"
-              sandbox="allow-same-origin"
-            />
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+    <div className="w-full h-full border rounded-lg overflow-hidden shadow-lg">
+      {template ? (
+        <iframe
+          ref={iframeRef}
+          title="Template Preview"
+          className="w-full h-[600px]"
+          sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+        />
+      ) : (
+        <p className="p-4 text-gray-500">Select a template to preview</p>
+      )}
+    </div>
   );
-};
-
-export default TemplatePreview;
+}
