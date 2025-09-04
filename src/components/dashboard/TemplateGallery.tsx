@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { FileText, Star, Eye, Download } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface TemplateGalleryProps {
   onClose: () => void;
@@ -12,6 +13,7 @@ interface TemplateGalleryProps {
 
 const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onClose }) => {
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const navigate = useNavigate();
 
   const categories = ['All', 'Modern', 'Classic', 'Creative', 'Executive', 'Tech'];
 
@@ -128,7 +130,14 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onClose }) => {
                         <Eye className="w-4 h-4 mr-2" />
                         Preview
                       </Button>
-                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                      <Button 
+                        size="sm" 
+                        className="bg-blue-600 hover:bg-blue-700"
+                        onClick={() => {
+                          navigate('/editor/new');
+                          onClose();
+                        }}
+                      >
                         <Download className="w-4 h-4 mr-2" />
                         Use Template
                       </Button>
@@ -161,7 +170,14 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onClose }) => {
                   <span className="text-sm text-slate-500 dark:text-slate-500">
                     {template.downloads} downloads
                   </span>
-                  <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                  <Button 
+                    size="sm" 
+                    className="bg-blue-600 hover:bg-blue-700"
+                    onClick={() => {
+                      navigate('/editor/new');
+                      onClose();
+                    }}
+                  >
                     Use Template
                   </Button>
                 </div>
