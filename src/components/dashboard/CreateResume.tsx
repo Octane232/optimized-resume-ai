@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -108,9 +108,25 @@ const CreateResume = () => {
   const categories = ['All', 'Modern', 'Simple', 'Tech', 'Creative'];
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  const filteredTemplates = selectedCategory === 'All' 
-    ? templates 
-    : templates.filter(t => t.category === selectedCategory);
+  const filteredTemplates = useMemo(() => 
+    selectedCategory === 'All' 
+      ? templates 
+      : templates.filter(t => t.category === selectedCategory),
+    [selectedCategory, templates]
+  );
+
+  const handlePreviewOpen = useCallback((template: any) => {
+    setPreviewTemplate(template);
+    setIsPreviewOpen(true);
+  }, []);
+
+  const handleSelectTemplate = useCallback((template: any) => {
+    setSelectedTemplate(template);
+    toast({
+      title: "Template Selected",
+      description: `${template.name} template has been selected.`,
+    });
+  }, [toast]);
 
   return (
     <div className="space-y-8 pb-8">

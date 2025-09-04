@@ -1,11 +1,11 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, memo } from "react";
 
 interface TemplateThumbnailProps {
   htmlContent: string;
   className?: string;
 }
 
-const TemplateThumbnail: React.FC<TemplateThumbnailProps> = ({
+const TemplateThumbnail: React.FC<TemplateThumbnailProps> = memo(({
   htmlContent,
   className = "",
 }) => {
@@ -96,6 +96,8 @@ const TemplateThumbnail: React.FC<TemplateThumbnailProps> = ({
       sandbox="allow-same-origin"
     />
   );
-};
+});
+
+TemplateThumbnail.displayName = 'TemplateThumbnail';
 
 export default TemplateThumbnail;
