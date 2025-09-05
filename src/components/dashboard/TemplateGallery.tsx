@@ -133,9 +133,10 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onClose }) => {
                       <Button 
                         size="sm" 
                         className="bg-blue-600 hover:bg-blue-700"
-                        onClick={() => {
-                          navigate('/editor/new');
+                        onClick={(e) => {
+                          e.stopPropagation();
                           onClose();
+                          navigate('/editor/new');
                         }}
                       >
                         <Download className="w-4 h-4 mr-2" />
@@ -173,9 +174,10 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onClose }) => {
                   <Button 
                     size="sm" 
                     className="bg-blue-600 hover:bg-blue-700"
-                    onClick={() => {
-                      navigate('/editor/new');
+                    onClick={(e) => {
+                      e.stopPropagation();
                       onClose();
+                      navigate('/editor/new');
                     }}
                   >
                     Use Template
