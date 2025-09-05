@@ -134,9 +134,13 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onClose }) => {
                         size="sm" 
                         className="bg-blue-600 hover:bg-blue-700"
                         onClick={(e) => {
+                          console.log('Use Template button clicked from preview overlay');
+                          console.log('Current location:', window.location.pathname);
                           e.stopPropagation();
                           e.preventDefault();
+                          console.log('Navigating to /editor/new...');
                           navigate('/editor/new');
+                          console.log('Navigation called');
                         }}
                       >
                         <Download className="w-4 h-4 mr-2" />
@@ -175,9 +179,14 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onClose }) => {
                     size="sm" 
                     className="bg-blue-600 hover:bg-blue-700"
                     onClick={(e) => {
+                      console.log('Use Template button clicked from card bottom');
+                      console.log('Template:', template.name);
+                      console.log('Current location:', window.location.pathname);
                       e.stopPropagation();
                       e.preventDefault();
+                      console.log('Navigating to /editor/new...');
                       navigate('/editor/new');
+                      console.log('Navigation called');
                     }}
                   >
                     Use Template
