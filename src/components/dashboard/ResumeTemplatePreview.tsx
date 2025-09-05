@@ -15,16 +15,17 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
-    if (!iframeRef.current) return;
+    if (!iframeRef.current || !templateId) return;
 
     const template = templates.find(t => t.id === templateId);
     let templateHTML = '';
 
-    // Default templates if not from database
-    if (templateId === 'modern' || templateId === 'classic' || templateId === 'creative' || templateId === 'executive') {
-      templateHTML = getBuiltInTemplate(templateId);
-    } else if (template?.html_content) {
+    // Use template HTML content from database
+    if (template?.html_content) {
       templateHTML = template.html_content;
+    } else {
+      // Fallback to a basic template if no HTML content
+      templateHTML = getDefaultTemplate();
     }
 
     // Replace placeholders with actual data
@@ -162,6 +163,40 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
       iframeDoc.close();
     }
   }, [resumeData, templateId, templates]);
+
+  const getDefaultTemplate = () => {
+    return `
+      <div class="header">
+        <h1>{{name}}</h1>
+        <p style="font-size: 1.2em; color: #666;">{{title}}</p>
+        <div class="contact-info">
+          <span>📧 {{email}}</span>
+          <span>📱 {{phone}}</span>
+          <span>📍 {{location}}</span>
+        </div>
+      </div>
+      
+      <div class="section">
+        <h2>Professional Summary</h2>
+        <p>{{summary}}</p>
+      </div>
+      
+      <div class="section">
+        <h2>Skills</h2>
+        <div>{{skills}}</div>
+      </div>
+      
+      <div class="section">
+        <h2>Experience</h2>
+        {{experience}}
+      </div>
+      
+      <div class="section">
+        <h2>Education</h2>
+        {{education}}
+      </div>
+    `;
+  };
 
   const getBuiltInTemplate = (templateName: string) => {
     switch(templateName) {

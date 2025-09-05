@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,10 +17,12 @@ import html2pdf from 'html2pdf.js';
 const ResumeEditor: React.FC = () => {
   const { resumeId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  const [selectedTemplate, setSelectedTemplate] = useState('modern');
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const [templates, setTemplates] = useState<any[]>([]);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [resumeData, setResumeData] = useState<ResumeData>({
     contact: {
       name: '',
@@ -44,22 +46,43 @@ const ResumeEditor: React.FC = () => {
 
   const [newSkill, setNewSkill] = useState('');
 
-  // Load templates
+  // Load templates and set initial template
   useEffect(() => {
-    loadTemplates();
+    const templateId = searchParams.get('template');
+    loadTemplates(templateId);
     if (resumeId && resumeId !== 'new') {
       loadResume();
     }
-  }, [resumeId]);
+  }, [resumeId, searchParams]);
 
-  const loadTemplates = async () => {
-    const { data, error } = await supabase
-      .from('resume_templates')
-      .select('*')
-      .order('name');
-    
-    if (data) {
-      setTemplates(data);
+  const loadTemplates = async (templateIdFromUrl?: string | null) => {
+    try {
+      const { data, error } = await supabase
+        .from('resume_templates')
+        .select('*')
+        .order('name');
+      
+      if (error) throw error;
+      
+      if (data) {
+        setTemplates(data);
+        
+        // Set initial template based on URL parameter or first available template
+        if (templateIdFromUrl && data.find(t => t.id === templateIdFromUrl)) {
+          setSelectedTemplate(templateIdFromUrl);
+        } else if (data.length > 0) {
+          setSelectedTemplate(data[0].id);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading templates:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load templates",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -466,10 +489,6 @@ const ResumeEditor: React.FC = () => {
                   <SelectValue placeholder="Select template" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="modern">Modern Template</SelectItem>
-                  <SelectItem value="classic">Classic Template</SelectItem>
-                  <SelectItem value="creative">Creative Template</SelectItem>
-                  <SelectItem value="executive">Executive Template</SelectItem>
                   {templates.map(template => (
                     <SelectItem key={template.id} value={template.id}>
                       {template.name}
