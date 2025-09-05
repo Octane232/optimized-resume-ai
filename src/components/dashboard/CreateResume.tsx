@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { FileText, Zap, Clock, Award, Wand2, Edit, Sparkles, Brain, Target, Users, Palette, Download, Star, Loader2, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { useNavigate } from 'react-router-dom';
 import TemplatePreview from './TemplatePreview';
 import TemplateThumbnail from './TemplateThumbnail';
 
@@ -17,6 +18,7 @@ const CreateResume = () => {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchTemplates();
@@ -316,11 +318,7 @@ const CreateResume = () => {
                       <Button 
                         className={`flex-1 bg-gradient-to-r ${template.color_class || 'from-slate-500 to-slate-600'} hover:shadow-lg text-white font-semibold rounded-xl transition-all duration-300`}
                         onClick={() => {
-                          setSelectedTemplate(template);
-                          toast({
-                            title: "Template Selected",
-                            description: `${template.name} template has been selected.`,
-                          });
+                          navigate('/editor/new');
                         }}
                       >
                         Use Template
@@ -340,11 +338,7 @@ const CreateResume = () => {
         isOpen={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}
         onUseTemplate={() => {
-          setSelectedTemplate(previewTemplate);
-          toast({
-            title: "Template Selected",
-            description: `${previewTemplate?.name} template has been selected.`,
-          });
+          navigate('/editor/new');
         }}
       />
     </div>
