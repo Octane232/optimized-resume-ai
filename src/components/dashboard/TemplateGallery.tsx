@@ -135,7 +135,7 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onClose }) => {
                         className="bg-blue-600 hover:bg-blue-700"
                         onClick={(e) => {
                           e.stopPropagation();
-                          onClose();
+                          e.preventDefault();
                           navigate('/editor/new');
                         }}
                       >
@@ -176,7 +176,7 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onClose }) => {
                     className="bg-blue-600 hover:bg-blue-700"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onClose();
+                      e.preventDefault();
                       navigate('/editor/new');
                     }}
                   >
