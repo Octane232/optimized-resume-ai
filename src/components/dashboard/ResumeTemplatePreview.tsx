@@ -261,71 +261,8 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
   };
 
   const getBuiltInTemplate = (templateName: string) => {
-    switch(templateName) {
-      case 'modern':
-        return `
-          <div class="header">
-            <h1>{{name}}</h1>
-            <p style="font-size: 1.2em; color: #666;">{{title}}</p>
-            <div class="contact-info">
-              <span>📧 {{email}}</span>
-              <span>📱 {{phone}}</span>
-              <span>📍 {{location}}</span>
-            </div>
-          </div>
-          
-          <div class="section">
-            <h2>Professional Summary</h2>
-            <p>{{summary}}</p>
-          </div>
-          
-          <div class="section">
-            <h2>Skills</h2>
-            <div>{{skills}}</div>
-          </div>
-          
-          <div class="section">
-            <h2>Experience</h2>
-            {{experience}}
-          </div>
-          
-          <div class="section">
-            <h2>Education</h2>
-            {{education}}
-          </div>
-        `;
-      
-      case 'classic':
-        return `
-          <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="margin-bottom: 10px;">{{name}}</h1>
-            <p>{{email}} | {{phone}} | {{location}}</p>
-          </div>
-          
-          <div class="section">
-            <h2 style="border-bottom: 1px solid #333; padding-bottom: 5px;">OBJECTIVE</h2>
-            <p>{{summary}}</p>
-          </div>
-          
-          <div class="section">
-            <h2 style="border-bottom: 1px solid #333; padding-bottom: 5px;">SKILLS</h2>
-            <div>{{skills}}</div>
-          </div>
-          
-          <div class="section">
-            <h2 style="border-bottom: 1px solid #333; padding-bottom: 5px;">PROFESSIONAL EXPERIENCE</h2>
-            {{experience}}
-          </div>
-          
-          <div class="section">
-            <h2 style="border-bottom: 1px solid #333; padding-bottom: 5px;">EDUCATION</h2>
-            {{education}}
-          </div>
-        `;
-      
-      default:
-        return getBuiltInTemplate('modern');
-    }
+    // This function is no longer needed since we're using database templates with Mustache
+    return getDefaultTemplate();
   };
 
   return (

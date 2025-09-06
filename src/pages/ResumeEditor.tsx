@@ -25,20 +25,58 @@ const ResumeEditor: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [resumeData, setResumeData] = useState<ResumeData>({
     contact: {
-      name: '',
-      title: '',
-      email: '',
-      phone: '',
-      location: '',
-      linkedin: '',
-      portfolio: '',
-      github: '',
+      name: 'John Doe',
+      title: 'Senior Software Engineer',
+      email: 'john.doe@example.com',
+      phone: '(555) 123-4567',
+      location: 'San Francisco, CA',
+      linkedin: 'linkedin.com/in/johndoe',
+      portfolio: 'johndoe.dev',
+      github: 'github.com/johndoe',
     },
-    summary: '',
-    skills: [],
-    experience: [],
-    education: [],
-    projects: [],
+    summary: 'Experienced software engineer with 8+ years of expertise in full-stack development, cloud architecture, and team leadership. Passionate about building scalable applications and mentoring junior developers.',
+    skills: ['JavaScript', 'TypeScript', 'React', 'Node.js', 'Python', 'AWS', 'Docker', 'PostgreSQL', 'GraphQL', 'CI/CD'],
+    experience: [
+      {
+        title: 'Senior Software Engineer',
+        company: 'Tech Company Inc.',
+        startDate: '2020',
+        endDate: 'Present',
+        responsibilities: [
+          'Led development of microservices architecture serving 1M+ users',
+          'Mentored team of 5 junior developers',
+          'Reduced API response time by 40% through optimization'
+        ],
+      },
+      {
+        title: 'Software Engineer',
+        company: 'StartUp Co.',
+        startDate: '2017',
+        endDate: '2020',
+        responsibilities: [
+          'Built real-time data processing pipeline using Node.js and Redis',
+          'Implemented CI/CD pipeline reducing deployment time by 60%',
+          'Developed RESTful APIs serving mobile and web clients'
+        ],
+      }
+    ],
+    education: [
+      {
+        degree: 'Bachelor of Science in Computer Science',
+        institution: 'University of California, Berkeley',
+        startYear: '2012',
+        endYear: '2016',
+        gpa: '3.8',
+      }
+    ],
+    projects: [
+      {
+        title: 'Open Source Contribution',
+        description: 'Major contributor to popular React library with 10k+ stars',
+        technologies: ['React', 'TypeScript', 'Jest'],
+        link: 'github.com/project'
+      }
+    ],
     certifications: [],
     languages: [],
     awards: [],
@@ -95,8 +133,14 @@ const ResumeEditor: React.FC = () => {
     
     if (data && data.content) {
       // Cast through unknown first for proper type conversion
-      setResumeData(data.content as unknown as ResumeData);
-      setSelectedTemplate(data.template_name || 'modern');
+      const loadedData = data.content as unknown as ResumeData;
+      // Merge with default data to ensure all fields have values
+      setResumeData(prev => ({
+        ...prev,
+        ...loadedData,
+        contact: { ...prev.contact, ...loadedData.contact },
+      }));
+      setSelectedTemplate(data.template_name || templates[0]?.id || '');
     }
   };
 
