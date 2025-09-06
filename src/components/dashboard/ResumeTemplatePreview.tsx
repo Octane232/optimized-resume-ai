@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { ResumeData } from '@/types/resume';
+import Mustache from 'mustache';
 
 interface ResumeTemplatePreviewProps {
   resumeData: ResumeData;
@@ -28,49 +29,68 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
       templateHTML = getDefaultTemplate();
     }
 
-    // Replace placeholders with actual data
-    let finalHTML = templateHTML;
+    // Prepare data for Mustache
+    const mustacheData = {
+      // Contact information
+      name: resumeData.contact.name || 'Your Name',
+      fullName: resumeData.contact.name || 'Your Name',
+      title: resumeData.contact.title || 'Professional Title',
+      email: resumeData.contact.email || 'email@example.com',
+      phone: resumeData.contact.phone || '(555) 123-4567',
+      location: resumeData.contact.location || 'City, State',
+      linkedin: resumeData.contact.linkedin || 'linkedin.com/in/yourprofile',
+      portfolio: resumeData.contact.portfolio || 'yourportfolio.com',
+      github: resumeData.contact.github || 'github.com/yourusername',
+      
+      // Summary
+      summary: resumeData.summary || 'Professional summary goes here...',
+      
+      // Skills
+      skills: resumeData.skills.map(skill => ({ skill })),
+      skillsList: resumeData.skills.join(', '),
+      hasSkills: resumeData.skills.length > 0,
+      
+      // Experience
+      experience: resumeData.experience.map(exp => ({
+        title: exp.title,
+        company: exp.company,
+        startDate: exp.startDate,
+        endDate: exp.endDate,
+        responsibilities: exp.responsibilities.map(r => ({ responsibility: r })),
+        hasResponsibilities: exp.responsibilities.length > 0
+      })),
+      hasExperience: resumeData.experience.length > 0,
+      
+      // Education
+      education: resumeData.education.map(edu => ({
+        degree: edu.degree,
+        institution: edu.institution,
+        startYear: edu.startYear,
+        endYear: edu.endYear,
+        gpa: edu.gpa || ''
+      })),
+      hasEducation: resumeData.education.length > 0,
+      
+      // Projects (if they exist)
+      projects: resumeData.projects?.map(proj => ({
+        title: proj.title,
+        description: proj.description,
+        technologies: proj.technologies?.join(', ') || '',
+        link: proj.link || ''
+      })) || [],
+      hasProjects: resumeData.projects?.length > 0,
+      
+      // Certifications (if they exist)
+      certifications: resumeData.certifications?.map(cert => ({
+        name: cert.name,
+        issuer: cert.issuer,
+        date: cert.date
+      })) || [],
+      hasCertifications: resumeData.certifications?.length > 0
+    };
     
-    // Contact info replacements
-    finalHTML = finalHTML.replace(/{{fullName}}/g, resumeData.contact.name || '');
-    finalHTML = finalHTML.replace(/{{name}}/g, resumeData.contact.name || '');
-    finalHTML = finalHTML.replace(/{{title}}/g, resumeData.contact.title || '');
-    finalHTML = finalHTML.replace(/{{email}}/g, resumeData.contact.email || '');
-    finalHTML = finalHTML.replace(/{{phone}}/g, resumeData.contact.phone || '');
-    finalHTML = finalHTML.replace(/{{location}}/g, resumeData.contact.location || '');
-    finalHTML = finalHTML.replace(/{{linkedin}}/g, resumeData.contact.linkedin || '');
-    finalHTML = finalHTML.replace(/{{portfolio}}/g, resumeData.contact.portfolio || '');
-    finalHTML = finalHTML.replace(/{{github}}/g, resumeData.contact.github || '');
-    
-    // Summary
-    finalHTML = finalHTML.replace(/{{summary}}/g, resumeData.summary || '');
-    
-    // Skills
-    const skillsHTML = resumeData.skills.length > 0 
-      ? resumeData.skills.map(s => `<span class="skill">${s}</span>`).join(' ')
-      : '';
-    finalHTML = finalHTML.replace(/{{skills}}/g, skillsHTML);
-    
-    // Experience
-    const experienceHTML = resumeData.experience.map(exp => `
-      <div class="experience-item">
-        <h3>${exp.title}</h3>
-        <p class="company">${exp.company} | ${exp.startDate} - ${exp.endDate}</p>
-        <ul>
-          ${exp.responsibilities.map(r => `<li>${r}</li>`).join('')}
-        </ul>
-      </div>
-    `).join('');
-    finalHTML = finalHTML.replace(/{{experience}}/g, experienceHTML);
-    
-    // Education
-    const educationHTML = resumeData.education.map(edu => `
-      <div class="education-item">
-        <h3>${edu.degree}</h3>
-        <p>${edu.institution} | ${edu.startYear} - ${edu.endYear}</p>
-      </div>
-    `).join('');
-    finalHTML = finalHTML.replace(/{{education}}/g, educationHTML);
+    // Render template with Mustache
+    const finalHTML = Mustache.render(templateHTML, mustacheData);
 
     // Wrap in full HTML document
     const fullHTML = `
@@ -176,25 +196,67 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
         </div>
       </div>
       
+      {{#hasSkills}}
+      <div class="section">
+        <h2>Skills</h2>
+        <div class="skills-container">
+          {{#skills}}
+            <span class="skill">{{skill}}</span>
+          {{/skills}}
+        </div>
+      </div>
+      {{/hasSkills}}
+      
       <div class="section">
         <h2>Professional Summary</h2>
         <p>{{summary}}</p>
       </div>
       
-      <div class="section">
-        <h2>Skills</h2>
-        <div>{{skills}}</div>
-      </div>
-      
+      {{#hasExperience}}
       <div class="section">
         <h2>Experience</h2>
-        {{experience}}
+        {{#experience}}
+        <div class="experience-item">
+          <h3>{{title}}</h3>
+          <p class="company">{{company}} | {{startDate}} - {{endDate}}</p>
+          {{#hasResponsibilities}}
+          <ul>
+            {{#responsibilities}}
+              <li>{{responsibility}}</li>
+            {{/responsibilities}}
+          </ul>
+          {{/hasResponsibilities}}
+        </div>
+        {{/experience}}
       </div>
+      {{/hasExperience}}
       
+      {{#hasEducation}}
       <div class="section">
         <h2>Education</h2>
-        {{education}}
+        {{#education}}
+        <div class="education-item">
+          <h3>{{degree}}</h3>
+          <p>{{institution}} | {{startYear}} - {{endYear}}</p>
+          {{#gpa}}<p>GPA: {{gpa}}</p>{{/gpa}}
+        </div>
+        {{/education}}
       </div>
+      {{/hasEducation}}
+      
+      {{#hasProjects}}
+      <div class="section">
+        <h2>Projects</h2>
+        {{#projects}}
+        <div class="project-item">
+          <h3>{{title}}</h3>
+          <p>{{description}}</p>
+          {{#technologies}}<p class="tech">Technologies: {{technologies}}</p>{{/technologies}}
+          {{#link}}<a href="{{link}}">View Project</a>{{/link}}
+        </div>
+        {{/projects}}
+      </div>
+      {{/hasProjects}}
     `;
   };
 
