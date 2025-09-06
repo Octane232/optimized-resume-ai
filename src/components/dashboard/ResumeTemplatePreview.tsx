@@ -45,8 +45,10 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
       // Summary
       summary: resumeData.summary || 'Professional summary goes here...',
       
-      // Skills
-      skills: resumeData.skills.map(skill => ({ skill })),
+      // Skills - ensure they're properly formatted for Mustache
+      skills: resumeData.skills.map(skill => 
+        typeof skill === 'string' ? skill : String(skill)
+      ),
       skillsList: resumeData.skills.join(', '),
       hasSkills: resumeData.skills.length > 0,
       
@@ -201,7 +203,7 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
         <h2>Skills</h2>
         <div class="skills-container">
           {{#skills}}
-            <span class="skill">{{skill}}</span>
+            <span class="skill">{{.}}</span>
           {{/skills}}
         </div>
       </div>
