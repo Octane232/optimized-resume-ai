@@ -29,51 +29,119 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = memo(({
       const iframeDoc = iframeRef.current.contentDocument || iframeRef.current.contentWindow?.document;
       if (!iframeDoc) return;
       
-      // Sample data to replace placeholders
-      const sampleData = {
-        fullName: "John Smith",
-        title: "Senior Software Engineer",
-        email: "john.smith@example.com",
-        phone: "(555) 123-4567",
-        location: "San Francisco, CA",
-        linkedin: "linkedin.com/in/johnsmith",
-        github: "github.com/johnsmith",
-        portfolio: "johnsmith.dev",
-        summary: "Experienced software engineer with 8+ years of expertise in full-stack development, specializing in React, Node.js, and cloud architecture. Passionate about building scalable solutions and mentoring teams.",
-        skills: ["React", "TypeScript", "Node.js", "AWS", "Docker", "PostgreSQL"],
-        experience: [{
-          title: "Senior Software Engineer",
-          company: "Tech Solutions Inc.",
-          dates: "2020 - Present",
-          description: "Led development of microservices architecture serving 1M+ users"
-        }],
-        education: [{
-          degree: "Bachelor of Science in Computer Science",
-          school: "Stanford University",
-          dates: "2012 - 2016"
-        }]
-      };
+      // Sample data to replace placeholders - CORRECTED VERSION
+const sampleData = {
+  // Contact Info (matches template)
+  fullName: "John Smith",
+  title: "Senior Software Engineer",
+  email: "john.smith@example.com",
+  phone: "(555) 123-4567",
+  location: "San Francisco, CA",
+  // summary (matches template)
+  summary: "Experienced software engineer with 8+ years of expertise in full-stack development, specializing in React, Node.js, and cloud architecture. Passionate about building scalable solutions and mentoring teams.",
+
+  // experiences (matches template loop {{#experiences}})
+  experiences: [
+    {
+      position: "Senior Software Engineer", // Changed from 'title'
+      company: "Tech Solutions Inc.", 
+      startDate: "2020", // Changed from 'dates'
+      endDate: "Present", // Changed from 'dates'
+      achievements: [ // Changed from 'description' and made an array
+        "Led development of microservices architecture serving 1M+ users",
+        "Mentored a team of 5 junior developers",
+        "Reduced API response time by 40% through optimization"
+      ]
+    }
+  ],
+
+  // education (matches template loop {{#education}})
+  education: [
+    {
+      degree: "Bachelor of Science in Computer Science",
+      institution: "Stanford University", // Changed from 'school'
+      startYear: "2012", // Added for formatting
+      endYear: "2016"    // Added for formatting
+    }
+  ],
+
+  // skills (matches template loop {{#skills}})
+  skills: ["React", "TypeScript", "Node.js", "AWS", "Docker", "PostgreSQL"]
+};
 
       let finalHTML = template.html_content;
 
-      // Replace placeholders like {{fullName}}
-      Object.entries(sampleData).forEach(([key, value]) => {
-        if (typeof value === "string") {
-          finalHTML = finalHTML.replace(
-            new RegExp(`{{\\s*${key}\\s*}}`, "g"),
-            value
-          );
-        } else if (Array.isArray(value) && typeof value[0] === "string") {
-          // Handle skills array
-          finalHTML = finalHTML.replace(
-            new RegExp(`{{\\s*${key}\\s*}}`, "g"),
-            value.join(", ")
-          );
+      // --- 1. FIRST: Handle Loops (BEFORE simple replacements) ---
+// Handle experiences loop {{#experiences}}...{{/experiences}}
+finalHTML = finalHTML.replace(
+  /{{#experiences}}([\s\S]*?){{\/experiences}}/g,
+  (match, loopTemplate) => {
+    if (!sampleData.experiences) return '';
+    return sampleData.experiences.map(exp => {
+      let expHtml = loopTemplate;
+      // Replace all simple placeholders inside the loop (position, company, etc.)
+      expHtml = expHtml.replace(/{{(\w+)}}/g, (m, key) => exp[key] || '');
+      // Handle the achievements list {{#achievements}}...{{/achievements}}
+      expHtml = expHtml.replace(
+        /{{#achievements}}([\s\S]*?){{\/achievements}}/g,
+        (achievementMatch, achievementListTemplate) => {
+          if (!exp.achievements) return '';
+          const listItems = exp.achievements.map(ach =>
+            achievementListTemplate.replace('{{.}}', ach)
+          ).join('');
+          return listItems;
         }
-      });
+      );
+      return expHtml;
+    }).join('');
+  }
+);
 
-      // Clean up any remaining unfilled placeholders
-      finalHTML = finalHTML.replace(/{{[^}]+}}/g, "");
+// Handle education loop {{#education}}...{{/education}}
+finalHTML = finalHTML.replace(
+  /{{#education}}([\s\S]*?){{\/education}}/g,
+  (match, loopTemplate) => {
+    if (!sampleData.education) return '';
+    return sampleData.education.map(edu => {
+      let eduHtml = loopTemplate;
+      // Format the graduation date from startYear and endYear
+      const graduationDate = edu.startYear && edu.endYear 
+        ? `${edu.startYear} - ${edu.endYear}`
+        : edu.startYear || edu.endYear || '';
+      // Replace placeholders, including the formatted date
+      eduHtml = eduHtml.replace(/{{(\w+)}}/g, (m, key) => {
+        if (key === 'graduationDate') return graduationDate;
+        return edu[key] || '';
+      });
+      return eduHtml;
+    }).join('');
+  }
+);
+
+// Handle skills loop {{#skills}}...{{/skills}}
+finalHTML = finalHTML.replace(
+  /{{#skills}}([\s\S]*?){{\/skills}}/g,
+  (match, loopTemplate) => {
+    if (!sampleData.skills) return '';
+    // For the simple comma-separated list
+    return loopTemplate.replace('{{.}}', sampleData.skills.join(', '));
+  }
+);
+
+// --- 2. SECOND: Replace simple top-level variables ---
+// Replace {{fullName}}, {{title}}, {{email}}, etc.
+Object.entries(sampleData).forEach(([key, value]) => {
+  // Skip arrays and objects, we handled loops above
+  if (typeof value === "string") {
+    finalHTML = finalHTML.replace(
+      new RegExp(`{{\\s*${key}\\s*}}`, "g"),
+      value
+    );
+  }
+});
+
+// --- 3. Clean up any remaining unfilled placeholders ---
+finalHTML = finalHTML.replace(/{{\s*[\w.]+\s*}}/g, "");
 
       // Ensure proper HTML structure if it's a fragment
       if (!finalHTML.includes("<html")) {
