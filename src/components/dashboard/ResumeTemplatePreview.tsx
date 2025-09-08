@@ -29,7 +29,7 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
       templateHTML = getDefaultTemplate();
     }
 
-    // Prepare data for Mustache
+    // Prepare data for Mustache - WITH FIXED EDUCATION DATES
     const mustacheData = {
       // Contact information
       name: resumeData.contact.name || 'Your Name',
@@ -63,13 +63,23 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
       })),
       hasExperience: resumeData.experience.length > 0,
       
-      // Education
+      // Education - FIXED: Add formatted date field
       education: resumeData.education.map(edu => ({
         degree: edu.degree,
         institution: edu.institution,
         startYear: edu.startYear,
         endYear: edu.endYear,
-        gpa: edu.gpa || ''
+        gpa: edu.gpa || '',
+        // ADD THIS LINE TO FIX THE DATE ISSUE:
+        date: edu.startYear && edu.endYear 
+          ? `${edu.startYear} - ${edu.endYear}`
+          : edu.startYear || edu.endYear || '',
+        graduationDate: edu.startYear && edu.endYear 
+          ? `${edu.startYear} - ${edu.endYear}`
+          : edu.startYear || edu.endYear || '',
+        years: edu.startYear && edu.endYear 
+          ? `${edu.startYear} - ${edu.endYear}`
+          : edu.startYear || edu.endYear || ''
       })),
       hasEducation: resumeData.education.length > 0,
       
@@ -239,7 +249,7 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
         {{#education}}
         <div class="education-item">
           <h3>{{degree}}</h3>
-          <p>{{institution}} | {{startYear}} - {{endYear}}</p>
+          <p>{{institution}} | {{date}}</p> <!-- CHANGED: Now uses the formatted date -->
           {{#gpa}}<p>GPA: {{gpa}}</p>{{/gpa}}
         </div>
         {{/education}}
@@ -260,11 +270,6 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
       </div>
       {{/hasProjects}}
     `;
-  };
-
-  const getBuiltInTemplate = (templateName: string) => {
-    // This function is no longer needed since we're using database templates with Mustache
-    return getDefaultTemplate();
   };
 
   return (
