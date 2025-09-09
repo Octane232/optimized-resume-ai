@@ -126,34 +126,31 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
-  // ===== ADD DEBUG CODE HERE =====
-  console.log('=== DEBUG: ResumeTemplatePreview ===');
-  console.log('Template ID:', templateId);
-  console.log('Resume Data:', resumeData);
-  console.log('Experience array:', resumeData.experience);
-  console.log('Experience length:', resumeData.experience.length);
-  if (resumeData.experience.length > 0) {
-    console.log('First experience item:', resumeData.experience[0]);
-  }
-  
-  const template = templates.find(t => t.id === templateId);
-  console.log('Selected template:', template);
-  console.log('Template HTML contains "experience":', template?.html_content?.includes('experience'));
-  console.log('Template HTML contains "workExperience":', template?.html_content?.includes('workExperience'));
-  console.log('==================================');
-  // ===== END DEBUG CODE =====
+    if (!iframeRef.current || !templateId) return;
 
-  if (!iframeRef.current || !templateId) return;
+    // ===== DEBUG CODE =====
+    console.log('=== DEBUG: ResumeTemplatePreview ===');
+    console.log('Template ID:', templateId);
+    console.log('Resume Data:', resumeData);
+    console.log('Experience array:', resumeData.experience);
+    console.log('Experience length:', resumeData.experience.length);
+    if (resumeData.experience.length > 0) {
+      console.log('First experience item:', resumeData.experience[0]);
+    }
+    
+    const template = templates.find(t => t.id === templateId);
+    console.log('Selected template:', template);
+    console.log('Template HTML contains "experience":', template?.html_content?.includes('experience'));
+    console.log('Template HTML contains "workExperience":', template?.html_content?.includes('workExperience'));
+    console.log('==================================');
+    // ===== END DEBUG CODE =====
 
-  // ... the rest of your existing code continues here
-  let templateHTML = '';
-  if (template?.html_content) {
-    templateHTML = template.html_content;
-  } else {
-    templateHTML = getDefaultTemplate();
-  }
-  // ... etc
-}, [resumeData, templateId, templates]);
+    let templateHTML = '';
+    if (template?.html_content) {
+      templateHTML = template.html_content;
+    } else {
+      templateHTML = getDefaultTemplate();
+    }
 
     // Prepare data for Mustache - UNIVERSAL VARIABLE SUPPORT
     const mustacheData = {
@@ -301,7 +298,7 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
       iframeDoc.write(fullHTML);
       iframeDoc.close();
     }
-  }, [resumeData, templateId, templates];
+  }, [resumeData, templateId, templates]);
 
   const getDefaultTemplate = () => {
     return `
