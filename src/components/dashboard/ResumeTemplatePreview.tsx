@@ -29,9 +29,7 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
       templateHTML = getDefaultTemplate();
     }
 
-    import React, { useEffect, useRef } from 'react';
-import { ResumeData } from '@/types/resume';
-import Mustache from 'mustache';
+    
 
 interface ResumeTemplatePreviewProps {
   resumeData: ResumeData;
