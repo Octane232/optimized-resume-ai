@@ -126,18 +126,34 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
-    if (!iframeRef.current || !templateId) return;
+  // ===== ADD DEBUG CODE HERE =====
+  console.log('=== DEBUG: ResumeTemplatePreview ===');
+  console.log('Template ID:', templateId);
+  console.log('Resume Data:', resumeData);
+  console.log('Experience array:', resumeData.experience);
+  console.log('Experience length:', resumeData.experience.length);
+  if (resumeData.experience.length > 0) {
+    console.log('First experience item:', resumeData.experience[0]);
+  }
+  
+  const template = templates.find(t => t.id === templateId);
+  console.log('Selected template:', template);
+  console.log('Template HTML contains "experience":', template?.html_content?.includes('experience'));
+  console.log('Template HTML contains "workExperience":', template?.html_content?.includes('workExperience'));
+  console.log('==================================');
+  // ===== END DEBUG CODE =====
 
-    const template = templates.find(t => t.id === templateId);
-    let templateHTML = '';
+  if (!iframeRef.current || !templateId) return;
 
-    // Use template HTML content from database
-    if (template?.html_content) {
-      templateHTML = template.html_content;
-    } else {
-      // Fallback to a basic template if no HTML content
-      templateHTML = getDefaultTemplate();
-    }
+  // ... the rest of your existing code continues here
+  let templateHTML = '';
+  if (template?.html_content) {
+    templateHTML = template.html_content;
+  } else {
+    templateHTML = getDefaultTemplate();
+  }
+  // ... etc
+}, [resumeData, templateId, templates]);
 
     // Prepare data for Mustache - UNIVERSAL VARIABLE SUPPORT
     const mustacheData = {
