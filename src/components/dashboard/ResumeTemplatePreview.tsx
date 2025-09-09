@@ -450,7 +450,7 @@ function createAwardData(award) {
   );
 };
 
-export default ResumeTemplatePreview;
+
     
     // Render template with Mustache
     const finalHTML = Mustache.render(templateHTML, mustacheData);
