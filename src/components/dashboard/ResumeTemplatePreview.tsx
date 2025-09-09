@@ -90,54 +90,18 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  // ===== DEBUG: Check if component mounts =====
-  console.log('🎯 ResumeTemplatePreview RENDERED');
-  console.log('Template ID:', templateId);
-  console.log('Experience items:', resumeData.experience.length);
-  console.log('Templates available:', templates.length);
-
   useEffect(() => {
-    console.log('🔄 useEffect triggered');
-    
-    // ===== DEBUG: Check conditions =====
-    console.log('iframeRef.current:', !!iframeRef.current);
-    console.log('templateId:', templateId);
-    
-    if (!iframeRef.current) {
-      console.log('❌ iframeRef not ready');
-      return;
-    }
-    
-    if (!templateId) {
-      console.log('❌ No template ID selected');
-      return;
-    }
+    if (!iframeRef.current || !templateId) return;
 
-    // ===== DEBUG: Check template =====
     const template = templates.find(t => t.id === templateId);
-    console.log('Selected template:', template);
-    
-    if (!template) {
-      console.log('❌ Template not found');
-      return;
-    }
-
-    console.log('Template HTML content length:', template.html_content?.length);
-    console.log('Contains "experiences":', template.html_content?.includes('experiences'));
-    console.log('Contains "{{#experiences}}":', template.html_content?.includes('{{#experiences}}'));
+    if (!template) return;
 
     let templateHTML = '';
     if (template?.html_content) {
       templateHTML = template.html_content;
-      console.log('✅ Using template from database');
     } else {
       templateHTML = getDefaultTemplate();
-      console.log('⚠️ Using default template');
     }
-
-    // ===== DEBUG: Check resume data =====
-    console.log('Resume data experience:', resumeData.experience);
-    console.log('First experience item:', resumeData.experience[0]);
 
     // Prepare data for Mustache - WITH ALL REQUIRED FIELDS
     const mustacheData = {
@@ -198,13 +162,9 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
       hasProjects: (resumeData.projects?.length || 0) > 0,
     };
 
-    console.log('Mustache data prepared:', mustacheData);
-    console.log('Experiences data:', mustacheData.experiences);
-
     // Render template with Mustache
     try {
       const finalHTML = Mustache.render(templateHTML, mustacheData);
-      console.log('✅ Mustache rendering successful');
       
       // Wrap in full HTML document
       const fullHTML = `
@@ -236,20 +196,19 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
         iframeDoc.open();
         iframeDoc.write(fullHTML);
         iframeDoc.close();
-        console.log('✅ Iframe content loaded successfully');
       }
     } catch (error) {
-      console.error('❌ Mustache rendering error:', error);
+      console.error('Template rendering error:', error);
       
       // Fallback: Show raw data in iframe
       const errorHTML = `
         <!DOCTYPE html>
         <html>
         <body>
-          <h1>Debug Info - Template Rendering Failed</h1>
-          <h2>Experience Data (${resumeData.experience.length} items)</h2>
+          <h1>Resume Preview</h1>
+          <h2>Experience</h2>
           ${resumeData.experience.map(exp => `
-            <div style="border: 2px solid red; padding: 10px; margin: 10px;">
+            <div style="margin: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px;">
               <h3>${exp.title} at ${exp.company}</h3>
               <p>${exp.startDate} - ${exp.endDate}</p>
               <ul>
@@ -257,8 +216,6 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
               </ul>
             </div>
           `).join('')}
-          <h2>Template Variables Detected:</h2>
-          <pre>${templateHTML.match(/{{\#?(\w+)\}}/g)?.join('\n') || 'No variables found'}</pre>
         </body>
         </html>
       `;
@@ -333,27 +290,11 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
 
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-      {/* Debug overlay */}
-      <div style={{
-        position: 'absolute', 
-        top: '10px', 
-        right: '10px', 
-        background: 'red', 
-        color: 'white', 
-        padding: '5px 10px',
-        borderRadius: '5px',
-        zIndex: 1000,
-        fontSize: '12px'
-      }}>
-        Debug: Exp={resumeData.experience.length} | Tpl={templateId}
-      </div>
-      
       <iframe
         ref={iframeRef}
         className="w-full h-[800px] border-0"
         title="Resume Preview"
         sandbox="allow-same-origin"
-        onLoad={() => console.log('✅ Iframe loaded successfully')}
       />
     </div>
   );
