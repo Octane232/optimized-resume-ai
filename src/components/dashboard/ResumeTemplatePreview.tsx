@@ -11,14 +11,22 @@ interface ResumeTemplatePreviewProps {
 // ===== HELPER FUNCTIONS =====
 function createExperienceData(exp: any) {
   return {
+    // Title variations
     title: exp.title,
     jobTitle: exp.title,
-    position: exp.title,
+    position: exp.title, // Template uses {{position}}
     role: exp.title,
+    
+    // Company variations
     company: exp.company,
     employer: exp.company,
     companyName: exp.company,
     organization: exp.company,
+    
+    // Location - Template uses {{location}} in experiences
+    location: exp.location || 'Remote',
+    
+    // Date variations
     startDate: exp.startDate,
     endDate: exp.endDate,
     start: exp.startDate,
@@ -26,12 +34,16 @@ function createExperienceData(exp: any) {
     duration: `${exp.startDate} - ${exp.endDate}`,
     period: `${exp.startDate} - ${exp.endDate}`,
     timePeriod: `${exp.startDate} - ${exp.endDate}`,
+    
+    // Responsibilities variations (template calls them "achievements")
     responsibilities: exp.responsibilities.map((r: string) => ({ responsibility: r })),
-    achievements: exp.responsibilities.map((r: string) => ({ achievement: r })),
+    achievements: exp.responsibilities.map((r: string) => ({ achievement: r })), // Template uses {{#achievements}}
     tasks: exp.responsibilities.map((r: string) => ({ task: r })),
     duties: exp.responsibilities.map((r: string) => ({ duty: r })),
     accomplishments: exp.responsibilities.map((r: string) => ({ accomplishment: r })),
     description: exp.responsibilities.join('. '),
+    
+    // Boolean flags
     hasResponsibilities: exp.responsibilities.length > 0,
     hasAchievements: exp.responsibilities.length > 0,
     hasTasks: exp.responsibilities.length > 0
@@ -40,22 +52,33 @@ function createExperienceData(exp: any) {
 
 function createEducationData(edu: any) {
   return {
+    // Degree variations
     degree: edu.degree,
     qualification: edu.degree,
     program: edu.degree,
+    
+    // Institution variations
     institution: edu.institution,
     school: edu.institution,
     university: edu.institution,
     college: edu.institution,
+    
+    // Year variations
     startYear: edu.startYear,
     endYear: edu.endYear,
     graduationYear: edu.endYear,
+    
+    // Date variations - Template uses {{graduationDate}}
     date: edu.startYear && edu.endYear ? `${edu.startYear} - ${edu.endYear}` : edu.startYear || edu.endYear || '',
     graduationDate: edu.startYear && edu.endYear ? `${edu.startYear} - ${edu.endYear}` : edu.startYear || edu.endYear || '',
     years: edu.startYear && edu.endYear ? `${edu.startYear} - ${edu.endYear}` : edu.startYear || edu.endYear || '',
     period: edu.startYear && edu.endYear ? `${edu.startYear} - ${edu.endYear}` : edu.startYear || edu.endYear || '',
+    
+    // GPA
     gpa: edu.gpa || '',
     grade: edu.gpa || '',
+    
+    // Boolean flags
     hasGPA: !!edu.gpa
   };
 }
@@ -100,10 +123,8 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
     }
 
     console.log('Template HTML content length:', template.html_content?.length);
-    console.log('Contains "experience":', template.html_content?.includes('experience'));
-    console.log('Contains "workExperience":', template.html_content?.includes('workExperience'));
-    console.log('Contains "{{#experience}}":', template.html_content?.includes('{{#experience}}'));
-    console.log('Contains "{{experience}}":', template.html_content?.includes('{{experience}}'));
+    console.log('Contains "experiences":', template.html_content?.includes('experiences'));
+    console.log('Contains "{{#experiences}}":', template.html_content?.includes('{{#experiences}}'));
 
     let templateHTML = '';
     if (template?.html_content) {
@@ -118,9 +139,9 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
     console.log('Resume data experience:', resumeData.experience);
     console.log('First experience item:', resumeData.experience[0]);
 
-    // Prepare data for Mustache
+    // Prepare data for Mustache - WITH ALL REQUIRED FIELDS
     const mustacheData = {
-      // Contact info
+      // ===== CONTACT INFO =====
       name: resumeData.contact.name,
       fullName: resumeData.contact.name,
       title: resumeData.contact.title,
@@ -133,22 +154,26 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
       github: resumeData.contact.github,
       address: resumeData.contact.location,
       
-      // Summary
+      // ===== SUMMARY =====
       summary: resumeData.summary,
       objective: resumeData.summary,
       professionalSummary: resumeData.summary,
       bio: resumeData.summary,
       
-      // Skills
+      // ===== SKILLS =====
       skills: resumeData.skills,
       skillsList: resumeData.skills.join(', '),
       competencies: resumeData.skills,
       technologies: resumeData.skills,
       hasSkills: resumeData.skills.length > 0,
       
-      // Experience - ALL variations
+      // ===== EXPERIENCE - ALL VARIATIONS INCLUDING "experiences" =====
       experience: resumeData.experience.map(createExperienceData),
       hasExperience: resumeData.experience.length > 0,
+      
+      // CRITICAL: Template uses {{#experiences}} (with "s")
+      experiences: resumeData.experience.map(createExperienceData),
+      hasExperiences: resumeData.experience.length > 0,
       
       workExperience: resumeData.experience.map(createExperienceData),
       hasWorkExperience: resumeData.experience.length > 0,
@@ -157,20 +182,24 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
       employment: resumeData.experience.map(createExperienceData),
       jobs: resumeData.experience.map(createExperienceData),
       workHistory: resumeData.experience.map(createExperienceData),
+      work: resumeData.experience.map(createExperienceData),
+      hasWork: resumeData.experience.length > 0,
       
-      // Education
+      // ===== EDUCATION =====
       education: resumeData.education.map(createEducationData),
       hasEducation: resumeData.education.length > 0,
       
       educationHistory: resumeData.education.map(createEducationData),
       academic: resumeData.education.map(createEducationData),
+      academics: resumeData.education.map(createEducationData),
       
-      // Projects
+      // ===== PROJECTS =====
       projects: resumeData.projects || [],
       hasProjects: (resumeData.projects?.length || 0) > 0,
     };
 
     console.log('Mustache data prepared:', mustacheData);
+    console.log('Experiences data:', mustacheData.experiences);
 
     // Render template with Mustache
     try {
@@ -217,7 +246,7 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
         <!DOCTYPE html>
         <html>
         <body>
-          <h1>Debug Info</h1>
+          <h1>Debug Info - Template Rendering Failed</h1>
           <h2>Experience Data (${resumeData.experience.length} items)</h2>
           ${resumeData.experience.map(exp => `
             <div style="border: 2px solid red; padding: 10px; margin: 10px;">
@@ -228,8 +257,8 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
               </ul>
             </div>
           `).join('')}
-          <h2>Template HTML</h2>
-          <pre>${templateHTML}</pre>
+          <h2>Template Variables Detected:</h2>
+          <pre>${templateHTML.match(/{{\#?(\w+)\}}/g)?.join('\n') || 'No variables found'}</pre>
         </body>
         </html>
       `;
@@ -269,20 +298,23 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
         <p>{{summary}}</p>
       </div>
       
-      {{#hasExperience}}
+      {{#hasExperiences}}
       <div class="section">
         <h2>Experience</h2>
-        {{#experience}}
+        {{#experiences}}
         <div class="experience-item">
-          <h3>{{title}}</h3>
-          <p class="company">{{company}} | {{startDate}} - {{endDate}}</p>
-          {{#hasResponsibilities}}
-          <ul>{{#responsibilities}}<li>{{responsibility}}</li>{{/responsibilities}}</ul>
-          {{/hasResponsibilities}}
+          <h3>{{position}}</h3>
+          <p class="company">{{company}} • {{location}}</p>
+          <p class="period">{{startDate}} - {{endDate}}</p>
+          {{#hasAchievements}}
+          <ul>
+            {{#achievements}}<li>{{achievement}}</li>{{/achievements}}
+          </ul>
+          {{/hasAchievements}}
         </div>
-        {{/experience}}
+        {{/experiences}}
       </div>
-      {{/hasExperience}}
+      {{/hasExperiences}}
       
       {{#hasEducation}}
       <div class="section">
@@ -290,7 +322,7 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
         {{#education}}
         <div class="education-item">
           <h3>{{degree}}</h3>
-          <p>{{institution}} | {{date}}</p>
+          <p>{{institution}} | {{graduationDate}}</p>
           {{#gpa}}<p>GPA: {{gpa}}</p>{{/gpa}}
         </div>
         {{/education}}
