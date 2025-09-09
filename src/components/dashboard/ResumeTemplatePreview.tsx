@@ -60,77 +60,214 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
       templateHTML = getDefaultTemplate();
     }
 
-    // Musche data
-    const mustacheData = {
-      // Contact information
-      name: resumeData.contact.name || 'Your Name',
-      fullName: resumeData.contact.name || 'Your Name',
-      title: resumeData.contact.title || 'Professional Title',
-      email: resumeData.contact.email || 'email@example.com',
-      phone: resumeData.contact.phone || '(555) 123-4567',
-      location: resumeData.contact.location || 'City, State',
-      linkedin: resumeData.contact.linkedin || 'linkedin.com/in/yourprofile',
-      portfolio: resumeData.contact.portfolio || 'yourportfolio.com',
-      github: resumeData.contact.github || 'github.com/yourusername',
-      
-      // Summary
-      summary: resumeData.summary || 'Professional summary goes here...',
-      
-      // Skills - ensure they're properly formatted for Mustache
-      skills: resumeData.skills.map(skill => 
-        typeof skill === 'string' ? skill : String(skill)
-      ),
-      skillsList: resumeData.skills.join(', '),
-      hasSkills: resumeData.skills.length > 0,
-      
-      // Experience
-      experience: resumeData.experience.map(exp => ({
-        title: exp.title,
-        company: exp.company,
-        startDate: exp.startDate,
-        endDate: exp.endDate,
-        responsibilities: exp.responsibilities.map(r => ({ responsibility: r })),
-        hasResponsibilities: exp.responsibilities.length > 0
-      })),
-      hasExperience: resumeData.experience.length > 0,
-      
-      // Education - FIXED: Add formatted date field
-      education: resumeData.education.map(edu => ({
-        degree: edu.degree,
-        institution: edu.institution,
-        startYear: edu.startYear,
-        endYear: edu.endYear,
-        gpa: edu.gpa || '',
-        // ADD THIS LINE TO FIX THE DATE ISSUE:
-        date: edu.startYear && edu.endYear 
-          ? `${edu.startYear} - ${edu.endYear}`
-          : edu.startYear || edu.endYear || '',
-        graduationDate: edu.startYear && edu.endYear 
-          ? `${edu.startYear} - ${edu.endYear}`
-          : edu.startYear || edu.endYear || '',
-        years: edu.startYear && edu.endYear 
-          ? `${edu.startYear} - ${edu.endYear}`
-          : edu.startYear || edu.endYear || ''
-      })),
-      hasEducation: resumeData.education.length > 0,
-      
-      // Projects (if they exist)
-      projects: resumeData.projects?.map(proj => ({
-        title: proj.title,
-        description: proj.description,
-        technologies: proj.technologies?.join(', ') || '',
-        link: proj.link || ''
-      })) || [],
-      hasProjects: resumeData.projects?.length > 0,
-      
-      // Certifications (if they exist)
-      certifications: resumeData.certifications?.map(cert => ({
-        name: cert.name,
-        issuer: cert.issuer,
-        date: cert.date
-      })) || [],
-      hasCertifications: resumeData.certifications?.length > 0
-    };
+  // Prepare data for Mustache - UNIVERSAL VARIABLE SUPPORT
+const mustacheData = {
+  // ===== CONTACT INFO =====
+  name: resumeData.contact.name || 'Your Name',
+  fullName: resumeData.contact.name || 'Your Name',
+  title: resumeData.contact.title || 'Professional Title',
+  jobTitle: resumeData.contact.title || 'Professional Title',
+  email: resumeData.contact.email || 'email@example.com',
+  phone: resumeData.contact.phone || '(555) 123-4567',
+  location: resumeData.contact.location || 'City, State',
+  linkedin: resumeData.contact.linkedin || 'linkedin.com/in/yourprofile',
+  portfolio: resumeData.contact.portfolio || 'yourportfolio.com',
+  github: resumeData.contact.github || 'github.com/yourusername',
+  address: resumeData.contact.location || 'City, State',
+  
+  // ===== SUMMARY =====
+  summary: resumeData.summary || 'Professional summary goes here...',
+  objective: resumeData.summary || 'Professional summary goes here...',
+  professionalSummary: resumeData.summary || 'Professional summary goes here...',
+  bio: resumeData.summary || 'Professional summary goes here...',
+  
+  // ===== SKILLS =====
+  skills: resumeData.skills.map(skill => typeof skill === 'string' ? skill : String(skill)),
+  skillsList: resumeData.skills.join(', '),
+  competencies: resumeData.skills,
+  technologies: resumeData.skills,
+  technicalSkills: resumeData.skills,
+  programmingLanguages: resumeData.skills,
+  languages: resumeData.skills,
+  abilities: resumeData.skills,
+  expertise: resumeData.skills,
+  hasSkills: resumeData.skills.length > 0,
+  hasCompetencies: resumeData.skills.length > 0,
+  
+  // ===== EXPERIENCE - ALL POSSIBLE VARIATIONS =====
+  // Main experience array
+  experience: resumeData.experience.map(createExperienceData),
+  hasExperience: resumeData.experience.length > 0,
+  
+  // Alternative names for experience
+  workExperience: resumeData.experience.map(createExperienceData),
+  hasWorkExperience: resumeData.experience.length > 0,
+  
+  professionalExperience: resumeData.experience.map(createExperienceData),
+  hasProfessionalExperience: resumeData.experience.length > 0,
+  
+  creativeExperience: resumeData.experience.map(createExperienceData),
+  hasCreativeExperience: resumeData.experience.length > 0,
+  
+  employment: resumeData.experience.map(createExperienceData),
+  hasEmployment: resumeData.experience.length > 0,
+  
+  employmentHistory: resumeData.experience.map(createExperienceData),
+  hasEmploymentHistory: resumeData.experience.length > 0,
+  
+  jobs: resumeData.experience.map(createExperienceData),
+  hasJobs: resumeData.experience.length > 0,
+  
+  workHistory: resumeData.experience.map(createExperienceData),
+  hasWorkHistory: resumeData.experience.length > 0,
+  
+  // ===== EDUCATION =====
+  education: resumeData.education.map(createEducationData),
+  hasEducation: resumeData.education.length > 0,
+  
+  educationHistory: resumeData.education.map(createEducationData),
+  hasEducationHistory: resumeData.education.length > 0,
+  
+  academic: resumeData.education.map(createEducationData),
+  hasAcademic: resumeData.education.length > 0,
+  
+  academics: resumeData.education.map(createEducationData),
+  hasAcademics: resumeData.education.length > 0,
+  
+  // ===== PROJECTS =====
+  projects: resumeData.projects?.map(createProjectData) || [],
+  hasProjects: resumeData.projects?.length > 0,
+  
+  personalProjects: resumeData.projects?.map(createProjectData) || [],
+  hasPersonalProjects: resumeData.projects?.length > 0,
+  
+  portfolioProjects: resumeData.projects?.map(createProjectData) || [],
+  hasPortfolioProjects: resumeData.projects?.length > 0,
+  
+  // ===== CERTIFICATIONS =====
+  certifications: resumeData.certifications?.map(createCertificationData) || [],
+  hasCertifications: resumeData.certifications?.length > 0,
+  
+  certificates: resumeData.certifications?.map(createCertificationData) || [],
+  hasCertificates: resumeData.certifications?.length > 0,
+  
+  // ===== AWARDS =====
+  awards: resumeData.awards?.map(createAwardData) || [],
+  hasAwards: resumeData.awards?.length > 0,
+  
+  honors: resumeData.awards?.map(createAwardData) || [],
+  hasHonors: resumeData.awards?.length > 0,
+  
+  achievements: resumeData.awards?.map(createAwardData) || [],
+  hasAchievements: resumeData.awards?.length > 0,
+};
+
+// Helper function for experience data
+function createExperienceData(exp) {
+  return {
+    // Title variations
+    title: exp.title,
+    jobTitle: exp.title,
+    position: exp.title,
+    role: exp.title,
+    
+    // Company variations
+    company: exp.company,
+    employer: exp.company,
+    companyName: exp.company,
+    organization: exp.company,
+    
+    // Date variations
+    startDate: exp.startDate,
+    endDate: exp.endDate,
+    start: exp.startDate,
+    end: exp.endDate,
+    duration: `${exp.startDate} - ${exp.endDate}`,
+    period: `${exp.startDate} - ${exp.endDate}`,
+    timePeriod: `${exp.startDate} - ${exp.endDate}`,
+    
+    // Responsibilities variations
+    responsibilities: exp.responsibilities.map(r => ({ responsibility: r })),
+    achievements: exp.responsibilities.map(r => ({ achievement: r })),
+    tasks: exp.responsibilities.map(r => ({ task: r })),
+    duties: exp.responsibilities.map(r => ({ duty: r })),
+    accomplishments: exp.responsibilities.map(r => ({ accomplishment: r })),
+    description: exp.responsibilities.join('. '),
+    
+    // Boolean flags
+    hasResponsibilities: exp.responsibilities.length > 0,
+    hasAchievements: exp.responsibilities.length > 0,
+    hasTasks: exp.responsibilities.length > 0
+  };
+}
+
+// Helper function for education data
+function createEducationData(edu) {
+  return {
+    // Degree variations
+    degree: edu.degree,
+    qualification: edu.degree,
+    program: edu.degree,
+    
+    // Institution variations
+    institution: edu.institution,
+    school: edu.institution,
+    university: edu.institution,
+    college: edu.institution,
+    
+    // Year variations
+    startYear: edu.startYear,
+    endYear: edu.endYear,
+    graduationYear: edu.endYear,
+    
+    // Date variations
+    date: edu.startYear && edu.endYear ? `${edu.startYear} - ${edu.endYear}` : edu.startYear || edu.endYear || '',
+    graduationDate: edu.startYear && edu.endYear ? `${edu.startYear} - ${edu.endYear}` : edu.startYear || edu.endYear || '',
+    years: edu.startYear && edu.endYear ? `${edu.startYear} - ${edu.endYear}` : edu.startYear || edu.endYear || '',
+    period: edu.startYear && edu.endYear ? `${edu.startYear} - ${edu.endYear}` : edu.startYear || edu.endYear || '',
+    
+    // GPA
+    gpa: edu.gpa || '',
+    grade: edu.gpa || '',
+    
+    // Boolean flags
+    hasGPA: !!edu.gpa
+  };
+}
+
+// Helper functions for other sections (add similar ones for projects, certifications, awards)
+function createProjectData(proj) {
+  return {
+    title: proj.title,
+    description: proj.description,
+    technologies: proj.technologies?.join(', ') || '',
+    techStack: proj.technologies?.join(', ') || '',
+    link: proj.link || '',
+    url: proj.link || ''
+  };
+}
+
+function createCertificationData(cert) {
+  return {
+    name: cert.name,
+    title: cert.name,
+    issuer: cert.issuer,
+    organization: cert.issuer,
+    date: cert.date,
+    issueDate: cert.date
+  };
+}
+
+function createAwardData(award) {
+  return {
+    name: award.name,
+    title: award.name,
+    issuer: award.issuer,
+    organization: award.issuer,
+    date: award.date,
+    year: award.date
+  };
+}
     
     // Render template with Mustache
     const finalHTML = Mustache.render(templateHTML, mustacheData);
