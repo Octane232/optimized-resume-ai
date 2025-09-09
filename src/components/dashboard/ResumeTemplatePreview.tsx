@@ -301,7 +301,7 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
       iframeDoc.write(fullHTML);
       iframeDoc.close();
     }
-  }, [resumeData, templateId, templates]);
+  }, [resumeData, templateId, templates];
 
   const getDefaultTemplate = () => {
     return `
