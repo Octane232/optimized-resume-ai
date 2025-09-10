@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -205,6 +203,33 @@ const ResumeEditor: React.FC = () => {
     setResumeData(prev => ({
       ...prev,
       education: prev.education.filter((_, i) => i !== index)
+    }));
+  };
+
+  const addProject = () => {
+    setResumeData(prev => ({
+      ...prev,
+      projects: [...prev.projects, {
+        title: '',
+        description: '',
+        technologies: [],
+        link: ''
+      }]
+    }));
+  };
+
+  const updateProject = (index: number, field: string, value: any) => {
+    setResumeData(prev => {
+      const newProjects = [...prev.projects];
+      newProjects[index] = { ...newProjects[index], [field]: value };
+      return { ...prev, projects: newProjects };
+    });
+  };
+
+  const removeProject = (index: number) => {
+    setResumeData(prev => ({
+      ...prev,
+      projects: prev.projects.filter((_, i) => i !== index)
     }));
   };
 
@@ -477,6 +502,57 @@ const ResumeEditor: React.FC = () => {
                   onChange={(e) => updateEducation(index, 'endYear', e.target.value)}
                 />
               </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      {/* Projects */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <span>Projects</span>
+            <Button onClick={addProject} size="sm" variant="outline">
+              <Plus className="w-4 h-4 mr-1" />
+              Add Project
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {resumeData.projects.map((project, index) => (
+            <div key={index} className="p-4 border rounded-lg space-y-3">
+              <div className="flex justify-end">
+                <Button
+                  onClick={() => removeProject(index)}
+                  size="sm"
+                  variant="ghost"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <Input
+                  placeholder="Project Title"
+                  value={project.title}
+                  onChange={(e) => updateProject(index, 'title', e.target.value)}
+                />
+                <Input
+                  placeholder="Technologies (comma-separated)"
+                  value={project.technologies.join(', ')}
+                  onChange={(e) => updateProject(index, 'technologies', e.target.value.split(',').map(t => t.trim()))}
+                />
+                <Input
+                  placeholder="Project Link"
+                  value={project.link}
+                  onChange={(e) => updateProject(index, 'link', e.target.value)}
+                />
+              </div>
+              <Textarea
+                placeholder="Project description..."
+                value={project.description}
+                onChange={(e) => updateProject(index, 'description', e.target.value)}
+                rows={3}
+              />
             </div>
           ))}
         </CardContent>
