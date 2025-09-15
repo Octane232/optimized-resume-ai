@@ -531,28 +531,40 @@ const ResumeEditor: React.FC = () => {
                 </Button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <Input
-                  placeholder="Project Title"
-                  value={project.title}
-                  onChange={(e) => updateProject(index, 'title', e.target.value)}
-                />
-                <Input
-                  placeholder="Technologies (comma-separated)"
-                  value={project.technologies.join(', ')}
-                  onChange={(e) => updateProject(index, 'technologies', e.target.value.split(',').map(t => t.trim()))}
-                />
-                <Input
-                  placeholder="Project Link"
-                  value={project.link}
-                  onChange={(e) => updateProject(index, 'link', e.target.value)}
+                <div className="space-y-2">
+                  <Label>Project Title</Label>
+                  <Input
+                    placeholder="Project Title"
+                    value={project.title}
+                    onChange={(e) => updateProject(index, 'title', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Technologies (comma-separated)</Label>
+                  <Input
+                    placeholder="React, TypeScript, Node.js"
+                    value={project.technologies.join(', ')}
+                    onChange={(e) => updateProject(index, 'technologies', e.target.value.split(',').map(t => t.trim()).filter(t => t))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Project Link</Label>
+                  <Input
+                    placeholder="https://github.com/username/project"
+                    value={project.link}
+                    onChange={(e) => updateProject(index, 'link', e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Project Description</Label>
+                <Textarea
+                  placeholder="Describe the project, your role, and key achievements..."
+                  value={project.description}
+                  onChange={(e) => updateProject(index, 'description', e.target.value)}
+                  rows={3}
                 />
               </div>
-              <Textarea
-                placeholder="Project description..."
-                value={project.description}
-                onChange={(e) => updateProject(index, 'description', e.target.value)}
-                rows={3}
-              />
             </div>
           ))}
         </CardContent>
