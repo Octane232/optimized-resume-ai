@@ -268,7 +268,7 @@ const CreateResume = () => {
                     
                     <div className="w-full h-56 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 rounded-xl border-2 border-slate-200 dark:border-slate-600 shadow-lg mb-4 overflow-hidden relative">
                       <TemplateThumbnail 
-                        htmlContent={template.html_content} 
+                        template={template} 
                         className="absolute inset-0"
                       />
                     </div>

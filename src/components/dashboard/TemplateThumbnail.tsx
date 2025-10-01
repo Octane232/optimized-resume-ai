@@ -1,103 +1,76 @@
-import React, { useEffect, useRef, memo } from "react";
+import React from "react";
+import CanvaStyleRenderer from '@/components/templates/CanvaStyleRenderer';
+import { ResumeData } from '@/types/resume';
 
 interface TemplateThumbnailProps {
-  htmlContent: string;
+  template: {
+    json_content?: any;
+    html_content?: string;
+    name?: string;
+  };
   className?: string;
 }
 
-const TemplateThumbnail: React.FC<TemplateThumbnailProps> = memo(({
-  htmlContent,
+const TemplateThumbnail: React.FC<TemplateThumbnailProps> = ({
+  template,
   className = "",
 }) => {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-
-  useEffect(() => {
-    if (htmlContent && iframeRef.current) {
-      // Mini sample data for thumbnail
-      const miniData = {
-        fullName: "John Smith",
-        title: "Software Engineer",
-        email: "john@example.com",
-        phone: "(555) 123-4567",
-        location: "San Francisco, CA",
-        linkedin: "linkedin.com/in/john",
-        github: "github.com/john",
-        portfolio: "johnsmith.dev",
-        summary:
-          "Experienced software engineer with expertise in web development.",
-        programmingLanguages: "JavaScript, Python",
-        frameworks: "React, Node.js",
-        tools: "Git, Docker",
-        databases: "PostgreSQL, MongoDB",
-      };
-
-      // Replace placeholders
-      let processedHtml = htmlContent || "";
-      Object.entries(miniData).forEach(([key, value]) => {
-        const regex = new RegExp(`{{\\s*${key}\\s*}}`, "g");
-        processedHtml = processedHtml.replace(regex, value);
-      });
-
-      // Replace arrays with simple placeholders
-      processedHtml = processedHtml.replace(
-        /{{#\w+}}[\s\S]*?{{\/\w+}}/g,
-        "<div>...</div>"
-      );
-      processedHtml = processedHtml.replace(/{{[^}]+}}/g, "...");
-
-      // Wrap in scaling container
-      const thumbnailHtml = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="UTF-8">
-          <style>
-            body {
-              margin: 0;
-              font-family: system-ui, sans-serif;
-              background: white;
-              color: #1a1a1a;
-              line-height: 1.4;
-              pointer-events: none;
-              user-select: none;
-            }
-            .scale-wrapper {
-              transform: scale(0.25);
-              transform-origin: top left;
-              width: 400%;
-              height: 400%;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="scale-wrapper">
-            ${processedHtml}
-          </div>
-        </body>
-        </html>
-      `;
-
-      const iframeDoc =
-        iframeRef.current.contentDocument ||
-        iframeRef.current.contentWindow?.document;
-      if (iframeDoc) {
-        iframeDoc.open();
-        iframeDoc.write(thumbnailHtml);
-        iframeDoc.close();
+  // Mini sample data for thumbnail
+  const miniData: ResumeData = {
+    contact: {
+      name: "John Smith",
+      title: "Software Engineer",
+      email: "john@example.com",
+      phone: "(555) 123-4567",
+      location: "San Francisco, CA",
+      linkedin: "linkedin.com/in/john",
+      portfolio: "johnsmith.dev",
+      github: "github.com/john"
+    },
+    summary: "Experienced software engineer with expertise in web development.",
+    skills: ["JavaScript", "React", "Node.js", "Python"],
+    experience: [
+      {
+        title: "Senior Developer",
+        company: "Tech Corp",
+        startDate: "2020",
+        endDate: "Present",
+        responsibilities: ["Led development team", "Built scalable solutions"]
       }
-    }
-  }, [htmlContent]);
+    ],
+    education: [
+      {
+        degree: "B.S. Computer Science",
+        institution: "University",
+        startYear: "2012",
+        endYear: "2016"
+      }
+    ]
+  };
 
+  if (template.json_content) {
+    return (
+      <div className={`overflow-hidden ${className}`} style={{ height: '300px' }}>
+        <div style={{ transform: 'scale(0.3)', transformOrigin: 'top left', width: '333%' }}>
+          <CanvaStyleRenderer 
+            template={template.json_content}
+            data={miniData}
+            scale={1}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Fallback for templates without json_content
   return (
-    <iframe
-      ref={iframeRef}
-      className={`w-full h-full border-0 pointer-events-none ${className}`}
-      title="Template Thumbnail"
-      sandbox="allow-same-origin"
-    />
+    <div className={`flex items-center justify-center h-full bg-gray-100 ${className}`}>
+      <div className="text-center p-4">
+        <div className="text-2xl font-bold text-gray-700 mb-2">{template.name || 'Template'}</div>
+        <div className="text-sm text-gray-500">Preview not available</div>
+      </div>
+    </div>
   );
-});
-
-TemplateThumbnail.displayName = 'TemplateThumbnail';
+};
 
 export default TemplateThumbnail;

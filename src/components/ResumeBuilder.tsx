@@ -108,7 +108,7 @@ const ResumeBuilder: React.FC = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <AIFeatures resumeData={resumeData} enabled={aiEnabled} />
+                <AIFeatures resumeData={resumeData} />
               </CardContent>
             </Card>
 
@@ -314,7 +314,30 @@ const ResumeBuilder: React.FC = () => {
                   {/* Resume Preview Container */}
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-white min-h-[500px]">
                     <div className="transform scale-75 origin-top w-[133%] h-[133%] relative -left-16 -top-10">
-                      <ClassicTemplate />
+                      <ClassicTemplate data={{
+                        contact: {
+                          name: "John Smith",
+                          title: "Software Engineer",
+                          email: "john@example.com",
+                          phone: "(555) 123-4567",
+                          location: "San Francisco, CA"
+                        },
+                        summary: "Experienced software engineer with expertise in full-stack development.",
+                        skills: ["React", "TypeScript", "Node.js"],
+                        experience: [{
+                          title: "Senior Developer",
+                          company: "Tech Corp",
+                          startDate: "2020",
+                          endDate: "Present",
+                          responsibilities: ["Led development team", "Built scalable solutions"]
+                        }],
+                        education: [{
+                          degree: "B.S. Computer Science",
+                          institution: "University",
+                          startYear: "2012",
+                          endYear: "2016"
+                        }]
+                      }} />
                     </div>
                   </div>
                   

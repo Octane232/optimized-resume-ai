@@ -210,12 +210,14 @@ export type Database = {
           description: string | null
           downloads: number | null
           features: Json | null
-          html_content: string
           id: string
           is_popular: boolean | null
+          json_content: Json
+          layout_type: string | null
           name: string
           preview_image: string | null
           rating: number | null
+          style_settings: Json | null
           updated_at: string
         }
         Insert: {
@@ -225,12 +227,14 @@ export type Database = {
           description?: string | null
           downloads?: number | null
           features?: Json | null
-          html_content: string
           id?: string
           is_popular?: boolean | null
+          json_content?: Json
+          layout_type?: string | null
           name: string
           preview_image?: string | null
           rating?: number | null
+          style_settings?: Json | null
           updated_at?: string
         }
         Update: {
@@ -240,12 +244,14 @@ export type Database = {
           description?: string | null
           downloads?: number | null
           features?: Json | null
-          html_content?: string
           id?: string
           is_popular?: boolean | null
+          json_content?: Json
+          layout_type?: string | null
           name?: string
           preview_image?: string | null
           rating?: number | null
+          style_settings?: Json | null
           updated_at?: string
         }
         Relationships: []
