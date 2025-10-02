@@ -29,11 +29,11 @@ const CreateResume = () => {
       const { data, error } = await supabase
         .from('resume_templates')
         .select('*')
-        .order('rating', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      setTemplates(data || []);
+      setTemplates((data || []).slice(0, 1));
     } catch (error) {
       console.error('Error fetching templates:', error);
       toast({

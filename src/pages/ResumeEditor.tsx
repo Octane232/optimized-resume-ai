@@ -98,19 +98,15 @@ const ResumeEditor: React.FC = () => {
       const { data, error } = await supabase
         .from('resume_templates')
         .select('*')
-        .order('name');
+        .order('created_at', { ascending: false });
       
       if (error) throw error;
       
-      if (data) {
-        setTemplates(data);
-        
-        // Set initial template based on URL parameter or first available template
-        if (templateIdFromUrl && data.find(t => t.id === templateIdFromUrl)) {
-          setSelectedTemplate(templateIdFromUrl);
-        } else if (data.length > 0) {
-          setSelectedTemplate(data[0].id);
-        }
+      if (data && data.length > 0) {
+        // Use only the first template as requested
+        const first = data[0];
+        setTemplates([first]);
+        setSelectedTemplate(first.id);
       }
     } catch (error) {
       console.error('Error loading templates:', error);

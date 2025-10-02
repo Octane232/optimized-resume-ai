@@ -31,12 +31,13 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onClose }) => {
       const { data, error } = await supabase
         .from('resume_templates')
         .select('*')
-        .order('rating', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      if (data) {
-        setTemplates(data);
+      if (data && data.length > 0) {
+        // Show only the first template as requested
+        setTemplates(data.slice(0, 1));
       }
     } catch (error) {
       console.error('Error loading templates:', error);
