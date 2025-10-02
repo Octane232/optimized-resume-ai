@@ -205,53 +205,41 @@ export type Database = {
       resume_templates: {
         Row: {
           category: string
-          color_class: string | null
           created_at: string
-          description: string | null
-          downloads: number | null
-          features: Json | null
+          description: string
           id: string
-          is_popular: boolean | null
-          json_content: Json
-          layout_type: string | null
+          is_premium: boolean
+          json_content: Json | null
           name: string
           preview_image: string | null
-          rating: number | null
-          style_settings: Json | null
+          styles: Json
+          template: Json
           updated_at: string
         }
         Insert: {
-          category: string
-          color_class?: string | null
+          category?: string
           created_at?: string
-          description?: string | null
-          downloads?: number | null
-          features?: Json | null
+          description: string
           id?: string
-          is_popular?: boolean | null
-          json_content?: Json
-          layout_type?: string | null
+          is_premium?: boolean
+          json_content?: Json | null
           name: string
           preview_image?: string | null
-          rating?: number | null
-          style_settings?: Json | null
+          styles: Json
+          template: Json
           updated_at?: string
         }
         Update: {
           category?: string
-          color_class?: string | null
           created_at?: string
-          description?: string | null
-          downloads?: number | null
-          features?: Json | null
+          description?: string
           id?: string
-          is_popular?: boolean | null
-          json_content?: Json
-          layout_type?: string | null
+          is_premium?: boolean
+          json_content?: Json | null
           name?: string
           preview_image?: string | null
-          rating?: number | null
-          style_settings?: Json | null
+          styles?: Json
+          template?: Json
           updated_at?: string
         }
         Relationships: []
