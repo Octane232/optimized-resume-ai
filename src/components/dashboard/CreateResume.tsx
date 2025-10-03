@@ -326,6 +326,10 @@ const CreateResume = () => {
                       <Button 
                         className={`flex-1 bg-gradient-to-r ${template.color_class || 'from-slate-500 to-slate-600'} hover:shadow-lg text-white font-semibold rounded-xl transition-all duration-300`}
                         onClick={() => {
+                          if (!template.json_content) {
+                            toast({ title: 'Template not ready', description: 'This template will be available soon. Please choose another with full styles.' });
+                            return;
+                          }
                           navigate(`/editor/new?template=${template.id}`);
                         }}
                       >
@@ -346,10 +350,10 @@ const CreateResume = () => {
         isOpen={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}
         onUseTemplate={() => {
-          if (previewTemplate?.id) {
+          if (previewTemplate?.json_content && previewTemplate?.id) {
             navigate(`/editor/new?template=${previewTemplate.id}`);
           } else {
-            navigate('/editor/new');
+            toast({ title: 'Template not ready', description: 'This template will be available soon. Please choose another with full styles.' });
           }
         }}
       />

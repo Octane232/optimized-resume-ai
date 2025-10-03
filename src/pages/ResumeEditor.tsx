@@ -101,22 +101,23 @@ const ResumeEditor: React.FC = () => {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      
-      if (data && data.length > 0) {
-        setTemplates(data);
-        
-        // Set template from URL or default to first
-        if (templateIdFromUrl) {
-          const urlTemplate = data.find(t => t.id === templateIdFromUrl);
-          if (urlTemplate) {
-            setSelectedTemplate(urlTemplate.id);
+        if (data && data.length > 0) {
+          setTemplates(data);
+
+          const usable = data.filter((t: any) => t.json_content);
+          const getFallbackId = () => (usable[0]?.id || data[0].id);
+
+          if (templateIdFromUrl) {
+            const urlTemplate = data.find((t: any) => t.id === templateIdFromUrl);
+            if (urlTemplate && urlTemplate.json_content) {
+              setSelectedTemplate(urlTemplate.id);
+            } else {
+              setSelectedTemplate(getFallbackId());
+            }
           } else {
-            setSelectedTemplate(data[0].id);
+            setSelectedTemplate(getFallbackId());
           }
-        } else {
-          setSelectedTemplate(data[0].id);
         }
-      }
     } catch (error) {
       console.error('Error loading templates:', error);
       toast({

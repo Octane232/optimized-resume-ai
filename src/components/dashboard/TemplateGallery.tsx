@@ -131,6 +131,10 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onClose }) => {
                           onClick={(e) => {
                             e.stopPropagation();
                             e.preventDefault();
+                            if (!template.json_content) {
+                              toast({ title: 'Template not ready', description: 'This template will be available soon. Please choose another with full styles.' });
+                              return;
+                            }
                             navigate(`/editor/new?template=${template.id}`);
                           }}
                         >
@@ -172,6 +176,10 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onClose }) => {
                       onClick={(e) => {
                         e.stopPropagation();
                         e.preventDefault();
+                        if (!template.json_content) {
+                          toast({ title: 'Template not ready', description: 'This template will be available soon. Please choose another with full styles.' });
+                          return;
+                        }
                         navigate(`/editor/new?template=${template.id}`);
                       }}
                     >
