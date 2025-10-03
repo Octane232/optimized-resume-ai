@@ -17,6 +17,7 @@ interface TemplateSection {
   style?: any;
   content?: any;
   sections?: string[];
+  children?: TemplateSection[];
   columns?: any;
   width?: string;
   position?: string;
@@ -229,136 +230,47 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
         );
 
       case 'columns':
+        const sidebarWidth = section.style?.sidebarWidth || '35%';
+        const columnGap = section.style?.columnGap || '24px';
+        const columns = section.style?.columns || 2;
+        
         return (
-          <div key={section.id} className="flex gap-4">
-            {section.columns?.map((col: any, idx: number) => (
-              <div 
-                key={idx} 
-                style={{ width: col.width }}
-                className="space-y-4"
-              >
-                {col.sections.map((sectionName: string) => {
-                  const sectionData = template.sections.find(s => s.id === sectionName);
-                  if (!sectionData) return null;
-                  return renderSection({ ...sectionData, id: `${sectionName}-${idx}` });
-                })}
-              </div>
-            ))}
-          </div>
-        );
-
-      case 'grid':
-        return (
-          <div 
-            key={section.id}
-            className={`grid grid-cols-${section.columns || 2} gap-${section.gap || '32'}px`}
-          >
-            {section.sections?.map((sectionName: string) => {
-              const sectionData = template.sections.find(s => s.id === sectionName);
-              if (!sectionData) return null;
-              return renderSection({ ...sectionData, id: `${sectionName}-grid` });
+          <div key={section.id} style={{ display: 'flex', gap: columnGap }}>
+            {section.children?.map((child: TemplateSection, idx: number) => {
+              const width = child.type === 'sidebar' ? sidebarWidth : `calc((100% - ${sidebarWidth} - ${columnGap}) * 1)`;
+              return (
+                <div key={child.id || idx} style={{ width, ...child.style }}>
+                  {child.children?.map((innerSection: TemplateSection) => renderSection(innerSection))}
+                </div>
+              );
             })}
           </div>
         );
 
-      case 'sidebar':
-        const isLeft = section.position === 'left';
+      case 'grid':
+        const gridColumns = section.style?.columns || 2;
+        const gridGap = section.style?.gap || '24px';
+        const gridPadding = section.style?.padding || '32px';
+        
         return (
-          <div
+          <div 
             key={section.id}
-            className={`absolute ${isLeft ? 'left-0' : 'right-0'} top-0 h-full`}
-            style={{
-              width: section.width || '35%',
-              backgroundColor: section.backgroundColor || theme.secondaryColor,
-              color: section.textColor || '#FFFFFF',
-              padding: '32px'
+            style={{ 
+              display: 'grid', 
+              gridTemplateColumns: `repeat(${gridColumns}, 1fr)`,
+              gap: gridGap,
+              padding: gridPadding
             }}
           >
-            <div className="space-y-6">
-              {section.sections?.map((sectionName: string) => {
-                // Render sidebar-specific sections
-                if (sectionName === 'contact') {
-                  return (
-                    <div key="contact">
-                      <h3 className="font-bold mb-3">Contact</h3>
-                      <div className="space-y-2 text-sm">
-                        <p>{data.contact.email}</p>
-                        <p>{data.contact.phone}</p>
-                        <p>{data.contact.location}</p>
-                        {data.contact.linkedin && <p>{data.contact.linkedin}</p>}
-                      </div>
-                    </div>
-                  );
-                }
-                if (sectionName === 'skills') {
-                  return (
-                    <div key="skills">
-                      <h3 className="font-bold mb-3">Skills</h3>
-                      <div className="space-y-2">
-                        {data.skills.map((skill, idx) => (
-                          <div key={idx} className="text-sm">
-                            {skill}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                }
-                if (sectionName === 'certifications' && data.certifications) {
-                  return (
-                    <div key="certifications">
-                      <h3 className="font-bold mb-3">Certifications</h3>
-                      <div className="space-y-2">
-                        {data.certifications.map((cert, idx) => (
-                          <div key={idx} className="text-sm">
-                            <p className="font-medium">{cert.name}</p>
-                            <p className="text-xs opacity-80">{cert.issuer}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                }
-                return null;
-              })}
-            </div>
+            {section.children?.map((child: TemplateSection) => renderSection(child))}
           </div>
         );
 
+      case 'sidebar':
       case 'main':
-        const hasSidebar = template.sections.some(s => s.type === 'sidebar');
-        const sidebarSection = template.sections.find(s => s.type === 'sidebar');
-        const marginLeft = hasSidebar && sidebarSection?.position === 'left' 
-          ? sidebarSection.width || '35%' 
-          : '0';
-        const marginRight = hasSidebar && sidebarSection?.position === 'right'
-          ? sidebarSection.width || '35%'
-          : '0';
-
         return (
-          <div
-            key={section.id}
-            style={{
-              marginLeft,
-              marginRight,
-              padding: '32px'
-            }}
-          >
-            <div className="space-y-6">
-              {section.sections?.map((sectionName: string) => {
-                if (sectionName === 'header') {
-                  return (
-                    <div key="header" className="mb-6">
-                      <h1 className="text-3xl font-bold mb-2">{data.contact.name}</h1>
-                      <h2 className="text-xl text-gray-600">{data.contact.title}</h2>
-                    </div>
-                  );
-                }
-                const sectionData = template.sections.find(s => s.id === sectionName);
-                if (!sectionData) return null;
-                return renderSection({ ...sectionData, id: `${sectionName}-main` });
-              })}
-            </div>
+          <div key={section.id} style={{ ...section.style }}>
+            {section.children?.map((child: TemplateSection) => renderSection(child))}
           </div>
         );
 
