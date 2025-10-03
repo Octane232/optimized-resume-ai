@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Download, X } from 'lucide-react';
 import CanvaStyleRenderer from '@/components/templates/CanvaStyleRenderer';
@@ -10,7 +10,9 @@ interface TemplatePreviewProps {
     id?: string;
     name?: string;
     json_content?: any;
-    style_settings?: any;
+    styles?: any;
+    style_settings?: any; // backward compatibility
+    template?: any;
   } | null;
   isOpen: boolean;
   onClose: () => void;
@@ -102,8 +104,8 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = memo(({
     }
     
     // Construct template from styles and default structure
-    if (template.style_settings) {
-      const styles = template.style_settings;
+    if ((template as any).styles || (template as any).style_settings) {
+      const styles = (template as any).styles || (template as any).style_settings;
       return {
         layout: styles.layout || 'modern',
         theme: {
@@ -115,32 +117,11 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = memo(({
           fontFamily: styles.font_family || 'Inter'
         },
         sections: [
-          {
-            id: 'header',
-            type: 'header',
-            style: {
-              backgroundColor: 'gradient',
-              padding: '48px',
-              textAlign: 'center'
-            }
-          },
-          {
-            id: 'summary',
-            type: 'summary'
-          },
-          {
-            id: 'experience',
-            type: 'experience'
-          },
-          {
-            id: 'skills',
-            type: 'skills',
-            style: { columns: 3 }
-          },
-          {
-            id: 'education',
-            type: 'education'
-          }
+          { id: 'header', type: 'header', style: { backgroundColor: 'gradient', padding: '48px', textAlign: 'center' } },
+          { id: 'summary', type: 'summary' },
+          { id: 'experience', type: 'experience' },
+          { id: 'skills', type: 'skills', style: { columns: 3 } },
+          { id: 'education', type: 'education' }
         ]
       };
     }
@@ -176,6 +157,9 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = memo(({
               </Button>
             </div>
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Resume template preview dialog
+          </DialogDescription>
         </DialogHeader>
         <div className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg mx-auto max-w-4xl p-8">
