@@ -326,7 +326,7 @@ const CreateResume = () => {
                       <Button 
                         className={`flex-1 bg-gradient-to-r ${template.color_class || 'from-slate-500 to-slate-600'} hover:shadow-lg text-white font-semibold rounded-xl transition-all duration-300`}
                         onClick={() => {
-                          navigate('/editor/new');
+                          navigate(`/editor/new?template=${template.id}`);
                         }}
                       >
                         Use Template
@@ -346,7 +346,11 @@ const CreateResume = () => {
         isOpen={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}
         onUseTemplate={() => {
-          navigate('/editor/new');
+          if (previewTemplate?.id) {
+            navigate(`/editor/new?template=${previewTemplate.id}`);
+          } else {
+            navigate('/editor/new');
+          }
         }}
       />
     </div>
