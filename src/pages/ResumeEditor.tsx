@@ -314,7 +314,7 @@ const ResumeEditor: React.FC = () => {
     if (element) {
       const opt = {
         margin: 0,
-        filename: `${resumeData.contact.name || 'resume'}.pdf`,
+        filename: `${resumeTitle || 'resume'}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2 },
         jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
