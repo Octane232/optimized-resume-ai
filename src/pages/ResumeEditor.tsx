@@ -311,11 +311,23 @@ const ResumeEditor: React.FC = () => {
     const element = document.getElementById('resume-preview-content');
     if (element) {
       const opt = {
-        margin: 0,
+        margin: [0.3, 0.3, 0.3, 0.3],
         filename: `${resumeData.contact.name || 'resume'}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+        image: { type: 'jpeg', quality: 0.95 },
+        html2canvas: { 
+          scale: 2,
+          useCORS: true,
+          letterRendering: true,
+          scrollY: -window.scrollY,
+          scrollX: 0
+        },
+        jsPDF: { 
+          unit: 'in', 
+          format: 'letter', 
+          orientation: 'portrait',
+          compress: true
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
       };
       html2pdf().set(opt).from(element).save();
     }
