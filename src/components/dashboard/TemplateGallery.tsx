@@ -36,8 +36,7 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onClose }) => {
       if (error) throw error;
 
       if (data && data.length > 0) {
-        // Show only the first template as requested
-        setTemplates(data.slice(0, 1));
+        setTemplates(data);
       }
     } catch (error) {
       console.error('Error loading templates:', error);

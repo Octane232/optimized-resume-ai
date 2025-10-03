@@ -33,7 +33,7 @@ const CreateResume = () => {
 
       if (error) throw error;
 
-      setTemplates((data || []).slice(0, 1));
+      setTemplates(data || []);
     } catch (error) {
       console.error('Error fetching templates:', error);
       toast({

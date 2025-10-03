@@ -103,10 +103,19 @@ const ResumeEditor: React.FC = () => {
       if (error) throw error;
       
       if (data && data.length > 0) {
-        // Use only the first template as requested
-        const first = data[0];
-        setTemplates([first]);
-        setSelectedTemplate(first.id);
+        setTemplates(data);
+        
+        // Set template from URL or default to first
+        if (templateIdFromUrl) {
+          const urlTemplate = data.find(t => t.id === templateIdFromUrl);
+          if (urlTemplate) {
+            setSelectedTemplate(urlTemplate.id);
+          } else {
+            setSelectedTemplate(data[0].id);
+          }
+        } else {
+          setSelectedTemplate(data[0].id);
+        }
       }
     } catch (error) {
       console.error('Error loading templates:', error);
