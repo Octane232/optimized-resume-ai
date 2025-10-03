@@ -1,33 +1,16 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Menu, X, Sun, Moon } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useTheme } from 'next-themes';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    // Check for saved theme preference or default to light mode
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-      setIsDark(true);
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
+  const { theme, setTheme } = useTheme();
 
   const toggleTheme = () => {
-    setIsDark(!isDark);
-    if (isDark) {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    } else {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    }
+    setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
   const navItems = [
@@ -81,7 +64,7 @@ const Header = () => {
               onClick={toggleTheme}
               className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
             >
-              {isDark ? <Sun size={18} /> : <Moon size={18} />}
+              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </Button>
             <Button asChild variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
               <Link to="/auth">Sign In</Link>
@@ -121,8 +104,8 @@ const Header = () => {
                   onClick={toggleTheme}
                   className="justify-start text-gray-600 dark:text-gray-400"
                 >
-                  {isDark ? <Sun size={18} className="mr-2" /> : <Moon size={18} className="mr-2" />}
-                  {isDark ? 'Light Mode' : 'Dark Mode'}
+                  {theme === 'dark' ? <Sun size={18} className="mr-2" /> : <Moon size={18} className="mr-2" />}
+                  {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
                 </Button>
                 <Button asChild variant="ghost" size="sm" className="justify-start">
                   <Link to="/auth">Sign In</Link>
