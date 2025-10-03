@@ -391,14 +391,18 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
           <div key={section.id} style={{ 
             display: 'flex', 
             gap: columnGap,
+            width: '100%',
+            position: 'relative',
             ...getAdvancedStyles(section.style)
           }}>
             {section.children?.map((child: TemplateSection, idx: number) => {
-              const width = child.type === 'sidebar' ? sidebarWidth : `calc((100% - ${sidebarWidth} - ${columnGap}) * 1)`;
+              const width = child.type === 'sidebar' ? sidebarWidth : `calc(100% - ${sidebarWidth} - ${columnGap})`;
               const childStyles = getAdvancedStyles(child.style);
               return (
                 <div key={child.id || idx} style={{ 
                   width, 
+                  flexShrink: 0,
+                  position: 'relative',
                   ...childStyles
                 }}>
                   {child.children?.map((innerSection: TemplateSection) => renderSection(innerSection))}
@@ -422,6 +426,8 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
               gridTemplateColumns: `repeat(${gridColumns}, 1fr)`,
               gap: gridGap,
               padding: gridPadding,
+              width: '100%',
+              position: 'relative',
               ...gridStyles
             }}
           >
@@ -468,8 +474,14 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
 
       case 'sidebar':
       case 'main':
+        const containerStyles = getAdvancedStyles(section.style);
         return (
-          <div key={section.id} style={{ ...getAdvancedStyles(section.style) }}>
+          <div key={section.id} style={{ 
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column',
+            ...containerStyles
+          }}>
             {section.children?.map((child: TemplateSection) => renderSection(child))}
           </div>
         );
@@ -481,16 +493,19 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
 
   return (
     <div 
-      className="resume-container bg-white relative"
+      className="resume-container bg-white"
       style={{
         transform: `scale(${scale})`,
         transformOrigin: 'top center',
         backgroundColor: template.theme.backgroundColor,
         fontFamily: template.theme.fontFamily,
-        minHeight: '800px',
+        width: '210mm',
+        minHeight: '297mm',
         maxWidth: '800px',
         margin: '0 auto',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+        overflow: 'hidden',
+        position: 'relative'
       }}
     >
       {template.sections.map(section => renderSection(section))}
