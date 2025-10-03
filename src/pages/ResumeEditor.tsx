@@ -285,13 +285,20 @@ const ResumeEditor: React.FC = () => {
       return;
     }
 
+    const selectedTemplateObj = templates.find((t: any) => t.id === selectedTemplate);
+    const computedTitle = (!resumeTitle || resumeTitle.trim() === '' || resumeTitle === 'My Resume')
+      ? (selectedTemplateObj?.name || 'Untitled Resume')
+      : resumeTitle.trim();
+
     const resumeRecord = {
       user_id: userData.user.id,
-      title: resumeTitle || 'Untitled Resume',
+      title: computedTitle,
       content: resumeData as unknown as any, // Cast to any for JSON storage
       template_name: selectedTemplate,
     };
 
+    // Keep UI in sync with what will be saved
+    setResumeTitle(computedTitle);
     if (resumeId && resumeId !== 'new') {
       const { error } = await supabase
         .from('resumes')
