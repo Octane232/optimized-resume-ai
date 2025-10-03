@@ -107,16 +107,29 @@ const ResumeEditor: React.FC = () => {
 
           const usable = data.filter((t: any) => t.json_content);
           const getFallbackId = () => (usable[0]?.id || data[0].id);
+          const getFallbackTemplate = () => (usable[0] || data[0]);
 
           if (templateIdFromUrl) {
             const urlTemplate = data.find((t: any) => t.id === templateIdFromUrl);
             if (urlTemplate && urlTemplate.json_content) {
               setSelectedTemplate(urlTemplate.id);
+              // Set resume title to template name for new resumes
+              if (resumeId === 'new') {
+                setResumeTitle(urlTemplate.name);
+              }
             } else {
-              setSelectedTemplate(getFallbackId());
+              const fallbackTemplate = getFallbackTemplate();
+              setSelectedTemplate(fallbackTemplate.id);
+              if (resumeId === 'new') {
+                setResumeTitle(fallbackTemplate.name);
+              }
             }
           } else {
-            setSelectedTemplate(getFallbackId());
+            const fallbackTemplate = getFallbackTemplate();
+            setSelectedTemplate(fallbackTemplate.id);
+            if (resumeId === 'new') {
+              setResumeTitle(fallbackTemplate.name);
+            }
           }
         }
     } catch (error) {
