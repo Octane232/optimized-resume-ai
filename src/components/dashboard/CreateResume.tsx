@@ -267,10 +267,18 @@ const CreateResume = () => {
                     )}
                     
                     <div className="w-full h-56 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 rounded-xl border-2 border-slate-200 dark:border-slate-600 shadow-lg mb-4 overflow-hidden relative">
-                      <TemplateThumbnail 
-                        template={template} 
-                        className="absolute inset-0"
-                      />
+                      {template.preview_image ? (
+                        <img 
+                          src={template.preview_image} 
+                          alt={template.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <TemplateThumbnail 
+                          template={template} 
+                          className="absolute inset-0"
+                        />
+                      )}
                     </div>
 
                     <div className="flex items-center justify-between mb-2">
