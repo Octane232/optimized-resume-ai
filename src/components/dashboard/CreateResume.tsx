@@ -113,7 +113,7 @@ const CreateResume = () => {
   const filteredTemplates = useMemo(() => 
     selectedCategory === 'All' 
       ? templates 
-      : templates.filter(t => t.category === selectedCategory),
+      : templates.filter(t => t.category?.toLowerCase() === selectedCategory.toLowerCase()),
     [selectedCategory, templates]
   );
 

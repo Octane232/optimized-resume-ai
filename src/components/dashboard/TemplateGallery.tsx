@@ -52,7 +52,7 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onClose }) => {
 
   const filteredTemplates = selectedCategory === 'All' 
     ? templates 
-    : templates.filter(template => template.category === selectedCategory);
+    : templates.filter(template => template.category?.toLowerCase() === selectedCategory.toLowerCase());
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
