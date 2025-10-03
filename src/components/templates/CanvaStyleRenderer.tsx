@@ -500,13 +500,12 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
         backgroundColor: template.theme.backgroundColor,
         fontFamily: template.theme.fontFamily,
         width: '210mm',
-        maxHeight: '297mm',
+        minHeight: '297mm',
         maxWidth: '800px',
         margin: '0 auto',
         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
         overflow: 'hidden',
-        position: 'relative',
-        pageBreakInside: 'avoid'
+        position: 'relative'
       }}
     >
       {template.sections.map(section => renderSection(section))}
