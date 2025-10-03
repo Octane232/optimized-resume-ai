@@ -95,6 +95,61 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = memo(({
 
   if (!isOpen || !template) return null;
 
+  // Transform database template format to CanvaStyleRenderer format
+  const getTemplateForRenderer = () => {
+    if (template.json_content) {
+      return template.json_content;
+    }
+    
+    // Construct template from styles and default structure
+    if (template.style_settings) {
+      const styles = template.style_settings;
+      return {
+        layout: styles.layout || 'modern',
+        theme: {
+          primaryColor: styles.primary_color || 'hsl(220, 90%, 56%)',
+          secondaryColor: styles.secondary_color || 'hsl(220, 15%, 25%)',
+          accentColor: styles.accent_color || 'hsl(280, 100%, 70%)',
+          backgroundColor: '#FFFFFF',
+          textColor: '#1a1a1a',
+          fontFamily: styles.font_family || 'Inter'
+        },
+        sections: [
+          {
+            id: 'header',
+            type: 'header',
+            style: {
+              backgroundColor: 'gradient',
+              padding: '48px',
+              textAlign: 'center'
+            }
+          },
+          {
+            id: 'summary',
+            type: 'summary'
+          },
+          {
+            id: 'experience',
+            type: 'experience'
+          },
+          {
+            id: 'skills',
+            type: 'skills',
+            style: { columns: 3 }
+          },
+          {
+            id: 'education',
+            type: 'education'
+          }
+        ]
+      };
+    }
+    
+    return null;
+  };
+
+  const rendererTemplate = getTemplateForRenderer();
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl h-[90vh] p-0 overflow-hidden">
@@ -124,9 +179,9 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = memo(({
         </DialogHeader>
         <div className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg mx-auto max-w-4xl p-8">
-            {template.json_content ? (
+            {rendererTemplate ? (
               <CanvaStyleRenderer 
-                template={template.json_content}
+                template={rendererTemplate}
                 data={sampleData}
                 scale={0.9}
               />
