@@ -67,7 +67,7 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden p-8">
+    <div id="resume-preview-content" className="bg-white rounded-lg shadow-lg overflow-hidden p-8">
       <CanvaStyleRenderer 
         template={rendererTemplate || defaultTemplate}
         data={resumeData}
