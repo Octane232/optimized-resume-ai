@@ -23,6 +23,7 @@ const ResumeEditor: React.FC = () => {
   const [templates, setTemplates] = useState<any[]>([]);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [resumeTitle, setResumeTitle] = useState('My Resume');
   const [resumeData, setResumeData] = useState<ResumeData>({
     contact: {
       name: 'John Doe',
@@ -147,6 +148,7 @@ const ResumeEditor: React.FC = () => {
         contact: { ...prev.contact, ...loadedData.contact },
       }));
       setSelectedTemplate(data.template_name || templates[0]?.id || '');
+      setResumeTitle(data.title || 'My Resume');
     }
   };
 
@@ -272,7 +274,7 @@ const ResumeEditor: React.FC = () => {
 
     const resumeRecord = {
       user_id: userData.user.id,
-      title: resumeData.contact.name ? `${resumeData.contact.name}'s Resume` : 'Untitled Resume',
+      title: resumeTitle || 'Untitled Resume',
       content: resumeData as unknown as any, // Cast to any for JSON storage
       template_name: selectedTemplate,
     };
@@ -323,6 +325,21 @@ const ResumeEditor: React.FC = () => {
 
   const formContent = (
     <div className="space-y-6 p-6">
+      {/* Resume Title */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Resume Title</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Input
+            value={resumeTitle}
+            onChange={(e) => setResumeTitle(e.target.value)}
+            placeholder="e.g., Software Engineer Resume, Marketing Manager CV"
+            className="text-lg font-semibold"
+          />
+        </CardContent>
+      </Card>
+
       {/* Personal Info */}
       <Card>
         <CardHeader>
