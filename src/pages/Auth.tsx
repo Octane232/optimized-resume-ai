@@ -8,7 +8,6 @@ import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import logo from '@/assets/pitchsora-logo.png';
 
 const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -116,7 +115,7 @@ const Auth = () => {
         });
       } else {
         toast({
-          title: "Welcome to AI Resume Pro!",
+          title: "Welcome to PitchSora!",
           description: "Please check your email to verify your account."
         });
       }
@@ -145,9 +144,6 @@ const Auth = () => {
             <ArrowLeft className="h-5 w-5" />
             <span className="font-semibold">Back to Home</span>
           </Link>
-          <Link to="/" className="flex items-center">
-            <img src={logo} alt="Pitchsora" className="h-30 w-auto object-contain" />
-          </Link>
         </div>
       </header>
 
@@ -155,10 +151,12 @@ const Auth = () => {
       <div className="relative z-10 flex items-center justify-center min-h-[calc(100vh-100px)] p-6">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              Join AI Resume Pro
+            <h1 className="text-4xl md:text-5xl font-bold mb-2">
+              <span className="bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent animate-gradient">
+                PitchSora
+              </span>
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-lg">
               Create professional resumes with the power of AI
             </p>
           </div>
