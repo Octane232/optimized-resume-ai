@@ -18,6 +18,7 @@ const InterviewPrep = () => {
   const [showResults, setShowResults] = useState(false);
   const [isLoadingFeedback, setIsLoadingFeedback] = useState(false);
   const [currentFeedback, setCurrentFeedback] = useState<any>(null);
+  const [sessionHistory, setSessionHistory] = useState<any[]>([]);
 
   const categories = [
     { id: 'ai-interview', label: 'AI Interview', icon: Brain, color: 'from-blue-500 to-blue-600' },
@@ -101,6 +102,15 @@ const InterviewPrep = () => {
           setCurrentQuestion(currentQuestion + 1);
           setCurrentFeedback(null);
         } else {
+          // Save completed session to history
+          const session = {
+            id: Date.now(),
+            date: new Date().toISOString(),
+            position: desiredPosition,
+            answers: newAnswers,
+            overallScore: newAnswers.reduce((sum, a) => sum + (a.feedback?.score || 0), 0) / newAnswers.length
+          };
+          setSessionHistory(prev => [...prev, session]);
           setShowResults(true);
         }
       }, 3000);
@@ -391,16 +401,26 @@ const InterviewPrep = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="text-center p-4 bg-gradient-to-r from-blue-50/50 to-purple-50/50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-xl">
-                  <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">85%</div>
+                  <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
+                    {sessionHistory.length > 0 
+                      ? `${Math.round((sessionHistory.reduce((sum, s) => sum + s.overallScore, 0) / sessionHistory.length) * 10)}%`
+                      : '0%'
+                    }
+                  </div>
                   <div className="text-sm text-slate-600 dark:text-slate-400">Preparation Score</div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="text-center p-3 bg-gradient-to-r from-emerald-50/50 to-teal-50/50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-xl">
-                    <div className="text-lg font-bold text-slate-900 dark:text-white">12</div>
+                    <div className="text-lg font-bold text-slate-900 dark:text-white">{sessionHistory.length}</div>
                     <div className="text-xs text-slate-600 dark:text-slate-400">Sessions Completed</div>
                   </div>
                   <div className="text-center p-3 bg-gradient-to-r from-orange-50/50 to-red-50/50 dark:from-orange-950/20 dark:to-red-950/20 rounded-xl">
-                    <div className="text-lg font-bold text-slate-900 dark:text-white">8.2</div>
+                    <div className="text-lg font-bold text-slate-900 dark:text-white">
+                      {sessionHistory.length > 0 
+                        ? (sessionHistory.reduce((sum, s) => sum + s.overallScore, 0) / sessionHistory.length).toFixed(1)
+                        : '0.0'
+                      }
+                    </div>
                     <div className="text-xs text-slate-600 dark:text-slate-400">Avg Score</div>
                   </div>
                 </div>
@@ -455,6 +475,130 @@ const InterviewPrep = () => {
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {selectedCategory === 'analytics' && (
+        <div className="space-y-6">
+          <Card className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl rounded-2xl">
+            <CardHeader className="border-b border-slate-200/60 dark:border-slate-700/60">
+              <CardTitle className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl">
+                  <Award className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold">Performance Analytics</h2>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 font-normal">
+                    Track your interview preparation progress
+                  </p>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              {sessionHistory.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Award className="w-8 h-8 text-slate-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">No Sessions Yet</h3>
+                  <p className="text-slate-600 dark:text-slate-400">
+                    Complete your first AI interview to see your performance analytics
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {/* Overall Stats */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="p-6 bg-gradient-to-r from-blue-50/50 to-purple-50/50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-2xl border border-blue-200/50 dark:border-blue-800/30">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                          <Star className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">Overall Score</p>
+                          <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                            {(sessionHistory.reduce((sum, s) => sum + s.overallScore, 0) / sessionHistory.length).toFixed(1)}/10
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-6 bg-gradient-to-r from-emerald-50/50 to-teal-50/50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-2xl border border-emerald-200/50 dark:border-emerald-800/30">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
+                          <CheckCircle className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">Total Sessions</p>
+                          <p className="text-2xl font-bold text-slate-900 dark:text-white">{sessionHistory.length}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-6 bg-gradient-to-r from-orange-50/50 to-red-50/50 dark:from-orange-950/20 dark:to-red-950/20 rounded-2xl border border-orange-200/50 dark:border-orange-800/30">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl flex items-center justify-center">
+                          <Target className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">Questions Answered</p>
+                          <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                            {sessionHistory.reduce((sum, s) => sum + s.answers.length, 0)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Session History */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Recent Sessions</h3>
+                    <div className="space-y-4">
+                      {sessionHistory.slice().reverse().map((session) => (
+                        <div key={session.id} className="p-5 bg-gradient-to-r from-slate-50/50 to-white/50 dark:from-slate-800/30 dark:to-slate-700/30 rounded-2xl border border-slate-200/50 dark:border-slate-700/50">
+                          <div className="flex items-start justify-between mb-3">
+                            <div>
+                              <h4 className="font-semibold text-slate-900 dark:text-white">{session.position}</h4>
+                              <p className="text-sm text-slate-600 dark:text-slate-400">
+                                {new Date(session.date).toLocaleDateString('en-US', { 
+                                  month: 'short', 
+                                  day: 'numeric', 
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 px-4 py-2 rounded-xl">
+                              <Star className="w-4 h-4 text-amber-500" fill="currentColor" />
+                              <span className="font-bold text-slate-900 dark:text-white">{session.overallScore.toFixed(1)}/10</span>
+                            </div>
+                          </div>
+                          <div className="flex gap-2 flex-wrap">
+                            <Badge variant="secondary" className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                              {session.answers.length} questions
+                            </Badge>
+                            <Badge 
+                              variant="secondary" 
+                              className={`text-xs ${
+                                session.overallScore >= 8 
+                                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                                  : session.overallScore >= 6
+                                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                                  : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+                              }`}
+                            >
+                              {session.overallScore >= 8 ? 'Excellent' : session.overallScore >= 6 ? 'Good' : 'Needs Improvement'}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   );
