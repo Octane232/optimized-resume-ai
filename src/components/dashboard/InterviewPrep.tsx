@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Brain, MessageCircle, Clock, Target, CheckCircle, Play, Sparkles, Star, Award, Users, RotateCcw, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
+import { Brain, MessageCircle, Clock, Target, CheckCircle, Sparkles, Star, Award, Users, RotateCcw, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -22,7 +22,6 @@ const InterviewPrep = () => {
   const categories = [
     { id: 'ai-interview', label: 'AI Interview', icon: Brain, color: 'from-blue-500 to-blue-600' },
     { id: 'tips', label: 'Interview Tips', icon: Target, color: 'from-emerald-500 to-emerald-600' },
-    { id: 'practice', label: 'Practice Sessions', icon: Play, color: 'from-purple-500 to-purple-600' },
     { id: 'analytics', label: 'Performance', icon: Award, color: 'from-orange-500 to-orange-600' }
   ];
 
