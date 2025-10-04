@@ -12,6 +12,7 @@ import JobFinder from '@/components/dashboard/JobFinder';
 import InterviewPrep from '@/components/dashboard/InterviewPrep';
 import Billing from '@/components/dashboard/Billing';
 import Settings from '@/components/dashboard/Settings';
+import HelpSupport from '@/components/dashboard/HelpSupport';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -61,6 +62,8 @@ const Dashboard = () => {
         return <Billing />;
       case 'settings':
         return <Settings />;
+      case 'help':
+        return <HelpSupport />;
       default:
         return <DashboardMain />;
     }
