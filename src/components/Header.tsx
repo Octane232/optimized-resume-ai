@@ -37,9 +37,8 @@ const Header = () => {
       <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3">
-            <img src={logo} alt="Pitchsora" className="h-10 w-auto object-contain" />
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Pitchsora</h1>
+          <Link to="/" className="flex items-center">
+            <img src={logo} alt="Pitchsora" className="h-8 w-auto object-contain" />
           </Link>
 
           {/* Desktop Navigation */}
