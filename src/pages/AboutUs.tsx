@@ -51,7 +51,7 @@ const AboutUs = () => {
                     description: "AI-powered matching that connects the right talent with the right opportunities"
                   },
                   {
-                    icon: <img src={logoIcon} alt="Pitchsora" className="w-8 h-8" />,
+                    icon: <img src={logoIcon} alt="Pitchsora" className="w-24 h-24" />,
                     title: "Empathy",
                     description: "Understanding the challenges of job searching and career transitions"
                   },
