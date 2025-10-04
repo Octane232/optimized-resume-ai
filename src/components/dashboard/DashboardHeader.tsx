@@ -2,9 +2,10 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Sun, Moon, Sparkles, Crown, Bell, Search } from 'lucide-react';
+import { Sun, Moon, Crown, Bell, Search } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useTheme } from 'next-themes';
+import logo from '@/assets/pitchsora-logo.png';
 
 interface DashboardHeaderProps {
   activeTab?: string;
@@ -27,22 +28,9 @@ const DashboardHeader = ({ activeTab, setActiveTab }: DashboardHeaderProps) => {
           {/* Logo */}
           <button 
             onClick={() => setActiveTab?.('dashboard')}
-            className="flex items-center gap-4 group transition-all duration-300 hover:scale-105"
+            className="flex items-center group transition-all duration-300 hover:opacity-80"
           >
-            <div className="relative">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-blue-500/25 transition-all duration-300">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
-                <Crown className="w-2 h-2 text-white" />
-              </div>
-            </div>
-            <div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
-                AI Resume Pro
-              </h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Professional Edition</p>
-            </div>
+            <img src={logo} alt="Pitchsora" className="h-12 w-auto object-contain" />
           </button>
         </div>
 

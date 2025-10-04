@@ -4,10 +4,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, Sparkles } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import logo from '@/assets/pitchsora-logo.png';
 
 const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -144,10 +145,9 @@ const Auth = () => {
             <ArrowLeft className="h-5 w-5" />
             <span className="font-semibold">Back to Home</span>
           </Link>
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-6 w-6 text-primary" />
-            <span className="font-bold text-xl">AI Resume Pro</span>
-          </div>
+          <Link to="/" className="flex items-center">
+            <img src={logo} alt="Pitchsora" className="h-10 w-auto object-contain" />
+          </Link>
         </div>
       </header>
 
