@@ -22,17 +22,33 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const systemPrompt = `You are an expert interview coach providing feedback on interview answers. 
-Your feedback should be constructive, specific, and actionable. 
-Evaluate the answer on: clarity, structure, specific examples, relevance, and completeness.
-Provide a score from 1-10 and detailed feedback.
-Format your response as JSON with fields: score (number), feedback (string), strengths (array), improvements (array)`;
+    const systemPrompt = `You are a STRICT and CRITICAL interview coach. Be HARSH and HONEST in your evaluation.
+
+SCORING RULES - Follow these strictly:
+- Empty, meaningless, or irrelevant answers: 1-2/10
+- Very poor answers with minimal content: 2-3/10
+- Poor answers lacking structure or examples: 3-4/10
+- Below average answers: 4-5/10
+- Average answers with some good points: 5-6/10
+- Good answers with clear structure: 6-7/10
+- Very good answers with examples: 7-8/10
+- Excellent answers with great examples and structure: 8-9/10
+- Perfect, exceptional answers: 9-10/10
+
+If the candidate says nothing meaningful, gives a very short response, or clearly didn't answer the question properly, give them 1-3/10.
+
+Evaluate strictly on:
+1. Does the answer actually address the question?
+2. Is there clear structure (e.g., STAR method)?
+3. Are there specific, concrete examples?
+4. Is the answer complete and thorough?
+5. Does it demonstrate relevant skills/knowledge?`;
 
     const userPrompt = `Position: ${position || 'General'}
-Question: ${question}
+Interview Question: ${question}
 Candidate's Answer: ${answer}
 
-Please evaluate this interview answer and provide detailed feedback.`;
+Evaluate this answer strictly. If it's poor, empty, or meaningless, score it 1-3/10.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -46,6 +62,41 @@ Please evaluate this interview answer and provide detailed feedback.`;
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
         ],
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "evaluate_interview_answer",
+              description: "Provide structured feedback on an interview answer",
+              parameters: {
+                type: "object",
+                properties: {
+                  score: {
+                    type: "number",
+                    description: "Score from 1-10, be strict"
+                  },
+                  feedback: {
+                    type: "string",
+                    description: "Detailed feedback on the answer"
+                  },
+                  strengths: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "List of strengths (empty array if answer is poor)"
+                  },
+                  improvements: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "List of specific improvements needed"
+                  }
+                },
+                required: ["score", "feedback", "strengths", "improvements"],
+                additionalProperties: false
+              }
+            }
+          }
+        ],
+        tool_choice: { type: "function", function: { name: "evaluate_interview_answer" } }
       }),
     });
 
@@ -56,24 +107,17 @@ Please evaluate this interview answer and provide detailed feedback.`;
     }
 
     const data = await response.json();
-    const aiResponse = data.choices[0].message.content;
     
-    // Try to parse as JSON, fallback to text parsing
-    let feedback;
-    try {
-      feedback = JSON.parse(aiResponse);
-    } catch {
-      // If not JSON, create a structured response from the text
-      const scoreMatch = aiResponse.match(/score[:\s]+(\d+)/i);
-      const score = scoreMatch ? parseInt(scoreMatch[1]) : 7;
-      
-      feedback = {
-        score: Math.min(10, Math.max(1, score)),
-        feedback: aiResponse,
-        strengths: [],
-        improvements: []
-      };
+    // Extract the structured tool call response
+    const toolCall = data.choices[0].message.tool_calls?.[0];
+    if (!toolCall) {
+      throw new Error("No tool call in response");
     }
+    
+    const feedback = JSON.parse(toolCall.function.arguments);
+    
+    // Ensure score is within bounds
+    feedback.score = Math.min(10, Math.max(1, feedback.score));
 
     return new Response(JSON.stringify(feedback), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
