@@ -66,7 +66,7 @@ const Footer = () => {
           <div className="md:col-span-1">
             <div className="flex items-center mb-6">
               <Link to="/" className="flex items-center">
-                <img src={logo} alt="Pitchsora" className="h-12 w-auto object-contain" />
+                <img src={logo} alt="Pitchsora" className="h-36 w-auto object-contain" />
               </Link>
             </div>
             <p className="text-gray-400 mb-6 leading-relaxed text-sm">

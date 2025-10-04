@@ -30,7 +30,7 @@ const DashboardHeader = ({ activeTab, setActiveTab }: DashboardHeaderProps) => {
             onClick={() => setActiveTab?.('dashboard')}
             className="flex items-center group transition-all duration-300 hover:opacity-80"
           >
-            <img src={logo} alt="Pitchsora" className="h-12 w-auto object-contain" />
+            <img src={logo} alt="Pitchsora" className="h-36 w-auto object-contain" />
           </button>
         </div>
 

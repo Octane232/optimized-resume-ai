@@ -146,7 +146,7 @@ const Auth = () => {
             <span className="font-semibold">Back to Home</span>
           </Link>
           <Link to="/" className="flex items-center">
-            <img src={logo} alt="Pitchsora" className="h-10 w-auto object-contain" />
+            <img src={logo} alt="Pitchsora" className="h-30 w-auto object-contain" />
           </Link>
         </div>
       </header>
