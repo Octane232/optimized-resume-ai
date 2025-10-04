@@ -4,8 +4,9 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Target, Heart, Zap, Users, TrendingUp, Award, CheckCircle } from 'lucide-react';
+import { Target, Zap, Users, TrendingUp, Award, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import logoIcon from '@/assets/logo-icon.png';
 
 const AboutUs = () => {
   return (
@@ -50,7 +51,7 @@ const AboutUs = () => {
                     description: "AI-powered matching that connects the right talent with the right opportunities"
                   },
                   {
-                    icon: <Heart className="w-8 h-8" />,
+                    icon: <img src={logoIcon} alt="Pitchsora" className="w-8 h-8" />,
                     title: "Empathy",
                     description: "Understanding the challenges of job searching and career transitions"
                   },
