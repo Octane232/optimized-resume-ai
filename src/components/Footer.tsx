@@ -20,30 +20,14 @@ const Footer = () => {
       title: 'Solutions',
       links: [
         { label: 'For Individuals', href: '/for-individuals' },
-        { label: 'For Students', href: '/for-students' },
-        { label: 'For Enterprises', href: '#enterprise' },
-        { label: 'For Recruiters', href: '#resources' },
-        { label: 'Integrations', href: '#resources' }
-      ]
-    },
-    {
-      title: 'Resources',
-      links: [
-        { label: 'Help Center', href: '#resources' },
-        { label: 'Career Blog', href: '#resources' },
-        { label: 'Resume Examples', href: '#resources' },
-        { label: 'Interview Tips', href: '#resources' },
-        { label: 'API Documentation', href: '#resources' }
+        { label: 'For Students', href: '/for-students' }
       ]
     },
     {
       title: 'Company',
       links: [
         { label: 'About Us', href: '/about-us' },
-        { label: 'Careers', href: '#resources' },
-        { label: 'Press Kit', href: '#resources' },
-        { label: 'Contact', href: '/contact' },
-        { label: 'Security', href: '#resources' }
+        { label: 'Contact', href: '/contact' }
       ]
     }
   ];
@@ -61,7 +45,7 @@ const Footer = () => {
     <footer className="bg-gray-900 text-white">
       {/* Main Footer Content */}
       <div className="container mx-auto px-4 lg:px-8 py-16 max-w-7xl">
-        <div className="grid md:grid-cols-5 gap-12">
+        <div className="grid md:grid-cols-4 gap-12">
           {/* Company Info */}
           <div className="md:col-span-1">
             <div className="flex items-center mb-6">
