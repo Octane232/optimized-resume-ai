@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,6 +19,64 @@ const InterviewPrep = () => {
   const [isLoadingFeedback, setIsLoadingFeedback] = useState(false);
   const [currentFeedback, setCurrentFeedback] = useState<any>(null);
   const [sessionHistory, setSessionHistory] = useState<any[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+
+  // Load session history from database
+  useEffect(() => {
+    loadSessionHistory();
+  }, []);
+
+  const loadSessionHistory = async () => {
+    try {
+      const { data: sessions, error: sessionsError } = await supabase
+        .from('interview_sessions')
+        .select('*')
+        .order('completed_at', { ascending: false });
+
+      if (sessionsError) throw sessionsError;
+
+      if (sessions) {
+        // Load answers for each session
+        const sessionsWithAnswers = await Promise.all(
+          sessions.map(async (session) => {
+            const { data: answers, error: answersError } = await supabase
+              .from('interview_answers')
+              .select('*')
+              .eq('session_id', session.id)
+              .order('created_at', { ascending: true });
+
+            if (answersError) throw answersError;
+
+            return {
+              id: session.id,
+              date: session.completed_at,
+              position: session.position,
+              overallScore: Number(session.overall_score),
+              answers: answers?.map(a => ({
+                question: a.question,
+                answer: a.answer,
+                feedback: {
+                  score: Number(a.score),
+                  ...(typeof a.feedback === 'object' && a.feedback ? a.feedback : {})
+                }
+              })) || []
+            };
+          })
+        );
+
+        setSessionHistory(sessionsWithAnswers);
+      }
+    } catch (error) {
+      console.error('Error loading session history:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load interview history",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
 
   const categories = [
     { id: 'ai-interview', label: 'AI Interview', icon: Brain, color: 'from-blue-500 to-blue-600' },
@@ -97,20 +155,67 @@ const InterviewPrep = () => {
       setUserAnswer('');
 
       // Auto-advance after showing feedback
-      setTimeout(() => {
+      setTimeout(async () => {
         if (currentQuestion < interviewQuestions.length - 1) {
           setCurrentQuestion(currentQuestion + 1);
           setCurrentFeedback(null);
         } else {
-          // Save completed session to history
-          const session = {
-            id: Date.now(),
-            date: new Date().toISOString(),
-            position: desiredPosition,
-            answers: newAnswers,
-            overallScore: newAnswers.reduce((sum, a) => sum + (a.feedback?.score || 0), 0) / newAnswers.length
-          };
-          setSessionHistory(prev => [...prev, session]);
+          // Save completed session to database
+          try {
+            const overallScore = newAnswers.reduce((sum, a) => sum + (a.feedback?.score || 0), 0) / newAnswers.length;
+            
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error('User not authenticated');
+
+            // Insert session
+            const { data: sessionData, error: sessionError } = await supabase
+              .from('interview_sessions')
+              .insert({
+                user_id: user.id,
+                position: desiredPosition,
+                overall_score: overallScore
+              })
+              .select()
+              .single();
+
+            if (sessionError) throw sessionError;
+
+            // Insert answers
+            const answersToInsert = newAnswers.map(a => ({
+              session_id: sessionData.id,
+              question: a.question,
+              answer: a.answer,
+              score: a.feedback?.score || 0,
+              feedback: {
+                feedback: a.feedback?.feedback,
+                strengths: a.feedback?.strengths || [],
+                improvements: a.feedback?.improvements || []
+              }
+            }));
+
+            const { error: answersError } = await supabase
+              .from('interview_answers')
+              .insert(answersToInsert);
+
+            if (answersError) throw answersError;
+
+            // Reload session history
+            await loadSessionHistory();
+
+            toast({
+              title: "Session Saved",
+              description: "Your interview performance has been saved successfully",
+            });
+
+          } catch (saveError) {
+            console.error('Error saving session:', saveError);
+            toast({
+              title: "Save Error",
+              description: "Failed to save session, but you can still view results",
+              variant: "destructive"
+            });
+          }
+
           setShowResults(true);
         }
       }, 3000);

@@ -122,6 +122,71 @@ export type Database = {
         }
         Relationships: []
       }
+      interview_answers: {
+        Row: {
+          answer: string
+          created_at: string
+          feedback: Json | null
+          id: string
+          question: string
+          score: number
+          session_id: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          feedback?: Json | null
+          id?: string
+          question: string
+          score: number
+          session_id: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          feedback?: Json | null
+          id?: string
+          question?: string
+          score?: number
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_answers_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "interview_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      interview_sessions: {
+        Row: {
+          completed_at: string
+          created_at: string
+          id: string
+          overall_score: number
+          position: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          created_at?: string
+          id?: string
+          overall_score: number
+          position: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          created_at?: string
+          id?: string
+          overall_score?: number
+          position?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
