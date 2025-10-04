@@ -5,15 +5,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Brain, MessageCircle, Clock, Target, CheckCircle, Play, Sparkles, Star, Award, Users, Mic, MicOff, RotateCcw, ArrowRight } from 'lucide-react';
+import { Brain, MessageCircle, Clock, Target, CheckCircle, Play, Sparkles, Star, Award, Users, RotateCcw, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
 
 const InterviewPrep = () => {
+  const { toast } = useToast();
   const [selectedCategory, setSelectedCategory] = useState('ai-interview');
   const [desiredPosition, setDesiredPosition] = useState('');
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
-  const [isRecording, setIsRecording] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [isLoadingFeedback, setIsLoadingFeedback] = useState(false);
+  const [currentFeedback, setCurrentFeedback] = useState<any>(null);
 
   const categories = [
     { id: 'ai-interview', label: 'AI Interview', icon: Brain, color: 'from-blue-500 to-blue-600' },
@@ -54,7 +58,7 @@ const InterviewPrep = () => {
   };
 
   const [interviewQuestions, setInterviewQuestions] = useState([]);
-  const [answers, setAnswers] = useState([]);
+  const [answers, setAnswers] = useState<any[]>([]);
 
   const startInterview = () => {
     const questions = generateQuestions(desiredPosition);
@@ -62,36 +66,62 @@ const InterviewPrep = () => {
     setCurrentQuestion(0);
     setAnswers([]);
     setShowResults(false);
+    setCurrentFeedback(null);
   };
 
-  const submitAnswer = () => {
-    const newAnswers = [...answers, userAnswer];
-    setAnswers(newAnswers);
-    setUserAnswer('');
+  const submitAnswer = async () => {
+    if (!userAnswer.trim()) return;
     
-    if (currentQuestion < interviewQuestions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
-    } else {
-      setShowResults(true);
+    setIsLoadingFeedback(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('interview-feedback', {
+        body: { 
+          question: interviewQuestions[currentQuestion],
+          answer: userAnswer,
+          position: desiredPosition 
+        }
+      });
+
+      if (error) throw error;
+
+      const feedbackData = {
+        question: interviewQuestions[currentQuestion],
+        answer: userAnswer,
+        feedback: data
+      };
+
+      const newAnswers = [...answers, feedbackData];
+      setAnswers(newAnswers);
+      setCurrentFeedback(data);
+      setUserAnswer('');
+
+      // Auto-advance after showing feedback
+      setTimeout(() => {
+        if (currentQuestion < interviewQuestions.length - 1) {
+          setCurrentQuestion(currentQuestion + 1);
+          setCurrentFeedback(null);
+        } else {
+          setShowResults(true);
+        }
+      }, 3000);
+
+    } catch (error) {
+      console.error('Error getting feedback:', error);
+      toast({
+        title: "Error",
+        description: "Failed to get AI feedback. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoadingFeedback(false);
     }
-  };
-
-  // Mock AI rating system
-  const getAnswerRating = (answer, questionIndex) => {
-    // Simulate AI rating based on answer length and keywords
-    const baseScore = Math.min(10, Math.max(1, answer.length / 20));
-    const keywords = ['experience', 'project', 'team', 'challenge', 'solution', 'result'];
-    const keywordBonus = keywords.filter(keyword => 
-      answer.toLowerCase().includes(keyword)
-    ).length * 0.5;
-    
-    return Math.min(10, Math.round((baseScore + keywordBonus) * 10) / 10);
   };
 
   const getOverallScore = () => {
     if (answers.length === 0) return 0;
-    const totalScore = answers.reduce((sum, answer, index) => 
-      sum + getAnswerRating(answer, index), 0
+    const totalScore = answers.reduce((sum, answer) => 
+      sum + (answer.feedback?.score || 0), 0
     );
     return Math.round((totalScore / answers.length) * 10) / 10;
   };
@@ -218,26 +248,47 @@ const InterviewPrep = () => {
 
                     <div className="space-y-4">
                       <h4 className="text-lg font-semibold text-slate-900 dark:text-white">Detailed Feedback</h4>
-                      {answers.map((answer, index) => {
-                        const rating = getAnswerRating(answer, index);
+                      {answers.map((answerData, index) => {
+                        const { question, answer, feedback } = answerData;
                         return (
                           <div key={index} className="p-4 bg-slate-50/50 dark:bg-slate-800/30 rounded-xl border border-slate-200/50 dark:border-slate-700/50">
                             <div className="flex items-center justify-between mb-2">
                               <p className="font-medium text-slate-900 dark:text-white">Question {index + 1}</p>
                               <div className="flex items-center gap-2">
                                 <Star className="w-4 h-4 text-amber-500" fill="currentColor" />
-                                <span className="font-bold text-slate-900 dark:text-white">{rating}/10</span>
+                                <span className="font-bold text-slate-900 dark:text-white">{feedback?.score || 0}/10</span>
                               </div>
                             </div>
-                            <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">{interviewQuestions[index]}</p>
-                            <p className="text-sm text-slate-700 dark:text-slate-300 bg-white/50 dark:bg-slate-700/30 p-3 rounded-lg">{answer}</p>
-                            <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                              <strong>AI Feedback:</strong> {
-                                rating >= 8 ? "Excellent answer with good structure and examples." :
-                                rating >= 6 ? "Good answer, could benefit from more specific examples." :
-                                rating >= 4 ? "Adequate answer, needs more detail and structure." :
-                                "Consider providing more context and specific examples."
-                              }
+                            <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">{question}</p>
+                            <p className="text-sm text-slate-700 dark:text-slate-300 bg-white/50 dark:bg-slate-700/30 p-3 rounded-lg mb-3">{answer}</p>
+                            
+                            <div className="space-y-2">
+                              <div className="text-sm">
+                                <strong className="text-slate-900 dark:text-white">AI Feedback:</strong>
+                                <p className="text-slate-600 dark:text-slate-400 mt-1">{feedback?.feedback}</p>
+                              </div>
+                              
+                              {feedback?.strengths && feedback.strengths.length > 0 && (
+                                <div className="text-sm">
+                                  <strong className="text-emerald-600 dark:text-emerald-400">Strengths:</strong>
+                                  <ul className="list-disc list-inside text-slate-600 dark:text-slate-400 mt-1">
+                                    {feedback.strengths.map((strength: string, i: number) => (
+                                      <li key={i}>{strength}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                              
+                              {feedback?.improvements && feedback.improvements.length > 0 && (
+                                <div className="text-sm">
+                                  <strong className="text-orange-600 dark:text-orange-400">Areas to Improve:</strong>
+                                  <ul className="list-disc list-inside text-slate-600 dark:text-slate-400 mt-1">
+                                    {feedback.improvements.map((improvement: string, i: number) => (
+                                      <li key={i}>{improvement}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
                             </div>
                           </div>
                         );
@@ -273,33 +324,50 @@ const InterviewPrep = () => {
                       </p>
                     </div>
 
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setIsRecording(!isRecording)}
-                          className={`rounded-xl ${isRecording ? 'bg-red-50 border-red-200 text-red-700' : ''}`}
-                        >
-                          {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                          {isRecording ? 'Stop Recording' : 'Voice Answer'}
-                        </Button>
-                      </div>
-                      
+                    <div className="space-y-6">
                       <Textarea
-                        placeholder="Type your answer here... Try to be specific and use examples."
+                        placeholder="Type your answer here... Try to be specific and use examples from your experience."
                         value={userAnswer}
                         onChange={(e) => setUserAnswer(e.target.value)}
-                        className="min-h-32 bg-white/50 dark:bg-slate-800/50 border-slate-200/50 dark:border-slate-700/50 rounded-xl"
+                        disabled={isLoadingFeedback}
+                        className="min-h-40 bg-white/50 dark:bg-slate-800/50 border-slate-200/50 dark:border-slate-700/50 rounded-xl text-base"
                       />
+                      
+                      {currentFeedback && (
+                        <div className="p-4 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-xl border border-emerald-200/50 dark:border-emerald-800/30 animate-in fade-in slide-in-from-bottom-4">
+                          <div className="flex items-start gap-3">
+                            <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
+                            <div className="space-y-2 flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-slate-900 dark:text-white">Score: {currentFeedback.score}/10</span>
+                              </div>
+                              <p className="text-sm text-slate-700 dark:text-slate-300">{currentFeedback.feedback}</p>
+                              {currentFeedback.strengths?.length > 0 && (
+                                <div className="text-xs text-emerald-700 dark:text-emerald-300">
+                                  <strong>Strengths:</strong> {currentFeedback.strengths.join(', ')}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
                       
                       <Button 
                         onClick={submitAnswer}
-                        disabled={!userAnswer.trim()}
-                        className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-xl"
+                        disabled={!userAnswer.trim() || isLoadingFeedback}
+                        className="w-full h-14 text-lg bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-xl"
                       >
-                        {currentQuestion < interviewQuestions.length - 1 ? 'Next Question' : 'Finish Interview'}
-                        <ArrowRight className="w-4 h-4 ml-2" />
+                        {isLoadingFeedback ? (
+                          <>
+                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                            Getting AI Feedback...
+                          </>
+                        ) : (
+                          <>
+                            Submit Answer
+                            <ArrowRight className="w-5 h-5 ml-2" />
+                          </>
+                        )}
                       </Button>
                     </div>
                   </div>
