@@ -16,7 +16,8 @@ const Auth = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    fullName: ''
+    firstName: '',
+    lastName: ''
   });
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -85,6 +86,16 @@ const Auth = () => {
     e.preventDefault();
     setIsLoading(true);
 
+    if (!formData.firstName.trim() || !formData.lastName.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "First name and last name are required.",
+        variant: "destructive"
+      });
+      setIsLoading(false);
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       toast({
         title: "Password Mismatch",
@@ -96,13 +107,15 @@ const Auth = () => {
     }
 
     try {
+      const fullName = `${formData.firstName.trim()} ${formData.lastName.trim()}`;
+      
       const { error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
           emailRedirectTo: `${window.location.origin}/dashboard`,
           data: {
-            full_name: formData.fullName
+            full_name: fullName
           }
         }
       });
@@ -243,20 +256,39 @@ const Auth = () => {
                     </div>
 
                     <form onSubmit={handleSignUp} className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="signup-name">Full Name</Label>
-                        <div className="relative">
-                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            id="signup-name"
-                            name="fullName"
-                            type="text"
-                            placeholder="Enter your full name"
-                            value={formData.fullName}
-                            onChange={handleInputChange}
-                            className="pl-10"
-                            required
-                          />
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="signup-firstname">First Name *</Label>
+                          <div className="relative">
+                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                              id="signup-firstname"
+                              name="firstName"
+                              type="text"
+                              placeholder="First name"
+                              value={formData.firstName}
+                              onChange={handleInputChange}
+                              className="pl-10"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="signup-lastname">Last Name *</Label>
+                          <div className="relative">
+                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                              id="signup-lastname"
+                              name="lastName"
+                              type="text"
+                              placeholder="Last name"
+                              value={formData.lastName}
+                              onChange={handleInputChange}
+                              className="pl-10"
+                              required
+                            />
+                          </div>
                         </div>
                       </div>
 

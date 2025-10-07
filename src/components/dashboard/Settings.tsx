@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 import { User, Lock, Bell, Shield, Trash2, Settings as SettingsIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
@@ -79,14 +80,37 @@ const Settings = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      const fullName = `${profileData.firstName} ${profileData.lastName}`.trim();
+      if (!profileData.firstName.trim() || !profileData.lastName.trim()) {
+        toast({
+          title: "Missing Information",
+          description: "First name and last name are required.",
+          variant: "destructive"
+        });
+        setSaving(false);
+        return;
+      }
+
+      const fullName = `${profileData.firstName.trim()} ${profileData.lastName.trim()}`;
+      
+      // Calculate profile completion
+      let completedFields = 0;
+      const totalFields = 5; // firstName, lastName, email, phone, location
+      
+      if (profileData.firstName.trim()) completedFields++;
+      if (profileData.lastName.trim()) completedFields++;
+      if (profileData.email) completedFields++; // Email is always present from auth
+      if (profileData.phone?.trim()) completedFields++;
+      if (profileData.location?.trim()) completedFields++;
+      
+      const profileCompletion = Math.round((completedFields / totalFields) * 100);
       
       const { error } = await supabase
         .from('profiles')
         .update({
           full_name: fullName,
           phone: profileData.phone,
-          location: profileData.location
+          location: profileData.location,
+          profile_completion: profileCompletion
         })
         .eq('user_id', user.id);
 
@@ -94,8 +118,11 @@ const Settings = () => {
 
       toast({
         title: "Success",
-        description: "Profile updated successfully"
+        description: `Profile updated successfully (${profileCompletion}% complete)`
       });
+      
+      // Refresh data to show updated completion
+      await fetchSettingsData();
     } catch (error) {
       console.error('Error saving profile:', error);
       toast({
@@ -150,6 +177,67 @@ const Settings = () => {
       </div>
 
       <div className="max-w-4xl mx-auto space-y-8">
+        {/* Profile Completion Card */}
+        <Card className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 border border-purple-200/50 dark:border-purple-800/50 shadow-xl rounded-2xl">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Profile Completion</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  Complete your profile to unlock all features
+                </p>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  {(() => {
+                    let completed = 0;
+                    if (profileData.firstName?.trim()) completed++;
+                    if (profileData.lastName?.trim()) completed++;
+                    if (profileData.email) completed++;
+                    if (profileData.phone?.trim()) completed++;
+                    if (profileData.location?.trim()) completed++;
+                    return Math.round((completed / 5) * 100);
+                  })()}%
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-400">Complete</p>
+              </div>
+            </div>
+            <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+              <div 
+                className="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full transition-all duration-300"
+                style={{ 
+                  width: `${(() => {
+                    let completed = 0;
+                    if (profileData.firstName?.trim()) completed++;
+                    if (profileData.lastName?.trim()) completed++;
+                    if (profileData.email) completed++;
+                    if (profileData.phone?.trim()) completed++;
+                    if (profileData.location?.trim()) completed++;
+                    return Math.round((completed / 5) * 100);
+                  })()}%` 
+                }}
+              />
+            </div>
+            <div className="flex flex-wrap gap-2 mt-4">
+              <Badge variant={profileData.firstName?.trim() ? "default" : "outline"} className="text-xs">
+                {profileData.firstName?.trim() ? "✓" : "○"} First Name
+              </Badge>
+              <Badge variant={profileData.lastName?.trim() ? "default" : "outline"} className="text-xs">
+                {profileData.lastName?.trim() ? "✓" : "○"} Last Name
+              </Badge>
+              <Badge variant={profileData.email ? "default" : "outline"} className="text-xs">
+                {profileData.email ? "✓" : "○"} Email
+              </Badge>
+              <Badge variant={profileData.phone?.trim() ? "default" : "outline"} className="text-xs">
+                {profileData.phone?.trim() ? "✓" : "○"} Phone
+              </Badge>
+              <Badge variant={profileData.location?.trim() ? "default" : "outline"} className="text-xs">
+                {profileData.location?.trim() ? "✓" : "○"} Location
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Profile Information */}
         <Card className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl rounded-2xl">
           <CardHeader className="border-b border-slate-200/60 dark:border-slate-700/60">
