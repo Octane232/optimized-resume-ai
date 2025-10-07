@@ -87,18 +87,6 @@ const DashboardHeader = ({ activeTab, setActiveTab }: DashboardHeaderProps) => {
             {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </Button>
           
-          {/* Notifications */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="relative h-10 w-10 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
-          >
-            <Bell className="w-5 h-5" />
-            <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs bg-red-500 hover:bg-red-500 border-2 border-white dark:border-slate-900">
-              3
-            </Badge>
-          </Button>
-          
           {/* User Profile */}
           <div className="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-700">
             <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
