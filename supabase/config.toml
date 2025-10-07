@@ -2,3 +2,6 @@ project_id = "xpmhahyvtyvrxryrqane"
 
 [functions.interview-feedback]
 verify_jwt = false
+
+[functions.generate-cover-letter]
+verify_jwt = false

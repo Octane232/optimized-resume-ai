@@ -8,6 +8,7 @@ import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardMain from '@/components/dashboard/DashboardMain';
 import MyResumes from '@/components/dashboard/MyResumes';
 import CreateResume from '@/components/dashboard/CreateResume';
+import CoverLetterGenerator from '@/components/dashboard/CoverLetterGenerator';
 import JobFinder from '@/components/dashboard/JobFinder';
 import InterviewPrep from '@/components/dashboard/InterviewPrep';
 import Billing from '@/components/dashboard/Billing';
@@ -54,6 +55,8 @@ const Dashboard = () => {
         return <MyResumes />;
       case 'create-resume':
         return <CreateResume />;
+      case 'cover-letter':
+        return <CoverLetterGenerator />;
       case 'job-finder':
         return <JobFinder />;
       case 'interview-prep':

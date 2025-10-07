@@ -11,6 +11,7 @@ import {
   Brain,
   LogOut,
   HelpCircle,
+  Mail,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -57,10 +58,16 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
       badge: null,
     },
     {
+      title: "Cover Letter",
+      id: "cover-letter",
+      icon: Mail,
+      badge: "New",
+    },
+    {
       title: "Job Finder",
       id: "job-finder",
       icon: Search,
-      badge: "New",
+      badge: null,
     },
     {
       title: "Interview Prep",
