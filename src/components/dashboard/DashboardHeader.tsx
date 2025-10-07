@@ -1,11 +1,12 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Sun, Moon, Crown, Bell, Search } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useTheme } from 'next-themes';
 import logo from '@/assets/pitchsora-logo.png';
+import { supabase } from '@/integrations/supabase/client';
 
 interface DashboardHeaderProps {
   activeTab?: string;
@@ -14,6 +15,35 @@ interface DashboardHeaderProps {
 
 const DashboardHeader = ({ activeTab, setActiveTab }: DashboardHeaderProps) => {
   const { theme, setTheme } = useTheme();
+  const [userName, setUserName] = useState('');
+  const [userInitials, setUserInitials] = useState('');
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
+  const fetchUserProfile = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('user_id', user.id)
+        .single();
+
+      if (profile?.full_name) {
+        setUserName(profile.full_name);
+        // Generate initials from full name
+        const names = profile.full_name.trim().split(' ');
+        const initials = names.map(n => n[0]).join('').toUpperCase().slice(0, 2);
+        setUserInitials(initials);
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  };
 
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
@@ -72,10 +102,10 @@ const DashboardHeader = ({ activeTab, setActiveTab }: DashboardHeaderProps) => {
           {/* User Profile */}
           <div className="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-700">
             <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-sm font-semibold text-white">JD</span>
+              <span className="text-sm font-semibold text-white">{userInitials || 'U'}</span>
             </div>
             <div className="hidden lg:block">
-              <p className="text-sm font-semibold text-slate-900 dark:text-white">John Doe</p>
+              <p className="text-sm font-semibold text-slate-900 dark:text-white">{userName || 'User'}</p>
               <div className="flex items-center gap-2">
                 <Badge className="text-xs bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 border-0">
                   <Crown className="w-3 h-3 mr-1" />
