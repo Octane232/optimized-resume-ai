@@ -1,24 +1,25 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FileText, Download, User, Crown, Plus, Lightbulb, TrendingUp, Star, Zap, Target, Clock, Award, Calendar, ArrowRight, Eye } from 'lucide-react';
+import { FileText, Download, Plus, Lightbulb, TrendingUp, Star, Target, ArrowRight, Eye, Edit, Sparkles } from 'lucide-react';
 import OnboardingFlow from './OnboardingFlow';
-import ResumePreview from './ResumePreview';
 import TemplateGallery from './TemplateGallery';
 import ActivityFeed from './ActivityFeed';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 const DashboardMain = () => {
+  const navigate = useNavigate();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [resumes, setResumes] = useState<any[]>([]);
   const [analytics, setAnalytics] = useState<any[]>([]);
-  const [subscription, setSubscription] = useState<any>(null);
+  const [usageStats, setUsageStats] = useState<any>(null);
   const [aiTips, setAiTips] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -52,9 +53,9 @@ const DashboardMain = () => {
         .select('*')
         .eq('user_id', user.id);
 
-      // Fetch subscription
-      const { data: subscriptionData } = await supabase
-        .from('user_subscriptions')
+      // Fetch usage stats
+      const { data: usageData } = await supabase
+        .from('user_usage_stats')
         .select('*')
         .eq('user_id', user.id)
         .maybeSingle();
@@ -64,12 +65,12 @@ const DashboardMain = () => {
         .from('ai_tips')
         .select('*')
         .eq('is_active', true)
-        .limit(3);
+        .limit(5);
 
       setProfile(profileData);
       setResumes(resumesData || []);
       setAnalytics(analyticsData || []);
-      setSubscription(subscriptionData);
+      setUsageStats(usageData);
       setAiTips(tipsData || []);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -106,49 +107,38 @@ const DashboardMain = () => {
       title: 'Total Resumes', 
       value: resumes.length.toString(), 
       icon: FileText, 
-      color: 'bg-gradient-to-r from-primary to-primary/80', 
-      bgColor: 'bg-primary/5', 
       change: resumes.length > 0 ? 'Keep building!' : 'Create your first resume',
-      trend: 'up'
     },
     { 
       title: 'Downloads', 
       value: totalDownloads.toString(), 
       icon: Download, 
-      color: 'bg-gradient-to-r from-emerald-500 to-emerald-600', 
-      bgColor: 'bg-emerald-50 dark:bg-emerald-950/20', 
       change: 'Total downloads',
-      trend: 'up'
     },
     { 
-      title: 'Views', 
+      title: 'Profile Views', 
       value: totalViews.toString(), 
       icon: Eye, 
-      color: 'bg-gradient-to-r from-amber-500 to-amber-600', 
-      bgColor: 'bg-amber-50 dark:bg-amber-950/20', 
       change: 'Total views',
-      trend: 'neutral'
     },
     { 
-      title: 'Plan Status', 
-      value: subscription?.plan_name || 'Free', 
-      icon: Crown, 
-      color: 'bg-gradient-to-r from-purple-500 to-purple-600', 
-      bgColor: 'bg-purple-50 dark:bg-purple-950/20', 
-      change: subscription?.plan_status === 'active' ? 'Active plan' : 'Inactive',
-      trend: 'neutral'
+      title: 'AI Generations', 
+      value: (usageStats?.ai_generations || 0).toString(), 
+      icon: Sparkles, 
+      change: 'AI assists used',
     },
   ];
 
-  const defaultTips = [
-    "Use action verbs to start your bullet points for more impact",
-    "Quantify your achievements with specific numbers and percentages",
-    "Tailor your resume keywords to match job descriptions",
-    "Keep your resume to 1-2 pages for optimal readability",
-    "Use consistent formatting throughout your document"
-  ];
+  const handleDownloadResume = async (resumeId: string) => {
+    toast({
+      title: "Download started",
+      description: "Preparing your resume for download...",
+    });
+  };
 
-  const currentTips = aiTips.length > 0 ? aiTips : defaultTips.map(tip => ({ description: tip }));
+  const handleEditResume = (resumeId: string) => {
+    navigate(`/resume-editor?id=${resumeId}`);
+  };
 
   return (
     <div className="space-y-8 pb-8">
@@ -167,11 +157,14 @@ const DashboardMain = () => {
                   
                   <h1 className="text-4xl lg:text-5xl font-bold text-foreground leading-tight">
                     Ready to land your 
-                    <span className="gradient-text"> dream job</span>, {profile?.full_name || 'User'}?
+                    <span className="gradient-text"> dream job</span>
+                    {profile?.first_name && `, ${profile.first_name}`}?
                   </h1>
                   
                   <p className="text-xl text-muted-foreground leading-relaxed">
-                    Create professional resumes in minutes with our AI-powered platform. Your next career opportunity is just one click away.
+                    {resumes.length === 0 
+                      ? "Create your first professional resume in minutes with our AI-powered builder."
+                      : "Continue building your professional presence and track your career progress."}
                   </p>
                 </div>
                 
@@ -190,25 +183,30 @@ const DashboardMain = () => {
                   </div>
                 </div>
 
-                {/* AI Tip */}
-                <div className="flex items-start gap-4 p-6 bg-amber-50/80 dark:bg-amber-950/20 rounded-2xl border border-amber-200/50 dark:border-amber-800/30">
-                  <div className="p-2.5 bg-gradient-to-r from-amber-400 to-orange-500 rounded-xl shadow-lg">
-                    <Lightbulb className="w-5 h-5 text-white" />
+                {/* AI Tips */}
+                {aiTips.length > 0 && (
+                  <div className="flex items-start gap-4 p-6 bg-accent/50 rounded-2xl border border-border/50">
+                    <div className="p-2.5 bg-primary rounded-xl shadow-lg">
+                      <Lightbulb className="w-5 h-5 text-primary-foreground" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-foreground mb-1 flex items-center gap-2">
+                        <Sparkles className="w-4 h-4" />
+                        Pro Tip
+                      </h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {aiTips[Math.floor(Math.random() * aiTips.length)]?.description}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-foreground mb-1">💡 Pro Tip</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {currentTips[Math.floor(Math.random() * currentTips.length)]?.description}
-                    </p>
-                  </div>
-                </div>
+                )}
               </div>
               
               <div className="flex flex-col gap-4">
                 <Button 
                   onClick={() => setShowOnboarding(true)}
                   size="lg"
-                  className="h-16 text-lg font-semibold gradient-bg shadow-xl hover:shadow-2xl transition-all duration-300 rounded-2xl"
+                  className="h-16 text-lg font-semibold bg-primary hover:bg-primary/90 shadow-xl hover:shadow-2xl transition-all duration-300 rounded-2xl"
                 >
                   <Plus className="w-6 h-6 mr-3" />
                   Create New Resume
@@ -219,7 +217,7 @@ const DashboardMain = () => {
                   variant="outline"
                   onClick={() => setShowTemplates(true)}
                   size="lg"
-                  className="h-14 text-base font-medium border-2 rounded-2xl"
+                  className="h-14 text-base font-medium rounded-2xl"
                 >
                   <Star className="w-5 h-5 mr-2" />
                   Browse Templates
@@ -235,21 +233,19 @@ const DashboardMain = () => {
         {stats.map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <Card key={index} className="relative overflow-hidden glass-morphism border border-border/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 rounded-2xl">
-              <div className={`absolute inset-0 ${stat.bgColor}`} />
-              <CardContent className="relative p-6">
+            <Card key={index} className="glass-morphism border border-border/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 rounded-2xl">
+              <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{stat.title}</p>
+                    <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
                     <p className="text-3xl font-bold text-foreground">{stat.value}</p>
                   </div>
-                  <div className={`p-3 rounded-2xl ${stat.color} shadow-lg`}>
-                    <Icon className="w-6 h-6 text-white" />
+                  <div className="p-3 rounded-2xl bg-primary/10">
+                    <Icon className="w-6 h-6 text-primary" />
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {stat.trend === 'up' && <TrendingUp className="w-4 h-4 text-emerald-500" />}
-                  <span className="text-sm text-muted-foreground font-medium">{stat.change}</span>
+                  <span className="text-sm text-muted-foreground">{stat.change}</span>
                 </div>
               </CardContent>
             </Card>
@@ -264,18 +260,14 @@ const DashboardMain = () => {
             <CardHeader className="border-b border-border/60 pb-6">
               <CardTitle className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 gradient-bg rounded-2xl shadow-lg">
-                    <FileText className="w-6 h-6 text-white" />
+                  <div className="p-3 bg-primary/10 rounded-2xl">
+                    <FileText className="w-6 h-6 text-primary" />
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold text-foreground">Recent Resumes</h2>
-                    <p className="text-sm text-muted-foreground mt-1">Manage and edit your resume collection</p>
+                    <p className="text-sm text-muted-foreground mt-1">Your latest resume projects</p>
                   </div>
                 </div>
-                <Button variant="outline" size="sm" className="rounded-xl">
-                  View All
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
@@ -291,42 +283,44 @@ const DashboardMain = () => {
                     </Button>
                   </div>
                 ) : (
-                  resumes.slice(0, 3).map((resume, index) => (
-                    <div key={resume.id} className="group relative overflow-hidden bg-accent/20 rounded-2xl border border-border/50 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                  resumes.slice(0, 5).map((resume) => (
+                    <div key={resume.id} className="group relative overflow-hidden bg-accent/20 rounded-2xl border border-border/50 hover:shadow-lg transition-all duration-300">
                       <div className="p-6">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <div className="w-14 h-14 gradient-bg rounded-2xl flex items-center justify-center shadow-lg">
-                              <FileText className="w-7 h-7 text-white" />
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-4 flex-1 min-w-0">
+                            <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center">
+                              <FileText className="w-7 h-7 text-primary" />
                             </div>
-                            <div className="space-y-2">
-                              <h3 className="font-semibold text-foreground text-lg">{resume.title}</h3>
-                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                <span>Modified {new Date(resume.updated_at).toLocaleDateString()}</span>
-                                <span>•</span>
-                                <span>{resume.template_name || 'Classic'}</span>
-                              </div>
-                              <div className="flex items-center gap-3">
-                                <Badge variant="outline" className="text-xs">
-                                  {resume.template_name || 'Classic Template'}
-                                </Badge>
-                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                  resume.is_public 
-                                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                                    : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                                }`}>
-                                  {resume.is_public ? 'Public' : 'Private'}
-                                </span>
+                            <div className="space-y-2 flex-1 min-w-0">
+                              <h3 className="font-semibold text-foreground text-lg truncate">{resume.title}</h3>
+                              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                                <span>Updated {new Date(resume.updated_at).toLocaleDateString()}</span>
+                                {resume.template_name && (
+                                  <>
+                                    <span>•</span>
+                                    <span className="truncate">{resume.template_name}</span>
+                                  </>
+                                )}
                               </div>
                             </div>
                           </div>
-                          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            <Button variant="outline" size="sm" className="rounded-xl">
+                          <div className="flex gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="rounded-xl"
+                              onClick={() => handleEditResume(resume.id)}
+                            >
+                              <Edit className="w-4 h-4 mr-1" />
                               Edit
                             </Button>
-                            <Button variant="outline" size="sm" className="rounded-xl">
-                              <Download className="w-4 h-4 mr-1" />
-                              Download
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="rounded-xl"
+                              onClick={() => handleDownloadResume(resume.id)}
+                            >
+                              <Download className="w-4 h-4" />
                             </Button>
                           </div>
                         </div>
