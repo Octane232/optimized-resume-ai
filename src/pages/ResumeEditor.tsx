@@ -332,14 +332,61 @@ const ResumeEditor: React.FC = () => {
   const exportPDF = () => {
     const element = document.getElementById('resume-preview-content');
     if (element) {
+      // Clone the element to avoid modifying the original
+      const clone = element.cloneNode(true) as HTMLElement;
+      
+      // Create a temporary container
+      const container = document.createElement('div');
+      container.style.position = 'absolute';
+      container.style.left = '-9999px';
+      container.style.top = '0';
+      container.style.width = '210mm'; // A4 width
+      container.appendChild(clone);
+      document.body.appendChild(container);
+
       const opt = {
-        margin: 0,
+        margin: [10, 10, 10, 10], // Top, Right, Bottom, Left margins in mm
         filename: `${resumeTitle || 'resume'}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+        html2canvas: { 
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          windowWidth: 794, // A4 width in pixels at 96 DPI (210mm)
+        },
+        jsPDF: { 
+          unit: 'mm', 
+          format: 'a4', 
+          orientation: 'portrait',
+          compress: true
+        },
+        pagebreak: { 
+          mode: ['avoid-all', 'css', 'legacy'],
+          avoid: ['.resume-section', '.experience-item', '.education-item']
+        }
       };
-      html2pdf().set(opt).from(element).save();
+
+      html2pdf()
+        .set(opt)
+        .from(clone)
+        .save()
+        .then(() => {
+          // Clean up
+          document.body.removeChild(container);
+          toast({
+            title: "Success",
+            description: "Resume downloaded successfully",
+          });
+        })
+        .catch((error) => {
+          console.error('PDF export error:', error);
+          document.body.removeChild(container);
+          toast({
+            title: "Error",
+            description: "Failed to export PDF",
+            variant: "destructive",
+          });
+        });
     }
   };
 

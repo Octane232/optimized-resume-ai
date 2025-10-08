@@ -132,7 +132,7 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
         return (
           <div 
             key={section.id}
-            className="resume-header"
+            className="resume-section resume-header"
             style={{
               ...headerStyles,
               background: section.style?.background || `linear-gradient(135deg, ${theme.primaryColor}, ${theme.secondaryColor})`,
@@ -174,7 +174,7 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
         return (
           <div 
             key={section.id}
-            className="resume-summary"
+            className="resume-section resume-summary"
             style={{
               ...summaryStyles,
               padding: section.style?.padding || '24px',
@@ -202,7 +202,7 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
         return (
           <div 
             key={section.id}
-            className="resume-experience"
+            className="resume-section resume-experience"
             style={{
               ...experienceStyles,
               padding: section.style?.padding || '24px',
@@ -218,7 +218,7 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
               Experience
             </h3>
             {data.experience.map((exp, idx) => (
-              <div key={idx} style={{ 
+              <div key={idx} className="experience-item" style={{ 
                 marginBottom: section.style?.itemSpacing || '24px',
                 paddingBottom: section.style?.divider ? '1rem' : '0',
                 borderBottom: section.style?.divider || 'none'
@@ -258,7 +258,7 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
         return (
           <div 
             key={section.id}
-            className="resume-skills"
+            className="resume-section resume-skills"
             style={{
               ...skillsStyles,
               padding: section.style?.padding || '24px',
@@ -331,7 +331,7 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
         return (
           <div 
             key={section.id}
-            className="resume-education"
+            className="resume-section resume-education"
             style={{
               ...educationStyles,
               padding: section.style?.padding || '24px',
@@ -347,7 +347,7 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
               Education
             </h3>
             {data.education.map((edu, idx) => (
-              <div key={idx} style={{ 
+              <div key={idx} className="education-item" style={{ 
                 marginBottom: section.style?.itemSpacing || '16px'
               }}>
                 {section.style?.tableLayout ? (

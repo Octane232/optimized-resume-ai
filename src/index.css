@@ -332,3 +332,22 @@
     padding: 0.75rem;
   }
 }
+
+/* PDF Export Styles - Page Break Control */
+@media print {
+  .resume-section,
+  .experience-item,
+  .education-item {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  
+  .resume-header {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+  
+  .resume-container {
+    box-shadow: none !important;
+  }
+}
