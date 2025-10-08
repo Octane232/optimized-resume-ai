@@ -726,8 +726,8 @@ const ResumeEditor: React.FC = () => {
         </div>
 
         {/* Right Panel - Preview */}
-        <div className="overflow-y-auto bg-muted/20 p-6">
-          <div className="max-w-4xl mx-auto">
+        <div className="overflow-y-auto bg-muted/20 p-6 flex items-start justify-center">
+          <div className="w-full" style={{ maxWidth: '850px' }}>
             <ResumeTemplatePreview
               resumeData={resumeData}
               templateId={selectedTemplate}
@@ -740,19 +740,21 @@ const ResumeEditor: React.FC = () => {
       {/* Mobile Layout */}
       <div className="lg:hidden">
         <Tabs defaultValue="edit" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-2 sticky top-0 z-10 bg-background">
             <TabsTrigger value="edit">Edit</TabsTrigger>
             <TabsTrigger value="preview">Preview</TabsTrigger>
           </TabsList>
           <TabsContent value="edit" className="mt-0">
             {formContent}
           </TabsContent>
-          <TabsContent value="preview" className="mt-0 p-4">
-            <ResumeTemplatePreview
-              resumeData={resumeData}
-              templateId={selectedTemplate}
-              templates={templates}
-            />
+          <TabsContent value="preview" className="mt-0 p-4 overflow-x-auto">
+            <div className="min-w-[320px]">
+              <ResumeTemplatePreview
+                resumeData={resumeData}
+                templateId={selectedTemplate}
+                templates={templates}
+              />
+            </div>
           </TabsContent>
         </Tabs>
       </div>
