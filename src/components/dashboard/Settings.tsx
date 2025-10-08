@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { User, Lock, Bell, Shield, Trash2, Settings as SettingsIcon } from 'lucide-react';
+import { User, Lock, Bell, Shield, Trash2, Settings as SettingsIcon, Target } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -139,17 +139,17 @@ const Settings = () => {
     return (
       <div className="space-y-8">
         {[...Array(3)].map((_, i) => (
-          <Card key={i} className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50">
+          <Card key={i} className="glass-morphism border border-border/50">
             <CardHeader>
               <div className="animate-pulse">
-                <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-1/4 mb-2"></div>
-                <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-1/3"></div>
+                <div className="h-6 bg-muted rounded w-1/4 mb-2"></div>
+                <div className="h-4 bg-muted rounded w-1/3"></div>
               </div>
             </CardHeader>
             <CardContent>
               <div className="animate-pulse space-y-4">
-                <div className="h-10 bg-slate-200 dark:bg-slate-700 rounded"></div>
-                <div className="h-10 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                <div className="h-10 bg-muted rounded"></div>
+                <div className="h-10 bg-muted rounded"></div>
               </div>
             </CardContent>
           </Card>
@@ -161,34 +161,37 @@ const Settings = () => {
   return (
     <div className="space-y-8">
       <div className="text-center space-y-4">
-        <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-slate-50 to-blue-50 dark:from-slate-950/30 dark:to-blue-950/30 rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
-          <div className="w-8 h-8 bg-gradient-to-r from-slate-500 to-blue-600 rounded-xl flex items-center justify-center">
-            <SettingsIcon className="w-4 h-4 text-white" />
+        <div className="inline-flex items-center gap-3 px-6 py-3 bg-accent/50 rounded-2xl border border-border/50">
+          <div className="w-8 h-8 bg-primary/10 rounded-xl flex items-center justify-center">
+            <SettingsIcon className="w-4 h-4 text-primary" />
           </div>
-          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Account Settings</span>
+          <span className="text-sm font-medium text-foreground">Account Settings</span>
         </div>
         
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 dark:from-white dark:via-slate-100 dark:to-slate-200 bg-clip-text text-transparent">
+        <h1 className="text-4xl font-bold text-foreground">
           Settings
         </h1>
-        <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
           Manage your profile and account settings
         </p>
       </div>
 
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Profile Completion Card */}
-        <Card className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 border border-purple-200/50 dark:border-purple-800/50 shadow-xl rounded-2xl">
-          <CardContent className="p-6">
+        <Card className="glass-morphism border border-border/50 shadow-xl rounded-2xl overflow-hidden">
+          <div className="bg-gradient-subtle p-6">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Profile Completion</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Complete your profile to unlock all features
+                <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                  <Target className="w-5 h-5 text-primary" />
+                  Profile Completion
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Complete your profile to get the best experience
                 </p>
               </div>
               <div className="text-right">
-                <div className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                <div className="text-3xl font-bold text-foreground">
                   {(() => {
                     let completed = 0;
                     if (profileData.firstName?.trim()) completed++;
@@ -199,12 +202,12 @@ const Settings = () => {
                     return Math.round((completed / 5) * 100);
                   })()}%
                 </div>
-                <p className="text-xs text-slate-600 dark:text-slate-400">Complete</p>
+                <p className="text-xs text-muted-foreground">Complete</p>
               </div>
             </div>
-            <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+            <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
               <div 
-                className="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full transition-all duration-300"
+                className="bg-primary h-3 rounded-full transition-all duration-500"
                 style={{ 
                   width: `${(() => {
                     let completed = 0;
@@ -235,64 +238,69 @@ const Settings = () => {
                 {profileData.location?.trim() ? "✓" : "○"} Location
               </Badge>
             </div>
-          </CardContent>
+          </div>
         </Card>
 
         {/* Profile Information */}
-        <Card className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl rounded-2xl">
-          <CardHeader className="border-b border-slate-200/60 dark:border-slate-700/60">
+        <Card className="glass-morphism border border-border/50 shadow-xl rounded-2xl">
+          <CardHeader className="border-b border-border/60">
             <CardTitle className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl">
-                <User className="w-5 h-5 text-white" />
+              <div className="p-2 bg-primary/10 rounded-xl">
+                <User className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h2 className="text-xl font-bold">Profile Information</h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400 font-normal">Update your personal details</p>
+                <h2 className="text-xl font-bold text-foreground">Profile Information</h2>
+                <p className="text-sm text-muted-foreground font-normal">Update your personal details</p>
               </div>
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">First Name</label>
+                <label className="block text-sm font-semibold text-foreground mb-2">First Name *</label>
                 <Input 
                   value={profileData.firstName}
                   onChange={(e) => setProfileData({...profileData, firstName: e.target.value})}
-                  className="bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-xl"
+                  className="rounded-xl"
+                  placeholder="Enter your first name"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Last Name</label>
+                <label className="block text-sm font-semibold text-foreground mb-2">Last Name *</label>
                 <Input 
                   value={profileData.lastName}
                   onChange={(e) => setProfileData({...profileData, lastName: e.target.value})}
-                  className="bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-xl"
+                  className="rounded-xl"
+                  placeholder="Enter your last name"
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Email Address</label>
+                <label className="block text-sm font-semibold text-foreground mb-2">Email Address</label>
                 <Input 
                   type="email"
                   value={profileData.email}
                   onChange={(e) => setProfileData({...profileData, email: e.target.value})}
-                  className="bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-xl"
+                  className="rounded-xl"
                   disabled
                 />
+                <p className="text-xs text-muted-foreground mt-1">Email cannot be changed here</p>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Phone Number</label>
+                <label className="block text-sm font-semibold text-foreground mb-2">Phone Number</label>
                 <Input 
                   value={profileData.phone}
                   onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
-                  className="bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-xl"
+                  className="rounded-xl"
+                  placeholder="+1 (555) 000-0000"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Location</label>
+                <label className="block text-sm font-semibold text-foreground mb-2">Location</label>
                 <Input 
                   value={profileData.location}
                   onChange={(e) => setProfileData({...profileData, location: e.target.value})}
-                  className="bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-xl"
+                  className="rounded-xl"
+                  placeholder="City, Country"
                 />
               </div>
             </div>
@@ -300,14 +308,14 @@ const Settings = () => {
               <Button 
                 onClick={saveProfile}
                 disabled={saving}
-                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl"
+                className="bg-primary hover:bg-primary/90 font-semibold rounded-xl"
               >
                 {saving ? 'Saving...' : 'Save Changes'}
               </Button>
               <Button 
                 variant="outline" 
                 onClick={() => fetchSettingsData()}
-                className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl"
+                className="rounded-xl"
               >
                 Cancel
               </Button>
@@ -316,23 +324,23 @@ const Settings = () => {
         </Card>
 
         {/* Notifications */}
-        <Card className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl rounded-2xl">
-          <CardHeader className="border-b border-slate-200/60 dark:border-slate-700/60">
+        <Card className="glass-morphism border border-border/50 shadow-xl rounded-2xl">
+          <CardHeader className="border-b border-border/60">
             <CardTitle className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-xl">
-                <Bell className="w-5 h-5 text-white" />
+              <div className="p-2 bg-primary/10 rounded-xl">
+                <Bell className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h2 className="text-xl font-bold">Notifications</h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400 font-normal">Manage your notification preferences</p>
+                <h2 className="text-xl font-bold text-foreground">Notifications</h2>
+                <p className="text-sm text-muted-foreground font-normal">Manage your notification preferences</p>
               </div>
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6 space-y-4">
-            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-slate-50/50 to-white/50 dark:from-slate-800/30 dark:to-slate-700/30 rounded-xl border border-slate-200/50 dark:border-slate-700/50">
+            <div className="flex items-center justify-between p-4 bg-accent/20 rounded-xl border border-border/50">
               <div>
-                <p className="font-semibold text-slate-900 dark:text-white">Email Notifications</p>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Resume tips and updates</p>
+                <p className="font-semibold text-foreground">Email Notifications</p>
+                <p className="text-sm text-muted-foreground">Resume tips and updates</p>
               </div>
               <Switch 
                 checked={notifications.emailNotifications}
@@ -340,10 +348,10 @@ const Settings = () => {
               />
             </div>
             
-            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-slate-50/50 to-white/50 dark:from-slate-800/30 dark:to-slate-700/30 rounded-xl border border-slate-200/50 dark:border-slate-700/50">
+            <div className="flex items-center justify-between p-4 bg-accent/20 rounded-xl border border-border/50">
               <div>
-                <p className="font-semibold text-slate-900 dark:text-white">Push Notifications</p>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Browser notifications</p>
+                <p className="font-semibold text-foreground">Push Notifications</p>
+                <p className="text-sm text-muted-foreground">Browser notifications</p>
               </div>
               <Switch 
                 checked={notifications.pushNotifications}
@@ -351,10 +359,10 @@ const Settings = () => {
               />
             </div>
             
-            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-slate-50/50 to-white/50 dark:from-slate-800/30 dark:to-slate-700/30 rounded-xl border border-slate-200/50 dark:border-slate-700/50">
+            <div className="flex items-center justify-between p-4 bg-accent/20 rounded-xl border border-border/50">
               <div>
-                <p className="font-semibold text-slate-900 dark:text-white">Marketing Emails</p>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Product updates and offers</p>
+                <p className="font-semibold text-foreground">Marketing Emails</p>
+                <p className="text-sm text-muted-foreground">Product updates and offers</p>
               </div>
               <Switch 
                 checked={notifications.marketingEmails}
@@ -365,46 +373,46 @@ const Settings = () => {
         </Card>
 
         {/* Privacy & Security */}
-        <Card className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl rounded-2xl">
-          <CardHeader className="border-b border-slate-200/60 dark:border-slate-700/60">
+        <Card className="glass-morphism border border-border/50 shadow-xl rounded-2xl">
+          <CardHeader className="border-b border-border/60">
             <CardTitle className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl">
-                <Shield className="w-5 h-5 text-white" />
+              <div className="p-2 bg-primary/10 rounded-xl">
+                <Shield className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h2 className="text-xl font-bold">Privacy & Security</h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400 font-normal">Manage your account security</p>
+                <h2 className="text-xl font-bold text-foreground">Privacy & Security</h2>
+                <p className="text-sm text-muted-foreground font-normal">Manage your account security</p>
               </div>
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6 space-y-6">
-            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-slate-50/50 to-white/50 dark:from-slate-800/30 dark:to-slate-700/30 rounded-xl border border-slate-200/50 dark:border-slate-700/50">
+            <div className="flex items-center justify-between p-4 bg-accent/20 rounded-xl border border-border/50">
               <div>
-                <h3 className="font-semibold text-slate-900 dark:text-white mb-1">Change Password</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Update your account password</p>
+                <h3 className="font-semibold text-foreground mb-1">Change Password</h3>
+                <p className="text-sm text-muted-foreground">Update your account password</p>
               </div>
-              <Button variant="outline" size="sm" className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl">
+              <Button variant="outline" size="sm" className="rounded-xl">
                 <Lock className="w-4 h-4 mr-2" />
                 Change
               </Button>
             </div>
             
-            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-slate-50/50 to-white/50 dark:from-slate-800/30 dark:to-slate-700/30 rounded-xl border border-slate-200/50 dark:border-slate-700/50">
+            <div className="flex items-center justify-between p-4 bg-accent/20 rounded-xl border border-border/50">
               <div>
-                <h3 className="font-semibold text-slate-900 dark:text-white mb-1">Two-Factor Authentication</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Add an extra layer of security</p>
+                <h3 className="font-semibold text-foreground mb-1">Two-Factor Authentication</h3>
+                <p className="text-sm text-muted-foreground">Add an extra layer of security</p>
               </div>
-              <Button variant="outline" size="sm" className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl">
+              <Button variant="outline" size="sm" className="rounded-xl">
                 Enable
               </Button>
             </div>
             
-            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-red-50/50 to-red-100/50 dark:from-red-950/20 dark:to-red-900/20 rounded-xl border border-red-200/50 dark:border-red-800/50">
+            <div className="flex items-center justify-between p-4 bg-destructive/10 rounded-xl border border-destructive/50">
               <div>
-                <h3 className="font-semibold text-red-700 dark:text-red-400 mb-1">Delete Account</h3>
-                <p className="text-sm text-red-600 dark:text-red-400">Permanently delete your account and data</p>
+                <h3 className="font-semibold text-destructive mb-1">Delete Account</h3>
+                <p className="text-sm text-muted-foreground">Permanently delete your account and data</p>
               </div>
-              <Button variant="outline" size="sm" className="border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl">
+              <Button variant="outline" size="sm" className="border-destructive text-destructive hover:bg-destructive/10 rounded-xl">
                 <Trash2 className="w-4 h-4 mr-2" />
                 Delete
               </Button>

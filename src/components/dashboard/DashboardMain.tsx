@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FileText, Download, Plus, Lightbulb, TrendingUp, Star, Target, ArrowRight, Eye, Edit, Sparkles } from 'lucide-react';
+import { FileText, Download, Plus, Lightbulb, TrendingUp, Star, ArrowRight, Eye, Edit, Sparkles } from 'lucide-react';
 import OnboardingFlow from './OnboardingFlow';
 import TemplateGallery from './TemplateGallery';
 import ActivityFeed from './ActivityFeed';
@@ -166,21 +165,6 @@ const DashboardMain = () => {
                       ? "Create your first professional resume in minutes with our AI-powered builder."
                       : "Continue building your professional presence and track your career progress."}
                   </p>
-                </div>
-                
-                {/* Profile Completion */}
-                <div className="bg-accent/30 rounded-2xl p-6 border border-border/50">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-semibold text-foreground">Profile Completion</span>
-                    <span className="text-lg font-bold text-foreground">{profileCompletion}%</span>
-                  </div>
-                  <Progress value={profileCompletion} className="h-3 mb-3" />
-                  <div className="flex items-center gap-2">
-                    <Target className="w-4 h-4 text-primary" />
-                    <p className="text-sm text-muted-foreground">
-                      {profileCompletion < 100 ? 'Complete your profile to unlock premium features' : '🎉 Profile complete! All features unlocked'}
-                    </p>
-                  </div>
                 </div>
 
                 {/* AI Tips */}
