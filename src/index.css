@@ -333,21 +333,37 @@
   }
 }
 
-/* PDF Export Styles - Page Break Control */
+/* PDF Export Styles - Single Page Optimization */
 @media print {
+  .resume-container {
+    box-shadow: none !important;
+    max-height: 297mm !important;
+    min-height: auto !important;
+    overflow: hidden !important;
+    page-break-after: avoid !important;
+    page-break-before: avoid !important;
+    page-break-inside: avoid !important;
+  }
+  
   .resume-section,
   .experience-item,
   .education-item {
-    page-break-inside: avoid;
-    break-inside: avoid;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
   
   .resume-header {
-    page-break-after: avoid;
-    break-after: avoid;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
   }
   
-  .resume-container {
-    box-shadow: none !important;
+  /* Force compact spacing in print */
+  .resume-section {
+    margin-bottom: 0.5rem !important;
+  }
+  
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
   }
 }

@@ -345,24 +345,26 @@ const ResumeEditor: React.FC = () => {
       document.body.appendChild(container);
 
       const opt = {
-        margin: [10, 10, 10, 10], // Top, Right, Bottom, Left margins in mm
+        margin: [5, 8, 5, 8], // Minimal margins: Top, Right, Bottom, Left in mm
         filename: `${resumeTitle || 'resume'}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
+        image: { type: 'jpeg', quality: 0.95 },
         html2canvas: { 
-          scale: 2,
+          scale: 1.8, // Reduced scale to fit more content
           useCORS: true,
           logging: false,
           windowWidth: 794, // A4 width in pixels at 96 DPI (210mm)
+          height: 1123, // A4 height in pixels (297mm) - force single page
         },
         jsPDF: { 
           unit: 'mm', 
           format: 'a4', 
           orientation: 'portrait',
-          compress: true
+          compress: true,
+          putOnlyUsedFonts: true,
         },
         pagebreak: { 
-          mode: ['avoid-all', 'css', 'legacy'],
-          avoid: ['.resume-section', '.experience-item', '.education-item']
+          mode: 'avoid-all', // Force single page
+          avoid: ['.resume-container', '.resume-section', '.experience-item', '.education-item']
         }
       };
 
