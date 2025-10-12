@@ -10,7 +10,22 @@ import {
   ExternalLink 
 } from "lucide-react";
 
+// Declare Tawk_API type
+declare global {
+  interface Window {
+    Tawk_API?: {
+      maximize?: () => void;
+    };
+  }
+}
+
 const HelpSupport = () => {
+  const openLiveChat = () => {
+    if (window.Tawk_API && window.Tawk_API.maximize) {
+      window.Tawk_API.maximize();
+    }
+  };
+
   const supportOptions = [
     {
       icon: BookOpen,
@@ -31,7 +46,7 @@ const HelpSupport = () => {
       title: "Live Chat",
       description: "Chat with our support team in real-time",
       action: "Start Chat",
-      href: "#"
+      onClick: openLiveChat
     },
     {
       icon: Mail,
@@ -90,12 +105,19 @@ const HelpSupport = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <Button asChild variant="outline" className="w-full">
-                <a href={option.href} className="flex items-center justify-center gap-2">
+              {option.onClick ? (
+                <Button onClick={option.onClick} variant="outline" className="w-full flex items-center justify-center gap-2">
                   {option.action}
-                  <ExternalLink className="w-4 h-4" />
-                </a>
-              </Button>
+                  <MessageSquare className="w-4 h-4" />
+                </Button>
+              ) : (
+                <Button asChild variant="outline" className="w-full">
+                  <a href={option.href} className="flex items-center justify-center gap-2">
+                    {option.action}
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                </Button>
+              )}
             </CardContent>
           </Card>
         ))}
