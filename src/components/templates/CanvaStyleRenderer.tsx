@@ -137,19 +137,19 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
               ...headerStyles,
               background: section.style?.background || `linear-gradient(135deg, ${theme.primaryColor}, ${theme.secondaryColor})`,
               color: section.style?.color || '#FFFFFF',
-              padding: section.style?.padding || '48px',
+              padding: section.style?.padding || '20px 24px',
               textAlign: section.style?.textAlign as any || 'center'
             }}
           >
             <h1 style={{ 
-              fontSize: '2.5rem', 
+              fontSize: '1.75rem', 
               fontWeight: 'bold', 
-              marginBottom: '0.5rem',
+              marginBottom: '0.25rem',
               color: 'inherit'
             }}>{data.contact.name}</h1>
             <h2 style={{ 
-              fontSize: '1.25rem', 
-              marginBottom: '1rem',
+              fontSize: '1rem', 
+              marginBottom: '0.5rem',
               color: 'inherit',
               opacity: 0.9
             }}>{data.contact.title}</h2>
@@ -157,8 +157,8 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
               display: 'flex', 
               flexWrap: 'wrap', 
               justifyContent: section.style?.textAlign === 'left' ? 'flex-start' : 'center',
-              gap: '1rem', 
-              fontSize: '0.875rem',
+              gap: '0.75rem', 
+              fontSize: '0.75rem',
               color: 'inherit'
             }}>
               <span>{data.contact.email}</span>
@@ -177,21 +177,21 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
             className="resume-section resume-summary"
             style={{
               ...summaryStyles,
-              padding: section.style?.padding || '24px',
-              fontSize: section.style?.fontSize || '16px',
+              padding: section.style?.padding || '16px 24px',
+              fontSize: section.style?.fontSize || '0.875rem',
               color: section.style?.color || theme.textColor
             }}
           >
             <h3 style={{ 
-              fontSize: '1.125rem', 
+              fontSize: '1rem', 
               fontWeight: 'bold', 
-              marginBottom: '0.75rem', 
+              marginBottom: '0.5rem', 
               color: theme.primaryColor 
             }}>
               Professional Summary
             </h3>
             <p style={{ 
-              lineHeight: section.style?.lineHeight || '1.6',
+              lineHeight: section.style?.lineHeight || '1.4',
               fontStyle: section.style?.fontStyle || 'normal'
             }}>{data.summary}</p>
           </div>
@@ -205,45 +205,45 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
             className="resume-section resume-experience"
             style={{
               ...experienceStyles,
-              padding: section.style?.padding || '24px',
+              padding: section.style?.padding || '16px 24px',
               color: section.style?.color || theme.textColor
             }}
           >
             <h3 style={{ 
-              fontSize: '1.125rem', 
+              fontSize: '1rem', 
               fontWeight: 'bold', 
-              marginBottom: '1rem', 
+              marginBottom: '0.5rem', 
               color: theme.primaryColor 
             }}>
               Experience
             </h3>
             {data.experience.map((exp, idx) => (
               <div key={idx} className="experience-item" style={{ 
-                marginBottom: section.style?.itemSpacing || '24px',
-                paddingBottom: section.style?.divider ? '1rem' : '0',
+                marginBottom: section.style?.itemSpacing || '12px',
+                paddingBottom: section.style?.divider ? '0.5rem' : '0',
                 borderBottom: section.style?.divider || 'none'
               }}>
                 <div style={{ 
                   display: 'flex', 
                   justifyContent: 'space-between', 
                   alignItems: 'flex-start', 
-                  marginBottom: '0.5rem' 
+                  marginBottom: '0.25rem' 
                 }}>
                   <div>
-                    <h4 style={{ fontWeight: 'bold', fontSize: '1rem' }}>{exp.title}</h4>
-                    <p style={{ color: '#6B7280', fontSize: '0.875rem' }}>{exp.company}</p>
+                    <h4 style={{ fontWeight: 'bold', fontSize: '0.875rem' }}>{exp.title}</h4>
+                    <p style={{ color: '#6B7280', fontSize: '0.75rem' }}>{exp.company}</p>
                   </div>
-                  <span style={{ fontSize: '0.875rem', color: '#6B7280' }}>
+                  <span style={{ fontSize: '0.75rem', color: '#6B7280', whiteSpace: 'nowrap', marginLeft: '8px' }}>
                     {exp.startDate} - {exp.endDate}
                   </span>
                 </div>
                 <ul style={{ 
                   listStyleType: 'disc', 
-                  paddingLeft: '1.5rem', 
-                  lineHeight: '1.4' 
+                  paddingLeft: '1.25rem', 
+                  lineHeight: '1.3' 
                 }}>
                   {exp.responsibilities.map((resp, i) => (
-                    <li key={i} style={{ fontSize: '0.875rem', marginBottom: '0.25rem' }}>{resp}</li>
+                    <li key={i} style={{ fontSize: '0.75rem', marginBottom: '0.125rem' }}>{resp}</li>
                   ))}
                 </ul>
               </div>
@@ -261,14 +261,14 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
             className="resume-section resume-skills"
             style={{
               ...skillsStyles,
-              padding: section.style?.padding || '24px',
+              padding: section.style?.padding || '16px 24px',
               color: section.style?.color || theme.textColor
             }}
           >
             <h3 style={{ 
-              fontSize: '1.125rem', 
+              fontSize: '1rem', 
               fontWeight: 'bold', 
-              marginBottom: '0.75rem', 
+              marginBottom: '0.5rem', 
               color: theme.primaryColor 
             }}>
               Skills & Expertise
@@ -278,15 +278,15 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
               <div style={{ 
                 display: 'grid',
                 gridTemplateColumns: `repeat(${section.style?.columns || 3}, 1fr)`,
-                gap: '0.5rem'
+                gap: '0.375rem'
               }}>
                 {data.skills.map((skill, idx) => (
                   <span 
                     key={idx}
                     style={{ 
-                      padding: '0.5rem 0.75rem',
+                      padding: '0.25rem 0.5rem',
                       borderRadius: '9999px',
-                      fontSize: '0.875rem',
+                      fontSize: '0.75rem',
                       textAlign: 'center',
                       backgroundColor: theme.accentColor + '20',
                       color: theme.primaryColor,
@@ -300,13 +300,13 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
             ) : displayType === 'list' ? (
               <ul style={{ 
                 listStyleType: section.style?.listStyle || 'disc',
-                paddingLeft: '1.5rem',
-                lineHeight: '1.6'
+                paddingLeft: '1.25rem',
+                lineHeight: '1.4'
               }}>
                 {data.skills.map((skill, idx) => (
                   <li key={idx} style={{ 
-                    fontSize: section.style?.fontSize || '0.875rem',
-                    marginBottom: '0.25rem'
+                    fontSize: section.style?.fontSize || '0.75rem',
+                    marginBottom: '0.125rem'
                   }}>{skill}</li>
                 ))}
               </ul>
@@ -314,10 +314,10 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
               <div style={{ 
                 display: 'flex',
                 flexWrap: 'wrap',
-                gap: '0.5rem'
+                gap: '0.375rem'
               }}>
                 {data.skills.map((skill, idx) => (
-                  <span key={idx} style={{ fontSize: '0.875rem' }}>
+                  <span key={idx} style={{ fontSize: '0.75rem' }}>
                     {skill}{idx < data.skills.length - 1 && (section.style?.separator || ' •')}
                   </span>
                 ))}
@@ -334,34 +334,34 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
             className="resume-section resume-education"
             style={{
               ...educationStyles,
-              padding: section.style?.padding || '24px',
+              padding: section.style?.padding || '16px 24px',
               color: section.style?.color || theme.textColor
             }}
           >
             <h3 style={{ 
-              fontSize: '1.125rem', 
+              fontSize: '1rem', 
               fontWeight: 'bold', 
-              marginBottom: '0.75rem', 
+              marginBottom: '0.5rem', 
               color: theme.primaryColor 
             }}>
               Education
             </h3>
             {data.education.map((edu, idx) => (
               <div key={idx} className="education-item" style={{ 
-                marginBottom: section.style?.itemSpacing || '16px'
+                marginBottom: section.style?.itemSpacing || '10px'
               }}>
                 {section.style?.tableLayout ? (
                   <div style={{ 
                     display: 'grid',
                     gridTemplateColumns: '1fr 1fr 2fr',
-                    gap: '1rem',
+                    gap: '0.5rem',
                     alignItems: 'center'
                   }}>
-                    <span style={{ fontSize: '0.875rem', color: '#6B7280' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#6B7280' }}>
                       {edu.startYear} - {edu.endYear}
                     </span>
-                    <span style={{ fontWeight: 'bold' }}>{edu.institution}</span>
-                    <span>{edu.degree}</span>
+                    <span style={{ fontWeight: 'bold', fontSize: '0.875rem' }}>{edu.institution}</span>
+                    <span style={{ fontSize: '0.875rem' }}>{edu.degree}</span>
                   </div>
                 ) : (
                   <div style={{ 
@@ -370,10 +370,10 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
                     alignItems: 'flex-start' 
                   }}>
                     <div>
-                      <h4 style={{ fontWeight: 'bold', fontSize: '1rem' }}>{edu.degree}</h4>
-                      <p style={{ color: '#6B7280', fontSize: '0.875rem' }}>{edu.institution}</p>
+                      <h4 style={{ fontWeight: 'bold', fontSize: '0.875rem' }}>{edu.degree}</h4>
+                      <p style={{ color: '#6B7280', fontSize: '0.75rem' }}>{edu.institution}</p>
                     </div>
-                    <span style={{ fontSize: '0.875rem', color: '#6B7280' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#6B7280', whiteSpace: 'nowrap', marginLeft: '8px' }}>
                       {edu.startYear} - {edu.endYear}
                     </span>
                   </div>
@@ -385,7 +385,7 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
 
       case 'columns':
         const sidebarWidth = section.style?.sidebarWidth || '35%';
-        const columnGap = section.style?.columnGap || '24px';
+        const columnGap = section.style?.columnGap || '16px';
         
         return (
           <div key={section.id} style={{ 
@@ -414,8 +414,8 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
 
       case 'grid':
         const gridColumns = section.style?.columns || 2;
-        const gridGap = section.style?.gap || '24px';
-        const gridPadding = section.style?.padding || '32px';
+        const gridGap = section.style?.gap || '16px';
+        const gridPadding = section.style?.padding || '16px 24px';
         const gridStyles = getAdvancedStyles(section.style);
         
         return (
@@ -443,14 +443,14 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
             className="resume-contact"
             style={{
               ...contactStyles,
-              padding: section.style?.padding || '24px',
+              padding: section.style?.padding || '16px 24px',
               color: section.style?.color || theme.textColor
             }}
           >
             <h3 style={{ 
-              fontSize: '1.125rem', 
+              fontSize: '1rem', 
               fontWeight: 'bold', 
-              marginBottom: '0.75rem', 
+              marginBottom: '0.5rem', 
               color: theme.primaryColor 
             }}>
               Contact
@@ -458,9 +458,9 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
             <div style={{ 
               display: 'flex',
               flexDirection: 'column',
-              gap: '0.5rem',
-              fontSize: section.style?.fontSize || '0.875rem',
-              lineHeight: section.style?.lineHeight || '1.5'
+              gap: '0.375rem',
+              fontSize: section.style?.fontSize || '0.75rem',
+              lineHeight: section.style?.lineHeight || '1.4'
             }}>
               <div>{data.contact.email}</div>
               <div>{data.contact.phone}</div>
