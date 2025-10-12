@@ -344,16 +344,40 @@ const ResumeEditor: React.FC = () => {
       container.appendChild(clone);
       document.body.appendChild(container);
 
+      // Compute scale to force single page (A4 @ 96DPI ~ 794x1123)
+      const A4_WIDTH_PX = 794;
+      const A4_HEIGHT_PX = 1123;
+      const mmToPx = (mm: number) => Math.round((mm / 25.4) * 96);
+      const marginTopMm = 5;
+      const marginBottomMm = 5;
+      const verticalMarginPx = mmToPx(marginTopMm + marginBottomMm);
+      const targetContentHeightPx = A4_HEIGHT_PX - verticalMarginPx;
+
+      // Normalize clone sizing for accurate measurement
+      clone.style.width = `${A4_WIDTH_PX}px`;
+      clone.style.maxWidth = `${A4_WIDTH_PX}px`;
+      clone.style.background = '#ffffff';
+      clone.style.transformOrigin = 'top left';
+
+      // Measure and scale to fit
+      const actualHeight = clone.scrollHeight;
+      if (actualHeight > targetContentHeightPx) {
+        const scaleFactor = targetContentHeightPx / actualHeight;
+        clone.style.transform = `scale(${scaleFactor})`;
+        // Preserve layout height so html2canvas captures full content pre-scale
+        clone.style.height = `${actualHeight}px`;
+      }
+
       const opt = {
-        margin: [5, 8, 5, 8], // Minimal margins: Top, Right, Bottom, Left in mm
+        margin: [marginTopMm, 8, marginBottomMm, 8],
         filename: `${resumeTitle || 'resume'}.pdf`,
         image: { type: 'jpeg', quality: 0.95 },
         html2canvas: { 
-          scale: 1.8, // Reduced scale to fit more content
+          scale: 2,
           useCORS: true,
           logging: false,
-          windowWidth: 794, // A4 width in pixels at 96 DPI (210mm)
-          height: 1123, // A4 height in pixels (297mm) - force single page
+          windowWidth: A4_WIDTH_PX,
+          backgroundColor: '#ffffff',
         },
         jsPDF: { 
           unit: 'mm', 
@@ -362,10 +386,8 @@ const ResumeEditor: React.FC = () => {
           compress: true,
           putOnlyUsedFonts: true,
         },
-        pagebreak: { 
-          mode: 'avoid-all', // Force single page
-          avoid: ['.resume-container', '.resume-section', '.experience-item', '.education-item']
-        }
+        // Let CSS control breaks; content is scaled to fit single page
+        pagebreak: { mode: ['css'] }
       };
 
       html2pdf()
