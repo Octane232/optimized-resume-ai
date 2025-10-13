@@ -16,13 +16,21 @@ import Settings from '@/components/dashboard/Settings';
 import HelpSupport from '@/components/dashboard/HelpSupport';
 
 const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState(() => {
+    // Restore last active tab from localStorage
+    return localStorage.getItem('dashboard-active-tab') || 'dashboard';
+  });
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     checkAuth();
   }, []);
+
+  useEffect(() => {
+    // Persist active tab to localStorage
+    localStorage.setItem('dashboard-active-tab', activeTab);
+  }, [activeTab]);
 
   const checkAuth = async () => {
     try {
