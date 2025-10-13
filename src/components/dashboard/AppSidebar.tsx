@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -38,6 +38,29 @@ interface AppSidebarProps {
 
 export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
   const navigate = useNavigate();
+  const [resumeCount, setResumeCount] = useState<number>(0);
+
+  useEffect(() => {
+    fetchResumeCount();
+  }, []);
+
+  const fetchResumeCount = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { count, error } = await supabase
+        .from('resumes')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      setResumeCount(count || 0);
+    } catch (error) {
+      console.error('Error fetching resume count:', error);
+    }
+  };
+
   const menuItems = [
     {
       title: "Dashboard",
@@ -49,7 +72,7 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
       title: "My Resumes",
       id: "my-resumes", 
       icon: FileText,
-      badge: "3",
+      badge: resumeCount > 0 ? resumeCount.toString() : null,
     },
     {
       title: "Create Resume",
