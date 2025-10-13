@@ -11,7 +11,11 @@ import ActivityFeed from './ActivityFeed';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-const DashboardMain = () => {
+interface DashboardMainProps {
+  setActiveTab?: (tab: string) => void;
+}
+
+const DashboardMain = ({ setActiveTab }: DashboardMainProps) => {
   const navigate = useNavigate();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
@@ -188,7 +192,7 @@ const DashboardMain = () => {
               
               <div className="flex flex-col gap-4">
                 <Button 
-                  onClick={() => setShowOnboarding(true)}
+                  onClick={() => setActiveTab?.('create-resume')}
                   size="lg"
                   className="h-16 text-lg font-semibold bg-primary hover:bg-primary/90 shadow-xl hover:shadow-2xl transition-all duration-300 rounded-2xl"
                 >
@@ -261,7 +265,7 @@ const DashboardMain = () => {
                     <FileText className="h-16 w-16 mx-auto mb-4 opacity-50" />
                     <h3 className="text-lg font-medium mb-2">No resumes yet</h3>
                     <p className="mb-6">Create your first resume to get started on your career journey</p>
-                    <Button onClick={() => setShowTemplates(true)} className="rounded-xl">
+                    <Button onClick={() => setActiveTab?.('create-resume')} className="rounded-xl">
                       <Plus className="w-4 h-4 mr-2" />
                       Create Resume
                     </Button>

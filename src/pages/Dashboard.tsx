@@ -50,7 +50,7 @@ const Dashboard = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <DashboardMain />;
+        return <DashboardMain setActiveTab={setActiveTab} />;
       case 'my-resumes':
         return <MyResumes />;
       case 'create-resume':
@@ -68,7 +68,7 @@ const Dashboard = () => {
       case 'help':
         return <HelpSupport />;
       default:
-        return <DashboardMain />;
+        return <DashboardMain setActiveTab={setActiveTab} />;
     }
   };
 
