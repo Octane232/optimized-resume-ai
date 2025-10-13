@@ -106,13 +106,15 @@ const Settings = () => {
       
       const { error } = await supabase
         .from('profiles')
-        .update({
+        .upsert({
+          user_id: user.id,
           full_name: fullName,
           phone: profileData.phone,
           location: profileData.location,
           profile_completion: profileCompletion
-        })
-        .eq('user_id', user.id);
+        }, {
+          onConflict: 'user_id'
+        });
 
       if (error) throw error;
 
