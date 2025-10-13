@@ -35,9 +35,16 @@ const DashboardHeader = ({ activeTab, setActiveTab }: DashboardHeaderProps) => {
 
       if (profile?.full_name) {
         setUserName(profile.full_name);
-        // Generate initials from full name
-        const names = profile.full_name.trim().split(' ');
-        const initials = names.map(n => n[0]).join('').toUpperCase().slice(0, 2);
+        // Generate initials: first letter of first name + first letter of last name
+        const names = profile.full_name.trim().split(' ').filter(n => n.length > 0);
+        let initials = '';
+        if (names.length >= 2) {
+          // First letter of first name + first letter of last name
+          initials = (names[0][0] + names[names.length - 1][0]).toUpperCase();
+        } else if (names.length === 1) {
+          // If only one name, use first two letters
+          initials = names[0].slice(0, 2).toUpperCase();
+        }
         setUserInitials(initials);
       }
     } catch (error) {
