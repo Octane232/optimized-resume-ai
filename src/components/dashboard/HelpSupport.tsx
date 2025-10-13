@@ -6,7 +6,6 @@ import {
   Mail, 
   MessageSquare, 
   BookOpen, 
-  Video,
   ExternalLink 
 } from "lucide-react";
 
@@ -32,13 +31,6 @@ const HelpSupport = () => {
       title: "Documentation",
       description: "Browse our comprehensive guides and tutorials",
       action: "View Docs",
-      href: "#"
-    },
-    {
-      icon: Video,
-      title: "Video Tutorials",
-      description: "Watch step-by-step video guides",
-      action: "Watch Videos",
       href: "#"
     },
     {
