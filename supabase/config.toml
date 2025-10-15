@@ -5,3 +5,15 @@ verify_jwt = false
 
 [functions.generate-cover-letter]
 verify_jwt = false
+
+[functions.send-welcome-email]
+verify_jwt = false
+
+[functions.send-password-reset]
+verify_jwt = false
+
+[functions.send-payment-confirmation]
+verify_jwt = false
+
+[functions.send-subscription-update]
+verify_jwt = false
