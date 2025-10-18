@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Star } from 'lucide-react';
+import { Star, Quote, TrendingUp, Zap } from 'lucide-react';
 
 const TestimonialsSection = () => {
   const testimonials = [
@@ -61,69 +61,115 @@ const TestimonialsSection = () => {
   ];
 
   return (
-    <section className="py-20 bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
-      <div className="container mx-auto px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full text-sm font-medium mb-4">
-            <Star className="w-4 h-4 fill-current" />
-            Success Stories
+    <section className="relative py-32 overflow-hidden bg-background">
+      {/* Advanced background with animated gradients */}
+      <div className="absolute inset-0 bg-[var(--gradient-mesh)] opacity-60"></div>
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-blue-400/20 to-purple-500/20 dark:from-blue-500/10 dark:to-purple-600/10 rounded-full blur-3xl animate-pulse"></div>
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-tr from-purple-400/20 to-emerald-400/20 dark:from-purple-500/10 dark:to-emerald-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+      
+      <div className="container mx-auto px-6 lg:px-8 relative">
+        <div className="text-center mb-20">
+          <div className="inline-flex items-center gap-2 glass-card rounded-full px-6 py-3 mb-8 animate-fade-in">
+            <TrendingUp className="w-5 h-5 text-emerald-500" />
+            <span className="text-sm font-semibold gradient-text bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
+              250,000+ Success Stories
+            </span>
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-            Real results from real people
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-[1.1] tracking-tight animate-fade-in" style={{ animationDelay: '0.1s' }}>
+            <span className="block gradient-text bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-[length:200%_auto] animate-gradient">
+              Real results
+            </span>
+            <span className="block text-foreground">from real people</span>
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Join thousands of professionals who accelerated their careers
+          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            Join thousands of professionals who accelerated their careers with AI-powered tools
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {testimonials.map((testimonial, index) => (
             <div 
               key={index} 
-              className="bg-white/80 backdrop-blur-sm dark:bg-gray-800/80 p-6 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 hover:shadow-card hover:scale-105 transition-all duration-300 animate-fade-in"
-              style={{ animationDelay: `${index * 0.1}s` }}
+              className="testimonial-card rounded-3xl p-8 group animate-fade-in"
+              style={{ animationDelay: `${0.3 + index * 0.1}s` }}
             >
-              {/* Rating Stars */}
-              <div className="flex mb-4">
+              {/* Decorative quote icon */}
+              <div className="absolute top-6 right-6 w-16 h-16 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-2xl flex items-center justify-center rotate-6 group-hover:rotate-12 transition-transform duration-500">
+                <Quote className="w-8 h-8 text-blue-500/40 dark:text-blue-400/40" />
+              </div>
+
+              {/* Rating Stars with glow effect */}
+              <div className="flex gap-1 mb-6">
                 {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
+                  <div key={i} className="relative">
+                    <Star className="h-5 w-5 text-yellow-400 fill-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]" />
+                  </div>
                 ))}
               </div>
 
               {/* Testimonial Content */}
-              <p className="text-gray-700 dark:text-gray-300 mb-6 leading-relaxed text-sm">
+              <p className="text-foreground/90 mb-8 leading-relaxed text-base font-medium relative z-10">
                 "{testimonial.content}"
               </p>
 
-              {/* User Info */}
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 ${testimonial.bgColor} rounded-full flex items-center justify-center text-white font-semibold text-sm`}>
+              {/* User Info with enhanced styling */}
+              <div className="flex items-center gap-4 pt-6 border-t border-border/50">
+                <div className={`relative w-14 h-14 ${testimonial.bgColor} rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-xl group-hover:scale-110 transition-transform duration-300`}>
                   {testimonial.initials}
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-2xl"></div>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900 dark:text-white text-sm">
+                  <h4 className="font-bold text-foreground text-base mb-1">
                     {testimonial.name}
                   </h4>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    {testimonial.role} at {testimonial.company}
+                  <p className="text-sm text-muted-foreground font-medium">
+                    {testimonial.role}
+                  </p>
+                  <p className="text-xs text-muted-foreground/70 mt-0.5">
+                    {testimonial.company}
                   </p>
                 </div>
               </div>
+
+              {/* Subtle gradient overlay on hover */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
             </div>
           ))}
         </div>
 
-        {/* Bottom CTA */}
-        <div className="text-center mt-16">
-          <div className="inline-flex items-center gap-4 bg-white/60 backdrop-blur-sm dark:bg-gray-800/60 rounded-full px-6 py-3 border border-gray-200/50 dark:border-gray-700/50">
-            <div className="flex -space-x-2">
-              <div className="w-8 h-8 bg-blue-500 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center text-white text-xs font-semibold">S</div>
-              <div className="w-8 h-8 bg-purple-500 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center text-white text-xs font-semibold">M</div>
-              <div className="w-8 h-8 bg-emerald-500 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center text-white text-xs font-semibold">E</div>
-              <div className="w-8 h-8 bg-gray-400 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center text-white text-xs font-semibold">+</div>
+        {/* Bottom CTA with advanced styling */}
+        <div className="text-center mt-24">
+          <div className="inline-flex items-center gap-6 glass-card-strong rounded-3xl px-10 py-6 animate-fade-in" style={{ animationDelay: '0.9s' }}>
+            <div className="flex -space-x-3">
+              {[
+                { bg: 'bg-gradient-to-br from-blue-400 to-blue-600', letter: 'S' },
+                { bg: 'bg-gradient-to-br from-purple-400 to-purple-600', letter: 'M' },
+                { bg: 'bg-gradient-to-br from-emerald-400 to-emerald-600', letter: 'E' },
+                { bg: 'bg-gradient-to-br from-orange-400 to-orange-600', letter: 'D' },
+                { bg: 'bg-gradient-to-br from-pink-400 to-pink-600', letter: 'L' }
+              ].map((user, i) => (
+                <div 
+                  key={i}
+                  className={`w-12 h-12 ${user.bg} rounded-full border-4 border-background flex items-center justify-center text-white text-sm font-bold shadow-xl animate-pulse`}
+                  style={{ animationDelay: `${i * 0.2}s` }}
+                >
+                  {user.letter}
+                </div>
+              ))}
+              <div className="w-12 h-12 bg-gradient-to-br from-gray-700 to-gray-900 rounded-full border-4 border-background flex items-center justify-center text-white text-xs font-bold shadow-xl">
+                +250K
+              </div>
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              <span className="font-semibold text-gray-900 dark:text-white">250,000+</span> successful resume builders
+            <div className="text-left">
+              <div className="flex items-center gap-2 mb-1">
+                <Zap className="w-5 h-5 text-yellow-500" />
+                <span className="text-2xl font-bold gradient-text bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-[length:200%_auto] animate-gradient">
+                  250,000+
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground font-medium">
+                Professionals landed their dream jobs
+              </p>
             </div>
           </div>
         </div>

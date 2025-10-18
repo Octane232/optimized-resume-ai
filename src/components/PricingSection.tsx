@@ -62,88 +62,109 @@ const PricingSection = () => {
   ];
 
   return (
-    <section id="pricing" className="py-24 bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-6 lg:px-8">
-        <div className="text-center mb-20">
-          <div className="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full text-sm font-medium mb-4">
-            <Star className="w-4 h-4" />
-            Pricing
+    <section id="pricing" className="relative py-32 overflow-hidden bg-background">
+      {/* Premium background effects */}
+      <div className="absolute inset-0 bg-[var(--gradient-mesh)] opacity-50"></div>
+      <div className="absolute top-1/2 left-0 w-96 h-96 bg-gradient-to-br from-blue-400/20 to-purple-500/20 dark:from-blue-500/10 dark:to-purple-600/10 rounded-full blur-3xl"></div>
+      <div className="absolute top-1/2 right-0 w-96 h-96 bg-gradient-to-bl from-purple-400/20 to-emerald-400/20 dark:from-purple-500/10 dark:to-emerald-500/10 rounded-full blur-3xl"></div>
+      
+      <div className="container mx-auto px-6 lg:px-8 relative">
+        <div className="text-center mb-24">
+          <div className="inline-flex items-center gap-2 glass-card rounded-full px-6 py-3 mb-8 animate-fade-in">
+            <Star className="w-5 h-5 text-yellow-500 fill-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]" />
+            <span className="text-sm font-semibold gradient-text bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
+              Flexible Pricing
+            </span>
           </div>
-          <h2 className="heading-lg text-gray-900 dark:text-white mb-6 text-balance">
-            Choose the plan that fits your goals
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-[1.1] tracking-tight animate-fade-in" style={{ animationDelay: '0.1s' }}>
+            <span className="block text-foreground">Choose the plan</span>
+            <span className="block gradient-text bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-[length:200%_auto] animate-gradient">
+              that fits your goals
+            </span>
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto text-balance">
+          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
             Start free and upgrade as your career grows. No hidden fees, cancel anytime.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-10 max-w-7xl mx-auto">
           {plans.map((plan, index) => (
             <div 
               key={index}
-              className={`enterprise-card p-8 relative fade-in-up ${
-                plan.popular ? 'ring-2 ring-blue-600 dark:ring-blue-400 scale-105' : ''
+              className={`pricing-card-premium rounded-3xl p-10 relative group animate-fade-in ${
+                plan.popular ? 'scale-105 z-10' : ''
               }`}
-              style={{ animationDelay: `${index * 0.1}s` }}
+              style={{ animationDelay: `${0.3 + index * 0.1}s` }}
             >
-              {plan.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium">
-                    Most Popular
+              {/* Rotating gradient border effect */}
+              <div className="relative z-10">
+                {plan.popular && (
+                  <div className="absolute -top-14 left-1/2 transform -translate-x-1/2">
+                    <div className="saas-button px-6 py-2 rounded-2xl text-sm font-bold shadow-xl flex items-center gap-2">
+                      <Star className="w-4 h-4 fill-current" />
+                      Most Popular
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  {plan.name}
-                </h3>
-                <div className="mb-4">
-                  <span className="text-4xl font-bold text-gray-900 dark:text-white">
-                    {plan.price}
-                  </span>
-                  {plan.period && (
-                    <span className="text-gray-600 dark:text-gray-400 ml-1">
-                      /{plan.period}
+                <div className="text-center mb-10">
+                  <h3 className="text-3xl font-extrabold text-foreground mb-4">
+                    {plan.name}
+                  </h3>
+                  <div className="mb-6">
+                    <span className="text-6xl font-extrabold gradient-text bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-[length:200%_auto] group-hover:animate-gradient">
+                      {plan.price}
                     </span>
-                  )}
+                    {plan.period && (
+                      <span className="text-muted-foreground text-lg font-medium ml-2">
+                        /{plan.period}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-muted-foreground text-base font-medium">
+                    {plan.description}
+                  </p>
                 </div>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {plan.description}
-                </p>
+
+                <ul className="space-y-5 mb-10">
+                  {plan.features.map((feature, featureIndex) => (
+                    <li key={featureIndex} className="flex items-start gap-4 group/item">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg group-hover/item:scale-110 transition-transform">
+                        <Check className="w-4 h-4 text-white" />
+                      </div>
+                      <span className="text-foreground/90 font-medium group-hover/item:text-foreground transition-colors">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Button 
+                  asChild
+                  size="lg"
+                  className={`w-full h-14 text-lg font-bold ${
+                    plan.popular 
+                      ? 'saas-button' 
+                      : 'glass-card hover:border-primary/50 transition-all'
+                  }`}
+                >
+                  <Link to={plan.href} className="flex items-center justify-center">
+                    {plan.cta}
+                    {plan.name !== 'Enterprise' && <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />}
+                  </Link>
+                </Button>
               </div>
-
-              <ul className="space-y-4 mb-8">
-                {plan.features.map((feature, featureIndex) => (
-                  <li key={featureIndex} className="flex items-start gap-3">
-                    <Check className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700 dark:text-gray-300">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Button 
-                asChild
-                className={`w-full ${
-                  plan.popular 
-                    ? 'saas-button' 
-                    : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
-                }`}
-              >
-                <Link to={plan.href}>
-                  {plan.cta}
-                  {plan.name !== 'Enterprise' && <ArrowRight className="ml-2 w-4 h-4" />}
-                </Link>
-              </Button>
             </div>
           ))}
         </div>
 
-        {/* Money back guarantee */}
-        <div className="text-center mt-16">
-          <div className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-            <Check className="w-4 h-4 text-green-500" />
-            30-day money-back guarantee on all paid plans
+        {/* Money back guarantee with enhanced styling */}
+        <div className="text-center mt-20">
+          <div className="inline-flex items-center gap-3 glass-card rounded-2xl px-8 py-4 animate-fade-in" style={{ animationDelay: '0.6s' }}>
+            <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center shadow-lg">
+              <Check className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-base font-semibold text-foreground">
+              30-day money-back guarantee on all paid plans
+            </span>
           </div>
         </div>
       </div>

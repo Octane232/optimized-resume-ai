@@ -88,6 +88,8 @@
     --gradient-mesh: radial-gradient(at 0% 0%, hsl(var(--blue-200) / 0.3) 0%, transparent 50%),
                      radial-gradient(at 100% 0%, hsl(var(--purple-200) / 0.3) 0%, transparent 50%),
                      radial-gradient(at 100% 100%, hsl(var(--emerald-200) / 0.2) 0%, transparent 50%);
+    --gradient-testimonial: linear-gradient(145deg, hsl(var(--blue-500) / 0.1), hsl(var(--purple-600) / 0.1));
+    --gradient-card-border: linear-gradient(145deg, hsl(var(--blue-400) / 0.5), hsl(var(--purple-500) / 0.5));
     
     /* Enhanced shadows with color */
     --shadow-soft: 0 2px 8px -2px hsl(var(--blue-600) / 0.08);
@@ -96,6 +98,8 @@
     --shadow-xl: 0 16px 48px -16px hsl(var(--blue-600) / 0.2), 0 8px 24px -8px hsl(var(--purple-600) / 0.16);
     --shadow-glow: 0 0 0 1px hsl(var(--blue-500) / 0.1), 0 8px 32px -8px hsl(var(--blue-500) / 0.3), 0 16px 48px -12px hsl(var(--purple-500) / 0.2);
     --shadow-glow-lg: 0 0 64px -16px hsl(var(--blue-500) / 0.4), 0 0 96px -24px hsl(var(--purple-500) / 0.3);
+    --shadow-3d: 0 20px 40px -12px hsl(var(--blue-600) / 0.25), 0 8px 16px -8px hsl(var(--purple-600) / 0.3);
+    --shadow-elevated: 0 24px 64px -16px hsl(var(--blue-500) / 0.35), 0 12px 32px -8px hsl(var(--purple-500) / 0.25);
 
     /* Animation variables */
     --ease-elastic: cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -238,6 +242,93 @@
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-12px); }
+}
+
+/* Advanced 3D card effects */
+.card-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.card-3d:hover {
+  transform: translateY(-8px) rotateX(5deg) rotateY(5deg);
+}
+
+/* Testimonial card with sophisticated effects */
+.testimonial-card {
+  position: relative;
+  backdrop-filter: blur(20px);
+  background: linear-gradient(145deg, 
+    hsl(var(--background)) 0%,
+    hsl(var(--background) / 0.95) 100%);
+  border: 1px solid hsl(var(--border) / 0.5);
+  box-shadow: var(--shadow-3d);
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.testimonial-card:hover {
+  transform: translateY(-12px) scale(1.02);
+  box-shadow: var(--shadow-elevated);
+}
+
+.testimonial-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: var(--gradient-card-border);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.testimonial-card:hover::before {
+  opacity: 1;
+}
+
+/* Pricing card premium styling */
+.pricing-card-premium {
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(24px);
+  background: linear-gradient(145deg,
+    hsl(var(--card)) 0%,
+    hsl(var(--card) / 0.98) 100%);
+  box-shadow: var(--shadow-3d);
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.pricing-card-premium::after {
+  content: '';
+  position: absolute;
+  inset: -100%;
+  background: conic-gradient(from 180deg at 50% 50%,
+    transparent 0deg,
+    hsl(var(--blue-400) / 0.15) 90deg,
+    hsl(var(--purple-500) / 0.15) 180deg,
+    transparent 270deg);
+  animation: rotate 8s linear infinite;
+}
+
+.pricing-card-premium:hover {
+  transform: translateY(-16px) scale(1.03);
+  box-shadow: var(--shadow-elevated);
+}
+
+@keyframes rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Header glassmorphism */
+.header-glass {
+  backdrop-filter: blur(16px) saturate(180%);
+  background: hsl(var(--background) / 0.85);
+  border-bottom: 1px solid hsl(var(--border) / 0.5);
 }
 
 .saas-button {
