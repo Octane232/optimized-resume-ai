@@ -18,6 +18,8 @@ import Contact from "./pages/Contact";
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
 import ResumeEditor from "./pages/ResumeEditor";
+import TermsOfService from "./pages/TermsOfService";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +45,8 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/editor/new" element={<ResumeEditor />} />
           <Route path="/editor/:resumeId" element={<ResumeEditor />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

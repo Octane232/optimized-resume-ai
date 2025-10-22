@@ -119,8 +119,8 @@ const Footer = () => {
                 © 2024 AI Resume Pro. All rights reserved.
               </p>
               <div className="flex space-x-8 text-base">
-                <a href="#" className="text-gray-400 hover:text-white transition-all hover:translate-y-[-2px]">Privacy Policy</a>
-                <a href="#" className="text-gray-400 hover:text-white transition-all hover:translate-y-[-2px]">Terms of Service</a>
+                <Link to="/privacy" className="text-gray-400 hover:text-white transition-all hover:translate-y-[-2px]">Privacy Policy</Link>
+                <Link to="/terms" className="text-gray-400 hover:text-white transition-all hover:translate-y-[-2px]">Terms of Service</Link>
                 <a href="#" className="text-gray-400 hover:text-white transition-all hover:translate-y-[-2px]">Cookie Policy</a>
               </div>
             </div>
