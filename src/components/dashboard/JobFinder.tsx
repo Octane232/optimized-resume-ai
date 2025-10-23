@@ -329,17 +329,20 @@ const JobFinder = () => {
           filteredJobs.map((job) => (
             <Card key={job.slug} className="group bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 rounded-2xl overflow-hidden">
               <CardContent className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex items-start gap-4 flex-1">
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-2xl shadow-lg">
+                <div className="flex flex-col lg:flex-row gap-6">
+                  {/* Left: Company Logo & Details */}
+                  <div className="flex gap-4 flex-1">
+                    <div className="w-14 h-14 flex-shrink-0 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-xl font-bold text-white shadow-lg">
                       {job.company ? job.company.charAt(0).toUpperCase() : '?'}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-2 flex-wrap">
-                        <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                    
+                    <div className="flex-1 space-y-3">
+                      {/* Job Title */}
+                      <div>
+                        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 break-words">
                           {job.title}
                         </h3>
-                        <div className="flex items-center gap-2 flex-wrap">
+                        <div className="flex flex-wrap gap-2">
                           {job.jobTypes?.map((type, idx) => (
                             <Badge key={idx} className={`text-xs px-3 py-1 rounded-full font-medium ${
                               type.toLowerCase().includes('remote') 
@@ -352,35 +355,40 @@ const JobFinder = () => {
                         </div>
                       </div>
                       
-                      <div className="flex items-center gap-6 text-slate-600 dark:text-slate-400 text-sm mb-3 flex-wrap">
-                        <div className="flex items-center gap-1">
-                          <Building className="w-4 h-4" />
-                          {job.company || 'Unknown Company'}
+                      {/* Company Info */}
+                      <div className="flex flex-wrap gap-4 text-slate-600 dark:text-slate-400 text-sm">
+                        <div className="flex items-center gap-2">
+                          <Building className="w-4 h-4 flex-shrink-0" />
+                          <span className="font-medium">{job.company || 'Unknown Company'}</span>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <MapPin className="w-4 h-4" />
-                          {job.location}
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4 flex-shrink-0" />
+                          <span>{job.location}</span>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          {getTimeSince(job.createdAt)}
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 flex-shrink-0" />
+                          <span>{getTimeSince(job.createdAt)}</span>
                         </div>
                       </div>
                       
-                      <p className="text-slate-700 dark:text-slate-300 mb-4 leading-relaxed line-clamp-3">
-                        {job.description}
+                      {/* Description */}
+                      <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+                        {job.description.length > 200 
+                          ? job.description.substring(0, 200) + '...' 
+                          : job.description}
                       </p>
                       
+                      {/* Tags */}
                       {job.tags && job.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {job.tags.slice(0, 5).map((tag, index) => (
-                            <Badge key={index} variant="outline" className="text-xs border-slate-300 dark:border-slate-600 px-3 py-1 rounded-full">
+                        <div className="flex flex-wrap gap-2">
+                          {job.tags.slice(0, 6).map((tag, index) => (
+                            <Badge key={index} variant="outline" className="text-xs border-slate-300 dark:border-slate-600 px-2 py-1 rounded-md bg-slate-50 dark:bg-slate-800/50">
                               {tag}
                             </Badge>
                           ))}
-                          {job.tags.length > 5 && (
-                            <Badge variant="outline" className="text-xs border-slate-300 dark:border-slate-600 px-3 py-1 rounded-full">
-                              +{job.tags.length - 5} more
+                          {job.tags.length > 6 && (
+                            <Badge variant="outline" className="text-xs border-slate-300 dark:border-slate-600 px-2 py-1 rounded-md">
+                              +{job.tags.length - 6}
                             </Badge>
                           )}
                         </div>
@@ -388,25 +396,26 @@ const JobFinder = () => {
                     </div>
                   </div>
                   
-                  <div className="flex flex-col gap-3 ml-6">
+                  {/* Right: Action Buttons */}
+                  <div className="flex lg:flex-col gap-3 lg:w-32 flex-shrink-0">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => toggleSaveJob(job.slug)}
-                      className={`border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl ${
+                      className={`flex-1 lg:flex-none border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl ${
                         savedJobs.has(job.slug) ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800' : ''
                       }`}
                     >
-                      <Bookmark className={`w-4 h-4 mr-2 ${savedJobs.has(job.slug) ? 'fill-current text-blue-600' : ''}`} />
-                      {savedJobs.has(job.slug) ? 'Saved' : 'Save'}
+                      <Bookmark className={`w-4 h-4 lg:mr-0 mr-2 ${savedJobs.has(job.slug) ? 'fill-current text-blue-600' : ''}`} />
+                      <span className="lg:hidden">{savedJobs.has(job.slug) ? 'Saved' : 'Save'}</span>
                     </Button>
                     <Button 
                       size="sm" 
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg"
+                      className="flex-1 lg:flex-none bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg"
                       onClick={() => window.open(job.url, '_blank')}
                     >
                       <ExternalLink className="w-4 h-4 mr-2" />
-                      View Job
+                      Apply
                     </Button>
                   </div>
                 </div>
