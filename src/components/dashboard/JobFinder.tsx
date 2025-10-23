@@ -1,11 +1,25 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Search, MapPin, Building, Clock, Bookmark, ExternalLink, Star, DollarSign, Users, Briefcase, Filter, Sparkles, TrendingUp } from 'lucide-react';
+import { Search, MapPin, Building, Clock, Bookmark, ExternalLink, Star, DollarSign, Users, Briefcase, Filter, Sparkles, TrendingUp, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
+interface Job {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  jobTypes: string[];
+  tags: string[];
+  description: string;
+  url: string;
+  createdAt: string;
+  slug: string;
+}
 
 const JobFinder = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -13,91 +27,119 @@ const JobFinder = () => {
   const [jobType, setJobType] = useState('');
   const [salaryRange, setSalaryRange] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
+  const { toast } = useToast();
 
-  const jobs = [
-    {
-      id: 1,
-      title: 'Senior Software Engineer',
-      company: 'TechCorp Inc.',
-      logo: '🚀',
-      location: 'San Francisco, CA',
-      type: 'Remote',
-      salary: '$120k - $180k',
-      salaryNum: 150000,
-      posted: '2 days ago',
-      description: 'Join our innovative team building next-generation cloud infrastructure. We\'re looking for passionate engineers who love solving complex problems.',
-      tags: ['React', 'Node.js', 'AWS', 'TypeScript'],
-      saved: false,
-      featured: true,
-      companySize: '100-500',
-      rating: 4.8,
-      applicants: 45,
-      matchScore: 95
-    },
-    {
-      id: 2,
-      title: 'Product Manager',
-      company: 'Innovation Labs',
-      logo: '💡',
-      location: 'New York, NY',
-      type: 'Hybrid',
-      salary: '$100k - $150k',
-      salaryNum: 125000,
-      posted: '1 week ago',
-      description: 'Lead product strategy for our flagship AI platform. Drive product vision and collaborate with engineering teams to deliver exceptional user experiences.',
-      tags: ['Product Strategy', 'AI/ML', 'Analytics', 'Agile'],
-      saved: true,
-      featured: false,
-      companySize: '50-200',
-      rating: 4.6,
-      applicants: 28,
-      matchScore: 88
-    },
-    {
-      id: 3,
-      title: 'UX Designer',
-      company: 'Design Studio',
-      logo: '🎨',
-      location: 'Austin, TX',
-      type: 'On-site',
-      salary: '$80k - $120k',
-      salaryNum: 100000,
-      posted: '3 days ago',
-      description: 'Create beautiful, intuitive user experiences for our mobile and web applications. Work closely with product and engineering teams.',
-      tags: ['Figma', 'User Research', 'Prototyping', 'Design Systems'],
-      saved: false,
-      featured: true,
-      companySize: '20-50',
-      rating: 4.9,
-      applicants: 67,
-      matchScore: 82
-    },
-    {
-      id: 4,
-      title: 'Data Scientist',
-      company: 'AI Dynamics',
-      logo: '📊',
-      location: 'Seattle, WA',
-      type: 'Remote',
-      salary: '$110k - $160k',
-      salaryNum: 135000,
-      posted: '5 days ago',
-      description: 'Build machine learning models that power our recommendation engine. Work with petabytes of data to derive actionable insights.',
-      tags: ['Python', 'TensorFlow', 'SQL', 'Machine Learning'],
-      saved: false,
-      featured: false,
-      companySize: '200-1000',
-      rating: 4.7,
-      applicants: 34,
-      matchScore: 91
+  useEffect(() => {
+    fetchJobs();
+  }, []);
+
+  const fetchJobs = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('https://www.arbeitnow.com/api/job-board-api');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch jobs');
+      }
+
+      const data = await response.json();
+      setJobs(data.data || []);
+    } catch (error) {
+      console.error('Error fetching jobs:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load job listings. Please try again later.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const handleSearch = async () => {
+    try {
+      setLoading(true);
+      let url = 'https://www.arbeitnow.com/api/job-board-api';
+      const params = new URLSearchParams();
+      
+      if (searchTerm) params.append('search', searchTerm);
+      if (location) params.append('location', location);
+      
+      if (params.toString()) {
+        url += `?${params.toString()}`;
+      }
+
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error('Failed to search jobs');
+      }
+
+      const data = await response.json();
+      setJobs(data.data || []);
+    } catch (error) {
+      console.error('Error searching jobs:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to search jobs. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleSaveJob = (jobId: string) => {
+    setSavedJobs(prev => {
+      const newSaved = new Set(prev);
+      if (newSaved.has(jobId)) {
+        newSaved.delete(jobId);
+      } else {
+        newSaved.add(jobId);
+      }
+      return newSaved;
+    });
+  };
+
+  const getTimeSince = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (seconds < 60) return 'just now';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days}d ago`;
+    const weeks = Math.floor(days / 7);
+    if (weeks < 4) return `${weeks}w ago`;
+    const months = Math.floor(days / 30);
+    return `${months}mo ago`;
+  };
+
+  const filteredJobs = jobs.filter(job => {
+    if (jobType) {
+      return job.jobTypes?.some(type => 
+        type.toLowerCase().includes(jobType.toLowerCase())
+      );
+    }
+    return true;
+  });
 
   const stats = [
-    { label: 'Active Jobs', value: '2,847', icon: Briefcase, color: 'from-blue-500 to-blue-600' },
-    { label: 'Companies', value: '456', icon: Building, color: 'from-emerald-500 to-emerald-600' },
-    { label: 'Avg. Salary', value: '$125k', icon: DollarSign, color: 'from-purple-500 to-purple-600' },
-    { label: 'Success Rate', value: '94%', icon: TrendingUp, color: 'from-orange-500 to-orange-600' }
+    { label: 'Active Jobs', value: jobs.length.toString(), icon: Briefcase, color: 'from-blue-500 to-blue-600' },
+    { label: 'Companies', value: new Set(jobs.map(j => j.company)).size.toString(), icon: Building, color: 'from-emerald-500 to-emerald-600' },
+    { label: 'Remote Jobs', value: jobs.filter(j => j.jobTypes?.includes('Remote')).length.toString(), icon: MapPin, color: 'from-purple-500 to-purple-600' },
+    { label: 'New Today', value: jobs.filter(j => {
+      const posted = new Date(j.createdAt);
+      const today = new Date();
+      return posted.toDateString() === today.toDateString();
+    }).length.toString(), icon: TrendingUp, color: 'from-orange-500 to-orange-600' }
   ];
 
   const trendingSearches = ['React Developer', 'Product Manager', 'Data Scientist', 'DevOps Engineer', 'UX Designer'];
@@ -184,8 +226,16 @@ const JobFinder = () => {
                   className="pl-10 h-12 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500/20"
                 />
               </div>
-              <Button className="h-12 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg">
-                <Search className="w-4 h-4 mr-2" />
+              <Button 
+                onClick={handleSearch}
+                disabled={loading}
+                className="h-12 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg disabled:opacity-50"
+              >
+                {loading ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Search className="w-4 h-4 mr-2" />
+                )}
                 Search
               </Button>
             </div>
@@ -252,124 +302,118 @@ const JobFinder = () => {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-            Recommended for You
+            {loading ? 'Loading Jobs...' : `${filteredJobs.length} Jobs Found`}
           </h2>
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-purple-500" />
-            <span className="text-sm text-slate-600 dark:text-slate-400">AI-matched jobs</span>
+            <span className="text-sm text-slate-600 dark:text-slate-400">Europe & Remote jobs</span>
           </div>
         </div>
 
-        {jobs.map((job) => (
-          <Card key={job.id} className="group bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 rounded-2xl overflow-hidden">
-            {job.featured && (
-              <div className="bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs font-medium py-2 px-4 text-center">
-                ⭐ Featured Job
-              </div>
-            )}
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex items-start gap-4 flex-1">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-2xl shadow-lg">
-                    {job.logo}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-xl font-bold text-slate-900 dark:text-white truncate">
-                        {job.title}
-                      </h3>
-                      <div className="flex items-center gap-2">
-                        <Badge className={`text-xs px-3 py-1 rounded-full font-medium ${
-                          job.type === 'Remote' 
-                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
-                            : job.type === 'Hybrid'
-                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800'
-                            : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200 dark:border-orange-800'
-                        }`}>
-                          {job.type}
-                        </Badge>
-                        <div className="flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900/30 rounded-full">
-                          <Star className="w-3 h-3 text-purple-600" />
-                          <span className="text-xs font-medium text-purple-700 dark:text-purple-400">
-                            {job.matchScore}% match
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-6 text-slate-600 dark:text-slate-400 text-sm mb-3">
-                      <div className="flex items-center gap-1">
-                        <Building className="w-4 h-4" />
-                        {job.company}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <MapPin className="w-4 h-4" />
-                        {job.location}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        {job.posted}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Users className="w-4 h-4" />
-                        {job.companySize} employees
-                      </div>
-                    </div>
-                    
-                    <p className="text-slate-700 dark:text-slate-300 mb-4 leading-relaxed">
-                      {job.description}
-                    </p>
-                    
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {job.tags.map((tag, index) => (
-                        <Badge key={index} variant="outline" className="text-xs border-slate-300 dark:border-slate-600 px-3 py-1 rounded-full">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
-                          {job.salary}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-1">
-                            <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                              {job.rating}
-                            </span>
-                          </div>
-                          <span className="text-sm text-slate-500">•</span>
-                          <span className="text-sm text-slate-600 dark:text-slate-400">
-                            {job.applicants} applicants
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex flex-col gap-3 ml-6">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className={`border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl ${
-                      job.saved ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800' : ''
-                    }`}
-                  >
-                    <Bookmark className={`w-4 h-4 mr-2 ${job.saved ? 'fill-current text-blue-600' : ''}`} />
-                    {job.saved ? 'Saved' : 'Save'}
-                  </Button>
-                  <Button size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg">
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    Apply Now
-                  </Button>
-                </div>
-              </div>
+        {loading ? (
+          <Card className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg rounded-2xl">
+            <CardContent className="p-12 flex flex-col items-center justify-center">
+              <Loader2 className="w-12 h-12 text-blue-500 animate-spin mb-4" />
+              <p className="text-slate-600 dark:text-slate-400">Loading job listings...</p>
             </CardContent>
           </Card>
-        ))}
+        ) : filteredJobs.length === 0 ? (
+          <Card className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg rounded-2xl">
+            <CardContent className="p-12 text-center">
+              <Briefcase className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">No jobs found</h3>
+              <p className="text-slate-600 dark:text-slate-400">Try adjusting your search filters or check back later.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          filteredJobs.map((job) => (
+            <Card key={job.slug} className="group bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 rounded-2xl overflow-hidden">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex items-start gap-4 flex-1">
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-2xl shadow-lg">
+                      {job.company.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-2 flex-wrap">
+                        <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                          {job.title}
+                        </h3>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {job.jobTypes?.map((type, idx) => (
+                            <Badge key={idx} className={`text-xs px-3 py-1 rounded-full font-medium ${
+                              type.toLowerCase().includes('remote') 
+                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
+                                : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800'
+                            }`}>
+                              {type}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-6 text-slate-600 dark:text-slate-400 text-sm mb-3 flex-wrap">
+                        <div className="flex items-center gap-1">
+                          <Building className="w-4 h-4" />
+                          {job.company}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <MapPin className="w-4 h-4" />
+                          {job.location}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          {getTimeSince(job.createdAt)}
+                        </div>
+                      </div>
+                      
+                      <p className="text-slate-700 dark:text-slate-300 mb-4 leading-relaxed line-clamp-3">
+                        {job.description}
+                      </p>
+                      
+                      {job.tags && job.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {job.tags.slice(0, 5).map((tag, index) => (
+                            <Badge key={index} variant="outline" className="text-xs border-slate-300 dark:border-slate-600 px-3 py-1 rounded-full">
+                              {tag}
+                            </Badge>
+                          ))}
+                          {job.tags.length > 5 && (
+                            <Badge variant="outline" className="text-xs border-slate-300 dark:border-slate-600 px-3 py-1 rounded-full">
+                              +{job.tags.length - 5} more
+                            </Badge>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col gap-3 ml-6">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toggleSaveJob(job.slug)}
+                      className={`border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl ${
+                        savedJobs.has(job.slug) ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800' : ''
+                      }`}
+                    >
+                      <Bookmark className={`w-4 h-4 mr-2 ${savedJobs.has(job.slug) ? 'fill-current text-blue-600' : ''}`} />
+                      {savedJobs.has(job.slug) ? 'Saved' : 'Save'}
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg"
+                      onClick={() => window.open(job.url, '_blank')}
+                    >
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      View Job
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
     </div>
   );
