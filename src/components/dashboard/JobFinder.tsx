@@ -332,7 +332,7 @@ const JobFinder = () => {
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-start gap-4 flex-1">
                     <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-2xl shadow-lg">
-                      {job.company.charAt(0).toUpperCase()}
+                      {job.company ? job.company.charAt(0).toUpperCase() : '?'}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-2 flex-wrap">
@@ -355,7 +355,7 @@ const JobFinder = () => {
                       <div className="flex items-center gap-6 text-slate-600 dark:text-slate-400 text-sm mb-3 flex-wrap">
                         <div className="flex items-center gap-1">
                           <Building className="w-4 h-4" />
-                          {job.company}
+                          {job.company || 'Unknown Company'}
                         </div>
                         <div className="flex items-center gap-1">
                           <MapPin className="w-4 h-4" />
