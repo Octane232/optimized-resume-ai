@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Check, Star, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const PricingSection = () => {
+  const [isYearly, setIsYearly] = useState(false);
+
   const plans = [
     {
       name: 'Free',
@@ -27,6 +29,8 @@ const PricingSection = () => {
     {
       name: 'Premium',
       price: '$9',
+      yearlyPrice: '$84',
+      monthlyPrice: '$9',
       period: 'per month',
       description: 'Everything you need to land your dream job',
       features: [
@@ -41,12 +45,13 @@ const PricingSection = () => {
       ],
       cta: 'Start Premium',
       popular: true,
-      href: '/auth',
-      yearlyPrice: '$84'
+      href: '/auth'
     },
     {
       name: 'Premium Plus',
       price: '$19',
+      yearlyPrice: '$168',
+      monthlyPrice: '$19',
       period: 'per month',
       description: 'Advanced features for serious job seekers',
       features: [
@@ -92,6 +97,29 @@ const PricingSection = () => {
           </p>
         </div>
 
+        {/* Billing Toggle */}
+        <div className="flex items-center justify-center gap-4 mb-12 animate-fade-in" style={{ animationDelay: '0.25s' }}>
+          <span className={`text-lg font-semibold transition-colors ${!isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>
+            Monthly
+          </span>
+          <button
+            onClick={() => setIsYearly(!isYearly)}
+            className="relative w-16 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full transition-all hover:shadow-lg"
+          >
+            <div
+              className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow-md transition-transform ${
+                isYearly ? 'translate-x-9' : 'translate-x-1'
+              }`}
+            />
+          </button>
+          <span className={`text-lg font-semibold transition-colors ${isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>
+            Yearly
+          </span>
+          <span className="glass-card px-3 py-1 rounded-full text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+            Save 22%
+          </span>
+        </div>
+
         <div className="grid md:grid-cols-3 gap-10 max-w-7xl mx-auto">
           {plans.map((plan, index) => (
             <div 
@@ -118,14 +146,19 @@ const PricingSection = () => {
                   </h3>
                   <div className="mb-6">
                     <span className="text-6xl font-extrabold gradient-text bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-[length:200%_auto] group-hover:animate-gradient">
-                      {plan.price}
+                      {plan.yearlyPrice && isYearly ? plan.yearlyPrice : plan.price}
                     </span>
-                    {plan.period && (
+                    {(plan.period || isYearly) && (
                       <span className="text-muted-foreground text-lg font-medium ml-2">
-                        /{plan.period}
+                        /{isYearly ? 'year' : plan.period}
                       </span>
                     )}
                   </div>
+                  {plan.yearlyPrice && isYearly && plan.monthlyPrice && (
+                    <p className="text-sm text-muted-foreground mb-2">
+                      That's {plan.monthlyPrice.replace('$', '$')}/month billed annually
+                    </p>
+                  )}
                   <p className="text-muted-foreground text-base font-medium">
                     {plan.description}
                   </p>
