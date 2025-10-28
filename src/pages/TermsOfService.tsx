@@ -173,8 +173,7 @@ const TermsOfService = () => {
             </p>
             <div className="bg-primary/5 rounded-xl p-6 space-y-2">
               <p className="font-semibold text-foreground">PitchSora Support Team</p>
-              <p className="text-muted-foreground">Email: legal@pitchsora.com</p>
-              <p className="text-muted-foreground">Address: [Your Business Address]</p>
+              <p className="text-muted-foreground">Email: contact-us@pitchsora.com</p>
             </div>
           </section>
         </div>

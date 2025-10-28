@@ -45,7 +45,7 @@ const HelpSupport = () => {
       title: "Email Support",
       description: "Send us an email and we'll respond within 24 hours",
       action: "Send Email",
-      href: "mailto:support@airesume.com"
+      href: "mailto:contact-us@pitchsora.com"
     }
   ];
 
@@ -138,15 +138,12 @@ const HelpSupport = () => {
         <CardHeader>
           <CardTitle>Still need help?</CardTitle>
           <CardDescription>
-            Our support team is available Monday-Friday, 9AM-6PM EST
+            Our support team is available to assist you
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent>
           <p className="text-sm">
-            <strong>Email:</strong> support@airesume.com
-          </p>
-          <p className="text-sm">
-            <strong>Phone:</strong> 1-800-RESUME-AI
+            <strong>Email:</strong> contact-us@pitchsora.com
           </p>
         </CardContent>
       </Card>

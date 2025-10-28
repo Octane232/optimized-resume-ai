@@ -4,7 +4,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Mail, Phone, MapPin } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -63,36 +63,17 @@ const Contact = () => {
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8 mb-16">
-              {[
-                {
-                  icon: <Mail className="w-6 h-6" />,
-                  title: "Email Support",
-                  description: "support@airesumepro.com",
-                  subtitle: "We typically respond within 24 hours"
-                },
-                {
-                  icon: <Phone className="w-6 h-6" />,
-                  title: "Phone Support",
-                  description: "+1 (555) 123-4567",
-                  subtitle: "Monday - Friday, 9 AM - 6 PM EST"
-                },
-                {
-                  icon: <MapPin className="w-6 h-6" />,
-                  title: "Office",
-                  description: "123 Business Ave, Suite 100",
-                  subtitle: "San Francisco, CA 94105"
-                }
-              ].map((contact, index) => (
-                <Card key={index} className="text-center p-8">
-                  <CardContent className="p-0">
-                    <div className="text-blue-600 mb-4 flex justify-center">{contact.icon}</div>
-                    <h3 className="text-lg font-semibold mb-2">{contact.title}</h3>
-                    <p className="text-gray-900 font-medium mb-1">{contact.description}</p>
-                    <p className="text-gray-600 text-sm">{contact.subtitle}</p>
-                  </CardContent>
-                </Card>
-              ))}
+            <div className="max-w-md mx-auto mb-16">
+              <Card className="text-center p-8">
+                <CardContent className="p-0">
+                  <div className="text-blue-600 mb-4 flex justify-center">
+                    <Mail className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">Email Support</h3>
+                  <p className="text-gray-900 font-medium mb-1">contact-us@pitchsora.com</p>
+                  <p className="text-gray-600 text-sm">We typically respond within 24 hours</p>
+                </CardContent>
+              </Card>
             </div>
 
             <div className="max-w-2xl mx-auto">

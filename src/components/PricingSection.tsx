@@ -53,7 +53,7 @@ const PricingSection = () => {
         'SSO integration',
         'Dedicated account manager',
         'Custom integrations',
-        'Priority phone support'
+        'Priority support'
       ],
       cta: 'Contact Sales',
       popular: false,

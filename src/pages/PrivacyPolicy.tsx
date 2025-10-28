@@ -163,7 +163,7 @@ const PrivacyPolicy = () => {
                     <li><strong>Data Portability:</strong> Transfer your data to another service provider</li>
                   </ul>
                   <p className="mt-3">
-                    To exercise these rights, please contact us at privacy@pitchsora.com. We will respond within 30 days.
+                    To exercise these rights, please contact us at contact-us@pitchsora.com. We will respond within 30 days.
                   </p>
                 </div>
               </div>
@@ -223,9 +223,7 @@ const PrivacyPolicy = () => {
             </p>
             <div className="bg-primary/5 rounded-xl p-6 space-y-2">
               <p className="font-semibold text-foreground">PitchSora Privacy Team</p>
-              <p className="text-muted-foreground">Email: privacy@pitchsora.com</p>
-              <p className="text-muted-foreground">Data Protection Officer: dpo@pitchsora.com</p>
-              <p className="text-muted-foreground">Address: [Your Business Address]</p>
+              <p className="text-muted-foreground">Email: contact-us@pitchsora.com</p>
             </div>
           </section>
 
