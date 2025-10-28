@@ -22,6 +22,7 @@ import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import CookiePolicy from "./pages/CookiePolicy";
 import ScrollToTop from "./components/ScrollToTop";
+import ScrollToSection from "./components/ScrollToSection";
 
 const queryClient = new QueryClient();
 
@@ -33,8 +34,13 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
         <ScrollToTop />
+        <ScrollToSection />
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/features" element={<Index />} />
+          <Route path="/pricing" element={<Index />} />
+          <Route path="/enterprise" element={<Index />} />
+          <Route path="/resources" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/resume-builder" element={<ResumeBuilder />} />
