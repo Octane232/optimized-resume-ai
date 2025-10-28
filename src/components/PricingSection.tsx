@@ -6,58 +6,63 @@ import { Link } from 'react-router-dom';
 const PricingSection = () => {
   const plans = [
     {
-      name: 'Starter',
+      name: 'Free',
       price: '$0',
       period: 'forever',
       description: 'Perfect for getting started',
       features: [
-        '1 professional resume',
-        '5 templates to choose from',
-        'Basic AI suggestions',
-        'PDF download',
-        'Email support'
+        'Create 1 resume or profile',
+        'Access to basic job search (limited to 10 job listings per day)',
+        'Basic AI interview questions (up to 5 per session)',
+        'Access to 1 job alert or recommendation per week',
+        'Email notifications for new jobs (once per week)',
+        'Save up to 2 job applications',
+        'Basic career tips or articles',
+        'Community support / Help center only'
       ],
       cta: 'Start Free',
       popular: false,
       href: '/auth'
     },
     {
-      name: 'Professional',
-      price: '$29',
+      name: 'Premium',
+      price: '$9',
       period: 'per month',
-      description: 'Everything you need to land interviews',
+      description: 'Everything you need to land your dream job',
       features: [
-        'Unlimited resumes',
-        '50+ premium templates',
-        'Advanced AI content generation',
-        'ATS optimization score',
-        'Cover letter builder',
-        'Resume analytics',
-        'Priority support',
-        'LinkedIn optimization'
+        'Unlimited job searches & listings',
+        'AI Interview Coach (up to 20 questions per session)',
+        'Generate unlimited AI-based interview answers',
+        'Resume builder (up to 5 resumes)',
+        'Save unlimited jobs',
+        'Daily job alerts (via email or dashboard)',
+        'Download interview prep materials (PDF or notes)',
+        'Priority email support'
       ],
-      cta: 'Start 14-day trial',
+      cta: 'Start Premium',
       popular: true,
-      href: '/auth'
+      href: '/auth',
+      yearlyPrice: '$84'
     },
     {
-      name: 'Enterprise',
-      price: 'Custom',
-      period: 'pricing',
-      description: 'For teams and organizations',
+      name: 'Premium Plus',
+      price: '$19',
+      period: 'per month',
+      description: 'Advanced features for serious job seekers',
       features: [
-        'Everything in Professional',
-        'Team collaboration tools',
-        'Custom branding',
-        'Advanced analytics dashboard',
-        'SSO integration',
-        'Dedicated account manager',
-        'Custom integrations',
-        'Priority support'
+        'Everything in Premium',
+        'Access to global job APIs (worldwide listings)',
+        'Smart job matching (AI recommends top jobs)',
+        'Unlimited AI interview simulations (mock interviews with feedback)',
+        'Resume optimization (AI-enhanced resume scoring)',
+        'Personalized career path suggestions',
+        'Direct recruiter contact (if available via API)',
+        'Exclusive insights & premium resources',
+        'Early access to new features'
       ],
-      cta: 'Contact Sales',
+      cta: 'Get Premium Plus',
       popular: false,
-      href: '/contact'
+      href: '/auth'
     }
   ];
 
