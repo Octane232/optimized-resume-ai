@@ -121,7 +121,7 @@ const Footer = () => {
               <div className="flex space-x-8 text-base">
                 <Link to="/privacy" className="text-gray-400 hover:text-white transition-all hover:translate-y-[-2px]">Privacy Policy</Link>
                 <Link to="/terms" className="text-gray-400 hover:text-white transition-all hover:translate-y-[-2px]">Terms of Service</Link>
-                <a href="#" className="text-gray-400 hover:text-white transition-all hover:translate-y-[-2px]">Cookie Policy</a>
+                <Link to="/cookie-policy" className="text-gray-400 hover:text-white transition-all hover:translate-y-[-2px]">Cookie Policy</Link>
               </div>
             </div>
             <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10">
