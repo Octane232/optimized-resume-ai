@@ -40,6 +40,8 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    const rawBody = await req.text();
+    
     // Verify webhook signature
     const signature = req.headers.get('X-Signature');
     const webhookSecret = Deno.env.get('LEMON_SQUEEZY_WEBHOOK_SECRET');
@@ -49,9 +51,12 @@ const handler = async (req: Request): Promise<Response> => {
       return new Response('Webhook secret not configured', { status: 500 });
     }
 
-    const rawBody = await req.text();
+    if (!signature) {
+      console.error('No signature provided');
+      return new Response('No signature provided', { status: 401 });
+    }
     
-    // Verify signature using HMAC SHA256
+    // Create HMAC SHA256 hash
     const encoder = new TextEncoder();
     const key = await crypto.subtle.importKey(
       'raw',
@@ -71,8 +76,11 @@ const handler = async (req: Request): Promise<Response> => {
       .map(b => b.toString(16).padStart(2, '0'))
       .join('');
     
+    // Compare signatures using timing-safe comparison
     if (signature !== expectedSignature) {
       console.error('Invalid webhook signature');
+      console.error('Expected:', expectedSignature);
+      console.error('Received:', signature);
       return new Response('Invalid signature', { status: 401 });
     }
 
