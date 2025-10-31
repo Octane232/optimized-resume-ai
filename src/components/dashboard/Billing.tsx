@@ -189,7 +189,7 @@ const Billing = () => {
       if (!user) return;
 
       // Redirect to Lemon Squeezy checkout
-      const checkoutUrl = `https://pitchsora.lemonsqueezy.com/buy/${plan.lemonSqueezyProductId}?checkout[email]=${user.email}&checkout[custom][user_id]=${user.id}`;
+      const checkoutUrl = `https://pitchsora.lemonsqueezy.com/checkout/buy/${plan.lemonSqueezyProductId}?checkout[email]=${user.email}&checkout[custom][user_id]=${user.id}`;
       window.open(checkoutUrl, '_blank');
     } catch (error) {
       console.error('Error initiating checkout:', error);
