@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.send-contact-form]
 verify_jwt = false
+
+[functions.lemon-squeezy-webhook]
+verify_jwt = false
