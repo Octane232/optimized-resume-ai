@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.lemon-squeezy-webhook]
 verify_jwt = false
+
+[functions.seed-subscription-plans]
+verify_jwt = false

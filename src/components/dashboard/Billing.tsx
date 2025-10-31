@@ -15,8 +15,24 @@ const Billing = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchBillingData();
+    seedPlansAndFetchData();
   }, []);
+
+  useEffect(() => {
+    fetchBillingData();
+  }, [billingCycle]);
+
+  const seedPlansAndFetchData = async () => {
+    try {
+      // Seed plans first
+      await supabase.functions.invoke('seed-subscription-plans');
+      // Then fetch all data
+      await fetchBillingData();
+    } catch (error) {
+      console.error('Error seeding plans:', error);
+      await fetchBillingData();
+    }
+  };
 
   const fetchBillingData = async () => {
     try {
@@ -57,12 +73,24 @@ const Billing = () => {
         throw usageError;
       }
 
-      // Process and set data
-      const formattedPlans = plansData?.map(plan => ({
-        name: plan.name,
+      // Process and set data - filter plans based on billing cycle
+      const filteredPlans = plansData?.filter(plan => {
+        if (plan.name === 'Free') return true;
+        if (billingCycle === 'monthly') {
+          return plan.price_monthly !== null && !plan.name.includes('Yearly');
+        } else {
+          return plan.price_yearly !== null && (plan.name.includes('Yearly') || plan.price_yearly === 0);
+        }
+      }) || [];
+
+      const formattedPlans = filteredPlans.map(plan => ({
+        id: plan.id,
+        name: plan.name.replace(' Yearly', ''),
         monthlyPrice: plan.price_monthly,
         yearlyPrice: plan.price_yearly,
-        price: billingCycle === 'monthly' ? `$${plan.price_monthly}` : `$${plan.price_yearly}`,
+        price: billingCycle === 'monthly' 
+          ? `$${plan.price_monthly || 0}` 
+          : `$${plan.price_yearly || 0}`,
         period: billingCycle === 'monthly' ? 'per month' : 'per year',
         originalPrice: billingCycle === 'yearly' && plan.price_monthly ? 
           `$${plan.price_monthly * 12}` : null,
@@ -72,9 +100,10 @@ const Billing = () => {
         popular: plan.is_popular,
         current: subscriptionData?.plan_id === plan.id,
         description: plan.description || '',
+        lemonSqueezyProductId: plan.lemon_squeezy_product_id,
         savings: billingCycle === 'yearly' && plan.price_monthly ? 
           `Save $${(plan.price_monthly * 12) - plan.price_yearly}` : null
-      })) || [];
+      }));
 
       const formattedInvoices = invoicesData?.map(invoice => ({
         id: invoice.invoice_number,
@@ -146,8 +175,24 @@ const Billing = () => {
     switch (iconName) {
       case 'Shield': return Shield;
       case 'Sparkles': return Sparkles;
+      case 'Crown': return Crown;
       case 'Users': return Users;
       default: return Shield;
+    }
+  };
+
+  const handleUpgrade = async (plan) => {
+    if (!plan.lemonSqueezyProductId) return;
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Redirect to Lemon Squeezy checkout
+      const checkoutUrl = `https://pitchsora.lemonsqueezy.com/buy/${plan.lemonSqueezyProductId}?checkout[email]=${user.email}&checkout[custom][user_id]=${user.id}`;
+      window.open(checkoutUrl, '_blank');
+    } catch (error) {
+      console.error('Error initiating checkout:', error);
     }
   };
 
@@ -366,7 +411,8 @@ const Billing = () => {
                         ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
                         : `bg-gradient-to-r ${plan.color} hover:shadow-lg text-white`
                     }`}
-                    disabled={plan.current}
+                    disabled={plan.current || plan.name === 'Free'}
+                    onClick={() => handleUpgrade(plan)}
                   >
                     {plan.current ? (
                       <>
@@ -376,7 +422,7 @@ const Billing = () => {
                     ) : (
                       <>
                         <Zap className="w-5 h-5 mr-2" />
-                        {plan.name === 'Free' ? 'Downgrade to Free' : `Upgrade to ${plan.name}`}
+                        {plan.name === 'Free' ? 'Current Plan' : `Upgrade to ${plan.name}`}
                       </>
                     )}
                   </Button>
