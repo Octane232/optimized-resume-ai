@@ -42,8 +42,11 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const rawBody = await req.text();
     
-    // Verify webhook signature
-    const signature = req.headers.get('X-Signature');
+    // Log all headers for debugging
+    console.log('Received headers:', Object.fromEntries(req.headers.entries()));
+    
+    // Verify webhook signature - try both header names
+    const signature = req.headers.get('X-Signature') || req.headers.get('x-signature');
     const webhookSecret = Deno.env.get('LEMON_SQUEEZY_WEBHOOK_SECRET');
     
     if (!webhookSecret) {
@@ -52,7 +55,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (!signature) {
-      console.error('No signature provided');
+      console.error('No signature provided in headers');
       return new Response('No signature provided', { status: 401 });
     }
     
