@@ -1,0 +1,3 @@
+-- Rename lemon_squeezy_product_id to lemon_squeezy_variant_id
+ALTER TABLE subscription_plans 
+RENAME COLUMN lemon_squeezy_product_id TO lemon_squeezy_variant_id;

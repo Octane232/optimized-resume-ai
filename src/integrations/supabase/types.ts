@@ -351,7 +351,7 @@ export type Database = {
           icon_name: string | null
           id: string
           is_popular: boolean | null
-          lemon_squeezy_product_id: string | null
+          lemon_squeezy_variant_id: string | null
           name: string
           price_monthly: number | null
           price_yearly: number | null
@@ -365,7 +365,7 @@ export type Database = {
           icon_name?: string | null
           id?: string
           is_popular?: boolean | null
-          lemon_squeezy_product_id?: string | null
+          lemon_squeezy_variant_id?: string | null
           name: string
           price_monthly?: number | null
           price_yearly?: number | null
@@ -379,7 +379,7 @@ export type Database = {
           icon_name?: string | null
           id?: string
           is_popular?: boolean | null
-          lemon_squeezy_product_id?: string | null
+          lemon_squeezy_variant_id?: string | null
           name?: string
           price_monthly?: number | null
           price_yearly?: number | null
