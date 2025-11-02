@@ -1,5 +1,8 @@
 project_id = "xpmhahyvtyvrxryrqane"
 
+[functions.create-checkout]
+verify_jwt = true
+
 [functions.interview-feedback]
 verify_jwt = false
 

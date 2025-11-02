@@ -185,12 +185,16 @@ const Billing = () => {
     if (!plan.lemonSqueezyVariantId) return;
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      // Call edge function to create checkout URL
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { variantId: plan.lemonSqueezyVariantId }
+      });
 
-      // Redirect to Lemon Squeezy checkout
-      const checkoutUrl = `https://pitchsorahqs.lemonsqueezy.com/checkout?variant=${plan.lemonSqueezyVariantId}&checkout[email]=${user.email}&checkout[custom][user_id]=${user.id}`;
-      window.location.href = checkoutUrl;
+      if (error) throw error;
+
+      if (data?.url) {
+        window.location.href = data.url;
+      }
     } catch (error) {
       console.error('Error initiating checkout:', error);
     }
