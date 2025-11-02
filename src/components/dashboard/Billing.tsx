@@ -100,7 +100,7 @@ const Billing = () => {
         popular: plan.is_popular,
         current: subscriptionData?.plan_id === plan.id,
         description: plan.description || '',
-        lemonSqueezyProductId: plan.lemon_squeezy_product_id,
+        lemonSqueezyVariantId: plan.lemon_squeezy_variant_id,
         savings: billingCycle === 'yearly' && plan.price_monthly ? 
           `Save $${(plan.price_monthly * 12) - plan.price_yearly}` : null
       }));
@@ -182,15 +182,15 @@ const Billing = () => {
   };
 
   const handleUpgrade = async (plan) => {
-    if (!plan.lemonSqueezyProductId) return;
+    if (!plan.lemonSqueezyVariantId) return;
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
       // Redirect to Lemon Squeezy checkout
-      const checkoutUrl = `https://pitchsora.lemonsqueezy.com/checkout/buy/${plan.lemonSqueezyProductId}?checkout[email]=${user.email}&checkout[custom][user_id]=${user.id}`;
-      window.open(checkoutUrl, '_blank');
+      const checkoutUrl = `https://pitchsora.lemonsqueezy.com/checkout?variant=${plan.lemonSqueezyVariantId}&checkout[email]=${user.email}&checkout[custom][user_id]=${user.id}`;
+      window.location.href = checkoutUrl;
     } catch (error) {
       console.error('Error initiating checkout:', error);
     }

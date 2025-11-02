@@ -19,7 +19,7 @@ interface Database {
           is_popular: boolean
           icon_name: string | null
           color_class: string | null
-          lemon_squeezy_product_id: string | null
+          lemon_squeezy_variant_id: string | null
         }
         Insert: {
           name: string
@@ -30,7 +30,7 @@ interface Database {
           is_popular?: boolean
           icon_name?: string | null
           color_class?: string | null
-          lemon_squeezy_product_id?: string | null
+          lemon_squeezy_variant_id?: string | null
         }
       }
     }
@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
         is_popular: false,
         icon_name: 'Shield',
         color_class: 'from-slate-500 to-slate-600',
-        lemon_squeezy_product_id: null
+        lemon_squeezy_variant_id: null
       },
       {
         name: 'Pitchsora Pro',
@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
         is_popular: true,
         icon_name: 'Sparkles',
         color_class: 'from-blue-500 to-purple-600',
-        lemon_squeezy_product_id: '678055'
+        lemon_squeezy_variant_id: '1065978'
       },
       {
         name: 'Pitchsora Pro Yearly',
@@ -94,7 +94,7 @@ Deno.serve(async (req) => {
         is_popular: true,
         icon_name: 'Sparkles',
         color_class: 'from-blue-500 to-purple-600',
-        lemon_squeezy_product_id: '678056'
+        lemon_squeezy_variant_id: '1065979'
       },
       {
         name: 'Pitchsora Premium',
@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
         is_popular: false,
         icon_name: 'Crown',
         color_class: 'from-purple-500 to-pink-600',
-        lemon_squeezy_product_id: '678058'
+        lemon_squeezy_variant_id: '1065981'
       },
       {
         name: 'Pitchsora Premium Yearly',
@@ -116,7 +116,7 @@ Deno.serve(async (req) => {
         is_popular: false,
         icon_name: 'Crown',
         color_class: 'from-purple-500 to-pink-600',
-        lemon_squeezy_product_id: '678062'
+        lemon_squeezy_variant_id: '1065987'
       }
     ]
 
