@@ -1,9 +1,16 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from "npm:zod@3";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const interviewFeedbackSchema = z.object({
+  question: z.string().trim().min(1, "Question is required").max(1000, "Question too long"),
+  answer: z.string().trim().min(1, "Answer is required").max(5000, "Answer too long"),
+  position: z.string().trim().max(200, "Position too long").optional()
+});
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -11,11 +18,11 @@ serve(async (req) => {
   }
 
   try {
-    const { question, answer, position } = await req.json();
+    const body = await req.json();
     
-    if (!question || !answer) {
-      throw new Error('Question and answer are required');
-    }
+    // Validate input
+    const validated = interviewFeedbackSchema.parse(body);
+    const { question, answer, position } = validated;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -124,6 +131,21 @@ Evaluate this answer strictly. If it's poor, empty, or meaningless, score it 1-3
     });
   } catch (error) {
     console.error("Error:", error);
+    
+    // Handle validation errors
+    if (error instanceof z.ZodError) {
+      return new Response(
+        JSON.stringify({ 
+          error: "Invalid input data",
+          details: error.errors.map(e => `${e.path.join('.')}: ${e.message}`)
+        }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        }
+      );
+    }
+    
     return new Response(
       JSON.stringify({ error: error.message }),
       {

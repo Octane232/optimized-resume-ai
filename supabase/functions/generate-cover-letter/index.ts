@@ -1,9 +1,19 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from "npm:zod@3";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const coverLetterSchema = z.object({
+  jobTitle: z.string().trim().min(1, "Job title is required").max(200, "Job title too long"),
+  companyName: z.string().trim().min(1, "Company name is required").max(200, "Company name too long"),
+  yourName: z.string().trim().min(1, "Your name is required").max(100, "Name too long"),
+  yourExperience: z.string().trim().max(2000, "Experience description too long").optional(),
+  keySkills: z.string().trim().max(1000, "Skills description too long").optional(),
+  whyInterested: z.string().trim().max(1000, "Interest description too long").optional()
+});
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -11,7 +21,11 @@ serve(async (req) => {
   }
 
   try {
-    const { jobTitle, companyName, yourName, yourExperience, keySkills, whyInterested } = await req.json();
+    const body = await req.json();
+    
+    // Validate input
+    const validated = coverLetterSchema.parse(body);
+    const { jobTitle, companyName, yourName, yourExperience, keySkills, whyInterested } = validated;
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -100,6 +114,21 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in generate-cover-letter function:', error);
+    
+    // Handle validation errors
+    if (error instanceof z.ZodError) {
+      return new Response(
+        JSON.stringify({ 
+          error: "Invalid input data",
+          details: error.errors.map(e => `${e.path.join('.')}: ${e.message}`)
+        }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        }
+      );
+    }
+    
     return new Response(
       JSON.stringify({ 
         error: error instanceof Error ? error.message : "Unknown error occurred" 

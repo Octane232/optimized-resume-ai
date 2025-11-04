@@ -1,17 +1,18 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { SmtpClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
+import { z } from "npm:zod@3";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface ContactFormRequest {
-  firstName: string;
-  lastName: string;
-  email: string;
-  message: string;
-}
+const contactFormSchema = z.object({
+  firstName: z.string().trim().min(1, "First name is required").max(100, "First name too long"),
+  lastName: z.string().trim().min(1, "Last name is required").max(100, "Last name too long"),
+  email: z.string().trim().email("Invalid email address").max(255, "Email too long"),
+  message: z.string().trim().min(10, "Message too short").max(1000, "Message too long")
+});
 
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
@@ -20,20 +21,13 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { firstName, lastName, email, message }: ContactFormRequest = await req.json();
+    const body = await req.json();
+    
+    // Validate input
+    const validated = contactFormSchema.parse(body);
+    const { firstName, lastName, email, message } = validated;
 
     console.log("Processing contact form submission:", { firstName, lastName, email });
-
-    // Validate required fields
-    if (!firstName || !lastName || !email || !message) {
-      return new Response(
-        JSON.stringify({ error: "All fields are required" }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
-        }
-      );
-    }
 
     // Get Zoho email credentials from environment
     const zohoEmail = Deno.env.get("ZOHO_EMAIL");
@@ -121,6 +115,21 @@ const handler = async (req: Request): Promise<Response> => {
     );
   } catch (error: any) {
     console.error("Error in send-contact-form function:", error);
+    
+    // Handle validation errors
+    if (error instanceof z.ZodError) {
+      return new Response(
+        JSON.stringify({ 
+          error: "Invalid input data",
+          details: error.errors.map(e => `${e.path.join('.')}: ${e.message}`)
+        }),
+        { 
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders }
+        }
+      );
+    }
+    
     return new Response(
       JSON.stringify({ error: error.message || "Failed to send message" }),
       {
