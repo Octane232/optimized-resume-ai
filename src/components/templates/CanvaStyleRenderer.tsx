@@ -144,33 +144,34 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
           <div 
             key={section.id}
             className="resume-section resume-header"
-            style={{
-              ...headerStyles,
-              background: section.style?.background || `linear-gradient(135deg, ${theme.primaryColor}, ${theme.secondaryColor})`,
-              color: section.style?.color || '#FFFFFF',
-              padding: section.style?.padding || '20px 24px',
-              textAlign: section.style?.textAlign as any || 'center'
-            }}
+            style={headerStyles}
           >
             <h1 style={{ 
-              fontSize: '1.75rem', 
-              fontWeight: 'bold', 
+              fontSize: section.style?.fontSize || '1.75rem', 
+              fontWeight: section.style?.fontWeight || 'bold', 
               marginBottom: '0.25rem',
-              color: 'inherit'
+              color: section.style?.color || 'inherit',
+              fontFamily: section.style?.fontFamily || 'inherit',
+              letterSpacing: section.style?.letterSpacing || 'normal',
+              textTransform: section.style?.textTransform as any || 'none'
             }}>{data.contact.name}</h1>
             <h2 style={{ 
-              fontSize: '1rem', 
+              fontSize: section.style?.titleFontSize || '1rem', 
               marginBottom: '0.5rem',
-              color: 'inherit',
-              opacity: 0.9
+              color: section.style?.color || 'inherit',
+              opacity: section.style?.titleOpacity || 0.9,
+              fontWeight: section.style?.titleFontWeight || 'normal',
+              textTransform: section.style?.titleTextTransform as any || 'none',
+              letterSpacing: section.style?.titleLetterSpacing || 'normal',
+              fontStyle: section.style?.titleFontStyle as any || 'normal'
             }}>{data.contact.title}</h2>
             <div style={{ 
               display: 'flex', 
               flexWrap: 'wrap', 
-              justifyContent: section.style?.textAlign === 'left' ? 'flex-start' : 'center',
+              justifyContent: section.style?.textAlign === 'left' ? 'flex-start' : section.style?.textAlign === 'right' ? 'flex-end' : 'center',
               gap: '0.75rem', 
               fontSize: '0.75rem',
-              color: 'inherit'
+              color: section.style?.color || 'inherit'
             }}>
               <span>{data.contact.email}</span>
               <span>{data.contact.phone}</span>
