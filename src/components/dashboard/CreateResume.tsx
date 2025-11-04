@@ -3,12 +3,18 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Zap, Clock, Award, Wand2, Edit, Sparkles, Brain, Target, Users, Palette, Download, Star, Loader2, Eye } from 'lucide-react';
+import { FileText, Zap, Clock, Award, Wand2, Edit, Sparkles, Brain, Target, Users, Palette, Download, Star, Loader2, Eye, ShieldCheck, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
 import TemplatePreview from './TemplatePreview';
 import TemplateThumbnail from './TemplateThumbnail';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 const CreateResume = () => {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
@@ -109,13 +115,25 @@ const CreateResume = () => {
 
   const categories = ['All', 'Modern', 'Simple', 'Tech', 'Creative'];
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [showAtsOnly, setShowAtsOnly] = useState(false);
 
-  const filteredTemplates = useMemo(() => 
-    selectedCategory === 'All' 
+  const filteredTemplates = useMemo(() => {
+    let filtered = selectedCategory === 'All' 
       ? templates 
-      : templates.filter(t => t.category?.toLowerCase() === selectedCategory.toLowerCase()),
-    [selectedCategory, templates]
-  );
+      : templates.filter(t => t.category?.toLowerCase() === selectedCategory.toLowerCase());
+    
+    if (showAtsOnly) {
+      filtered = filtered.filter(t => t.ats_friendly);
+    }
+    
+    return filtered;
+  }, [selectedCategory, templates, showAtsOnly]);
+
+  const getATSScoreBadge = (score: number) => {
+    if (score >= 90) return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
+    if (score >= 75) return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400";
+    return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
+  };
 
   const handlePreviewOpen = useCallback((template: any) => {
     setPreviewTemplate(template);
@@ -232,22 +250,40 @@ const CreateResume = () => {
         </CardHeader>
         <CardContent className="p-8">
           {/* Category Filter */}
-          <div className="flex flex-wrap gap-2 mb-8 justify-center">
-            {categories.map((category) => (
+          <div className="space-y-4 mb-8">
+            <div className="flex flex-wrap gap-2 justify-center">
+              {categories.map((category) => (
+                <Button
+                  key={category}
+                  variant={selectedCategory === category ? "default" : "outline"}
+                  onClick={() => setSelectedCategory(category)}
+                  size="sm"
+                  className={`rounded-full font-medium transition-all duration-300 ${
+                    selectedCategory === category 
+                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg' 
+                      : 'hover:bg-slate-50 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  {category}
+                </Button>
+              ))}
+            </div>
+
+            {/* ATS Filter Toggle */}
+            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg max-w-md mx-auto">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-green-600 dark:text-green-400" />
+                <span className="font-medium text-sm">ATS-friendly only (90+)</span>
+              </div>
               <Button
-                key={category}
-                variant={selectedCategory === category ? "default" : "outline"}
-                onClick={() => setSelectedCategory(category)}
+                variant={showAtsOnly ? "default" : "outline"}
                 size="sm"
-                className={`rounded-full font-medium transition-all duration-300 ${
-                  selectedCategory === category 
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg' 
-                    : 'hover:bg-slate-50 dark:hover:bg-slate-800'
-                }`}
+                onClick={() => setShowAtsOnly(!showAtsOnly)}
+                className="rounded-full h-8"
               >
-                {category}
+                {showAtsOnly ? "On" : "Off"}
               </Button>
-            ))}
+            </div>
           </div>
 
           {loading ? (
@@ -294,6 +330,38 @@ const CreateResume = () => {
                         <span className="text-xs text-slate-600 dark:text-slate-400">{template.downloads > 1000 ? `${(template.downloads / 1000).toFixed(1)}k` : template.downloads}</span>
                       </div>
                     </div>
+
+                    {/* ATS Score */}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center gap-2 mb-3 cursor-help">
+                            {template.ats_friendly ? (
+                              <ShieldCheck className="w-4 h-4 text-green-600 dark:text-green-400" />
+                            ) : (
+                              <AlertCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                            )}
+                            <span className="text-xs font-medium">ATS:</span>
+                            <Badge className={`text-xs ${getATSScoreBadge(template.ats_score || 0)}`}>
+                              {template.ats_score || 0}/100
+                            </Badge>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <div className="space-y-2">
+                            <p className="font-semibold">ATS Features:</p>
+                            <ul className="text-xs space-y-1">
+                              {(template.ats_features || []).map((feature: string, idx: number) => (
+                                <li key={idx} className="flex items-center gap-2">
+                                  <div className="w-1 h-1 rounded-full bg-green-500" />
+                                  {feature.split('-').join(' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                   
                   <div className="space-y-4">

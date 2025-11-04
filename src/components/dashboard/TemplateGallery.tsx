@@ -4,10 +4,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Star, Eye, Download, Loader2 } from 'lucide-react';
+import { FileText, Star, Eye, Download, Loader2, ShieldCheck, AlertCircle, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface TemplateGalleryProps {
   onClose: () => void;
@@ -17,10 +23,17 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onClose }) => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [templates, setTemplates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAtsOnly, setShowAtsOnly] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const categories = ['All', 'Modern', 'Classic', 'Creative', 'Executive', 'Tech'];
+
+  const getATSScoreBadge = (score: number) => {
+    if (score >= 90) return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
+    if (score >= 75) return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400";
+    return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
+  };
 
   useEffect(() => {
     loadTemplates();
@@ -50,9 +63,15 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onClose }) => {
     }
   };
 
-  const filteredTemplates = selectedCategory === 'All' 
-    ? templates 
-    : templates.filter(template => template.category?.toLowerCase() === selectedCategory.toLowerCase());
+  const filteredTemplates = templates.filter(template => {
+    if (selectedCategory !== 'All' && template.category?.toLowerCase() !== selectedCategory.toLowerCase()) {
+      return false;
+    }
+    if (showAtsOnly && !template.ats_friendly) {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
@@ -62,8 +81,23 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onClose }) => {
             Choose Your Perfect Template
           </DialogTitle>
           
+          {/* ATS Info Banner */}
+          <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <div className="flex items-start gap-3">
+              <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">
+                  ATS-Friendly Templates
+                </h3>
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  Applicant Tracking Systems (ATS) scan resumes before humans see them. Choose templates with high ATS scores (90+) to ensure your resume passes automated screening.
+                </p>
+              </div>
+            </div>
+          </div>
+          
           {/* Category Filter */}
-          <div className="flex flex-wrap justify-center gap-3 mb-8">
+          <div className="flex flex-wrap justify-center gap-3 mb-4">
             {categories.map((category) => (
               <Button
                 key={category}
@@ -74,6 +108,22 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onClose }) => {
                 {category}
               </Button>
             ))}
+          </div>
+
+          {/* ATS Filter Toggle */}
+          <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg mb-6">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-green-600 dark:text-green-400" />
+              <span className="font-medium text-sm">Show only ATS-friendly templates (Score 90+)</span>
+            </div>
+            <Button
+              variant={showAtsOnly ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShowAtsOnly(!showAtsOnly)}
+              className="rounded-full"
+            >
+              {showAtsOnly ? "Enabled" : "Disabled"}
+            </Button>
           </div>
         </DialogHeader>
 
@@ -161,6 +211,38 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onClose }) => {
                       {template.rating || 4.5}
                     </div>
                   </div>
+                  
+                  {/* ATS Score */}
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex items-center gap-2 mb-3 cursor-help">
+                          {template.ats_friendly ? (
+                            <ShieldCheck className="w-4 h-4 text-green-600 dark:text-green-400" />
+                          ) : (
+                            <AlertCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                          )}
+                          <span className="text-sm font-medium">ATS Score:</span>
+                          <Badge className={getATSScoreBadge(template.ats_score || 0)}>
+                            {template.ats_score || 0}/100
+                          </Badge>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">
+                        <div className="space-y-2">
+                          <p className="font-semibold">ATS Features:</p>
+                          <ul className="text-xs space-y-1">
+                            {(template.ats_features || []).map((feature: string, idx: number) => (
+                              <li key={idx} className="flex items-center gap-2">
+                                <div className="w-1 h-1 rounded-full bg-green-500" />
+                                {feature.split('-').join(' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                   
                   <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
                     {template.description}

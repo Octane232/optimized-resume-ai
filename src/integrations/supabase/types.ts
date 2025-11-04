@@ -269,6 +269,9 @@ export type Database = {
       }
       resume_templates: {
         Row: {
+          ats_features: Json | null
+          ats_friendly: boolean | null
+          ats_score: number | null
           category: string
           created_at: string
           description: string
@@ -282,6 +285,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ats_features?: Json | null
+          ats_friendly?: boolean | null
+          ats_score?: number | null
           category?: string
           created_at?: string
           description: string
@@ -295,6 +301,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ats_features?: Json | null
+          ats_friendly?: boolean | null
+          ats_score?: number | null
           category?: string
           created_at?: string
           description?: string
