@@ -43,6 +43,18 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Verify secret token for security
+    const { secret } = await req.json().catch(() => ({}));
+    const expectedSecret = Deno.env.get('SEED_SECRET');
+    
+    if (!expectedSecret || secret !== expectedSecret) {
+      console.error('Unauthorized seed attempt');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+      );
+    }
+
     const supabase = createClient<Database>(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
