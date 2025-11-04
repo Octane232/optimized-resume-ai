@@ -114,13 +114,15 @@ const ResumesShowcase = () => {
                       </Badge>
                     )}
                     
-                    <div className="relative overflow-hidden bg-gray-100 dark:bg-gray-700 h-64">
-                      <div className="w-full h-full p-2 overflow-hidden transform scale-[0.28] origin-top-left">
+                    <div className="relative overflow-hidden bg-gray-100 dark:bg-gray-700 h-80">
+                      <div className="w-full h-full flex items-center justify-center p-4">
                         {template.json_content && (
-                          <CanvaStyleRenderer 
-                            template={template.json_content as any} 
-                            data={sampleData} 
-                          />
+                          <div className="transform scale-[0.32] origin-center" style={{ width: '850px', height: '1100px' }}>
+                            <CanvaStyleRenderer 
+                              template={template.json_content as any} 
+                              data={sampleData} 
+                            />
+                          </div>
                         )}
                       </div>
                       
