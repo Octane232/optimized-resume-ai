@@ -39,6 +39,17 @@ interface CanvaStyleRendererProps {
 }
 
 const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data, scale = 1 }) => {
+  // Provide default theme if not defined
+  const defaultTheme: TemplateTheme = {
+    primaryColor: '#2563eb',
+    secondaryColor: '#64748b',
+    accentColor: '#3b82f6',
+    backgroundColor: '#ffffff',
+    textColor: '#1e293b',
+    fontFamily: 'Inter, sans-serif'
+  };
+
+  const theme = template.theme || defaultTheme;
   const renderContent = (content: string | any) => {
     if (typeof content === 'string') {
       // Convert data to template-friendly format
@@ -497,8 +508,8 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
       style={{
         transform: `scale(${scale})`,
         transformOrigin: 'top center',
-        backgroundColor: template.theme.backgroundColor,
-        fontFamily: template.theme.fontFamily,
+        backgroundColor: theme.backgroundColor,
+        fontFamily: theme.fontFamily,
         width: '100%',
         maxWidth: '210mm',
         minHeight: '297mm',
