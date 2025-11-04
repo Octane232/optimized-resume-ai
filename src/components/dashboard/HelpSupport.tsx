@@ -5,37 +5,20 @@ import { Button } from "@/components/ui/button";
 import { 
   HelpCircle, 
   Mail, 
-  MessageSquare, 
   BookOpen, 
   ExternalLink 
 } from "lucide-react";
-
-// Declare Tawk_API type
-declare global {
-  interface Window {
-    Tawk_API?: {
-      maximize?: () => void;
-    };
-  }
-}
 
 interface SupportOption {
   icon: React.ElementType;
   title: string;
   description: string;
   action: string;
-  onClick?: () => void;
   href?: string;
   internal?: boolean;
 }
 
 const HelpSupport = () => {
-  const openLiveChat = () => {
-    if (window.Tawk_API && window.Tawk_API.maximize) {
-      window.Tawk_API.maximize();
-    }
-  };
-
   const supportOptions: SupportOption[] = [
     {
       icon: BookOpen,
@@ -44,13 +27,6 @@ const HelpSupport = () => {
       action: "View Docs",
       href: "/documentation",
       internal: true
-    },
-    {
-      icon: MessageSquare,
-      title: "Live Chat",
-      description: "Chat with our support team in real-time",
-      action: "Start Chat",
-      onClick: openLiveChat
     },
     {
       icon: Mail,
@@ -109,12 +85,7 @@ const HelpSupport = () => {
               </div>
             </CardHeader>
             <CardContent>
-              {option.onClick ? (
-                <Button onClick={option.onClick} variant="outline" className="w-full flex items-center justify-center gap-2">
-                  {option.action}
-                  <MessageSquare className="w-4 h-4" />
-                </Button>
-              ) : option.internal && option.href ? (
+              {option.internal && option.href ? (
                 <Button asChild variant="outline" className="w-full">
                   <Link to={option.href} className="flex items-center justify-center gap-2">
                     {option.action}
