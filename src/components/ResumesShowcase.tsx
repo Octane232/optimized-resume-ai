@@ -1,20 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Eye, Download, Star, ChevronDown, ChevronUp } from 'lucide-react';
-
-// Import templates
-import ClassicTemplate from '@/components/templates/ClassicTemplate';
-import ModernTemplate from '@/components/templates/ModernTemplate';
-import CreativeTemplate from '@/components/templates/CreativeTemplate';
-import ExecutiveTemplate from '@/components/templates/ExecutiveTemplate';
-import TechTemplate from '@/components/templates/TechTemplate';
-import ClassicTemplate2 from '@/components/templates/ClassicTemplate2';
-import ModernTemplate2 from '@/components/templates/ModernTemplate2';
-
-// Import sample data
+import { supabase } from '@/integrations/supabase/client';
+import CanvaStyleRenderer from '@/components/templates/CanvaStyleRenderer';
 import { 
   classicResueSample, 
   modernResumeSample, 
@@ -22,131 +13,54 @@ import {
   executiveResumeSample, 
   techResumeSample 
 } from '@/data/sampleResumes';
+import { useNavigate } from 'react-router-dom';
 
 const ResumesShowcase = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [showAll, setShowAll] = useState(false);
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
-  const categories = ['All', 'Classic', 'Modern', 'Creative', 'Executive', 'Tech'];
+  const categories = ['All', 'classic', 'modern', 'creative', 'executive', 'tech'];
 
-  const resumes = [
-    // Classic Category
-    {
-      id: 1,
-      category: 'Classic',
-      title: 'Traditional Professional',
-      description: 'Clean, timeless design perfect for conservative industries',
-      industry: 'Finance',
-      experience: 'Senior Level',
-      rating: 4.9,
-      downloads: '12.3k',
-      template: ClassicTemplate,
-      data: classicResueSample,
-      featured: true
-    },
-    {
-      id: 2,
-      category: 'Classic',
-      title: 'Centered Elegance',
-      description: 'Sophisticated center-aligned layout for formal presentations',
-      industry: 'Law',
-      experience: 'Senior Level',
-      rating: 4.8,
-      downloads: '8.9k',
-      template: ClassicTemplate2,
-      data: classicResueSample
-    },
-    {
-      id: 3,
-      category: 'Classic',
-      title: 'Corporate Executive',
-      description: 'Formal layout ideal for C-suite positions',
-      industry: 'Corporate',
-      experience: 'Executive',
-      rating: 4.8,
-      downloads: '8.7k',
-      template: ExecutiveTemplate,
-      data: executiveResumeSample
-    },
-    
-    // Modern Category
-    {
-      id: 11,
-      category: 'Modern',
-      title: 'Minimalist Pro',
-      description: 'Clean lines and modern typography for contemporary roles',
-      industry: 'Marketing',
-      experience: 'Mid-Level',
-      rating: 4.9,
-      downloads: '15.2k',
-      template: ModernTemplate,
-      data: modernResumeSample,
-      featured: true
-    },
-    {
-      id: 12,
-      category: 'Modern',
-      title: 'Split Column',
-      description: 'Efficient two-column layout maximizing space utilization',
-      industry: 'Consulting',
-      experience: 'Mid-Level',
-      rating: 4.7,
-      downloads: '11.4k',
-      template: ModernTemplate2,
-      data: modernResumeSample
-    },
-    
-    // Creative Category
-    {
-      id: 21,
-      category: 'Creative',
-      title: 'Designer Portfolio',
-      description: 'Vibrant and creative layout for design professionals',
-      industry: 'Design',
-      experience: 'Mid-Level',
-      rating: 4.8,
-      downloads: '11.4k',
-      template: CreativeTemplate,
-      data: creativeResumeSample,
-      featured: true
-    },
-    
-    // Executive Category
-    {
-      id: 31,
-      category: 'Executive',
-      title: 'CEO Excellence',
-      description: 'Premium design for top-tier executive positions',
-      industry: 'Technology',
-      experience: 'Executive',
-      rating: 4.9,
-      downloads: '6.1k',
-      template: ExecutiveTemplate,
-      data: executiveResumeSample,
-      featured: true
-    },
-    
-    // Tech Category
-    {
-      id: 41,
-      category: 'Tech',
-      title: 'Software Engineer',
-      description: 'Tech-focused design highlighting technical skills',
-      industry: 'Software',
-      experience: 'Senior Level',
-      rating: 4.9,
-      downloads: '18.7k',
-      template: TechTemplate,
-      data: techResumeSample,
-      featured: true
+  useEffect(() => {
+    loadTemplates();
+  }, []);
+
+  const loadTemplates = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('resume_templates')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      
+      setTemplates(data || []);
+    } catch (error) {
+      console.error('Error loading templates:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
-  const filteredResumes = selectedCategory === 'All' 
-    ? resumes 
-    : resumes.filter(resume => resume.category === selectedCategory);
+  const getSampleData = (category: string) => {
+    switch (category) {
+      case 'classic': return classicResueSample;
+      case 'modern': return modernResumeSample;
+      case 'creative': return creativeResumeSample;
+      case 'executive': return executiveResumeSample;
+      case 'tech': return techResumeSample;
+      default: return classicResueSample;
+    }
+  };
 
-  const displayedResumes = showAll ? filteredResumes : filteredResumes.slice(0, 6);
+  const filteredTemplates = selectedCategory === 'All' 
+    ? templates 
+    : templates.filter(t => t.category.toLowerCase() === selectedCategory.toLowerCase());
+
+  const displayedTemplates = showAll ? filteredTemplates : filteredTemplates.slice(0, 6);
 
   return (
     <section className="py-20 bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
@@ -167,7 +81,7 @@ const ResumesShowcase = () => {
                 key={category}
                 variant={selectedCategory === category ? "default" : "outline"}
                 onClick={() => setSelectedCategory(category)}
-                className="px-6 py-2"
+                className="px-6 py-2 capitalize"
               >
                 {category}
               </Button>
@@ -176,87 +90,101 @@ const ResumesShowcase = () => {
         </div>
 
         {/* Resume Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {displayedResumes.map((resume, index) => {
-            const TemplateComponent = resume.template;
-            return (
-              <Card 
-                key={resume.id} 
-                className="group hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 border-0 shadow-md overflow-hidden animate-fade-in"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className="relative">
-                  {resume.featured && (
-                    <Badge className="absolute top-3 left-3 z-10 bg-gradient-to-r from-amber-400 to-orange-500 text-white border-0">
-                      <Star className="w-3 h-3 mr-1" />
-                      Featured
-                    </Badge>
-                  )}
-                  
-                  <div className="relative overflow-hidden bg-gray-100 dark:bg-gray-700 h-64">
-                    <div className="w-full h-full p-2 overflow-hidden">
-                      <TemplateComponent data={resume.data} scale={0.3} />
-                    </div>
+        {loading ? (
+          <div className="text-center py-20">
+            <p className="text-gray-600 dark:text-gray-400">Loading templates...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {displayedTemplates.map((template, index) => {
+              const sampleData = getSampleData(template.category);
+              const isFeatured = index < 3;
+              
+              return (
+                <Card 
+                  key={template.id} 
+                  className="group hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 border-0 shadow-md overflow-hidden animate-fade-in"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <div className="relative">
+                    {isFeatured && (
+                      <Badge className="absolute top-3 left-3 z-10 bg-gradient-to-r from-amber-400 to-orange-500 text-white border-0">
+                        <Star className="w-3 h-3 mr-1" />
+                        Featured
+                      </Badge>
+                    )}
                     
-                    {/* Overlay on hover */}
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                      <div className="flex gap-3">
-                        <Button size="sm" variant="secondary" className="bg-white/90 hover:bg-white">
-                          <Eye className="w-4 h-4 mr-2" />
-                          Preview
-                        </Button>
-                        <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-                          <Download className="w-4 h-4 mr-2" />
-                          Use Template
-                        </Button>
+                    <div className="relative overflow-hidden bg-gray-100 dark:bg-gray-700 h-64">
+                      <div className="w-full h-full p-2 overflow-hidden transform scale-[0.28] origin-top-left">
+                        {template.json_content && (
+                          <CanvaStyleRenderer 
+                            template={template.json_content as any} 
+                            data={sampleData} 
+                          />
+                        )}
+                      </div>
+                      
+                      {/* Overlay on hover */}
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                        <div className="flex gap-3">
+                          <Button size="sm" variant="secondary" className="bg-white/90 hover:bg-white">
+                            <Eye className="w-4 h-4 mr-2" />
+                            Preview
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            className="bg-blue-600 hover:bg-blue-700"
+                            onClick={() => navigate(`/editor?template=${template.id}`)}
+                          >
+                            <Download className="w-4 h-4 mr-2" />
+                            Use Template
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-1">
-                        {resume.title}
-                      </h3>
-                      <Badge variant="outline" className="text-xs border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300">
-                        {resume.category}
-                      </Badge>
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-1">
+                          {template.name}
+                        </h3>
+                        <Badge variant="outline" className="text-xs border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 capitalize">
+                          {template.category}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                        <Star className="w-4 h-4 text-amber-400 mr-1" />
+                        4.8
+                      </div>
                     </div>
-                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                      <Star className="w-4 h-4 text-amber-400 mr-1" />
-                      {resume.rating}
+                    
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                      {template.description}
+                    </p>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500 dark:text-gray-500">
+                        {template.is_premium ? 'Premium' : 'Free'}
+                      </span>
+                      <Button 
+                        size="sm" 
+                        className="bg-blue-600 hover:bg-blue-700"
+                        onClick={() => navigate(`/editor?template=${template.id}`)}
+                      >
+                        Use Template
+                      </Button>
                     </div>
-                  </div>
-                  
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
-                    {resume.description}
-                  </p>
-                  
-                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-500 mb-4">
-                    <span className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded">
-                      {resume.industry}
-                    </span>
-                    <span className="text-gray-600 dark:text-gray-400">{resume.experience}</span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500 dark:text-gray-500">
-                      {resume.downloads} downloads
-                    </span>
-                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-                      Use Template
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
 
         {/* Show More/Less Button */}
-        {filteredResumes.length > 6 && (
+        {filteredTemplates.length > 6 && (
           <div className="text-center mt-12">
             <Button
               onClick={() => setShowAll(!showAll)}
@@ -272,7 +200,7 @@ const ResumesShowcase = () => {
               ) : (
                 <>
                   <ChevronDown className="w-4 h-4 mr-2" />
-                  Show More Templates ({filteredResumes.length - 6} more)
+                  Show More Templates ({filteredTemplates.length - 6} more)
                 </>
               )}
             </Button>
