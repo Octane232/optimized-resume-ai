@@ -67,7 +67,7 @@ const Footer = () => {
                 { Icon: Linkedin, href: '#' },
                 { Icon: Twitter, href: '#' },
                 { Icon: Github, href: '#' },
-                { Icon: Mail, href: '#' }
+                { Icon: Mail, href: 'mailto:contact-us@pitchsora.com' }
               ].map(({ Icon, href }, i) => (
                 <a 
                   key={i}
