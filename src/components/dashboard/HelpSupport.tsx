@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
@@ -31,7 +32,8 @@ const HelpSupport = () => {
       title: "Documentation",
       description: "Browse our comprehensive guides and tutorials",
       action: "View Docs",
-      href: "https://docs.lovable.dev/"
+      href: "/documentation",
+      internal: true
     },
     {
       icon: MessageSquare,
@@ -101,6 +103,13 @@ const HelpSupport = () => {
                 <Button onClick={option.onClick} variant="outline" className="w-full flex items-center justify-center gap-2">
                   {option.action}
                   <MessageSquare className="w-4 h-4" />
+                </Button>
+              ) : option.internal ? (
+                <Button asChild variant="outline" className="w-full">
+                  <Link to={option.href} className="flex items-center justify-center gap-2">
+                    {option.action}
+                    <BookOpen className="w-4 h-4" />
+                  </Link>
                 </Button>
               ) : (
                 <Button asChild variant="outline" className="w-full">
