@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Sun, Moon, Crown, Bell, Search } from 'lucide-react';
+import { Sun, Moon, Crown, Bell } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useTheme } from 'next-themes';
 import logo from '@/assets/pitchsora-logo.png';
@@ -71,17 +71,6 @@ const DashboardHeader = ({ activeTab, setActiveTab }: DashboardHeaderProps) => {
           </button>
         </div>
 
-        {/* Search Bar */}
-        <div className="hidden md:flex flex-1 max-w-md mx-8">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Search resumes, templates..." 
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-            />
-          </div>
-        </div>
 
         <div className="flex items-center gap-4">
           {/* Theme Toggle */}
