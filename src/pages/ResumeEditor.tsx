@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -85,16 +85,8 @@ const ResumeEditor: React.FC = () => {
 
   const [newSkill, setNewSkill] = useState('');
 
-  // Load templates and set initial template
-  useEffect(() => {
-    const templateId = searchParams.get('template');
-    loadTemplates(templateId);
-    if (resumeId && resumeId !== 'new') {
-      loadResume();
-    }
-  }, [resumeId, searchParams]);
-
-  const loadTemplates = async (templateIdFromUrl?: string | null) => {
+  // Load templates with useCallback for optimization
+  const loadTemplates = useCallback(async (templateIdFromUrl?: string | null) => {
     try {
       const { data, error } = await supabase
         .from('resume_templates')
@@ -142,9 +134,9 @@ const ResumeEditor: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [resumeId, toast]);
 
-  const loadResume = async () => {
+  const loadResume = useCallback(async () => {
     const { data, error } = await supabase
       .from('resumes')
       .select('*')
@@ -163,7 +155,16 @@ const ResumeEditor: React.FC = () => {
       setSelectedTemplate(data.template_name || templates[0]?.id || '');
       setResumeTitle(data.title || 'My Resume');
     }
-  };
+  }, [resumeId, templates]);
+
+  // Load templates and set initial template
+  useEffect(() => {
+    const templateId = searchParams.get('template');
+    loadTemplates(templateId);
+    if (resumeId && resumeId !== 'new') {
+      loadResume();
+    }
+  }, [resumeId, searchParams, loadTemplates, loadResume]);
 
   const updateContact = (field: string, value: string) => {
     setResumeData(prev => ({

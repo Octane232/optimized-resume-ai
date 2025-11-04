@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ResumeData } from '@/types/resume';
 import Mustache from 'mustache';
 
@@ -38,18 +38,19 @@ interface CanvaStyleRendererProps {
   scale?: number;
 }
 
-const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data, scale = 1 }) => {
-  // Provide default theme if not defined
-  const defaultTheme: TemplateTheme = {
-    primaryColor: '#2563eb',
-    secondaryColor: '#64748b',
-    accentColor: '#3b82f6',
-    backgroundColor: '#ffffff',
-    textColor: '#1e293b',
-    fontFamily: 'Inter, sans-serif'
-  };
-
-  const theme = template.theme || defaultTheme;
+const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = React.memo(({ template, data, scale = 1 }) => {
+  // Memoize theme to prevent recalculation
+  const theme = useMemo(() => {
+    const defaultTheme: TemplateTheme = {
+      primaryColor: '#2563eb',
+      secondaryColor: '#64748b',
+      accentColor: '#3b82f6',
+      backgroundColor: '#ffffff',
+      textColor: '#1e293b',
+      fontFamily: 'Inter, sans-serif'
+    };
+    return template.theme || defaultTheme;
+  }, [template.theme]);
   const renderContent = (content: string | any) => {
     if (typeof content === 'string') {
       // Convert data to template-friendly format
@@ -523,6 +524,8 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
       {template.sections.map(section => renderSection(section))}
     </div>
   );
-};
+});
+
+CanvaStyleRenderer.displayName = 'CanvaStyleRenderer';
 
 export default CanvaStyleRenderer;

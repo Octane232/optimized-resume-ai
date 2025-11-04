@@ -8,7 +8,7 @@ interface ResumeTemplatePreviewProps {
   templates: any[];
 }
 
-const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({ 
+const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = React.memo(({ 
   resumeData, 
   templateId,
   templates 
@@ -77,6 +77,8 @@ const ResumeTemplatePreview: React.FC<ResumeTemplatePreviewProps> = ({
       </div>
     </div>
   );
-};
+});
+
+ResumeTemplatePreview.displayName = 'ResumeTemplatePreview';
 
 export default ResumeTemplatePreview;
