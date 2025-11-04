@@ -212,37 +212,39 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onClose }) => {
                     </div>
                   </div>
                   
-                  {/* ATS Score */}
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="flex items-center gap-2 mb-3 cursor-help">
-                          {template.ats_friendly ? (
-                            <ShieldCheck className="w-4 h-4 text-green-600 dark:text-green-400" />
-                          ) : (
-                            <AlertCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
-                          )}
-                          <span className="text-sm font-medium">ATS Score:</span>
-                          <Badge className={getATSScoreBadge(template.ats_score || 0)}>
-                            {template.ats_score || 0}/100
-                          </Badge>
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent className="max-w-xs">
-                        <div className="space-y-2">
-                          <p className="font-semibold">ATS Features:</p>
-                          <ul className="text-xs space-y-1">
-                            {(template.ats_features || []).map((feature: string, idx: number) => (
-                              <li key={idx} className="flex items-center gap-2">
-                                <div className="w-1 h-1 rounded-full bg-green-500" />
-                                {feature.split('-').join(' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  {/* ATS Score - Only show when filter is enabled */}
+                  {showAtsOnly && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center gap-2 mb-3 cursor-help">
+                            {template.ats_friendly ? (
+                              <ShieldCheck className="w-4 h-4 text-green-600 dark:text-green-400" />
+                            ) : (
+                              <AlertCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                            )}
+                            <span className="text-sm font-medium">ATS Score:</span>
+                            <Badge className={getATSScoreBadge(template.ats_score || 0)}>
+                              {template.ats_score || 0}/100
+                            </Badge>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <div className="space-y-2">
+                            <p className="font-semibold">ATS Features:</p>
+                            <ul className="text-xs space-y-1">
+                              {(template.ats_features || []).map((feature: string, idx: number) => (
+                                <li key={idx} className="flex items-center gap-2">
+                                  <div className="w-1 h-1 rounded-full bg-green-500" />
+                                  {feature.split('-').join(' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
                   
                   <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
                     {template.description}
