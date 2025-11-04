@@ -86,7 +86,7 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = ({ template, data,
   };
 
   const renderSection = (section: TemplateSection): React.ReactNode => {
-    const { theme } = template;
+    // Use the theme from parent scope (with default fallback)
     
     // Helper function to apply advanced styling
     const getAdvancedStyles = (sectionStyle: any) => {
