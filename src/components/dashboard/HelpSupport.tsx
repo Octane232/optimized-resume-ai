@@ -31,7 +31,7 @@ const HelpSupport = () => {
       title: "Documentation",
       description: "Browse our comprehensive guides and tutorials",
       action: "View Docs",
-      href: "#"
+      href: "https://docs.lovable.dev/"
     },
     {
       icon: MessageSquare,
