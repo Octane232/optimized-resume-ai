@@ -19,6 +19,16 @@ declare global {
   }
 }
 
+interface SupportOption {
+  icon: React.ElementType;
+  title: string;
+  description: string;
+  action: string;
+  onClick?: () => void;
+  href?: string;
+  internal?: boolean;
+}
+
 const HelpSupport = () => {
   const openLiveChat = () => {
     if (window.Tawk_API && window.Tawk_API.maximize) {
@@ -26,7 +36,7 @@ const HelpSupport = () => {
     }
   };
 
-  const supportOptions = [
+  const supportOptions: SupportOption[] = [
     {
       icon: BookOpen,
       title: "Documentation",
@@ -104,21 +114,21 @@ const HelpSupport = () => {
                   {option.action}
                   <MessageSquare className="w-4 h-4" />
                 </Button>
-              ) : option.internal ? (
+              ) : option.internal && option.href ? (
                 <Button asChild variant="outline" className="w-full">
                   <Link to={option.href} className="flex items-center justify-center gap-2">
                     {option.action}
                     <BookOpen className="w-4 h-4" />
                   </Link>
                 </Button>
-              ) : (
+              ) : option.href ? (
                 <Button asChild variant="outline" className="w-full">
                   <a href={option.href} className="flex items-center justify-center gap-2">
                     {option.action}
                     <ExternalLink className="w-4 h-4" />
                   </a>
                 </Button>
-              )}
+              ) : null}
             </CardContent>
           </Card>
         ))}
