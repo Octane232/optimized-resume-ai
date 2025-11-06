@@ -370,6 +370,14 @@ const JobFinder = () => {
                           <Clock className="w-4 h-4 flex-shrink-0" />
                           <span>{getTimeSince(job.createdAt)}</span>
                         </div>
+                        {job.salary && (
+                          <div className="flex items-center gap-2">
+                            <DollarSign className="w-4 h-4 flex-shrink-0 text-emerald-600 dark:text-emerald-400" />
+                            <span className="font-semibold text-emerald-700 dark:text-emerald-400">
+                              ${Math.round(job.salary.min).toLocaleString()} - ${Math.round(job.salary.max).toLocaleString()}
+                            </span>
+                          </div>
+                        )}
                       </div>
                       
                       {/* Description */}
