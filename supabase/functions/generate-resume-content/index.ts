@@ -14,7 +14,7 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const systemPrompt = `You are an expert resume writer and career coach. Generate professional, ATS-optimized resume content that highlights achievements and uses strong action verbs. Focus on quantifiable results and industry-specific keywords.`;
+    const systemPrompt = `You are an expert resume writer and career coach. Generate professional, ATS-optimized resume content that highlights achievements and uses strong action verbs. Focus on quantifiable results and industry-specific keywords. Also recommend the most suitable resume template based on the role and industry.`;
 
     const userPrompt = `Create comprehensive resume content for:
 
@@ -32,6 +32,12 @@ Generate:
    - 3-4 bullet points per role with quantifiable achievements
 3. 2 education entries with degree, institution, and graduation year
 4. 3-5 relevant projects with titles, descriptions, and technologies
+5. Recommend the best template type based on the role:
+   - "tech" for software/IT roles
+   - "creative" for design/marketing roles
+   - "executive" for senior management/C-level positions
+   - "modern" for contemporary corporate roles
+   - "classic" for traditional industries (law, finance, academia)
 
 Make it specific to ${targetRole} and optimize for ATS systems.`;
 
@@ -56,6 +62,11 @@ Make it specific to ${targetRole} and optimize for ATS systems.`;
               type: "object",
               properties: {
                 summary: { type: "string" },
+                recommendedTemplate: { 
+                  type: "string",
+                  enum: ["tech", "creative", "executive", "modern", "classic"],
+                  description: "Recommended template type based on the target role"
+                },
                 experience: {
                   type: "array",
                   items: {
@@ -104,7 +115,7 @@ Make it specific to ${targetRole} and optimize for ATS systems.`;
                   }
                 }
               },
-              required: ["summary", "experience", "education", "projects"]
+              required: ["summary", "recommendedTemplate", "experience", "education", "projects"]
             }
           }
         }],
@@ -160,7 +171,10 @@ Make it specific to ${targetRole} and optimize for ATS systems.`;
     };
 
     return new Response(
-      JSON.stringify({ data: fullResumeData }),
+      JSON.stringify({ 
+        data: fullResumeData,
+        recommendedTemplate: resumeContent.recommendedTemplate 
+      }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
