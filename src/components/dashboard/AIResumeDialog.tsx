@@ -65,14 +65,26 @@ const AIResumeDialog: React.FC<AIResumeDialogProps> = ({ open, onOpenChange, sel
         throw new Error('No resume data generated');
       }
 
-      // Save the generated resume with AI-recommended template
+      // Get user data
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) {
         throw new Error('User not authenticated');
       }
 
-      // Use AI-recommended template or fallback to selected/modern
-      const templateName = data.recommendedTemplate || selectedTemplate?.id || 'modern';
+      // Fetch actual template from database matching AI recommendation
+      const recommendedCategory = data.recommendedTemplate || 'modern';
+      const { data: templates, error: templateError } = await supabase
+        .from('resume_templates')
+        .select('id, name, category')
+        .eq('category', recommendedCategory)
+        .limit(1);
+
+      if (templateError) {
+        console.error('Error fetching template:', templateError);
+      }
+
+      // Use the fetched template ID or fallback to the category name
+      const templateId = templates?.[0]?.id || selectedTemplate?.id || null;
 
       const { data: resumeData, error: saveError } = await supabase
         .from('resumes')
@@ -80,7 +92,7 @@ const AIResumeDialog: React.FC<AIResumeDialogProps> = ({ open, onOpenChange, sel
           user_id: userData.user.id,
           title: `${formData.targetRole} Resume`,
           content: data.data,
-          template_name: templateName
+          template_name: templateId
         })
         .select()
         .single();
@@ -89,7 +101,7 @@ const AIResumeDialog: React.FC<AIResumeDialogProps> = ({ open, onOpenChange, sel
 
       toast({
         title: 'Success!',
-        description: `Your AI-powered resume has been created with the ${data.recommendedTemplate || 'modern'} template`,
+        description: `Your AI-powered resume has been created with a ${recommendedCategory} template`,
       });
 
       onOpenChange(false);
