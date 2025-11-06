@@ -49,7 +49,12 @@ const JobFinder = () => {
       });
 
       if (error) throw error;
-      setJobs(data.data || []);
+      
+      // Deduplicate jobs by ID
+      const uniqueJobs = Array.from(
+        new Map((data.data || []).map((job: Job) => [job.id, job])).values()
+      ) as Job[];
+      setJobs(uniqueJobs);
     } catch (error) {
       console.error('Error fetching jobs:', error);
       toast({
@@ -70,7 +75,12 @@ const JobFinder = () => {
       });
 
       if (error) throw error;
-      setJobs(data.data || []);
+      
+      // Deduplicate jobs by ID
+      const uniqueJobs = Array.from(
+        new Map((data.data || []).map((job: Job) => [job.id, job])).values()
+      ) as Job[];
+      setJobs(uniqueJobs);
     } catch (error) {
       console.error('Error searching jobs:', error);
       toast({
