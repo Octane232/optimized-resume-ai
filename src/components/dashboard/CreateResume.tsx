@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Zap, Clock, Award, Wand2, Edit, Sparkles, Brain, Target, Users, Palette, Download, Star, Loader2, Eye, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Zap, Clock, Award, Wand2, Edit, Sparkles, Brain, Target, Users, Palette, Download, Star, Loader2, Eye, ShieldCheck, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -103,15 +103,6 @@ const CreateResume = () => {
       features: ['Step-by-Step Guidance', 'Expert Tips', 'Live Preview'],
       time: '15 minutes',
       difficulty: 'Intermediate'
-    },
-    {
-      icon: FileText,
-      title: 'Import & Enhance',
-      description: 'Upload your existing resume and let AI enhance it',
-      gradient: 'from-orange-500 to-red-600',
-      features: ['Import Existing', 'AI Enhancement', 'Format Upgrade'],
-      time: '3 minutes',
-      difficulty: 'Beginner'
     }
   ];
 
