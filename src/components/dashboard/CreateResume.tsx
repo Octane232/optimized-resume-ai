@@ -9,6 +9,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
 import TemplatePreview from './TemplatePreview';
 import TemplateThumbnail from './TemplateThumbnail';
+import AIResumeDialog from './AIResumeDialog';
 import {
   Tooltip,
   TooltipContent,
@@ -20,6 +21,7 @@ const CreateResume = () => {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [previewTemplate, setPreviewTemplate] = useState(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isAIDialogOpen, setIsAIDialogOpen] = useState(false);
   const [step, setStep] = useState('templates'); // templates, builder, preview
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -201,7 +203,24 @@ const CreateResume = () => {
                     ))}
                   </div>
                   
-                  <Button className={`w-full bg-gradient-to-r ${method.gradient} hover:shadow-lg text-white font-semibold py-3 rounded-xl transition-all duration-300`}>
+                  <Button 
+                    onClick={() => {
+                      if (index === 0) {
+                        // AI-Powered Resume
+                        setIsAIDialogOpen(true);
+                      } else if (index === 1) {
+                        // Guided Builder - go to editor with first template
+                        navigate(`/editor/new${templates[0]?.id ? `?template=${templates[0].id}` : ''}`);
+                      } else {
+                        // Import & Enhance - placeholder for now
+                        toast({
+                          title: 'Coming Soon',
+                          description: 'Import & enhance feature will be available soon!',
+                        });
+                      }
+                    }}
+                    className={`w-full bg-gradient-to-r ${method.gradient} hover:shadow-lg text-white font-semibold py-3 rounded-xl transition-all duration-300`}
+                  >
                     <Sparkles className="w-5 h-5 mr-2" />
                     Get Started
                   </Button>
@@ -426,6 +445,13 @@ const CreateResume = () => {
             toast({ title: 'Template not ready', description: 'This template will be available soon. Please choose another with full styles.' });
           }
         }}
+      />
+
+      {/* AI Resume Dialog */}
+      <AIResumeDialog
+        open={isAIDialogOpen}
+        onOpenChange={setIsAIDialogOpen}
+        selectedTemplate={selectedTemplate}
       />
     </div>
   );
