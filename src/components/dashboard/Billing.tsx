@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, Crown, CreditCard, Download, Star, Zap, Shield, Headphones, Sparkles, TrendingUp, Users, Award } from 'lucide-react';
+import { Check, Crown, CreditCard, Download, Star, Zap, Shield, Headphones, Sparkles, TrendingUp, Users, Award, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
 
 const Billing = () => {
   const [billingCycle, setBillingCycle] = useState('monthly');
@@ -13,6 +15,8 @@ const Billing = () => {
   const [invoices, setInvoices] = useState([]);
   const [usageStats, setUsageStats] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [upgradingPlan, setUpgradingPlan] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchBillingData();
@@ -172,6 +176,8 @@ const Billing = () => {
   const handleUpgrade = async (plan) => {
     if (!plan.lemonSqueezyVariantId) return;
 
+    setUpgradingPlan(plan.id);
+
     try {
       // Call edge function to create checkout URL
       const { data, error } = await supabase.functions.invoke('create-checkout', {
@@ -185,6 +191,12 @@ const Billing = () => {
       }
     } catch (error) {
       console.error('Error initiating checkout:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to start checkout. Please try again.',
+        variant: 'destructive'
+      });
+      setUpgradingPlan(null);
     }
   };
 
@@ -403,10 +415,15 @@ const Billing = () => {
                         ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
                         : `bg-gradient-to-r ${plan.color} hover:shadow-lg text-white`
                     }`}
-                    disabled={plan.current || plan.name === 'Free'}
+                    disabled={plan.current || plan.name === 'Free' || upgradingPlan !== null}
                     onClick={() => handleUpgrade(plan)}
                   >
-                    {plan.current ? (
+                    {upgradingPlan === plan.id ? (
+                      <>
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        Processing...
+                      </>
+                    ) : plan.current ? (
                       <>
                         <Crown className="w-5 h-5 mr-2" />
                         Current Plan
@@ -480,6 +497,30 @@ const Billing = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Upgrade Loading Dialog */}
+      <Dialog open={upgradingPlan !== null} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+              Processing Your Upgrade
+            </DialogTitle>
+            <DialogDescription>
+              Please wait while we create your secure checkout session. You'll be redirected to complete your payment in a moment.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center justify-center py-8">
+            <div className="relative">
+              <div className="w-20 h-20 rounded-full border-4 border-blue-200 dark:border-blue-900"></div>
+              <div className="w-20 h-20 rounded-full border-4 border-t-blue-600 dark:border-t-blue-400 animate-spin absolute top-0 left-0"></div>
+            </div>
+            <p className="mt-6 text-sm text-slate-600 dark:text-slate-400 text-center">
+              This usually takes just a few seconds...
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
