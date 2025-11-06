@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FileText, Download, Plus, Lightbulb, TrendingUp, Star, ArrowRight, Eye, Edit, Sparkles } from 'lucide-react';
+import { FileText, Download, Plus, Lightbulb, TrendingUp, Star, ArrowRight, Bookmark, Edit, Sparkles, MessageSquare, Briefcase } from 'lucide-react';
 import OnboardingFlow from './OnboardingFlow';
 import TemplateGallery from './TemplateGallery';
 import ActivityFeed from './ActivityFeed';
@@ -113,22 +113,22 @@ const DashboardMain = ({ setActiveTab }: DashboardMainProps) => {
       change: resumes.length > 0 ? 'Keep building!' : 'Create your first resume',
     },
     { 
-      title: 'Downloads', 
+      title: 'Cover Letters Created', 
       value: totalDownloads.toString(), 
-      icon: Download, 
-      change: 'Total downloads',
+      icon: MessageSquare, 
+      change: 'Total cover letters',
     },
     { 
-      title: 'Profile Views', 
+      title: 'Jobs Saved', 
       value: totalViews.toString(), 
-      icon: Eye, 
-      change: 'Total views',
+      icon: Bookmark, 
+      change: 'Saved opportunities',
     },
     { 
-      title: 'AI Generations', 
+      title: 'Interviews Prep Done', 
       value: (usageStats?.ai_generations || 0).toString(), 
-      icon: Sparkles, 
-      change: 'AI assists used',
+      icon: Briefcase, 
+      change: 'Practice sessions',
     },
   ];
 
