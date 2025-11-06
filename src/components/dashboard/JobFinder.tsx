@@ -40,7 +40,27 @@ const JobFinder = () => {
 
   useEffect(() => {
     fetchJobs();
+    loadSavedJobs();
   }, [country]);
+
+  const loadSavedJobs = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: savedJobsData } = await supabase
+        .from('saved_jobs')
+        .select('job_url')
+        .eq('user_id', user.id);
+
+      if (savedJobsData) {
+        const savedUrls = new Set(savedJobsData.map(job => job.job_url));
+        setSavedJobs(savedUrls);
+      }
+    } catch (error) {
+      console.error('Error loading saved jobs:', error);
+    }
+  };
 
   const fetchJobs = async () => {
     try {
@@ -94,16 +114,77 @@ const JobFinder = () => {
     }
   };
 
-  const toggleSaveJob = (jobId: string) => {
-    setSavedJobs(prev => {
-      const newSaved = new Set(prev);
-      if (newSaved.has(jobId)) {
-        newSaved.delete(jobId);
-      } else {
-        newSaved.add(jobId);
+  const toggleSaveJob = async (jobUrl: string, job?: Job) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to save jobs.",
+          variant: "destructive"
+        });
+        return;
       }
-      return newSaved;
-    });
+
+      const isSaved = savedJobs.has(jobUrl);
+
+      if (isSaved) {
+        // Remove from database
+        const { error } = await supabase
+          .from('saved_jobs')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('job_url', jobUrl);
+
+        if (error) throw error;
+
+        setSavedJobs(prev => {
+          const newSaved = new Set(prev);
+          newSaved.delete(jobUrl);
+          return newSaved;
+        });
+
+        toast({
+          title: "Job Removed",
+          description: "Job removed from your saved list."
+        });
+      } else {
+        // Add to database
+        if (!job) return;
+
+        const { error } = await supabase
+          .from('saved_jobs')
+          .insert({
+            user_id: user.id,
+            job_title: job.title,
+            company: job.company,
+            location: job.location,
+            salary: job.salary ? `${job.salary.min} - ${job.salary.max}` : null,
+            job_url: jobUrl,
+            description: job.description
+          });
+
+        if (error) throw error;
+
+        setSavedJobs(prev => {
+          const newSaved = new Set(prev);
+          newSaved.add(jobUrl);
+          return newSaved;
+        });
+
+        toast({
+          title: "Job Saved!",
+          description: "Job added to your saved list."
+        });
+      }
+    } catch (error) {
+      console.error('Error toggling save job:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update saved job. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const getTimeSince = (dateString: string) => {
@@ -432,13 +513,13 @@ const JobFinder = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => toggleSaveJob(job.slug)}
+                      onClick={() => toggleSaveJob(job.url, job)}
                       className={`flex-1 lg:flex-none border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl ${
-                        savedJobs.has(job.slug) ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800' : ''
+                        savedJobs.has(job.url) ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800' : ''
                       }`}
                     >
-                      <Bookmark className={`w-4 h-4 lg:mr-0 mr-2 ${savedJobs.has(job.slug) ? 'fill-current text-blue-600' : ''}`} />
-                      <span className="lg:hidden">{savedJobs.has(job.slug) ? 'Saved' : 'Save'}</span>
+                      <Bookmark className={`w-4 h-4 lg:mr-0 mr-2 ${savedJobs.has(job.url) ? 'fill-current text-blue-600' : ''}`} />
+                      <span className="lg:hidden">{savedJobs.has(job.url) ? 'Saved' : 'Save'}</span>
                     </Button>
                     <Button 
                       size="sm" 

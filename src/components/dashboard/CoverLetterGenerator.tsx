@@ -43,9 +43,27 @@ const CoverLetterGenerator = () => {
 
       if (data.coverLetter) {
         setGeneratedLetter(data.coverLetter);
+        
+        // Save cover letter to database
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { error: saveError } = await supabase
+            .from('cover_letters')
+            .insert({
+              user_id: user.id,
+              job_title: formData.jobTitle,
+              company_name: formData.companyName,
+              content: data.coverLetter
+            });
+
+          if (saveError) {
+            console.error('Error saving cover letter:', saveError);
+          }
+        }
+        
         toast({
           title: "Cover Letter Generated!",
-          description: "Your personalized cover letter is ready."
+          description: "Your personalized cover letter is ready and saved."
         });
       }
     } catch (error) {
