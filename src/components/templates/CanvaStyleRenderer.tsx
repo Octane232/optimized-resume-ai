@@ -151,7 +151,7 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = React.memo(({ temp
               fontSize: section.style?.fontSize || '1.75rem', 
               fontWeight: section.style?.fontWeight || 'bold', 
               marginBottom: '0.25rem',
-              color: section.style?.color || 'inherit',
+              color: section.style?.color || theme.textColor,
               fontFamily: section.style?.fontFamily || 'inherit',
               letterSpacing: section.style?.letterSpacing || 'normal',
               textTransform: section.style?.textTransform as any || 'none'
@@ -159,7 +159,7 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = React.memo(({ temp
             <h2 style={{ 
               fontSize: section.style?.titleFontSize || '1rem', 
               marginBottom: '0.5rem',
-              color: section.style?.color || 'inherit',
+              color: section.style?.color || theme.textColor,
               opacity: section.style?.titleOpacity || 0.9,
               fontWeight: section.style?.titleFontWeight || 'normal',
               textTransform: section.style?.titleTextTransform as any || 'none',
@@ -172,7 +172,7 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = React.memo(({ temp
               justifyContent: section.style?.textAlign === 'left' ? 'flex-start' : section.style?.textAlign === 'right' ? 'flex-end' : 'center',
               gap: '0.75rem', 
               fontSize: '0.75rem',
-              color: section.style?.color || 'inherit'
+              color: section.style?.color || theme.textColor
             }}>
               <span>{data.contact.email}</span>
               <span>{data.contact.phone}</span>
