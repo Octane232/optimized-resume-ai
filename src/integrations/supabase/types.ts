@@ -122,6 +122,36 @@ export type Database = {
         }
         Relationships: []
       }
+      cover_letters: {
+        Row: {
+          company_name: string | null
+          content: string
+          created_at: string
+          id: string
+          job_title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_name?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          job_title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_name?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          job_title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       interview_answers: {
         Row: {
           answer: string
@@ -347,6 +377,42 @@ export type Database = {
           template_name?: string | null
           title?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      saved_jobs: {
+        Row: {
+          company: string
+          created_at: string
+          description: string | null
+          id: string
+          job_title: string
+          job_url: string | null
+          location: string | null
+          salary: string | null
+          user_id: string
+        }
+        Insert: {
+          company: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          job_title: string
+          job_url?: string | null
+          location?: string | null
+          salary?: string | null
+          user_id: string
+        }
+        Update: {
+          company?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          job_title?: string
+          job_url?: string | null
+          location?: string | null
+          salary?: string | null
           user_id?: string
         }
         Relationships: []

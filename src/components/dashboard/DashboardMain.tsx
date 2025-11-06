@@ -24,6 +24,9 @@ const DashboardMain = ({ setActiveTab }: DashboardMainProps) => {
   const [analytics, setAnalytics] = useState<any[]>([]);
   const [usageStats, setUsageStats] = useState<any>(null);
   const [aiTips, setAiTips] = useState<any[]>([]);
+  const [coverLettersCount, setCoverLettersCount] = useState(0);
+  const [savedJobsCount, setSavedJobsCount] = useState(0);
+  const [interviewSessionsCount, setInterviewSessionsCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -70,11 +73,32 @@ const DashboardMain = ({ setActiveTab }: DashboardMainProps) => {
         .eq('is_active', true)
         .limit(5);
 
+      // Fetch cover letters count
+      const { count: coverLettersCount } = await supabase
+        .from('cover_letters')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+      // Fetch saved jobs count
+      const { count: savedJobsCount } = await supabase
+        .from('saved_jobs')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+      // Fetch interview sessions count
+      const { count: interviewSessionsCount } = await supabase
+        .from('interview_sessions')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
       setProfile(profileData);
       setResumes(resumesData || []);
       setAnalytics(analyticsData || []);
       setUsageStats(usageData);
       setAiTips(tipsData || []);
+      setCoverLettersCount(coverLettersCount || 0);
+      setSavedJobsCount(savedJobsCount || 0);
+      setInterviewSessionsCount(interviewSessionsCount || 0);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       toast({
@@ -101,10 +125,6 @@ const DashboardMain = ({ setActiveTab }: DashboardMainProps) => {
     );
   }
 
-  const totalDownloads = analytics.reduce((sum: number, item: any) => sum + (item.downloads || 0), 0);
-  const totalViews = analytics.reduce((sum: number, item: any) => sum + (item.views || 0), 0);
-  const profileCompletion = profile?.profile_completion || 0;
-
   const stats = [
     { 
       title: 'Total Resumes', 
@@ -114,19 +134,19 @@ const DashboardMain = ({ setActiveTab }: DashboardMainProps) => {
     },
     { 
       title: 'Cover Letters Created', 
-      value: totalDownloads.toString(), 
+      value: coverLettersCount.toString(), 
       icon: MessageSquare, 
       change: 'Total cover letters',
     },
     { 
       title: 'Jobs Saved', 
-      value: totalViews.toString(), 
+      value: savedJobsCount.toString(), 
       icon: Bookmark, 
       change: 'Saved opportunities',
     },
     { 
       title: 'Interviews Prep Done', 
-      value: (usageStats?.ai_generations || 0).toString(), 
+      value: interviewSessionsCount.toString(), 
       icon: Briefcase, 
       change: 'Practice sessions',
     },
