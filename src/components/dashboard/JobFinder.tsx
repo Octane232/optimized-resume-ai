@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Search, MapPin, Building, Clock, Bookmark, ExternalLink, Star, DollarSign, Users, Briefcase, Filter, Sparkles, TrendingUp, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Job {
   id: string;
@@ -19,6 +20,10 @@ interface Job {
   url: string;
   createdAt: string;
   slug: string;
+  salary?: {
+    min: number;
+    max: number;
+  } | null;
 }
 
 const JobFinder = () => {
@@ -39,13 +44,11 @@ const JobFinder = () => {
   const fetchJobs = async () => {
     try {
       setLoading(true);
-      const response = await fetch('https://www.arbeitnow.com/api/job-board-api');
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch jobs');
-      }
+      const { data, error } = await supabase.functions.invoke('search-jobs', {
+        body: { searchTerm: '', location: '', page: 1 }
+      });
 
-      const data = await response.json();
+      if (error) throw error;
       setJobs(data.data || []);
     } catch (error) {
       console.error('Error fetching jobs:', error);
@@ -62,23 +65,11 @@ const JobFinder = () => {
   const handleSearch = async () => {
     try {
       setLoading(true);
-      let url = 'https://www.arbeitnow.com/api/job-board-api';
-      const params = new URLSearchParams();
-      
-      if (searchTerm) params.append('search', searchTerm);
-      if (location) params.append('location', location);
-      
-      if (params.toString()) {
-        url += `?${params.toString()}`;
-      }
+      const { data, error } = await supabase.functions.invoke('search-jobs', {
+        body: { searchTerm, location, page: 1 }
+      });
 
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error('Failed to search jobs');
-      }
-
-      const data = await response.json();
+      if (error) throw error;
       setJobs(data.data || []);
     } catch (error) {
       console.error('Error searching jobs:', error);
@@ -306,7 +297,7 @@ const JobFinder = () => {
           </h2>
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-purple-500" />
-            <span className="text-sm text-slate-600 dark:text-slate-400">Europe & Remote jobs</span>
+            <span className="text-sm text-slate-600 dark:text-slate-400">Powered by Adzuna</span>
           </div>
         </div>
 

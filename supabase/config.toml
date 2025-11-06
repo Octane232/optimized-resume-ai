@@ -32,3 +32,6 @@ verify_jwt = false
 
 [functions.seed-subscription-plans]
 verify_jwt = false
+
+[functions.search-jobs]
+verify_jwt = false
