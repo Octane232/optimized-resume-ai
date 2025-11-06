@@ -115,7 +115,7 @@ const CreateResume = () => {
     }
   ];
 
-  const categories = ['All', 'Modern', 'Simple', 'Tech', 'Creative'];
+  const categories = ['All', 'Modern', 'Classic', 'Tech', 'Creative'];
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [showAtsOnly, setShowAtsOnly] = useState(false);
 
