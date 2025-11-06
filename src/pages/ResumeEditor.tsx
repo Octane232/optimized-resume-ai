@@ -136,7 +136,7 @@ const ResumeEditor: React.FC = () => {
     }
   }, [resumeId, toast]);
 
-  const loadResume = useCallback(async () => {
+  const loadResume = useCallback(async (loadedTemplates?: any[]) => {
     const { data, error } = await supabase
       .from('resumes')
       .select('*')
@@ -152,19 +152,76 @@ const ResumeEditor: React.FC = () => {
         ...loadedData,
         contact: { ...prev.contact, ...loadedData.contact },
       }));
-      setSelectedTemplate(data.template_name || templates[0]?.id || '');
+      
+      // Use passed templates or fallback to state
+      const templatesToUse = loadedTemplates || templates;
+      setSelectedTemplate(data.template_name || templatesToUse[0]?.id || '');
       setResumeTitle(data.title || 'My Resume');
     }
   }, [resumeId, templates]);
 
-  // Load templates and set initial template
+  // Load templates first, then load resume
   useEffect(() => {
-    const templateId = searchParams.get('template');
-    loadTemplates(templateId);
-    if (resumeId && resumeId !== 'new') {
-      loadResume();
-    }
-  }, [resumeId, searchParams, loadTemplates, loadResume]);
+    const loadData = async () => {
+      const templateId = searchParams.get('template');
+      
+      // Load templates first
+      const { data: templatesData, error } = await supabase
+        .from('resume_templates')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error loading templates:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load templates",
+          variant: "destructive"
+        });
+        setLoading(false);
+        return;
+      }
+
+      if (templatesData && templatesData.length > 0) {
+        setTemplates(templatesData);
+
+        const usable = templatesData.filter((t: any) => t.json_content);
+        const getFallbackId = () => (usable[0]?.id || templatesData[0].id);
+        const getFallbackTemplate = () => (usable[0] || templatesData[0]);
+
+        if (templateId) {
+          const urlTemplate = templatesData.find((t: any) => t.id === templateId);
+          if (urlTemplate && urlTemplate.json_content) {
+            setSelectedTemplate(urlTemplate.id);
+            if (resumeId === 'new') {
+              setResumeTitle(urlTemplate.name);
+            }
+          } else {
+            const fallbackTemplate = getFallbackTemplate();
+            setSelectedTemplate(fallbackTemplate.id);
+            if (resumeId === 'new') {
+              setResumeTitle(fallbackTemplate.name);
+            }
+          }
+        } else {
+          const fallbackTemplate = getFallbackTemplate();
+          setSelectedTemplate(fallbackTemplate.id);
+          if (resumeId === 'new') {
+            setResumeTitle(fallbackTemplate.name);
+          }
+        }
+        
+        // Now load resume with templates available
+        if (resumeId && resumeId !== 'new') {
+          await loadResume(templatesData);
+        }
+      }
+      
+      setLoading(false);
+    };
+    
+    loadData();
+  }, [resumeId, searchParams, loadResume, toast]);
 
   const updateContact = (field: string, value: string) => {
     setResumeData(prev => ({
