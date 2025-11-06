@@ -7,7 +7,7 @@ serve(async (req) => {
   }
 
   try {
-    const { searchTerm, location, page = 1 } = await req.json();
+    const { searchTerm, location, page = 1, country = 'us' } = await req.json();
     
     const ADZUNA_API_ID = Deno.env.get("ADZUNA_API_ID");
     const ADZUNA_API_KEY = Deno.env.get("ADZUNA_API_KEY");
@@ -16,8 +16,7 @@ serve(async (req) => {
       throw new Error("Adzuna API credentials not configured");
     }
 
-    // Build Adzuna API URL
-    const country = "us"; // Default to US, can be made dynamic later
+    // Build Adzuna API URL with dynamic country
     const baseUrl = `https://api.adzuna.com/v1/api/jobs/${country}/search/${page}`;
     
     const params = new URLSearchParams({

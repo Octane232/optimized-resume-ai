@@ -29,6 +29,7 @@ interface Job {
 const JobFinder = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [location, setLocation] = useState('');
+  const [country, setCountry] = useState('us');
   const [jobType, setJobType] = useState('');
   const [salaryRange, setSalaryRange] = useState('');
   const [showFilters, setShowFilters] = useState(false);
@@ -39,13 +40,13 @@ const JobFinder = () => {
 
   useEffect(() => {
     fetchJobs();
-  }, []);
+  }, [country]);
 
   const fetchJobs = async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase.functions.invoke('search-jobs', {
-        body: { searchTerm: '', location: '', page: 1 }
+        body: { searchTerm: '', location: '', page: 1, country }
       });
 
       if (error) throw error;
@@ -71,7 +72,7 @@ const JobFinder = () => {
     try {
       setLoading(true);
       const { data, error } = await supabase.functions.invoke('search-jobs', {
-        body: { searchTerm, location, page: 1 }
+        body: { searchTerm, location, page: 1, country }
       });
 
       if (error) throw error;
@@ -208,7 +209,28 @@ const JobFinder = () => {
         <CardContent className="p-6">
           <div className="space-y-6">
             {/* Main Search */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              <div className="relative">
+                <Select value={country} onValueChange={setCountry}>
+                  <SelectTrigger className="h-12 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-xl">
+                    <SelectValue placeholder="Country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="us">🇺🇸 United States</SelectItem>
+                    <SelectItem value="gb">🇬🇧 United Kingdom</SelectItem>
+                    <SelectItem value="ca">🇨🇦 Canada</SelectItem>
+                    <SelectItem value="au">🇦🇺 Australia</SelectItem>
+                    <SelectItem value="de">🇩🇪 Germany</SelectItem>
+                    <SelectItem value="fr">🇫🇷 France</SelectItem>
+                    <SelectItem value="nl">🇳🇱 Netherlands</SelectItem>
+                    <SelectItem value="br">🇧🇷 Brazil</SelectItem>
+                    <SelectItem value="in">🇮🇳 India</SelectItem>
+                    <SelectItem value="pl">🇵🇱 Poland</SelectItem>
+                    <SelectItem value="at">🇦🇹 Austria</SelectItem>
+                    <SelectItem value="ch">🇨🇭 Switzerland</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="relative md:col-span-2">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input
