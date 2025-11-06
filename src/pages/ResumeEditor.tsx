@@ -87,141 +87,83 @@ const ResumeEditor: React.FC = () => {
 
   // Load templates with useCallback for optimization
   const loadTemplates = useCallback(async (templateIdFromUrl?: string | null) => {
-    try {
-      const { data, error } = await supabase
-        .from('resume_templates')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-        if (data && data.length > 0) {
-          setTemplates(data);
-
-          const usable = data.filter((t: any) => t.json_content);
-          const getFallbackId = () => (usable[0]?.id || data[0].id);
-          const getFallbackTemplate = () => (usable[0] || data[0]);
-
-          if (templateIdFromUrl) {
-            const urlTemplate = data.find((t: any) => t.id === templateIdFromUrl);
-            if (urlTemplate && urlTemplate.json_content) {
-              setSelectedTemplate(urlTemplate.id);
-              // Set resume title to template name for new resumes
-              if (resumeId === 'new') {
-                setResumeTitle(urlTemplate.name);
-              }
-            } else {
-              const fallbackTemplate = getFallbackTemplate();
-              setSelectedTemplate(fallbackTemplate.id);
-              if (resumeId === 'new') {
-                setResumeTitle(fallbackTemplate.name);
-              }
-            }
-          } else {
-            const fallbackTemplate = getFallbackTemplate();
-            setSelectedTemplate(fallbackTemplate.id);
-            if (resumeId === 'new') {
-              setResumeTitle(fallbackTemplate.name);
-            }
-          }
-        }
-    } catch (error) {
-      console.error('Error loading templates:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load templates",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [resumeId, toast]);
+    // This function is no longer used - keeping for backwards compatibility
+  }, []);
 
   const loadResume = useCallback(async (loadedTemplates?: any[]) => {
-    const { data, error } = await supabase
-      .from('resumes')
-      .select('*')
-      .eq('id', resumeId)
-      .single();
-    
-    if (data && data.content) {
-      // Cast through unknown first for proper type conversion
-      const loadedData = data.content as unknown as ResumeData;
-      // Merge with default data to ensure all fields have values
-      setResumeData(prev => ({
-        ...prev,
-        ...loadedData,
-        contact: { ...prev.contact, ...loadedData.contact },
-      }));
-      
-      // Use passed templates or fallback to state
-      const templatesToUse = loadedTemplates || templates;
-      setSelectedTemplate(data.template_name || templatesToUse[0]?.id || '');
-      setResumeTitle(data.title || 'My Resume');
-    }
-  }, [resumeId, templates]);
+    // This function is no longer used - keeping for backwards compatibility
+  }, []);
 
   // Load templates first, then load resume
   useEffect(() => {
     const loadData = async () => {
-      const templateId = searchParams.get('template');
-      
-      // Load templates first
-      const { data: templatesData, error } = await supabase
-        .from('resume_templates')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error('Error loading templates:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load templates",
-          variant: "destructive"
-        });
-        setLoading(false);
-        return;
-      }
+      try {
+        setLoading(true);
+        const templateId = searchParams.get('template');
+        
+        // Load templates first
+        const { data: templatesData, error } = await supabase
+          .from('resume_templates')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (error) throw error;
 
-      if (templatesData && templatesData.length > 0) {
-        setTemplates(templatesData);
+        if (templatesData && templatesData.length > 0) {
+          setTemplates(templatesData);
 
-        const usable = templatesData.filter((t: any) => t.json_content);
-        const getFallbackId = () => (usable[0]?.id || templatesData[0].id);
-        const getFallbackTemplate = () => (usable[0] || templatesData[0]);
+          const usable = templatesData.filter((t: any) => t.json_content);
+          const getFallbackTemplate = () => (usable[0] || templatesData[0]);
 
-        if (templateId) {
-          const urlTemplate = templatesData.find((t: any) => t.id === templateId);
-          if (urlTemplate && urlTemplate.json_content) {
-            setSelectedTemplate(urlTemplate.id);
-            if (resumeId === 'new') {
-              setResumeTitle(urlTemplate.name);
+          // Set initial template
+          let initialTemplate = getFallbackTemplate();
+          if (templateId) {
+            const urlTemplate = templatesData.find((t: any) => t.id === templateId);
+            if (urlTemplate && urlTemplate.json_content) {
+              initialTemplate = urlTemplate;
+            }
+          }
+
+          // Load existing resume if not new
+          if (resumeId && resumeId !== 'new') {
+            const { data: resumeData, error: resumeError } = await supabase
+              .from('resumes')
+              .select('*')
+              .eq('id', resumeId)
+              .single();
+            
+            if (resumeError) throw resumeError;
+            
+            if (resumeData && resumeData.content) {
+              const loadedData = resumeData.content as unknown as ResumeData;
+              setResumeData(prev => ({
+                ...prev,
+                ...loadedData,
+                contact: { ...prev.contact, ...loadedData.contact },
+              }));
+              setSelectedTemplate(resumeData.template_name || initialTemplate.id);
+              setResumeTitle(resumeData.title || 'My Resume');
             }
           } else {
-            const fallbackTemplate = getFallbackTemplate();
-            setSelectedTemplate(fallbackTemplate.id);
-            if (resumeId === 'new') {
-              setResumeTitle(fallbackTemplate.name);
-            }
-          }
-        } else {
-          const fallbackTemplate = getFallbackTemplate();
-          setSelectedTemplate(fallbackTemplate.id);
-          if (resumeId === 'new') {
-            setResumeTitle(fallbackTemplate.name);
+            // New resume - use template
+            setSelectedTemplate(initialTemplate.id);
+            setResumeTitle(initialTemplate.name);
           }
         }
-        
-        // Now load resume with templates available
-        if (resumeId && resumeId !== 'new') {
-          await loadResume(templatesData);
-        }
+      } catch (error) {
+        console.error('Error loading data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load resume",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
       }
-      
-      setLoading(false);
     };
     
     loadData();
-  }, [resumeId, searchParams, loadResume, toast]);
+  }, [resumeId, searchParams, toast]);
 
   const updateContact = (field: string, value: string) => {
     setResumeData(prev => ({
