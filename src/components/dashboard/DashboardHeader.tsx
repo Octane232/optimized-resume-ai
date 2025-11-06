@@ -25,6 +25,7 @@ const DashboardHeader = ({ activeTab, setActiveTab }: DashboardHeaderProps) => {
   const { theme, setTheme } = useTheme();
   const [userName, setUserName] = useState('');
   const [userInitials, setUserInitials] = useState('');
+  const [currentPlan, setCurrentPlan] = useState('Free');
 
   useEffect(() => {
     fetchUserProfile();
@@ -35,6 +36,7 @@ const DashboardHeader = ({ activeTab, setActiveTab }: DashboardHeaderProps) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // Fetch profile
       const { data: profile } = await supabase
         .from('profiles')
         .select('full_name')
@@ -54,6 +56,27 @@ const DashboardHeader = ({ activeTab, setActiveTab }: DashboardHeaderProps) => {
           initials = names[0].slice(0, 2).toUpperCase();
         }
         setUserInitials(initials);
+      }
+
+      // Fetch current subscription plan
+      const { data: subscription } = await supabase
+        .from('user_subscriptions')
+        .select('plan_id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (subscription?.plan_id) {
+        const { data: plan } = await supabase
+          .from('subscription_plans')
+          .select('name')
+          .eq('id', subscription.plan_id)
+          .single();
+
+        if (plan?.name) {
+          // Remove "Pitchsora" prefix and "Yearly" suffix for cleaner display
+          const planName = plan.name.replace('Pitchsora ', '').replace(' Yearly', '');
+          setCurrentPlan(planName);
+        }
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -147,7 +170,7 @@ const DashboardHeader = ({ activeTab, setActiveTab }: DashboardHeaderProps) => {
               <div className="flex items-center gap-2">
                 <Badge className="text-xs bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 border-0">
                   <Crown className="w-3 h-3 mr-1" />
-                  Pro Plan
+                  {currentPlan} Plan
                 </Badge>
               </div>
             </div>
