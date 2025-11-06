@@ -15,24 +15,12 @@ const Billing = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    seedPlansAndFetchData();
+    fetchBillingData();
   }, []);
 
   useEffect(() => {
     fetchBillingData();
   }, [billingCycle]);
-
-  const seedPlansAndFetchData = async () => {
-    try {
-      // Seed plans first
-      await supabase.functions.invoke('seed-subscription-plans');
-      // Then fetch all data
-      await fetchBillingData();
-    } catch (error) {
-      console.error('Error seeding plans:', error);
-      await fetchBillingData();
-    }
-  };
 
   const fetchBillingData = async () => {
     try {
