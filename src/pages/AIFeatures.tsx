@@ -37,7 +37,7 @@ const AIFeatures = () => {
   return (
     <div className="min-h-screen">
       <Header />
-      <main className="pt-16">
+      <main className="pt-28">
         {/* Hero Section */}
         <section className="py-20 bg-gradient-to-br from-purple-50 to-white">
           <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
