@@ -7,8 +7,8 @@ const ResourcesSection = () => {
     {
       icon: MessageSquare,
       title: 'Help Center',
-      description: 'Get instant answers to common questions, troubleshooting guides, and step-by-step tutorials to maximize your AI Resume Pro experience.',
-      features: ['24/7 Support', 'Video Tutorials', 'FAQ Database', 'Live Chat']
+      description: 'Get instant answers to common questions, troubleshooting guides, and step-by-step tutorials to maximize your Pitchsora experience.',
+      features: ['Email Support', 'Video Tutorials', 'FAQ Database', 'Response within 24h']
     },
     {
       icon: Book,
@@ -30,9 +30,9 @@ const ResourcesSection = () => {
     },
     {
       icon: Code,
-      title: 'API Documentation',
-      description: 'Integrate AI Resume Pro into your applications with our comprehensive API documentation and developer resources.',
-      features: ['RESTful API', 'SDKs Available', 'Code Examples', 'Webhook Support']
+      title: 'Template Customization',
+      description: 'Customize resume templates to match your personal style with flexible formatting options and export capabilities.',
+      features: ['Multiple Formats', 'Custom Colors', 'Font Options', 'PDF Export']
     },
     {
       icon: TrendingUp,

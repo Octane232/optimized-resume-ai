@@ -86,7 +86,7 @@ const HeroSection = () => {
             <div className="space-y-4">
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-[0.95] tracking-tighter animate-fade-in">
                 <span className="block text-foreground drop-shadow-sm">Build resumes</span>
-                <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent drop-shadow-[0_2px_20px_rgba(59,130,246,0.4)]">
+                <span className="block bg-gradient-to-r from-primary via-purple-600 to-primary bg-clip-text text-transparent drop-shadow-[0_2px_20px_rgba(59,130,246,0.4)]">
                   that work
                 </span>
               </h1>

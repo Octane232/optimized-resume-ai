@@ -157,12 +157,12 @@ const BenefitsSection = () => {
               <div className="flex items-center justify-center gap-3">
                 <Zap className="w-7 h-7 text-yellow-500" />
                 <span className="text-4xl font-black gradient-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-[length:200%_auto] animate-gradient">
-                  250,000+
+                  1,200+
                 </span>
                 <Zap className="w-7 h-7 text-yellow-500" />
               </div>
               <p className="text-lg text-muted-foreground font-medium">
-                Professionals already using AI Resume Pro
+                Professionals already using Pitchsora
               </p>
             </div>
 

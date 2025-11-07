@@ -22,23 +22,26 @@ const ComingSoonSection = () => {
           </div>
           
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-            Enterprise Solutions
+            Enterprise & Team Features
           </h2>
           
-          <p className="text-lg text-muted-foreground mb-8">
-            Team features and organization tools to help companies streamline their hiring process.
+          <p className="text-lg text-muted-foreground mb-6">
+            We're building team collaboration tools and bulk resume management for HR teams and recruitment agencies.
           </p>
 
-          <div className="flex flex-wrap gap-3 mb-8">
-            {platforms.map((platform, index) => (
-              <div 
-                key={index} 
-                className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-lg text-sm text-muted-foreground"
-              >
-                {platform.logo && <platform.logo className="h-4 w-4" />}
-                <span>{platform.name}</span>
-              </div>
-            ))}
+          <div className="space-y-3 mb-8 text-left">
+            <div className="flex items-start gap-3">
+              <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+              <p className="text-muted-foreground">Team workspaces with shared templates and brand guidelines</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+              <p className="text-muted-foreground">Bulk candidate resume formatting and export</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+              <p className="text-muted-foreground">Integration with ATS systems</p>
+            </div>
           </div>
 
           <div className="border border-border rounded-2xl p-6 max-w-md bg-muted/20">
