@@ -73,15 +73,15 @@ const BenefitsSection = () => {
             <Sparkles className="w-6 h-6 text-purple-500 animate-pulse" style={{ animationDelay: '0.6s' }} />
           </div>
 
-          <h2 className="text-6xl md:text-7xl lg:text-8xl font-black mb-8 leading-[0.95] tracking-tighter animate-fade-in" style={{ animationDelay: '0.1s' }}>
-            <span className="block text-foreground mb-2">Everything You Need</span>
-            <span className="block gradient-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-[length:200%_auto] animate-gradient">
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-black mb-8 leading-[0.95] tracking-tighter animate-fade-in" style={{ animationDelay: '0.1s' }}>
+            <span className="block text-foreground mb-2 drop-shadow-sm">Everything You Need</span>
+            <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-[0_2px_20px_rgba(59,130,246,0.5)]">
               All In One Place
             </span>
           </h2>
 
-          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            Powerful features that set you apart from the competition
+          <p className="text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <span className="text-foreground/80">Powerful features that set you apart from the competition</span>
           </p>
         </div>
 

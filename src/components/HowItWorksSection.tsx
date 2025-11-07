@@ -44,14 +44,14 @@ const HowItWorksSection = () => {
               Simple 3-Step Process
             </span>
           </div>
-          <h2 className="text-6xl md:text-7xl lg:text-8xl font-black mb-8 leading-[0.95] tracking-tighter animate-fade-in" style={{ animationDelay: '0.1s' }}>
-            <span className="block text-foreground/40 text-3xl md:text-4xl font-bold mb-4">HOW IT WORKS</span>
-            <span className="block gradient-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-[length:200%_auto] animate-gradient">
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-black mb-8 leading-[0.95] tracking-tighter animate-fade-in" style={{ animationDelay: '0.1s' }}>
+            <span className="block text-foreground/40 text-2xl md:text-3xl font-bold mb-4 uppercase tracking-wide">How It Works</span>
+            <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-[0_2px_20px_rgba(59,130,246,0.5)]">
               Create in Minutes
             </span>
           </h2>
-          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            From blank page to professional resume in <span className="font-bold text-foreground">under 3 minutes</span>
+          <p className="text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <span className="text-foreground/80">From blank page to professional resume in </span><span className="font-bold text-foreground">under 3 minutes</span>
           </p>
         </div>
 
@@ -77,11 +77,11 @@ const HowItWorksSection = () => {
                     <div className="text-sm font-bold text-muted-foreground">STEP {index + 1}</div>
                   </div>
 
-                  <h3 className="text-4xl md:text-5xl font-black text-foreground leading-tight">
+                  <h3 className="text-4xl md:text-5xl font-black text-foreground leading-tight drop-shadow-sm">
                     {step.title}
                   </h3>
                   
-                  <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
+                  <p className="text-lg md:text-xl leading-relaxed text-foreground/80 font-medium">
                     {step.description}
                   </p>
 

@@ -47,7 +47,7 @@ const Header = () => {
               <button
                 key={item.label}
                 onClick={() => scrollToSection(item.href)}
-                className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 font-medium text-sm"
+                className="text-foreground/70 hover:text-foreground transition-colors duration-200 font-semibold text-sm relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-primary after:transition-all"
               >
                 {item.label}
               </button>
@@ -60,55 +60,54 @@ const Header = () => {
               variant="ghost"
               size="sm"
               onClick={toggleTheme}
-              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+              className="text-foreground/70 hover:text-foreground"
             >
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </Button>
-            <Button asChild variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+            <Button asChild variant="ghost" size="sm" className="text-foreground/70 hover:text-foreground font-semibold">
               <Link to="/auth">Sign In</Link>
             </Button>
-            <Button asChild size="sm" className="saas-button">
+            <Button asChild size="sm" className="saas-button font-bold">
               <Link to="/auth">Get Started</Link>
             </Button>
           </div>
 
-          {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2"
+            className="md:hidden p-2 text-foreground hover:text-primary transition-colors"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Toggle menu"
           >
-            {isMenuOpen ? <X size={20} className="text-gray-900 dark:text-white" /> : <Menu size={20} className="text-gray-900 dark:text-white" />}
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md">
+          <div className="md:hidden py-4 border-t border-border glass-card-strong">
             <nav className="flex flex-col space-y-3">
               {navItems.map((item) => (
                 <button
                   key={item.label}
                   onClick={() => scrollToSection(item.href)}
-                  className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 font-medium text-sm py-2 text-left"
+                  className="text-foreground/70 hover:text-foreground transition-colors duration-200 font-semibold text-sm py-2 text-left px-4"
                 >
                   {item.label}
                 </button>
               ))}
-              <div className="flex flex-col space-y-2 pt-4 border-t border-gray-200 dark:border-gray-800">
+              <div className="flex flex-col space-y-2 pt-4 border-t border-border px-4">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={toggleTheme}
-                  className="justify-start text-gray-600 dark:text-gray-400"
+                  className="justify-start text-foreground/70 font-semibold"
                 >
                   {theme === 'dark' ? <Sun size={18} className="mr-2" /> : <Moon size={18} className="mr-2" />}
                   {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
                 </Button>
-                <Button asChild variant="ghost" size="sm" className="justify-start">
+                <Button asChild variant="ghost" size="sm" className="justify-start font-semibold">
                   <Link to="/auth">Sign In</Link>
                 </Button>
-                <Button asChild size="sm" className="saas-button">
+                <Button asChild size="sm" className="saas-button font-bold">
                   <Link to="/auth">Get Started</Link>
                 </Button>
               </div>

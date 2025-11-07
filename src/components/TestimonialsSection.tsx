@@ -75,14 +75,14 @@ const TestimonialsSection = () => {
               250,000+ Success Stories
             </span>
           </div>
-          <h2 className="text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-[1.1] tracking-tight animate-fade-in" style={{ animationDelay: '0.1s' }}>
-            <span className="block gradient-text bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-[length:200%_auto] animate-gradient">
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-[1] tracking-tight animate-fade-in" style={{ animationDelay: '0.1s' }}>
+            <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-[0_2px_20px_rgba(59,130,246,0.5)]">
               Real results
             </span>
-            <span className="block text-foreground">from real people</span>
+            <span className="block text-foreground drop-shadow-sm">from real people</span>
           </h2>
-          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            Join thousands of professionals who accelerated their careers with AI-powered tools
+          <p className="text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <span className="text-foreground/80">Join thousands of professionals who accelerated their careers with AI-powered tools</span>
           </p>
         </div>
 

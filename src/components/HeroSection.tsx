@@ -94,24 +94,24 @@ const HeroSection = () => {
             {/* Main headline with advanced typography */}
             <div className="space-y-4">
               <h1 className="text-6xl md:text-7xl lg:text-8xl font-black leading-[0.95] tracking-tighter animate-fade-in">
-                <span className="block text-foreground mb-2">Land Your</span>
-                <span className="block gradient-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-[length:200%_auto] animate-gradient drop-shadow-[0_0_30px_rgba(147,51,234,0.3)]">
+                <span className="block text-foreground mb-2 drop-shadow-sm">Land Your</span>
+                <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-[0_2px_20px_rgba(59,130,246,0.5)]">
                   Dream Job
                 </span>
-                <span className="block text-foreground mt-2">In Minutes</span>
+                <span className="block text-foreground mt-2 drop-shadow-sm">In Minutes</span>
               </h1>
               
               {/* Decorative line */}
               <div className="flex items-center gap-4 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-                <div className="h-1 w-20 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full"></div>
-                <Sparkles className="w-6 h-6 text-purple-500 animate-pulse" />
-                <div className="h-1 w-20 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 rounded-full"></div>
+                <div className="h-1 w-20 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-full shadow-lg"></div>
+                <Sparkles className="w-6 h-6 text-purple-600 animate-pulse drop-shadow-lg" />
+                <div className="h-1 w-20 bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 rounded-full shadow-lg"></div>
               </div>
             </div>
 
             {/* Subtitle with better spacing */}
-            <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-2xl animate-fade-in" style={{ animationDelay: '0.2s' }}>
-              <span className="font-semibold text-foreground">AI-powered resume builder</span> that creates professional, ATS-optimized resumes tailored to your dream job. Join 250,000+ professionals who accelerated their careers.
+            <p className="text-xl md:text-2xl leading-relaxed max-w-2xl animate-fade-in" style={{ animationDelay: '0.2s' }}>
+              <span className="font-bold text-foreground">AI-powered resume builder</span> <span className="text-foreground/80">that creates professional, ATS-optimized resumes tailored to your dream job. Join 250,000+ professionals who accelerated their careers.</span>
             </p>
 
             {/* CTA buttons with enhanced styling */}

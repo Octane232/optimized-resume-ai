@@ -6,32 +6,32 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 217 91% 60%;
+    --primary: 221 83% 53%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 240 5% 96%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary-foreground: 222 47% 11%;
 
     --muted: 240 5% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 217 91% 60%;
+    --accent: 221 83% 53%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 217 91% 60%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 221 83% 53%;
     --radius: 0.75rem;
 
     /* Enhanced modern palette */
@@ -92,14 +92,14 @@
     --gradient-card-border: linear-gradient(145deg, hsl(var(--blue-400) / 0.5), hsl(var(--purple-500) / 0.5));
     
     /* Enhanced shadows with color */
-    --shadow-soft: 0 2px 8px -2px hsl(var(--blue-600) / 0.08);
-    --shadow-card: 0 4px 16px -4px hsl(var(--blue-600) / 0.12), 0 2px 8px -2px hsl(var(--purple-600) / 0.08);
-    --shadow-lg: 0 8px 24px -8px hsl(var(--blue-600) / 0.16), 0 4px 12px -4px hsl(var(--purple-600) / 0.12);
-    --shadow-xl: 0 16px 48px -16px hsl(var(--blue-600) / 0.2), 0 8px 24px -8px hsl(var(--purple-600) / 0.16);
-    --shadow-glow: 0 0 0 1px hsl(var(--blue-500) / 0.1), 0 8px 32px -8px hsl(var(--blue-500) / 0.3), 0 16px 48px -12px hsl(var(--purple-500) / 0.2);
-    --shadow-glow-lg: 0 0 64px -16px hsl(var(--blue-500) / 0.4), 0 0 96px -24px hsl(var(--purple-500) / 0.3);
-    --shadow-3d: 0 20px 40px -12px hsl(var(--blue-600) / 0.25), 0 8px 16px -8px hsl(var(--purple-600) / 0.3);
-    --shadow-elevated: 0 24px 64px -16px hsl(var(--blue-500) / 0.35), 0 12px 32px -8px hsl(var(--purple-500) / 0.25);
+    --shadow-soft: 0 2px 8px -2px hsl(221 83% 53% / 0.1);
+    --shadow-card: 0 4px 16px -4px hsl(221 83% 53% / 0.15), 0 2px 8px -2px hsl(271 81% 56% / 0.1);
+    --shadow-lg: 0 8px 24px -8px hsl(221 83% 53% / 0.2), 0 4px 12px -4px hsl(271 81% 56% / 0.15);
+    --shadow-xl: 0 16px 48px -16px hsl(221 83% 53% / 0.25), 0 8px 24px -8px hsl(271 81% 56% / 0.2);
+    --shadow-glow: 0 0 0 1px hsl(221 83% 53% / 0.15), 0 8px 32px -8px hsl(221 83% 53% / 0.4), 0 16px 48px -12px hsl(271 81% 56% / 0.25);
+    --shadow-glow-lg: 0 0 64px -16px hsl(221 83% 53% / 0.5), 0 0 96px -24px hsl(271 81% 56% / 0.4);
+    --shadow-3d: 0 20px 40px -12px hsl(221 83% 53% / 0.3), 0 8px 16px -8px hsl(271 81% 56% / 0.35);
+    --shadow-elevated: 0 24px 64px -16px hsl(221 83% 53% / 0.4), 0 12px 32px -8px hsl(271 81% 56% / 0.3);
 
     /* Animation variables */
     --ease-elastic: cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -206,18 +206,18 @@
 }
 
 .glass-card {
-  background: hsl(var(--background) / 0.7);
+  background: hsl(var(--background) / 0.8);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid hsl(var(--border) / 0.5);
+  border: 1px solid hsl(var(--border));
   box-shadow: var(--shadow-card);
 }
 
 .glass-card-strong {
-  background: hsl(var(--background) / 0.9);
+  background: hsl(var(--background) / 0.95);
   backdrop-filter: blur(40px) saturate(200%);
   -webkit-backdrop-filter: blur(40px) saturate(200%);
-  border: 1px solid hsl(var(--border) / 0.8);
+  border: 1px solid hsl(var(--border));
   box-shadow: var(--shadow-lg);
 }
 
@@ -326,9 +326,10 @@
 
 /* Header glassmorphism */
 .header-glass {
-  backdrop-filter: blur(16px) saturate(180%);
-  background: hsl(var(--background) / 0.85);
-  border-bottom: 1px solid hsl(var(--border) / 0.5);
+  backdrop-filter: blur(20px) saturate(180%);
+  background: hsl(var(--background) / 0.9);
+  border-bottom: 1px solid hsl(var(--border));
+  box-shadow: 0 4px 16px -4px hsl(221 83% 53% / 0.08);
 }
 
 .saas-button {

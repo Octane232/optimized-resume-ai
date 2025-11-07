@@ -86,14 +86,14 @@ const PricingSection = () => {
               Flexible Pricing
             </span>
           </div>
-          <h2 className="text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-[1.1] tracking-tight animate-fade-in" style={{ animationDelay: '0.1s' }}>
-            <span className="block text-foreground">Choose the plan</span>
-            <span className="block gradient-text bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-[length:200%_auto] animate-gradient">
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-[1] tracking-tight animate-fade-in" style={{ animationDelay: '0.1s' }}>
+            <span className="block text-foreground drop-shadow-sm">Choose the plan</span>
+            <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-[0_2px_20px_rgba(59,130,246,0.5)]">
               that fits your goals
             </span>
           </h2>
-          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            Start free and upgrade as your career grows. No hidden fees, cancel anytime.
+          <p className="text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <span className="text-foreground/80">Start free and upgrade as your career grows. No hidden fees, cancel anytime.</span>
           </p>
         </div>
 
