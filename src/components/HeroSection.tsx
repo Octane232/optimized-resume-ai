@@ -47,7 +47,7 @@ const HeroSection = () => {
       {/* Diagonal accent */}
       <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-bl from-blue-500/5 via-purple-500/5 to-transparent skew-x-12 transform origin-top-right"></div>
       
-      <div className="container mx-auto px-6 lg:px-8 relative pt-40 pb-20">
+      <div className="container mx-auto px-6 lg:px-8 relative pt-32 pb-20">
         {/* Top floating cards */}
         <div className="absolute top-20 right-10 glass-card rounded-2xl p-4 animate-fade-in floating-card hidden lg:block" style={{ animationDelay: '0.5s' }}>
           <div className="flex items-center gap-3">
