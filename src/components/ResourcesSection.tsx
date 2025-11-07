@@ -43,14 +43,14 @@ const ResourcesSection = () => {
   ];
 
   return (
-    <section className="py-16 bg-white dark:bg-gray-800 transition-colors duration-300">
-      <div className="container mx-auto px-4 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Comprehensive Career Resources
+    <section className="py-24 bg-muted/30">
+      <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
+        <div className="max-w-2xl mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            Resources to help you succeed
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Everything you need to accelerate your career journey, from expert guidance to powerful tools and insights.
+          <p className="text-lg text-muted-foreground">
+            Guides, tips, and tools to navigate your job search and career growth.
           </p>
         </div>
 
@@ -58,50 +58,37 @@ const ResourcesSection = () => {
           {resources.map((resource, index) => (
             <div 
               key={index} 
-              className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 hover:shadow-lg transition-all duration-300 group border border-gray-100 dark:border-gray-600 hover:border-gray-200 dark:hover:border-gray-500"
+              className="bg-card border border-border rounded-2xl p-8 hover:border-foreground/20 transition-all group"
             >
-              <div className="flex items-center mb-4">
-                <div className="p-3 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 mr-4 group-hover:scale-110 transition-transform duration-300">
-                  <resource.icon className="h-6 w-6 text-white" />
+              <div className="mb-6">
+                <div className="inline-flex p-3 rounded-xl bg-primary/10 mb-4">
+                  <resource.icon className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                <h3 className="text-xl font-semibold text-foreground mb-3">
                   {resource.title}
                 </h3>
-              </div>
               
-              <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
-                {resource.description}
-              </p>
+                <p className="text-muted-foreground leading-relaxed">
+                  {resource.description}
+                </p>
+              </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 mb-6">
                 {resource.features.map((feature, featureIndex) => (
-                  <div key={featureIndex} className="flex items-center text-sm text-gray-700 dark:text-gray-300">
-                    <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mr-3"></div>
+                  <div key={featureIndex} className="flex items-center text-sm text-muted-foreground">
+                    <div className="w-1 h-1 bg-primary rounded-full mr-2"></div>
                     {feature}
                   </div>
                 ))}
               </div>
 
-              <div className="mt-6">
-                <button className="text-blue-600 dark:text-blue-400 font-semibold hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
-                  Learn More →
-                </button>
-              </div>
+              <button className="text-foreground font-medium text-sm hover:translate-x-1 transition-transform inline-flex items-center">
+                Learn more <span className="ml-1">→</span>
+              </button>
             </div>
           ))}
         </div>
 
-        <div className="text-center mt-12">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-8 text-white">
-            <h3 className="text-2xl font-bold mb-4">Ready to Transform Your Career?</h3>
-            <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
-              Join thousands of professionals who have accelerated their careers with AI Resume Pro's comprehensive platform and resources.
-            </p>
-            <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-              Start Your 7-Day Free Trial
-            </button>
-          </div>
-        </div>
       </div>
     </section>
   );

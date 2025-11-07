@@ -63,25 +63,24 @@ const ResumesShowcase = () => {
   const displayedTemplates = showAll ? filteredTemplates : filteredTemplates.slice(0, 6);
 
   return (
-    <section className="py-20 bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <section className="py-24 bg-background">
       <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-            Professional Resume Templates
+        <div className="max-w-2xl mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6 leading-tight">
+            Resume templates that get you hired
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
-            Choose from our collection of professionally designed, ATS-optimized resume templates. 
-            Each template is crafted by career experts and loved by hiring managers.
+          <p className="text-lg text-muted-foreground">
+            Hand-picked designs used by thousands of job seekers. Pick one, customize it, and land your next interview.
           </p>
           
           {/* Category Filter */}
-          <div className="flex flex-wrap justify-center gap-3 mb-12">
+          <div className="flex flex-wrap gap-2 mb-12">
             {categories.map((category) => (
               <Button
                 key={category}
-                variant={selectedCategory === category ? "default" : "outline"}
+                variant={selectedCategory === category ? "default" : "ghost"}
                 onClick={() => setSelectedCategory(category)}
-                className="px-6 py-2 capitalize"
+                className="capitalize rounded-full"
               >
                 {category}
               </Button>
@@ -210,18 +209,20 @@ const ResumesShowcase = () => {
         )}
 
         {/* CTA Section */}
-        <div className="text-center mt-16">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white">
-            <h3 className="text-2xl font-bold mb-4">
-              Can't Find the Perfect Template?
-            </h3>
-            <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
-              Our AI can create a completely custom resume design based on your industry, 
-              experience level, and personal preferences.
-            </p>
-            <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
-              Create Custom Resume with AI
-            </Button>
+        <div className="mt-20">
+          <div className="bg-card border-2 border-border rounded-3xl p-12 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl"></div>
+            <div className="relative max-w-2xl">
+              <h3 className="text-3xl font-bold mb-4 text-foreground">
+                Need something specific?
+              </h3>
+              <p className="text-muted-foreground mb-6 text-lg">
+                Let AI build a custom template tailored to your role and industry.
+              </p>
+              <Button size="lg" className="rounded-full">
+                Try AI Builder →
+              </Button>
+            </div>
           </div>
         </div>
       </div>
