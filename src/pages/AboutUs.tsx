@@ -15,13 +15,12 @@ const AboutUs = () => {
       <main className="pt-16">
         <section className="py-20 bg-gradient-to-br from-gray-50 to-white">
           <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
-            <div className="text-center max-w-4xl mx-auto">
-              <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+            <div className="text-center max-w-3xl mx-auto">
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
                 About Pitchsora
               </h1>
-              <p className="text-xl text-gray-600 mb-8">
-                We're revolutionizing the job search experience with AI-powered tools that help professionals 
-                build better resumes, find perfect jobs, and accelerate their careers.
+              <p className="text-lg text-gray-600">
+                We help job seekers create better resumes and get more interviews. That's it.
               </p>
             </div>
           </div>
@@ -32,15 +31,17 @@ const AboutUs = () => {
           <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
             <div className="grid lg:grid-cols-2 gap-12 items-center mb-20">
               <div>
-                <h2 className="text-4xl font-bold mb-6">Our Mission</h2>
-                <p className="text-lg text-gray-600 mb-6">
-                  At Pitchsora, we believe that everyone deserves access to tools that help them showcase their talents 
-                  and find meaningful work. Our mission is to democratize career advancement by making professional 
-                  resume building and job searching accessible, intelligent, and effective for everyone.
+                <h2 className="text-3xl font-bold mb-4">Why we built this</h2>
+                <p className="text-lg text-gray-600 mb-4">
+                  Job hunting is already stressful. Your resume shouldn't add to that stress.
+                </p>
+                <p className="text-lg text-gray-600 mb-4">
+                  We built Pitchsora because we were tired of resume builders that either looked terrible or cost way too much. 
+                  Most of them make promises they can't keep about "guaranteed interviews" or "AI magic."
                 </p>
                 <p className="text-lg text-gray-600">
-                  We combine cutting-edge AI technology with human-centered design to create a platform that not only 
-                  helps you land interviews but guides you through your entire career journey.
+                  We focus on what actually matters: clean templates that pass ATS systems, simple editing tools, 
+                  and helpful suggestions when you need them. No BS.
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-6">
@@ -86,18 +87,17 @@ const AboutUs = () => {
               <h2 className="text-4xl font-bold mb-4">Trusted by Professionals Worldwide</h2>
               <p className="text-gray-600 text-lg">Join thousands who have transformed their careers with Pitchsora</p>
             </div>
-            <div className="grid md:grid-cols-4 gap-8">
+            <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
               {[
-                { number: "150K+", label: "Active Users", icon: <Users className="w-6 h-6" /> },
-                { number: "2M+", label: "Resumes Created", icon: <TrendingUp className="w-6 h-6" /> },
-                { number: "5M+", label: "Job Applications", icon: <Target className="w-6 h-6" /> },
-                { number: "95%", label: "Success Rate", icon: <Award className="w-6 h-6" /> }
+                { number: "1,200+", label: "Users", icon: <Users className="w-6 h-6" /> },
+                { number: "3,400+", label: "Resumes Created", icon: <TrendingUp className="w-6 h-6" /> },
+                { number: "4.6★", label: "Average Rating", icon: <Award className="w-6 h-6" /> }
               ].map((stat, index) => (
-                <Card key={index} className="p-8 text-center">
+                <Card key={index} className="p-6 text-center">
                   <CardContent className="p-0">
-                    <div className="text-blue-600 mb-3 flex justify-center">{stat.icon}</div>
-                    <div className="text-4xl font-bold text-gray-900 mb-2">{stat.number}</div>
-                    <p className="text-gray-600">{stat.label}</p>
+                    <div className="text-blue-600 mb-2 flex justify-center">{stat.icon}</div>
+                    <div className="text-3xl font-bold text-gray-900 mb-1">{stat.number}</div>
+                    <p className="text-gray-600 text-sm">{stat.label}</p>
                   </CardContent>
                 </Card>
               ))}

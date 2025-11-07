@@ -16,17 +16,17 @@ const HeroSection = () => {
   }, []);
 
   const features = [
-    { icon: Brain, label: 'AI-Powered', desc: 'Smart content generation', color: 'from-blue-500 to-purple-500' },
-    { icon: Target, label: 'ATS-Optimized', desc: '98% success rate', color: 'from-purple-500 to-pink-500' },
-    { icon: Zap, label: 'Instant Results', desc: 'Ready in 3 minutes', color: 'from-emerald-500 to-blue-500' },
-    { icon: Shield, label: 'Secure', desc: 'Bank-level encryption', color: 'from-orange-500 to-red-500' }
+    { icon: Brain, label: 'Smart Tools', desc: 'AI-assisted writing', color: 'from-blue-500 to-purple-500' },
+    { icon: Target, label: 'ATS-Ready', desc: 'Pass tracking systems', color: 'from-purple-500 to-pink-500' },
+    { icon: Zap, label: 'Quick Setup', desc: 'Start in minutes', color: 'from-emerald-500 to-blue-500' },
+    { icon: Shield, label: 'Private', desc: 'Your data stays yours', color: 'from-orange-500 to-red-500' }
   ];
 
   const metrics = [
-    { icon: Users, value: '250K+', label: 'Active Users', color: 'blue' },
-    { icon: TrendingUp, value: '95%', label: 'Success Rate', color: 'emerald' },
-    { icon: Award, value: '4.9/5', label: 'User Rating', color: 'purple' },
-    { icon: Clock, value: '3 min', label: 'Avg. Time', color: 'orange' }
+    { icon: Users, value: '1,200+', label: 'Users', color: 'blue' },
+    { icon: TrendingUp, value: '3,400', label: 'Resumes', color: 'emerald' },
+    { icon: Award, value: '4.6★', label: 'Rating', color: 'purple' },
+    { icon: Clock, value: '<5 min', label: 'Avg. Time', color: 'orange' }
   ];
 
   return (
@@ -55,20 +55,16 @@ const HeroSection = () => {
               <CheckCircle className="w-6 h-6 text-white" />
             </div>
             <div>
-              <div className="text-sm font-bold text-foreground">98% Success</div>
-              <div className="text-xs text-muted-foreground">ATS Pass Rate</div>
+              <div className="text-sm font-bold text-foreground">ATS Pass</div>
+              <div className="text-xs text-muted-foreground">Optimized</div>
             </div>
           </div>
         </div>
 
-        <div className="absolute top-40 left-10 glass-card rounded-2xl p-4 animate-fade-in floating-card hidden lg:block" style={{ animationDelay: '0.7s' }}>
+        <div className="absolute top-40 left-10 glass-card rounded-2xl p-3 animate-fade-in floating-card hidden lg:block" style={{ animationDelay: '0.7s' }}>
           <div className="flex items-center gap-2">
-            <div className="flex -space-x-2">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className={`w-8 h-8 bg-gradient-to-br from-${i === 1 ? 'blue' : i === 2 ? 'purple' : i === 3 ? 'pink' : 'orange'}-400 to-${i === 1 ? 'blue' : i === 2 ? 'purple' : i === 3 ? 'pink' : 'orange'}-600 rounded-full border-2 border-background`}></div>
-              ))}
-            </div>
-            <div className="text-xs font-semibold text-foreground">+250K Users</div>
+            <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+            <div className="text-xs font-semibold text-foreground">1,200+ reviews</div>
           </div>
         </div>
 
@@ -77,41 +73,35 @@ const HeroSection = () => {
           {/* Left - Main hero content (spans 7 columns) */}
           <div className="lg:col-span-7 space-y-8">
             {/* Trust badge */}
-            <div className="inline-flex items-center gap-3 glass-card rounded-full px-6 py-3 animate-fade-in hover:scale-105 transition-transform cursor-default">
-              <div className="flex items-center gap-2">
-                <Star className="w-4 h-4 text-yellow-400 fill-yellow-400 animate-pulse" />
-                <Star className="w-4 h-4 text-yellow-400 fill-yellow-400 animate-pulse" style={{ animationDelay: '0.1s' }} />
-                <Star className="w-4 h-4 text-yellow-400 fill-yellow-400 animate-pulse" style={{ animationDelay: '0.2s' }} />
-                <Star className="w-4 h-4 text-yellow-400 fill-yellow-400 animate-pulse" style={{ animationDelay: '0.3s' }} />
-                <Star className="w-4 h-4 text-yellow-400 fill-yellow-400 animate-pulse" style={{ animationDelay: '0.4s' }} />
+            <div className="inline-flex items-center gap-2 glass-card rounded-full px-4 py-2 animate-fade-in hover:scale-105 transition-transform cursor-default">
+              <div className="flex items-center gap-1.5">
+                <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                <span className="text-sm font-semibold text-foreground">4.6</span>
               </div>
               <div className="h-4 w-px bg-border"></div>
-              <span className="text-sm font-bold gradient-text bg-gradient-to-r from-foreground via-foreground/90 to-foreground bg-[length:200%_auto] animate-gradient">
-                4.9/5 from 250,000+ professionals
-              </span>
+              <span className="text-sm text-muted-foreground">from 1,200+ reviews</span>
             </div>
 
             {/* Main headline with advanced typography */}
             <div className="space-y-4">
-              <h1 className="text-6xl md:text-7xl lg:text-8xl font-black leading-[0.95] tracking-tighter animate-fade-in">
-                <span className="block text-foreground mb-2 drop-shadow-sm">Land Your</span>
-                <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-[0_2px_20px_rgba(59,130,246,0.5)]">
-                  Dream Job
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-[0.95] tracking-tighter animate-fade-in">
+                <span className="block text-foreground drop-shadow-sm">Build resumes</span>
+                <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent drop-shadow-[0_2px_20px_rgba(59,130,246,0.4)]">
+                  that work
                 </span>
-                <span className="block text-foreground mt-2 drop-shadow-sm">In Minutes</span>
               </h1>
               
               {/* Decorative line */}
-              <div className="flex items-center gap-4 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-                <div className="h-1 w-20 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-full shadow-lg"></div>
-                <Sparkles className="w-6 h-6 text-purple-600 animate-pulse drop-shadow-lg" />
-                <div className="h-1 w-20 bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 rounded-full shadow-lg"></div>
+              <div className="flex items-center gap-3 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+                <div className="h-1 w-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"></div>
+                <Sparkles className="w-4 h-4 text-purple-600" />
+                <div className="h-1 w-12 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full"></div>
               </div>
             </div>
 
             {/* Subtitle with better spacing */}
-            <p className="text-xl md:text-2xl leading-relaxed max-w-2xl animate-fade-in" style={{ animationDelay: '0.2s' }}>
-              <span className="font-bold text-foreground">AI-powered resume builder</span> <span className="text-foreground/80">that creates professional, ATS-optimized resumes tailored to your dream job. Join 250,000+ professionals who accelerated their careers.</span>
+            <p className="text-lg md:text-xl leading-relaxed max-w-xl animate-fade-in" style={{ animationDelay: '0.2s' }}>
+              <span className="text-foreground/80">Create professional resumes in minutes. Optimized for applicant tracking systems and designed to get you interviews.</span>
             </p>
 
             {/* CTA buttons with enhanced styling */}
@@ -134,16 +124,16 @@ const HeroSection = () => {
             {/* Trust indicators */}
             <div className="flex flex-wrap gap-6 items-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <CheckCircle className="w-5 h-5 text-emerald-500" />
-                <span>No credit card required</span>
+                <CheckCircle className="w-4 h-4 text-emerald-500" />
+                <span>Free to start</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <CheckCircle className="w-5 h-5 text-emerald-500" />
-                <span>Free forever plan</span>
+                <CheckCircle className="w-4 h-4 text-emerald-500" />
+                <span>ATS-friendly</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <CheckCircle className="w-5 h-5 text-emerald-500" />
-                <span>Cancel anytime</span>
+                <CheckCircle className="w-4 h-4 text-emerald-500" />
+                <span>Export as PDF</span>
               </div>
             </div>
           </div>

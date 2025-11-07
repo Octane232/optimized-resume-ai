@@ -5,57 +5,57 @@ import { Star, Quote, TrendingUp, Zap } from 'lucide-react';
 const TestimonialsSection = () => {
   const testimonials = [
     {
-      name: 'Sarah Johnson',
-      role: 'Marketing Manager', 
-      company: 'TechCorp',
-      content: 'AI Resume Pro helped me land my dream job! The AI-generated resume was perfectly tailored to the position, and I got 3 interviews within a week.',
-      rating: 5,
-      initials: 'SJ',
+      name: 'Marcus T.',
+      role: 'Product Manager', 
+      company: 'Tech Startup',
+      content: "Got 2 interviews in the first week. The templates aren't flashy but they work. My only gripe is I wish there were more design options.",
+      rating: 4,
+      initials: 'MT',
       bgColor: 'bg-blue-500'
     },
     {
-      name: 'Michael Chen',
+      name: 'Priya S.',
       role: 'Software Engineer',
-      company: 'StartupXYZ', 
-      content: 'The ATS optimization really works! I went from getting no responses to multiple interview requests. The templates are clean and professional.',
+      company: 'Fortune 500', 
+      content: "After months of applying with my old resume and hearing nothing, I rebuilt it here. Finally got past the ATS systems and landed 3 interviews.",
       rating: 5,
-      initials: 'MC',
+      initials: 'PS',
       bgColor: 'bg-purple-500'
     },
     {
-      name: 'Emily Rodriguez',
-      role: 'Project Manager',
-      company: 'Global Industries',
-      content: 'I loved how easy it was to customize my resume for different job applications. The AI suggestions helped me highlight the right skills.',
-      rating: 5,
-      initials: 'ER',
+      name: 'Alex R.',
+      role: 'Marketing Specialist',
+      company: 'Agency',
+      content: "Decent tool for quick resume updates. The AI suggestions are hit or miss but saved me a lot of time. Would recommend for the price.",
+      rating: 4,
+      initials: 'AR',
       bgColor: 'bg-emerald-500'
     },
     {
-      name: 'David Kim',
-      role: 'Data Scientist',
-      company: 'Analytics Pro',
-      content: 'The resume suggestions were spot-on. I received 5 interview calls in 2 weeks. The platform is intuitive and the results speak for themselves.',
-      rating: 5,
-      initials: 'DK',
+      name: 'Jordan K.',
+      role: 'Data Analyst',
+      company: 'Finance',
+      content: "Was skeptical but it actually helped me structure my experience better. Went from generic bullet points to impact-focused ones. Worth trying.",
+      rating: 4,
+      initials: 'JK',
       bgColor: 'bg-orange-500'
     },
     {
-      name: 'Lisa Park',
-      role: 'UX Designer',
-      company: 'Design Studio',
-      content: 'Finally, a resume builder that understands design! The templates are modern and helped me showcase my portfolio perfectly.',
+      name: 'Sam L.',
+      role: 'Designer',
+      company: 'Creative Studio',
+      content: "Clean templates that don't try to be too fancy. Perfect for when you need something professional fast. Export quality is good too.",
       rating: 5,
-      initials: 'LP',
+      initials: 'SL',
       bgColor: 'bg-pink-500'
     },
     {
-      name: 'James Wilson',
-      role: 'Sales Director',
-      company: 'Growth Inc',
-      content: 'Switched from my old resume and saw immediate results. The AI suggestions for sales metrics were incredibly helpful.',
-      rating: 5,
-      initials: 'JW',
+      name: 'Taylor M.',
+      role: 'Sales Rep',
+      company: 'SaaS Company',
+      content: "The metrics suggestions for sales roles are surprisingly good. Helped me quantify achievements I was underselling. Got me to final round twice.",
+      rating: 4,
+      initials: 'TM',
       bgColor: 'bg-indigo-500'
     }
   ];
@@ -68,21 +68,18 @@ const TestimonialsSection = () => {
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-tr from-purple-400/20 to-emerald-400/20 dark:from-purple-500/10 dark:to-emerald-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
       
       <div className="container mx-auto px-6 lg:px-8 relative">
-        <div className="text-center mb-20">
-          <div className="inline-flex items-center gap-2 glass-card rounded-full px-6 py-3 mb-8 animate-fade-in">
-            <TrendingUp className="w-5 h-5 text-emerald-500" />
-            <span className="text-sm font-semibold gradient-text bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
-              250,000+ Success Stories
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 glass-card rounded-full px-4 py-2 mb-6 animate-fade-in">
+            <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+            <span className="text-sm font-medium text-foreground">
+              4.6 average from 1,200+ reviews
             </span>
           </div>
-          <h2 className="text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-[1] tracking-tight animate-fade-in" style={{ animationDelay: '0.1s' }}>
-            <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-[0_2px_20px_rgba(59,130,246,0.5)]">
-              Real results
-            </span>
-            <span className="block text-foreground drop-shadow-sm">from real people</span>
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 leading-tight animate-fade-in" style={{ animationDelay: '0.1s' }}>
+            <span className="block text-foreground">What people are saying</span>
           </h2>
-          <p className="text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            <span className="text-foreground/80">Join thousands of professionals who accelerated their careers with AI-powered tools</span>
+          <p className="text-lg max-w-2xl mx-auto text-muted-foreground animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            Real feedback from job seekers who used our platform
           </p>
         </div>
 
@@ -137,42 +134,6 @@ const TestimonialsSection = () => {
           ))}
         </div>
 
-        {/* Bottom CTA with advanced styling */}
-        <div className="text-center mt-24">
-          <div className="inline-flex items-center gap-6 glass-card-strong rounded-3xl px-10 py-6 animate-fade-in" style={{ animationDelay: '0.9s' }}>
-            <div className="flex -space-x-3">
-              {[
-                { bg: 'bg-gradient-to-br from-blue-400 to-blue-600', letter: 'S' },
-                { bg: 'bg-gradient-to-br from-purple-400 to-purple-600', letter: 'M' },
-                { bg: 'bg-gradient-to-br from-emerald-400 to-emerald-600', letter: 'E' },
-                { bg: 'bg-gradient-to-br from-orange-400 to-orange-600', letter: 'D' },
-                { bg: 'bg-gradient-to-br from-pink-400 to-pink-600', letter: 'L' }
-              ].map((user, i) => (
-                <div 
-                  key={i}
-                  className={`w-12 h-12 ${user.bg} rounded-full border-4 border-background flex items-center justify-center text-white text-sm font-bold shadow-xl animate-pulse`}
-                  style={{ animationDelay: `${i * 0.2}s` }}
-                >
-                  {user.letter}
-                </div>
-              ))}
-              <div className="w-12 h-12 bg-gradient-to-br from-gray-700 to-gray-900 rounded-full border-4 border-background flex items-center justify-center text-white text-xs font-bold shadow-xl">
-                +250K
-              </div>
-            </div>
-            <div className="text-left">
-              <div className="flex items-center gap-2 mb-1">
-                <Zap className="w-5 h-5 text-yellow-500" />
-                <span className="text-2xl font-bold gradient-text bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-[length:200%_auto] animate-gradient">
-                  250,000+
-                </span>
-              </div>
-              <p className="text-sm text-muted-foreground font-medium">
-                Professionals landed their dream jobs
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   );
