@@ -135,7 +135,7 @@ const ResumesShowcase = () => {
                           <Button 
                             size="sm" 
                             className="bg-blue-600 hover:bg-blue-700"
-                            onClick={() => navigate(`/editor?template=${template.id}`)}
+                            onClick={() => navigate(`/editor/new?template=${template.id}`)}
                           >
                             <Download className="w-4 h-4 mr-2" />
                             Use Template
@@ -172,7 +172,7 @@ const ResumesShowcase = () => {
                       <Button 
                         size="sm" 
                         className="bg-blue-600 hover:bg-blue-700"
-                        onClick={() => navigate(`/editor?template=${template.id}`)}
+                        onClick={() => navigate(`/editor/new?template=${template.id}`)}
                       >
                         Use Template
                       </Button>
