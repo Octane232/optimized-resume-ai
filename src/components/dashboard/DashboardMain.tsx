@@ -4,7 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FileText, Download, Plus, Lightbulb, TrendingUp, Star, ArrowRight, Bookmark, Edit, Sparkles, MessageSquare, Briefcase } from 'lucide-react';
+import { FileText, Download, Plus, Lightbulb, TrendingUp, Star, ArrowRight, Bookmark, Sparkles, MessageSquare, Briefcase } from 'lucide-react';
+import html2pdf from 'html2pdf.js';
+import ResumeTemplatePreview from './ResumeTemplatePreview';
 import OnboardingFlow from './OnboardingFlow';
 import TemplateGallery from './TemplateGallery';
 import ActivityFeed from './ActivityFeed';
@@ -153,14 +155,103 @@ const DashboardMain = ({ setActiveTab }: DashboardMainProps) => {
   ];
 
   const handleDownloadResume = async (resumeId: string) => {
-    toast({
-      title: "Download started",
-      description: "Preparing your resume for download...",
-    });
-  };
+    try {
+      toast({
+        title: "Download started",
+        description: "Preparing your resume for download...",
+      });
 
-  const handleEditResume = (resumeId: string) => {
-    navigate(`/resume-editor?id=${resumeId}`);
+      // Fetch the resume data
+      const { data: resume, error } = await supabase
+        .from('resumes')
+        .select('*')
+        .eq('id', resumeId)
+        .single();
+
+      if (error || !resume) {
+        throw new Error('Failed to fetch resume');
+      }
+
+      // Fetch templates
+      const { data: templatesData } = await supabase
+        .from('resume_templates')
+        .select('*');
+
+      // Create a temporary container for the resume preview
+      const container = document.createElement('div');
+      container.style.position = 'fixed';
+      container.style.left = '-9999px';
+      container.style.width = '210mm'; // A4 width
+      document.body.appendChild(container);
+
+      // Create a temporary root to render the resume
+      const root = document.createElement('div');
+      container.appendChild(root);
+
+      // Render the resume preview
+      const { createRoot } = await import('react-dom/client');
+      const reactRoot = createRoot(root);
+      
+      await new Promise<void>((resolve) => {
+        reactRoot.render(
+          <ResumeTemplatePreview 
+            resumeData={resume.content as any}
+            templateId={resume.template_name || ''}
+            templates={templatesData || []}
+          />
+        );
+        // Give time for rendering
+        setTimeout(() => resolve(), 100);
+      });
+
+      // Clone the rendered element
+      const clone = root.cloneNode(true) as HTMLElement;
+      container.removeChild(root);
+      container.appendChild(clone);
+
+      // PDF generation options
+      const opt = {
+        margin: 0,
+        filename: `${resume.title || 'resume'}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 2,
+          useCORS: true,
+          letterRendering: true,
+          scrollY: 0,
+          scrollX: 0,
+        },
+        jsPDF: { 
+          unit: 'mm', 
+          format: 'a4', 
+          orientation: 'portrait',
+          compress: true,
+          putOnlyUsedFonts: true,
+        },
+        pagebreak: { mode: ['css'] }
+      };
+
+      await html2pdf()
+        .set(opt)
+        .from(clone)
+        .save();
+
+      // Clean up
+      reactRoot.unmount();
+      document.body.removeChild(container);
+      
+      toast({
+        title: "Success",
+        description: "Resume downloaded successfully",
+      });
+    } catch (error: any) {
+      console.error('Error downloading resume:', error);
+      toast({
+        title: "Error",
+        description: "Failed to download resume. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -315,18 +406,10 @@ const DashboardMain = ({ setActiveTab }: DashboardMainProps) => {
                               variant="outline" 
                               size="sm" 
                               className="rounded-xl"
-                              onClick={() => handleEditResume(resume.id)}
-                            >
-                              <Edit className="w-4 h-4 mr-1" />
-                              Edit
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="rounded-xl"
                               onClick={() => handleDownloadResume(resume.id)}
                             >
-                              <Download className="w-4 h-4" />
+                              <Download className="w-4 h-4 mr-2" />
+                              Download
                             </Button>
                           </div>
                         </div>
