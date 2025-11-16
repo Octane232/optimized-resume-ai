@@ -2,17 +2,14 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { 
   HelpCircle, 
   Mail, 
   BookOpen, 
-  ExternalLink 
+  ExternalLink,
+  Copy,
+  Check
 } from "lucide-react";
 
 interface SupportOption {
@@ -26,43 +23,18 @@ interface SupportOption {
 }
 
 const HelpSupport = () => {
-  const [isContactDialogOpen, setIsContactDialogOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    message: ""
-  });
+  const [copied, setCopied] = useState(false);
   const { toast } = useToast();
+  const emailAddress = 'contact-us@pitchsora.com';
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const { error } = await supabase.functions.invoke("send-contact-form", {
-        body: formData
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Message sent!",
-        description: "We'll get back to you as soon as possible.",
-      });
-
-      setIsContactDialogOpen(false);
-      setFormData({ firstName: "", lastName: "", email: "", message: "" });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to send message. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleCopyEmail = () => {
+    navigator.clipboard.writeText(emailAddress);
+    setCopied(true);
+    toast({
+      title: "Email copied!",
+      description: "Email address copied to clipboard.",
+    });
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const supportOptions: SupportOption[] = [
@@ -78,8 +50,8 @@ const HelpSupport = () => {
       icon: Mail,
       title: "Email Support",
       description: "Send us an email and we'll respond within 24 hours",
-      action: "Send Email",
-      onClick: () => setIsContactDialogOpen(true)
+      action: "Copy Email",
+      onClick: handleCopyEmail
     }
   ];
 
@@ -175,75 +147,40 @@ const HelpSupport = () => {
       </Card>
 
       {/* Contact Info */}
-      <Card className="bg-primary/5 border-primary/20">
+      {/* Direct Contact */}
+      <Card>
         <CardHeader>
-          <CardTitle>Still need help?</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Mail className="h-5 w-5" />
+            Still need help?
+          </CardTitle>
           <CardDescription>
-            Our support team is available to assist you
+            Can't find what you're looking for? Our support team is here to help.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <p className="text-sm">
-            <strong>Email:</strong> contact-us@pitchsora.com
+        <CardContent className="space-y-4">
+          <div className="bg-muted rounded-lg p-4">
+            <p className="text-sm text-muted-foreground mb-2">Email us at:</p>
+            <p className="text-lg font-semibold mb-3">{emailAddress}</p>
+            <Button onClick={handleCopyEmail} className="w-full gap-2">
+              {copied ? (
+                <>
+                  <Check className="h-4 w-4" />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4" />
+                  Copy Email Address
+                </>
+              )}
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground text-center">
+            We typically respond within 24 hours
           </p>
         </CardContent>
       </Card>
-
-      <Dialog open={isContactDialogOpen} onOpenChange={setIsContactDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Contact Support</DialogTitle>
-            <DialogDescription>
-              Send us a message and we'll respond within 24 hours.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
-                <Input
-                  id="firstName"
-                  value={formData.firstName}
-                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input
-                  id="lastName"
-                  value={formData.lastName}
-                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                  required
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="message">Message</Label>
-              <Textarea
-                id="message"
-                value={formData.message}
-                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                rows={5}
-                required
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Sending..." : "Send Message"}
-            </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
