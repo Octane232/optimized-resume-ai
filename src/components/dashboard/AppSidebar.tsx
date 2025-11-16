@@ -39,6 +39,46 @@ interface AppSidebarProps {
 export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
   const navigate = useNavigate();
   const [resumeCount, setResumeCount] = useState<number>(0);
+  const [tagline, setTagline] = useState<string>("");
+
+  const motivationalTaglines = [
+    "Land Your Dream Job",
+    "Your Future Starts Today",
+    "Build Your Success Story",
+    "Stand Out, Get Noticed",
+    "Career Excellence Awaits",
+    "Transform Your Career Path",
+    "Unlock New Opportunities",
+    "Your Next Chapter Begins",
+    "Elevate Your Professional Brand",
+    "Make Your Mark",
+    "Success Is Within Reach",
+    "Craft Your Perfect Resume",
+    "Your Skills Deserve Recognition",
+    "Open Doors to Possibilities",
+    "Shine in Your Interview",
+    "Be The Top Candidate",
+    "Your Potential, Realized",
+    "Career Growth Starts Here",
+    "Get Hired, Get Happy",
+    "Professional Excellence Awaits"
+  ];
+
+  useEffect(() => {
+    // Set initial tagline based on current hour
+    const updateTagline = () => {
+      const hour = new Date().getHours();
+      const index = hour % motivationalTaglines.length;
+      setTagline(motivationalTaglines[index]);
+    };
+
+    updateTagline();
+
+    // Update every hour
+    const interval = setInterval(updateTagline, 60 * 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     fetchResumeCount();
@@ -151,7 +191,9 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
           </div>
           <div>
             <h2 className="text-lg font-semibold">PitchSora</h2>
-            <p className="text-xs text-muted-foreground">Land Your Dream Job</p>
+            <p className="text-xs text-muted-foreground transition-all duration-500">
+              {tagline}
+            </p>
           </div>
         </div>
       </SidebarHeader>
