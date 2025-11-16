@@ -147,11 +147,11 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
       <SidebarHeader className="p-4 border-b border-border">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <span className="text-sm font-bold text-primary-foreground">AR</span>
+            <span className="text-sm font-bold text-primary-foreground">PS</span>
           </div>
           <div>
-            <h2 className="text-lg font-semibold">AI Resume</h2>
-            <p className="text-xs text-muted-foreground">Professional</p>
+            <h2 className="text-lg font-semibold">PitchSora</h2>
+            <p className="text-xs text-muted-foreground">Land Your Dream Job</p>
           </div>
         </div>
       </SidebarHeader>
