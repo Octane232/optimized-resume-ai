@@ -499,9 +499,10 @@ export type Database = {
         Row: {
           billing_cycle: string | null
           created_at: string
-          expires_at: string | null
+          current_period_end: string | null
           features: Json | null
           id: string
+          lemon_squeezy_subscription_id: string | null
           plan_id: string
           plan_status: string
           price: number | null
@@ -511,9 +512,10 @@ export type Database = {
         Insert: {
           billing_cycle?: string | null
           created_at?: string
-          expires_at?: string | null
+          current_period_end?: string | null
           features?: Json | null
           id?: string
+          lemon_squeezy_subscription_id?: string | null
           plan_id: string
           plan_status?: string
           price?: number | null
@@ -523,9 +525,10 @@ export type Database = {
         Update: {
           billing_cycle?: string | null
           created_at?: string
-          expires_at?: string | null
+          current_period_end?: string | null
           features?: Json | null
           id?: string
+          lemon_squeezy_subscription_id?: string | null
           plan_id?: string
           plan_status?: string
           price?: number | null

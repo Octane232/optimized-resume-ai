@@ -113,8 +113,8 @@ const Billing = () => {
       const currentSubscription = currentPlanDetails ? {
         name: currentPlanDetails.name,
         price: `$${subscriptionData.price}/${subscriptionData.billing_cycle}`,
-        nextBilling: subscriptionData.expires_at ? 
-          new Date(subscriptionData.expires_at).toLocaleDateString() : 'N/A',
+        nextBilling: subscriptionData.current_period_end ? 
+          new Date(subscriptionData.current_period_end).toLocaleDateString() : 'N/A',
         features: currentPlanDetails.features || [],
         status: subscriptionData.plan_status
       } : {
