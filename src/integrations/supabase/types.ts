@@ -226,6 +226,7 @@ export type Database = {
           id: string
           location: string | null
           phone: string | null
+          plan: string | null
           profile_completion: number | null
           updated_at: string
           user_id: string
@@ -239,6 +240,7 @@ export type Database = {
           id?: string
           location?: string | null
           phone?: string | null
+          plan?: string | null
           profile_completion?: number | null
           updated_at?: string
           user_id: string
@@ -252,6 +254,7 @@ export type Database = {
           id?: string
           location?: string | null
           phone?: string | null
+          plan?: string | null
           profile_completion?: number | null
           updated_at?: string
           user_id?: string
@@ -569,6 +572,33 @@ export type Database = {
           templates_used?: number | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      webhook_logs: {
+        Row: {
+          created_at: string | null
+          error: string | null
+          event_type: string | null
+          id: string
+          payload: Json
+          processed: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          error?: string | null
+          event_type?: string | null
+          id?: string
+          payload: Json
+          processed?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          error?: string | null
+          event_type?: string | null
+          id?: string
+          payload?: Json
+          processed?: boolean | null
         }
         Relationships: []
       }
