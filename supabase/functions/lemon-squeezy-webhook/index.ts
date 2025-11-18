@@ -39,8 +39,21 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Initialize Supabase client early for logging
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
   try {
     const rawBody = await req.text();
+    const payload: WebhookPayload = JSON.parse(rawBody);
+    
+    // Log webhook to database for debugging
+    await supabase.from('webhook_logs').insert({
+      payload: payload,
+      event_type: payload.meta.event_name,
+      processed: false
+    });
     
     // Log all headers for debugging
     console.log('Received headers:', Object.fromEntries(req.headers.entries()));
@@ -87,15 +100,9 @@ const handler = async (req: Request): Promise<Response> => {
       return new Response('Invalid signature', { status: 401 });
     }
 
-    const payload: WebhookPayload = JSON.parse(rawBody);
     const eventName = payload.meta.event_name;
     
     console.log('Received webhook event:', eventName);
-
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Get user_id from custom data or find by email
     let userId = payload.meta.custom_data?.user_id;
@@ -124,7 +131,7 @@ const handler = async (req: Request): Promise<Response> => {
       case 'subscription_created':
         await handleSubscriptionCreated(supabase, userId, payload);
         break;
-      
+
       case 'subscription_updated':
         await handleSubscriptionUpdated(supabase, userId, payload);
         break;
@@ -153,6 +160,9 @@ const handler = async (req: Request): Promise<Response> => {
         console.log('Unhandled webhook event:', eventName);
     }
 
+    // Mark webhook as processed
+    await supabase.from('webhook_logs').update({ processed: true }).eq('event_type', eventName).eq('processed', false).limit(1);
+
     return new Response(JSON.stringify({ received: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
@@ -160,6 +170,19 @@ const handler = async (req: Request): Promise<Response> => {
 
   } catch (error: any) {
     console.error('Error processing webhook:', error);
+    
+    // Log error to database
+    try {
+      await supabase.from('webhook_logs').insert({
+        payload: { error: error.message },
+        event_type: 'error',
+        processed: false,
+        error: error.message
+      });
+    } catch (logError) {
+      console.error('Failed to log error:', logError);
+    }
+    
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
@@ -191,7 +214,7 @@ async function handleSubscriptionCreated(supabase: any, userId: string, payload:
   // Find matching plan by variant name
   const { data: plan } = await supabase
     .from('subscription_plans')
-    .select('id')
+    .select('id, name')
     .ilike('name', `%${payload.data.attributes.variant_name}%`)
     .single();
 
@@ -199,6 +222,9 @@ async function handleSubscriptionCreated(supabase: any, userId: string, payload:
     console.error('Could not find matching plan for:', payload.data.attributes.variant_name);
     return;
   }
+
+  // Determine plan tier from plan name
+  const planTier = getPlanTier(plan.name);
 
   // Create or update subscription
   const { data: subscription } = await supabase
@@ -214,20 +240,36 @@ async function handleSubscriptionCreated(supabase: any, userId: string, payload:
     .select()
     .single();
 
-  console.log('Created subscription:', subscription?.id);
+  // Update profiles table with plan
+  await supabase
+    .from('profiles')
+    .update({ plan: planTier })
+    .eq('user_id', userId);
+
+  console.log('Created subscription:', subscription?.id, 'Plan:', planTier);
 }
 
 async function handleSubscriptionUpdated(supabase: any, userId: string, payload: WebhookPayload) {
   console.log('Processing subscription_updated for user:', userId);
   
+  const status = payload.data.attributes.status;
+  
   await supabase
     .from('user_subscriptions')
     .update({
-      status: payload.data.attributes.status,
+      status: status,
       current_period_end: payload.data.attributes.renews_at,
       updated_at: new Date().toISOString(),
     })
     .eq('lemon_squeezy_subscription_id', payload.data.id);
+
+  // Update profiles table - set to free if cancelled/expired, keep current if active
+  if (status === 'cancelled' || status === 'expired') {
+    await supabase
+      .from('profiles')
+      .update({ plan: 'free' })
+      .eq('user_id', userId);
+  }
 }
 
 async function handleSubscriptionCancelled(supabase: any, userId: string, payload: WebhookPayload) {
@@ -241,6 +283,12 @@ async function handleSubscriptionCancelled(supabase: any, userId: string, payloa
       updated_at: new Date().toISOString(),
     })
     .eq('lemon_squeezy_subscription_id', payload.data.id);
+
+  // Update profiles table to free plan
+  await supabase
+    .from('profiles')
+    .update({ plan: 'free' })
+    .eq('user_id', userId);
 }
 
 async function handleSubscriptionResumed(supabase: any, userId: string, payload: WebhookPayload) {
@@ -266,6 +314,12 @@ async function handleSubscriptionExpired(supabase: any, userId: string, payload:
       updated_at: new Date().toISOString(),
     })
     .eq('lemon_squeezy_subscription_id', payload.data.id);
+
+  // Update profiles table to free plan
+  await supabase
+    .from('profiles')
+    .update({ plan: 'free' })
+    .eq('user_id', userId);
 }
 
 async function handleSubscriptionPaused(supabase: any, userId: string, payload: WebhookPayload) {
@@ -290,6 +344,17 @@ async function handleSubscriptionUnpaused(supabase: any, userId: string, payload
       updated_at: new Date().toISOString(),
     })
     .eq('lemon_squeezy_subscription_id', payload.data.id);
+}
+
+// Helper function to determine plan tier from plan name
+function getPlanTier(planName: string): string {
+  const lowerName = planName.toLowerCase();
+  if (lowerName.includes('premium') || lowerName.includes('enterprise')) {
+    return 'premium';
+  } else if (lowerName.includes('pro') || lowerName.includes('professional')) {
+    return 'pro';
+  }
+  return 'free';
 }
 
 serve(handler);
