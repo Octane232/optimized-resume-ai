@@ -211,15 +211,17 @@ async function handleOrderCreated(supabase: any, userId: string, payload: Webhoo
 async function handleSubscriptionCreated(supabase: any, userId: string, payload: WebhookPayload) {
   console.log('Processing subscription_created for user:', userId);
   
-  // Find matching plan by variant name
+  // Find matching plan by variant_id
+  const variantId = payload.data.attributes.variant_id.toString();
   const { data: plan } = await supabase
     .from('subscription_plans')
     .select('id, name')
-    .ilike('name', `%${payload.data.attributes.variant_name}%`)
+    .eq('lemon_squeezy_variant_id', variantId)
     .single();
 
   if (!plan) {
-    console.error('Could not find matching plan for:', payload.data.attributes.variant_name);
+    console.error('Could not find matching plan for variant_id:', variantId);
+    console.error('Available variant IDs should be configured in subscription_plans table');
     return;
   }
 
@@ -232,10 +234,9 @@ async function handleSubscriptionCreated(supabase: any, userId: string, payload:
     .upsert({
       user_id: userId,
       plan_id: plan.id,
-      status: 'active',
+      plan_status: 'active',
       current_period_end: payload.data.attributes.renews_at,
       lemon_squeezy_subscription_id: payload.data.id,
-      lemon_squeezy_customer_id: payload.data.attributes.customer_id.toString(),
     })
     .select()
     .single();
@@ -257,7 +258,7 @@ async function handleSubscriptionUpdated(supabase: any, userId: string, payload:
   await supabase
     .from('user_subscriptions')
     .update({
-      status: status,
+      plan_status: status,
       current_period_end: payload.data.attributes.renews_at,
       updated_at: new Date().toISOString(),
     })
@@ -278,8 +279,7 @@ async function handleSubscriptionCancelled(supabase: any, userId: string, payloa
   await supabase
     .from('user_subscriptions')
     .update({
-      status: 'cancelled',
-      cancel_at_period_end: true,
+      plan_status: 'cancelled',
       updated_at: new Date().toISOString(),
     })
     .eq('lemon_squeezy_subscription_id', payload.data.id);
@@ -297,8 +297,7 @@ async function handleSubscriptionResumed(supabase: any, userId: string, payload:
   await supabase
     .from('user_subscriptions')
     .update({
-      status: 'active',
-      cancel_at_period_end: false,
+      plan_status: 'active',
       updated_at: new Date().toISOString(),
     })
     .eq('lemon_squeezy_subscription_id', payload.data.id);
@@ -310,7 +309,7 @@ async function handleSubscriptionExpired(supabase: any, userId: string, payload:
   await supabase
     .from('user_subscriptions')
     .update({
-      status: 'expired',
+      plan_status: 'expired',
       updated_at: new Date().toISOString(),
     })
     .eq('lemon_squeezy_subscription_id', payload.data.id);
@@ -328,7 +327,7 @@ async function handleSubscriptionPaused(supabase: any, userId: string, payload: 
   await supabase
     .from('user_subscriptions')
     .update({
-      status: 'paused',
+      plan_status: 'paused',
       updated_at: new Date().toISOString(),
     })
     .eq('lemon_squeezy_subscription_id', payload.data.id);
@@ -340,7 +339,7 @@ async function handleSubscriptionUnpaused(supabase: any, userId: string, payload
   await supabase
     .from('user_subscriptions')
     .update({
-      status: 'active',
+      plan_status: 'active',
       updated_at: new Date().toISOString(),
     })
     .eq('lemon_squeezy_subscription_id', payload.data.id);
