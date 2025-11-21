@@ -52,12 +52,25 @@ Deno.serve(async (req) => {
         data: {
           type: 'checkouts',
           attributes: {
+            checkout_options: {
+              embed: false,
+              media: false,
+              logo: true,
+              desc: true,
+              discount: true,
+              dark: false,
+              subscription_preview: true,
+              button_color: '#7C3AED'
+            },
             checkout_data: {
               email: user.email,
               custom: {
                 user_id: user.id
               }
-            }
+            },
+            expires_at: null,
+            preview: false,
+            test_mode: false
           },
           relationships: {
             store: {
@@ -69,7 +82,7 @@ Deno.serve(async (req) => {
             variant: {
               data: {
                 type: 'variants',
-                id: variantId
+                id: variantId.toString()
               }
             }
           }
