@@ -16,6 +16,7 @@ interface WebhookPayload {
   data: {
     id: string;
     attributes: {
+      store_id: number;
       status: string;
       customer_id: number;
       order_id: number;
@@ -103,6 +104,16 @@ const handler = async (req: Request): Promise<Response> => {
     const eventName = payload.meta.event_name;
     
     console.log('Received webhook event:', eventName);
+    console.log('Webhook payload details:', {
+      event: eventName,
+      subscription_id: payload.data.id,
+      variant_id: payload.data.attributes.variant_id,
+      store_id: payload.data.attributes.store_id,
+      product_id: payload.data.attributes.product_id,
+      plan_name: payload.data.attributes.variant_name,
+      user_id: payload.meta.custom_data?.user_id,
+      user_email: payload.data.attributes.user_email
+    });
 
     // Get user_id from custom data or find by email
     let userId = payload.meta.custom_data?.user_id;
@@ -210,6 +221,14 @@ async function handleOrderCreated(supabase: any, userId: string, payload: Webhoo
 
 async function handleSubscriptionCreated(supabase: any, userId: string, payload: WebhookPayload) {
   console.log('Processing subscription_created for user:', userId);
+  console.log('Subscription details:', {
+    subscription_id: payload.data.id,
+    variant_id: payload.data.attributes.variant_id,
+    store_id: payload.data.attributes.store_id,
+    product_id: payload.data.attributes.product_id,
+    plan_name: payload.data.attributes.variant_name,
+    user_id: userId
+  });
   
   // Find matching plan by variant_id
   const variantId = payload.data.attributes.variant_id.toString();
