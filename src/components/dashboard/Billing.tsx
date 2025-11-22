@@ -200,6 +200,33 @@ const Billing = () => {
     }
   };
 
+  const handleCancelSubscription = async () => {
+    if (!confirm('Are you sure you want to cancel your subscription? You will lose access to premium features at the end of your billing period.')) {
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('cancel-subscription');
+
+      if (error) throw error;
+
+      toast({
+        title: 'Success',
+        description: 'Your subscription has been cancelled. You will retain access until the end of your billing period.',
+      });
+
+      // Refresh billing data
+      fetchBillingData();
+    } catch (error) {
+      console.error('Error cancelling subscription:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to cancel subscription. Please try again or contact support.',
+        variant: 'destructive'
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-8">
@@ -286,9 +313,15 @@ const Billing = () => {
                 <CreditCard className="w-4 h-4 mr-2" />
                 Update Payment Method
               </Button>
-              <Button variant="outline" className="border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl">
-                Cancel Subscription
-              </Button>
+              {currentPlan?.name !== 'Free' && (
+                <Button 
+                  variant="outline" 
+                  onClick={handleCancelSubscription}
+                  className="border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl"
+                >
+                  Cancel Subscription
+                </Button>
+              )}
             </div>
           </div>
         </CardContent>
