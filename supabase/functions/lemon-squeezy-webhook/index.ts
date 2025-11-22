@@ -204,14 +204,26 @@ const handler = async (req: Request): Promise<Response> => {
 async function handleOrderCreated(supabase: any, userId: string, payload: WebhookPayload) {
   console.log('Processing order_created for user:', userId);
   
+  // Get plan name from variant
+  const variantId = payload.data.attributes.variant_id.toString();
+  const { data: plan } = await supabase
+    .from('subscription_plans')
+    .select('name, price_monthly, price_yearly')
+    .eq('lemon_squeezy_variant_id', variantId)
+    .single();
+
+  const planName = plan?.name || payload.data.attributes.variant_name;
+  const amount = plan?.price_monthly || plan?.price_yearly || 0;
+  
   const { data: invoice } = await supabase
-    .from('invoices')
+    .from('billing_invoices')
     .insert({
       user_id: userId,
-      amount: 0, // You'll need to parse amount from payload
+      amount: amount,
       status: 'paid',
-      payment_date: payload.data.attributes.created_at,
+      description: `${planName} subscription`,
       invoice_number: `LS-${payload.data.attributes.order_id}`,
+      payment_method: 'Credit Card',
     })
     .select()
     .single();
