@@ -12,6 +12,7 @@ import {
   LogOut,
   HelpCircle,
   Mail,
+  Target,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -131,6 +132,18 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
       id: "job-finder",
       icon: Search,
       badge: null,
+    },
+    {
+      title: "Application Tracker",
+      id: "application-tracker",
+      icon: Brain,
+      badge: "New",
+    },
+    {
+      title: "Skill Gap Analyzer",
+      id: "skill-gap",
+      icon: Target,
+      badge: "New",
     },
     {
       title: "Interview Prep",

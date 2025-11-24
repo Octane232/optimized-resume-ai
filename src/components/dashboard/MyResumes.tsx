@@ -4,10 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { FileText, Download, Edit, Trash2, Plus, Search, Filter, Grid, List, Star, Eye, Calendar, Clock } from 'lucide-react';
+import { FileText, Download, Edit, Trash2, Plus, Search, Filter, Grid, List, Star, Eye, Calendar, Clock, Target } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { ResumeATSDialog } from './ResumeATSDialog';
 
 const MyResumes = () => {
   const navigate = useNavigate();
@@ -16,6 +17,8 @@ const MyResumes = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [resumes, setResumes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedResumeForATS, setSelectedResumeForATS] = useState<any>(null);
+  const [atsDialogOpen, setAtsDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchResumes();
@@ -143,6 +146,18 @@ const MyResumes = () => {
           <Button 
             variant="outline" 
             size="sm" 
+            className="flex-1 hover:bg-green-50 hover:border-green-200 hover:text-green-700 rounded-xl transition-all duration-300"
+            onClick={() => {
+              setSelectedResumeForATS(resume);
+              setAtsDialogOpen(true);
+            }}
+          >
+            <Target className="w-4 h-4 mr-2" />
+            ATS Score
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
             className="text-red-600 hover:bg-red-50 hover:border-red-200 hover:text-red-700 rounded-xl transition-all duration-300"
             onClick={() => deleteResume(resume.id)}
           >
@@ -250,6 +265,17 @@ const MyResumes = () => {
             </Button>
           </CardContent>
         </Card>
+      )}
+
+      {/* ATS Score Dialog */}
+      {selectedResumeForATS && (
+        <ResumeATSDialog 
+          open={atsDialogOpen}
+          onOpenChange={setAtsDialogOpen}
+          resumeId={selectedResumeForATS.id}
+          resumeContent={selectedResumeForATS.content}
+          resumeTitle={selectedResumeForATS.title}
+        />
       )}
     </div>
   );
