@@ -14,6 +14,8 @@ import InterviewPrep from '@/components/dashboard/InterviewPrep';
 import Billing from '@/components/dashboard/Billing';
 import Settings from '@/components/dashboard/Settings';
 import HelpSupport from '@/components/dashboard/HelpSupport';
+import { ApplicationTracker } from '@/components/dashboard/ApplicationTracker';
+import { SkillGapAnalyzer } from '@/components/dashboard/SkillGapAnalyzer';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState(() => {
@@ -67,6 +69,10 @@ const Dashboard = () => {
         return <CoverLetterGenerator />;
       case 'job-finder':
         return <JobFinder />;
+      case 'application-tracker':
+        return <ApplicationTracker />;
+      case 'skill-gap':
+        return <SkillGapAnalyzer />;
       case 'interview-prep':
         return <InterviewPrep />;
       case 'billing':

@@ -217,6 +217,77 @@ export type Database = {
         }
         Relationships: []
       }
+      job_applications: {
+        Row: {
+          applied_date: string
+          company_name: string
+          contact_email: string | null
+          contact_person: string | null
+          created_at: string
+          deadline: string | null
+          follow_up_date: string | null
+          id: string
+          job_title: string
+          job_url: string | null
+          location: string | null
+          notes: string | null
+          priority: string | null
+          resume_id: string | null
+          salary_range: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          applied_date?: string
+          company_name: string
+          contact_email?: string | null
+          contact_person?: string | null
+          created_at?: string
+          deadline?: string | null
+          follow_up_date?: string | null
+          id?: string
+          job_title: string
+          job_url?: string | null
+          location?: string | null
+          notes?: string | null
+          priority?: string | null
+          resume_id?: string | null
+          salary_range?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          applied_date?: string
+          company_name?: string
+          contact_email?: string | null
+          contact_person?: string | null
+          created_at?: string
+          deadline?: string | null
+          follow_up_date?: string | null
+          id?: string
+          job_title?: string
+          job_url?: string | null
+          location?: string | null
+          notes?: string | null
+          priority?: string | null
+          resume_id?: string | null
+          salary_range?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_applications_resume_id_fkey"
+            columns: ["resume_id"]
+            isOneToOne: false
+            referencedRelation: "resumes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -293,6 +364,65 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "resume_analytics_resume_id_fkey"
+            columns: ["resume_id"]
+            isOneToOne: false
+            referencedRelation: "resumes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resume_scores: {
+        Row: {
+          created_at: string
+          education_score: number | null
+          experience_score: number | null
+          formatting_score: number | null
+          id: string
+          keywords_score: number | null
+          missing_keywords: string[] | null
+          overall_score: number
+          resume_id: string | null
+          strengths: string[] | null
+          suggestions: Json | null
+          updated_at: string
+          user_id: string
+          weaknesses: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          education_score?: number | null
+          experience_score?: number | null
+          formatting_score?: number | null
+          id?: string
+          keywords_score?: number | null
+          missing_keywords?: string[] | null
+          overall_score: number
+          resume_id?: string | null
+          strengths?: string[] | null
+          suggestions?: Json | null
+          updated_at?: string
+          user_id: string
+          weaknesses?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          education_score?: number | null
+          experience_score?: number | null
+          formatting_score?: number | null
+          id?: string
+          keywords_score?: number | null
+          missing_keywords?: string[] | null
+          overall_score?: number
+          resume_id?: string | null
+          strengths?: string[] | null
+          suggestions?: Json | null
+          updated_at?: string
+          user_id?: string
+          weaknesses?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resume_scores_resume_id_fkey"
             columns: ["resume_id"]
             isOneToOne: false
             referencedRelation: "resumes"
@@ -419,6 +549,56 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      skill_gaps: {
+        Row: {
+          created_at: string
+          id: string
+          job_title: string
+          match_percentage: number | null
+          matching_skills: string[]
+          missing_skills: string[]
+          recommendations: Json | null
+          required_skills: string[]
+          resume_id: string | null
+          user_id: string
+          user_skills: string[]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          job_title: string
+          match_percentage?: number | null
+          matching_skills: string[]
+          missing_skills: string[]
+          recommendations?: Json | null
+          required_skills: string[]
+          resume_id?: string | null
+          user_id: string
+          user_skills: string[]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          job_title?: string
+          match_percentage?: number | null
+          matching_skills?: string[]
+          missing_skills?: string[]
+          recommendations?: Json | null
+          required_skills?: string[]
+          resume_id?: string | null
+          user_id?: string
+          user_skills?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skill_gaps_resume_id_fkey"
+            columns: ["resume_id"]
+            isOneToOne: false
+            referencedRelation: "resumes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subscription_plans: {
         Row: {

@@ -44,3 +44,9 @@ verify_jwt = false
 
 [functions.update-tech-templates]
 verify_jwt = false
+
+[functions.analyze-resume-ats]
+verify_jwt = false
+
+[functions.analyze-skill-gap]
+verify_jwt = false
