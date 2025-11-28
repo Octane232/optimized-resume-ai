@@ -85,9 +85,9 @@ const HeroSection = () => {
             {/* Main headline with advanced typography */}
             <div className="space-y-4">
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-[0.95] tracking-tighter animate-fade-in">
-                <span className="block text-foreground drop-shadow-sm">Build resumes</span>
+                <span className="block text-foreground drop-shadow-sm">AI-Powered Resume Builder</span>
                 <span className="block bg-gradient-to-r from-primary via-purple-600 to-primary bg-clip-text text-transparent drop-shadow-[0_2px_20px_rgba(59,130,246,0.4)]">
-                  that work
+                  Land Your Dream Job
                 </span>
               </h1>
               
@@ -101,7 +101,7 @@ const HeroSection = () => {
 
             {/* Subtitle with better spacing */}
             <p className="text-lg md:text-xl leading-relaxed max-w-xl animate-fade-in" style={{ animationDelay: '0.2s' }}>
-              <span className="text-foreground/80">Create professional resumes in minutes. Optimized for applicant tracking systems and designed to get you interviews.</span>
+              <span className="text-foreground/80">Create ATS-optimized resumes in minutes using AI. Get instant feedback, track applications, analyze skill gaps, and practice interviews—all in one platform.</span>
             </p>
 
             {/* CTA buttons with enhanced styling */}
