@@ -50,3 +50,6 @@ verify_jwt = false
 
 [functions.analyze-skill-gap]
 verify_jwt = false
+
+[functions.analyze-resume-match]
+verify_jwt = false
