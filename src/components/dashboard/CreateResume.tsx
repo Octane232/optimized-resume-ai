@@ -3,13 +3,14 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Zap, Clock, Award, Wand2, Edit, Sparkles, Brain, Target, Users, Palette, Download, Star, Loader2, Eye, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Zap, Clock, Award, Wand2, Edit, Sparkles, Brain, Target, Users, Palette, Download, Star, Loader2, Eye, ShieldCheck, AlertCircle, Upload } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
 import TemplatePreview from './TemplatePreview';
 import TemplateThumbnail from './TemplateThumbnail';
 import AIResumeDialog from './AIResumeDialog';
+import { ResumeImportAnalyzer } from './ResumeImportAnalyzer';
 import {
   Tooltip,
   TooltipContent,
@@ -103,12 +104,22 @@ const CreateResume = () => {
       features: ['Step-by-Step Guidance', 'Expert Tips', 'Live Preview'],
       time: '15 minutes',
       difficulty: 'Intermediate'
+    },
+    {
+      icon: Upload,
+      title: 'Import & Analyze',
+      description: 'Upload your existing resume and get AI-powered job match analysis',
+      gradient: 'from-pink-500 to-rose-600',
+      features: ['Resume Upload', 'Job Match Score', 'Improvement Tips'],
+      time: '3 minutes',
+      difficulty: 'Beginner'
     }
   ];
 
   const categories = ['All', 'Modern', 'Classic', 'Tech', 'Creative'];
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [showAtsOnly, setShowAtsOnly] = useState(false);
+  const [showImport, setShowImport] = useState(false);
 
   const filteredTemplates = useMemo(() => {
     let filtered = selectedCategory === 'All' 
@@ -202,12 +213,9 @@ const CreateResume = () => {
                       } else if (index === 1) {
                         // Guided Builder - go to editor with first template
                         navigate(`/editor/new${templates[0]?.id ? `?template=${templates[0].id}` : ''}`);
-                      } else {
-                        // Import & Enhance - placeholder for now
-                        toast({
-                          title: 'Coming Soon',
-                          description: 'Import & enhance feature will be available soon!',
-                        });
+                      } else if (index === 2) {
+                        // Import & Analyze
+                        setShowImport(!showImport);
                       }
                     }}
                     className={`w-full bg-gradient-to-r ${method.gradient} hover:shadow-lg text-white font-semibold py-3 rounded-xl transition-all duration-300`}
@@ -221,6 +229,11 @@ const CreateResume = () => {
           );
         })}
       </div>
+
+      {/* Import & Analyze Section */}
+      {showImport && (
+        <ResumeImportAnalyzer />
+      )}
 
       {/* Features */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
