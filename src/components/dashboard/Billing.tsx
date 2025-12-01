@@ -92,7 +92,6 @@ const Billing = () => {
         popular: plan.is_popular,
         current: subscriptionData?.plan_id === plan.id,
         description: plan.description || '',
-        lemonSqueezyVariantId: plan.lemon_squeezy_variant_id,
         savings: billingCycle === 'yearly' && plan.price_monthly ? 
           `Save $${(plan.price_monthly * 12) - plan.price_yearly}` : null
       }));
@@ -174,30 +173,10 @@ const Billing = () => {
   };
 
   const handleUpgrade = async (plan) => {
-    if (!plan.lemonSqueezyVariantId) return;
-
-    setUpgradingPlan(plan.id);
-
-    try {
-      // Call edge function to create checkout URL
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { variantId: plan.lemonSqueezyVariantId }
-      });
-
-      if (error) throw error;
-
-      if (data?.url) {
-        window.location.href = data.url;
-      }
-    } catch (error) {
-      console.error('Error initiating checkout:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to start checkout. Please try again.',
-        variant: 'destructive'
-      });
-      setUpgradingPlan(null);
-    }
+    toast({
+      title: 'Coming Soon',
+      description: 'Stripe integration is being configured. Check back soon!',
+    });
   };
 
   const handleCancelSubscription = async () => {
@@ -205,26 +184,10 @@ const Billing = () => {
       return;
     }
 
-    try {
-      const { data, error } = await supabase.functions.invoke('cancel-subscription');
-
-      if (error) throw error;
-
-      toast({
-        title: 'Success',
-        description: 'Your subscription has been cancelled. You will retain access until the end of your billing period.',
-      });
-
-      // Refresh billing data
-      fetchBillingData();
-    } catch (error) {
-      console.error('Error cancelling subscription:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to cancel subscription. Please try again or contact support.',
-        variant: 'destructive'
-      });
-    }
+    toast({
+      title: 'Coming Soon',
+      description: 'Stripe integration is being configured. Check back soon!',
+    });
   };
 
   if (loading) {
