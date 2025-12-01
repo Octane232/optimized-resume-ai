@@ -16,6 +16,8 @@ const JobSearch = lazy(() => import("./pages/JobSearch"));
 const Templates = lazy(() => import("./pages/Templates"));
 const AIFeatures = lazy(() => import("./pages/AIFeatures"));
 const Analytics = lazy(() => import("./pages/Analytics"));
+const AffiliateProgram = lazy(() => import("./pages/AffiliateProgram"));
+const AffiliateDashboard = lazy(() => import("./pages/AffiliateDashboard"));
 const ForIndividuals = lazy(() => import("./pages/ForIndividuals"));
 const ForStudents = lazy(() => import("./pages/ForStudents"));
 const AboutUs = lazy(() => import("./pages/AboutUs"));
@@ -63,6 +65,8 @@ const App = () => (
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/cookie-policy" element={<CookiePolicy />} />
             <Route path="/documentation" element={<Documentation />} />
+            <Route path="/affiliate-program" element={<AffiliateProgram />} />
+            <Route path="/affiliate-dashboard" element={<AffiliateDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
