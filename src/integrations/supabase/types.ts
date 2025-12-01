@@ -609,7 +609,6 @@ export type Database = {
           icon_name: string | null
           id: string
           is_popular: boolean | null
-          lemon_squeezy_variant_id: string | null
           name: string
           price_monthly: number | null
           price_yearly: number | null
@@ -623,7 +622,6 @@ export type Database = {
           icon_name?: string | null
           id?: string
           is_popular?: boolean | null
-          lemon_squeezy_variant_id?: string | null
           name: string
           price_monthly?: number | null
           price_yearly?: number | null
@@ -637,7 +635,6 @@ export type Database = {
           icon_name?: string | null
           id?: string
           is_popular?: boolean | null
-          lemon_squeezy_variant_id?: string | null
           name?: string
           price_monthly?: number | null
           price_yearly?: number | null
@@ -682,7 +679,6 @@ export type Database = {
           current_period_end: string | null
           features: Json | null
           id: string
-          lemon_squeezy_subscription_id: string | null
           plan_id: string
           plan_status: string
           price: number | null
@@ -695,7 +691,6 @@ export type Database = {
           current_period_end?: string | null
           features?: Json | null
           id?: string
-          lemon_squeezy_subscription_id?: string | null
           plan_id: string
           plan_status?: string
           price?: number | null
@@ -708,7 +703,6 @@ export type Database = {
           current_period_end?: string | null
           features?: Json | null
           id?: string
-          lemon_squeezy_subscription_id?: string | null
           plan_id?: string
           plan_status?: string
           price?: number | null
