@@ -27,7 +27,8 @@ const Footer = () => {
       title: 'Company',
       links: [
         { label: 'About Us', href: '/about-us' },
-        { label: 'Contact', href: '/contact' }
+        { label: 'Contact', href: '/contact' },
+        { label: 'Affiliate Program', href: '/affiliate-program' }
       ]
     }
   ];
