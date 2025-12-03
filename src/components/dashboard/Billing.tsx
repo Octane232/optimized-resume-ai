@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, Crown, CreditCard, Download, Star, Zap, Shield, Headphones, Sparkles, TrendingUp, Users, Award, Loader2 } from 'lucide-react';
+import { Check, Crown, CreditCard, Download, Star, Zap, Shield, Headphones, Sparkles, TrendingUp, Users, Award, Loader2, ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { STRIPE_TIERS } from '@/lib/stripe';
 
 const Billing = () => {
   const [billingCycle, setBillingCycle] = useState('monthly');
@@ -173,21 +174,65 @@ const Billing = () => {
   };
 
   const handleUpgrade = async (plan) => {
-    toast({
-      title: 'Coming Soon',
-      description: 'Stripe integration is being configured. Check back soon!',
-    });
+    try {
+      setUpgradingPlan(plan.name);
+      
+      // Map plan name to Stripe price ID
+      const tierName = plan.name.toLowerCase() as keyof typeof STRIPE_TIERS;
+      const stripeTier = STRIPE_TIERS[tierName];
+      
+      if (!stripeTier) {
+        toast({
+          title: 'Plan Not Available',
+          description: 'This plan is not available for purchase yet.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { priceId: stripeTier.price_id },
+      });
+
+      if (error) throw error;
+
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (error) {
+      console.error('Error creating checkout:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to start checkout. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setUpgradingPlan(null);
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('customer-portal');
+      
+      if (error) throw error;
+
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (error) {
+      console.error('Error opening customer portal:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to open subscription management. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleCancelSubscription = async () => {
-    if (!confirm('Are you sure you want to cancel your subscription? You will lose access to premium features at the end of your billing period.')) {
-      return;
-    }
-
-    toast({
-      title: 'Coming Soon',
-      description: 'Stripe integration is being configured. Check back soon!',
-    });
+    // Redirect to customer portal for cancellation
+    handleManageSubscription();
   };
 
   if (loading) {
@@ -272,9 +317,13 @@ const Billing = () => {
             </div>
             
             <div className="flex flex-col gap-3">
-              <Button variant="outline" className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl">
-                <CreditCard className="w-4 h-4 mr-2" />
-                Update Payment Method
+              <Button 
+                variant="outline" 
+                onClick={handleManageSubscription}
+                className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl"
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Manage Subscription
               </Button>
               {currentPlan?.name !== 'Free' && (
                 <Button 
