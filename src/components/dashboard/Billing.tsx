@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { STRIPE_TIERS, getPriceId } from '@/lib/stripe';
 
 const Billing = () => {
   const [billingCycle, setBillingCycle] = useState('monthly');
@@ -173,19 +174,61 @@ const Billing = () => {
   };
 
   const handleUpgrade = async (plan) => {
-    // TODO: Implement Stripe checkout
-    toast({
-      title: 'Coming Soon',
-      description: 'Payment integration is being set up.',
-    });
+    try {
+      setUpgradingPlan(plan.name);
+      
+      // Map plan name to Stripe price ID
+      const tierName = plan.name.toLowerCase() as keyof typeof STRIPE_TIERS;
+      
+      if (tierName !== 'pro' && tierName !== 'premium') {
+        toast({
+          title: 'Plan Not Available',
+          description: 'This plan is not available for purchase.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const priceId = getPriceId(tierName, billingCycle === 'yearly');
+
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { priceId },
+      });
+
+      if (error) throw error;
+
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (error) {
+      console.error('Error creating checkout:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to start checkout. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setUpgradingPlan(null);
+    }
   };
 
   const handleManageSubscription = async () => {
-    // TODO: Implement customer portal
-    toast({
-      title: 'Coming Soon',
-      description: 'Subscription management is being set up.',
-    });
+    try {
+      const { data, error } = await supabase.functions.invoke('customer-portal');
+      
+      if (error) throw error;
+
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (error) {
+      console.error('Error opening customer portal:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to open subscription management. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleCancelSubscription = async () => {
