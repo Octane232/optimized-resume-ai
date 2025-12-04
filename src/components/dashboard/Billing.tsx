@@ -7,7 +7,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { STRIPE_TIERS } from '@/lib/stripe';
 
 const Billing = () => {
   const [billingCycle, setBillingCycle] = useState('monthly');
@@ -174,64 +173,22 @@ const Billing = () => {
   };
 
   const handleUpgrade = async (plan) => {
-    try {
-      setUpgradingPlan(plan.name);
-      
-      // Map plan name to Stripe price ID
-      const tierName = plan.name.toLowerCase() as keyof typeof STRIPE_TIERS;
-      const stripeTier = STRIPE_TIERS[tierName];
-      
-      if (!stripeTier) {
-        toast({
-          title: 'Plan Not Available',
-          description: 'This plan is not available for purchase yet.',
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { priceId: stripeTier.price_id },
-      });
-
-      if (error) throw error;
-
-      if (data?.url) {
-        window.open(data.url, '_blank');
-      }
-    } catch (error) {
-      console.error('Error creating checkout:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to start checkout. Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setUpgradingPlan(null);
-    }
+    // TODO: Implement Stripe checkout
+    toast({
+      title: 'Coming Soon',
+      description: 'Payment integration is being set up.',
+    });
   };
 
   const handleManageSubscription = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('customer-portal');
-      
-      if (error) throw error;
-
-      if (data?.url) {
-        window.open(data.url, '_blank');
-      }
-    } catch (error) {
-      console.error('Error opening customer portal:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to open subscription management. Please try again.',
-        variant: 'destructive',
-      });
-    }
+    // TODO: Implement customer portal
+    toast({
+      title: 'Coming Soon',
+      description: 'Subscription management is being set up.',
+    });
   };
 
   const handleCancelSubscription = async () => {
-    // Redirect to customer portal for cancellation
     handleManageSubscription();
   };
 
