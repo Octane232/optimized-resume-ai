@@ -38,7 +38,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-14">
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <img src={logo} alt="Pitchsora" className="h-8 w-auto min-w-[90px] max-w-[180px] object-contain" />
+            <img src={logo} alt="Pitchsora" className="h-9 w-auto object-contain" />
           </Link>
 
           {/* Desktop Navigation */}
