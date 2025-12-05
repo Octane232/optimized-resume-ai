@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Menu, X, Sun, Moon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTheme } from 'next-themes';
-import logo from '@/assets/pitchsora-logo-navbar.png';
+import logo from '@/assets/pitchsora-logo.png';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -38,7 +38,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-14">
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <img src={logo} alt="Pitchsora" className="h-9 w-auto object-contain" />
+            <img src={logo} alt="Pitchsora" className="h-10 w-auto object-contain" />
           </Link>
 
           {/* Desktop Navigation */}
