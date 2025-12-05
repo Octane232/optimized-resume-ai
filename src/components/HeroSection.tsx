@@ -1,20 +1,10 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, CheckCircle, Star, Sparkles, Zap, FileText, Brain, Shield, Target, TrendingUp, Award, Clock, Users } from 'lucide-react';
+import { ArrowRight, CheckCircle, Star, Sparkles, Zap, FileText, Brain, Shield, Target } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const HeroSection = () => {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
   const features = [
     { icon: Brain, label: 'Smart Tools', desc: 'AI-assisted writing', color: 'from-blue-500 to-purple-500' },
     { icon: Target, label: 'ATS-Ready', desc: 'Pass tracking systems', color: 'from-purple-500 to-pink-500' },
@@ -22,52 +12,19 @@ const HeroSection = () => {
     { icon: Shield, label: 'Private', desc: 'Your data stays yours', color: 'from-orange-500 to-red-500' }
   ];
 
-  const metrics = [
-    { icon: Users, value: '1,200+', label: 'Users', color: 'blue' },
-    { icon: TrendingUp, value: '3,400', label: 'Resumes', color: 'emerald' },
-    { icon: Award, value: '4.6★', label: 'Rating', color: 'purple' },
-    { icon: Clock, value: '<5 min', label: 'Avg. Time', color: 'orange' }
-  ];
-
   return (
     <section className="relative min-h-screen overflow-hidden bg-background">
       {/* Advanced animated background */}
       <div className="absolute inset-0 bg-[var(--gradient-mesh)] opacity-90"></div>
       
-      {/* Dynamic gradient orbs following mouse */}
-      <div 
-        className="absolute w-[800px] h-[800px] bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20 dark:from-blue-500/10 dark:via-purple-500/10 dark:to-pink-500/10 rounded-full blur-3xl transition-all duration-1000 ease-out pointer-events-none"
-        style={{
-          left: `${mousePosition.x * 0.02}px`,
-          top: `${mousePosition.y * 0.02}px`,
-        }}
-      ></div>
+      {/* Animated gradient orbs */}
+      <div className="absolute w-[800px] h-[800px] bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20 dark:from-blue-500/10 dark:via-purple-500/10 dark:to-pink-500/10 rounded-full blur-3xl pointer-events-none -left-40 -top-40"></div>
       <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-gradient-to-tl from-emerald-400/20 via-blue-400/20 to-transparent dark:from-emerald-500/10 dark:via-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
       
       {/* Diagonal accent */}
       <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-bl from-blue-500/5 via-purple-500/5 to-transparent skew-x-12 transform origin-top-right"></div>
       
       <div className="container mx-auto px-6 lg:px-8 relative pt-32 pb-20">
-        {/* Top floating cards */}
-        <div className="absolute top-20 right-10 glass-card rounded-2xl p-4 animate-fade-in floating-card hidden lg:block" style={{ animationDelay: '0.5s' }}>
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
-              <CheckCircle className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <div className="text-sm font-bold text-foreground">ATS Pass</div>
-              <div className="text-xs text-muted-foreground">Optimized</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="absolute top-40 left-10 glass-card rounded-2xl p-3 animate-fade-in floating-card hidden lg:block" style={{ animationDelay: '0.7s' }}>
-          <div className="flex items-center gap-2">
-            <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-            <div className="text-xs font-semibold text-foreground">1,200+ reviews</div>
-          </div>
-        </div>
-
         {/* Main content - Asymmetric grid layout */}
         <div className="grid lg:grid-cols-12 gap-8 items-center min-h-[80vh]">
           {/* Left - Main hero content (spans 7 columns) */}
@@ -198,34 +155,7 @@ const HeroSection = () => {
           </div>
         </div>
 
-        {/* Bottom metrics bar - Full width bento style */}
-        <div className="mt-20 grid grid-cols-2 lg:grid-cols-4 gap-6">
-          {metrics.map((metric, index) => {
-            const Icon = metric.icon;
-            return (
-              <div 
-                key={index}
-                className="card-3d glass-card-strong rounded-2xl p-6 text-center group animate-fade-in"
-                style={{ animationDelay: `${1 + index * 0.1}s` }}
-              >
-                <div className={`w-12 h-12 mx-auto mb-3 bg-gradient-to-br from-${metric.color}-400 to-${metric.color}-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-12 transition-all duration-300`}>
-                  <Icon className="w-6 h-6 text-white" />
-                </div>
-                <div className="text-3xl font-black gradient-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-[length:200%_auto] mb-1">
-                  {metric.value}
-                </div>
-                <div className="text-sm text-muted-foreground font-medium">
-                  {metric.label}
-                </div>
-              </div>
-            );
-          })}
-        </div>
       </div>
-
-      {/* Floating decorative elements */}
-      <div className="absolute top-1/4 right-1/4 w-32 h-32 bg-gradient-to-br from-blue-400/20 to-purple-500/20 rounded-full blur-2xl animate-pulse hidden lg:block"></div>
-      <div className="absolute bottom-1/3 left-1/4 w-40 h-40 bg-gradient-to-br from-pink-400/20 to-orange-500/20 rounded-full blur-2xl animate-pulse hidden lg:block" style={{ animationDelay: '1s' }}></div>
     </section>
   );
 };
