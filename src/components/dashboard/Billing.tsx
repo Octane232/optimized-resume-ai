@@ -177,10 +177,17 @@ const Billing = () => {
     try {
       setUpgradingPlan(plan.name);
       
-      // Map plan name to Stripe price ID
-      const tierName = plan.name.toLowerCase() as keyof typeof STRIPE_TIERS;
+      // Map plan name to Stripe tier - check if name contains 'pro' or 'premium'
+      const planNameLower = plan.name.toLowerCase();
+      let tierName: 'pro' | 'premium' | null = null;
       
-      if (tierName !== 'pro' && tierName !== 'premium') {
+      if (planNameLower.includes('premium')) {
+        tierName = 'premium';
+      } else if (planNameLower.includes('pro')) {
+        tierName = 'pro';
+      }
+      
+      if (!tierName) {
         toast({
           title: 'Plan Not Available',
           description: 'This plan is not available for purchase.',
