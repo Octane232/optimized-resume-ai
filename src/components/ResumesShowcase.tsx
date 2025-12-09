@@ -1,9 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Eye, Download, Star, ChevronDown, ChevronUp } from 'lucide-react';
+import { Monitor, PenTool, Briefcase, GraduationCap, Code, Users, ArrowRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import CanvaStyleRenderer from '@/components/templates/CanvaStyleRenderer';
 import { 
@@ -15,14 +13,17 @@ import {
 } from '@/data/sampleResumes';
 import { useNavigate } from 'react-router-dom';
 
+const categoryData = [
+  { id: 'classic', name: 'Classic & Professional', icon: Briefcase, count: 0 },
+  { id: 'modern', name: 'Modern & Creative', icon: PenTool, count: 0 },
+  { id: 'executive', name: 'Executive & Leadership', icon: Users, count: 0 },
+  { id: 'tech', name: 'Tech & Engineering', icon: Code, count: 0 },
+];
+
 const ResumesShowcase = () => {
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [showAll, setShowAll] = useState(false);
   const [templates, setTemplates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
-  const categories = ['All', 'classic', 'modern', 'creative', 'executive', 'tech'];
 
   useEffect(() => {
     loadTemplates();
@@ -36,7 +37,6 @@ const ResumesShowcase = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      
       setTemplates(data || []);
     } catch (error) {
       console.error('Error loading templates:', error);
@@ -56,174 +56,108 @@ const ResumesShowcase = () => {
     }
   };
 
-  const filteredTemplates = selectedCategory === 'All' 
-    ? templates 
-    : templates.filter(t => t.category.toLowerCase() === selectedCategory.toLowerCase());
+  // Get category counts
+  const getCategoryCount = (categoryId: string) => {
+    return templates.filter(t => t.category.toLowerCase() === categoryId.toLowerCase()).length;
+  };
 
-  const displayedTemplates = showAll ? filteredTemplates : filteredTemplates.slice(0, 6);
+  // Get 4 templates to display
+  const displayTemplates = templates.slice(0, 4);
 
   return (
-    <section className="py-24 bg-background">
+    <section className="py-16 bg-background">
       <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
-        <div className="max-w-2xl mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6 leading-tight">
-            Resume templates that get you hired
+        {/* Header */}
+        <div className="text-center mb-10">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
+            Resume Templates
           </h2>
-          <p className="text-lg text-muted-foreground">
-            Hand-picked designs used by thousands of job seekers. Pick one, customize it, and land your next interview.
+          <p className="text-muted-foreground max-w-xl mx-auto">
+            Choose from professionally designed templates for every industry
           </p>
-          
-          {/* Category Filter */}
-          <div className="flex flex-wrap gap-2 mb-12">
-            {categories.map((category) => (
-              <Button
-                key={category}
-                variant={selectedCategory === category ? "default" : "ghost"}
-                onClick={() => setSelectedCategory(category)}
-                className="capitalize rounded-full"
-              >
-                {category}
-              </Button>
-            ))}
-          </div>
         </div>
 
-        {/* Resume Grid */}
+        {/* Category Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+          {categoryData.map((category) => {
+            const Icon = category.icon;
+            const count = getCategoryCount(category.id);
+            return (
+              <Card 
+                key={category.id}
+                className="p-4 hover:shadow-md transition-shadow cursor-pointer border border-border bg-card"
+                onClick={() => navigate('/templates')}
+              >
+                <div className="flex flex-col items-start gap-2">
+                  <div className="p-2 bg-muted rounded-lg">
+                    <Icon className="w-5 h-5 text-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-sm text-foreground leading-tight">
+                      {category.name}
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {count} templates
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Resume Previews Grid */}
         {loading ? (
-          <div className="text-center py-20">
-            <p className="text-gray-600 dark:text-gray-400">Loading templates...</p>
+          <div className="text-center py-10">
+            <p className="text-muted-foreground">Loading templates...</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {displayedTemplates.map((template, index) => {
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {displayTemplates.map((template, index) => {
               const sampleData = getSampleData(template.category);
-              const isFeatured = index < 3;
               
               return (
                 <Card 
                   key={template.id} 
-                  className="group hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 border-0 shadow-md overflow-hidden animate-fade-in"
-                  style={{ animationDelay: `${index * 0.1}s` }}
+                  className="group hover:shadow-lg transition-all duration-300 bg-card border border-border overflow-hidden cursor-pointer"
+                  onClick={() => navigate(`/editor/new?template=${template.id}`)}
                 >
-                  <div className="relative">
-                    {isFeatured && (
-                      <Badge className="absolute top-3 left-3 z-10 bg-gradient-to-r from-amber-400 to-orange-500 text-white border-0">
-                        <Star className="w-3 h-3 mr-1" />
-                        Featured
-                      </Badge>
-                    )}
-                    
-                    <div className="relative overflow-hidden bg-gray-100 dark:bg-gray-700 h-96">
-                      <div className="w-full h-full flex items-center justify-center p-4">
-                        {template.json_content && (
-                          <div className="transform scale-[0.35] origin-center" style={{ width: '850px', height: '1100px' }}>
-                            <CanvaStyleRenderer 
-                              template={template.json_content as any} 
-                              data={sampleData} 
-                            />
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* Overlay on hover */}
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                        <div className="flex gap-3">
-                          <Button size="sm" variant="secondary" className="bg-white/90 hover:bg-white">
-                            <Eye className="w-4 h-4 mr-2" />
-                            Preview
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            className="bg-blue-600 hover:bg-blue-700"
-                            onClick={() => navigate(`/editor/new?template=${template.id}`)}
-                          >
-                            <Download className="w-4 h-4 mr-2" />
-                            Use Template
-                          </Button>
+                  <div className="relative bg-muted h-48 overflow-hidden">
+                    <div className="w-full h-full flex items-center justify-center p-2">
+                      {template.json_content && (
+                        <div className="transform scale-[0.18] origin-center" style={{ width: '850px', height: '1100px' }}>
+                          <CanvaStyleRenderer 
+                            template={template.json_content as any} 
+                            data={sampleData} 
+                          />
                         </div>
-                      </div>
+                      )}
                     </div>
                   </div>
-
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-1">
-                          {template.name}
-                        </h3>
-                        <Badge variant="outline" className="text-xs border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 capitalize">
-                          {template.category}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                        <Star className="w-4 h-4 text-amber-400 mr-1" />
-                        4.8
-                      </div>
-                    </div>
-                    
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
-                      {template.description}
+                  <div className="p-3">
+                    <h3 className="font-medium text-sm text-foreground truncate">
+                      {template.name}
+                    </h3>
+                    <p className="text-xs text-muted-foreground capitalize">
+                      {template.category}
                     </p>
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500 dark:text-gray-500">
-                        {template.is_premium ? 'Premium' : 'Free'}
-                      </span>
-                      <Button 
-                        size="sm" 
-                        className="bg-blue-600 hover:bg-blue-700"
-                        onClick={() => navigate(`/editor/new?template=${template.id}`)}
-                      >
-                        Use Template
-                      </Button>
-                    </div>
-                  </CardContent>
+                  </div>
                 </Card>
               );
             })}
           </div>
         )}
 
-        {/* Show More/Less Button */}
-        {filteredTemplates.length > 6 && (
-          <div className="text-center mt-12">
-            <Button
-              onClick={() => setShowAll(!showAll)}
-              variant="outline"
-              size="lg"
-              className="px-8 py-3"
-            >
-              {showAll ? (
-                <>
-                  <ChevronUp className="w-4 h-4 mr-2" />
-                  Show Less
-                </>
-              ) : (
-                <>
-                  <ChevronDown className="w-4 h-4 mr-2" />
-                  Show More Templates ({filteredTemplates.length - 6} more)
-                </>
-              )}
-            </Button>
-          </div>
-        )}
-
-        {/* CTA Section */}
-        <div className="mt-20">
-          <div className="bg-card border-2 border-border rounded-3xl p-12 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl"></div>
-            <div className="relative max-w-2xl">
-              <h3 className="text-3xl font-bold mb-4 text-foreground">
-                Need something specific?
-              </h3>
-              <p className="text-muted-foreground mb-6 text-lg">
-                Let AI build a custom template tailored to your role and industry.
-              </p>
-              <Button size="lg" className="rounded-full">
-                Try AI Builder →
-              </Button>
-            </div>
-          </div>
+        {/* View All Button */}
+        <div className="text-center mt-8">
+          <Button
+            onClick={() => navigate('/templates')}
+            variant="outline"
+            className="px-6"
+          >
+            View All Templates
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
         </div>
       </div>
     </section>
