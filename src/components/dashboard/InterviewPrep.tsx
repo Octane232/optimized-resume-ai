@@ -5,12 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Brain, MessageCircle, Clock, Target, CheckCircle, Sparkles, Star, Award, Users, RotateCcw, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
+import { Brain, MessageCircle, Clock, Target, CheckCircle, Sparkles, Star, Award, Users, RotateCcw, ArrowRight, Loader2, CheckCircle2, Lock, Crown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
+import UpgradeModal from './UpgradeModal';
 
 const InterviewPrep = () => {
   const { toast } = useToast();
+  const { tier, limits } = useSubscriptionLimits();
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const isLocked = !limits.hasInterviewPrep;
   const [selectedCategory, setSelectedCategory] = useState('ai-interview');
   const [desiredPosition, setDesiredPosition] = useState('');
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -266,6 +271,75 @@ const InterviewPrep = () => {
       timeToRead: "4 min"
     }
   ];
+
+  if (isLocked) {
+    return (
+      <div className="space-y-8">
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 rounded-2xl border border-amber-200/50 dark:border-amber-800/50">
+            <div className="w-8 h-8 bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl flex items-center justify-center">
+              <Lock className="w-4 h-4 text-white" />
+            </div>
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Premium Feature</span>
+          </div>
+          
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 dark:from-white dark:via-slate-100 dark:to-slate-200 bg-clip-text text-transparent">
+            Interview Prep
+          </h1>
+          <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+            Get AI-powered interview coaching with personalized feedback
+          </p>
+        </div>
+
+        <Card className="max-w-lg mx-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl rounded-2xl">
+          <CardContent className="p-8 text-center space-y-6">
+            <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
+              <Crown className="w-10 h-10 text-white" />
+            </div>
+            
+            <div>
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Unlock Interview Prep</h3>
+              <p className="text-slate-600 dark:text-slate-400">
+                Upgrade to Premium to access AI-powered interview simulations, personalized feedback, and expert tips.
+              </p>
+            </div>
+
+            <ul className="text-left space-y-3">
+              <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                <CheckCircle className="w-5 h-5 text-emerald-500" />
+                AI Interview Simulator with real-time feedback
+              </li>
+              <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                <CheckCircle className="w-5 h-5 text-emerald-500" />
+                Industry-specific questions
+              </li>
+              <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                <CheckCircle className="w-5 h-5 text-emerald-500" />
+                Performance analytics & history
+              </li>
+            </ul>
+
+            <Button 
+              onClick={() => setShowUpgradeModal(true)}
+              className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-xl shadow-lg"
+            >
+              <Crown className="w-5 h-5 mr-2" />
+              Upgrade to Premium
+            </Button>
+          </CardContent>
+        </Card>
+
+        <UpgradeModal
+          open={showUpgradeModal}
+          onOpenChange={setShowUpgradeModal}
+          feature="Interview Prep"
+          requiredTier="premium"
+          currentTier={tier}
+          limitType="feature"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
