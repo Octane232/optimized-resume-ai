@@ -8,7 +8,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { STRIPE_TIERS, getPriceId } from '@/lib/stripe';
-import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { TIER_FEATURES } from '@/lib/tierConfig';
 
 const Billing = () => {
@@ -19,7 +19,7 @@ const Billing = () => {
   const [loading, setLoading] = useState(true);
   const [upgradingPlan, setUpgradingPlan] = useState<string | null>(null);
   const { toast } = useToast();
-  const { tier, usage, limits, getNextResetDate, getRemainingTemplates, getRemainingDownloads, getRemainingAIGenerations } = useSubscriptionLimits();
+  const { tier, usage, limits, getNextResetDate, getRemainingTemplates, getRemainingDownloads, getRemainingAIGenerations } = useSubscription();
 
   useEffect(() => {
     fetchBillingData();

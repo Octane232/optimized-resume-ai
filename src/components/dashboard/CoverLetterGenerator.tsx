@@ -7,14 +7,14 @@ import { Label } from '@/components/ui/label';
 import { FileText, Sparkles, Download, Copy, Loader2, Lock, Crown, CheckCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import UpgradeModal from './UpgradeModal';
 
 const CoverLetterGenerator = () => {
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedLetter, setGeneratedLetter] = useState('');
-  const { tier, limits } = useSubscriptionLimits();
+  const { tier, limits } = useSubscription();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const isLocked = !limits.hasCoverLetter;
   

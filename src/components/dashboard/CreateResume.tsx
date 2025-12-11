@@ -12,7 +12,7 @@ import TemplateThumbnail from './TemplateThumbnail';
 import AIResumeDialog from './AIResumeDialog';
 import { ResumeImportAnalyzer } from './ResumeImportAnalyzer';
 import UpgradeModal from './UpgradeModal';
-import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import {
   Tooltip,
   TooltipContent,
@@ -31,7 +31,7 @@ const CreateResume = () => {
   const [upgradeModal, setUpgradeModal] = useState<{ open: boolean; feature: string; requiredTier: 'pro' | 'premium'; limitType: 'templates' | 'ai' | 'feature' }>({ open: false, feature: '', requiredTier: 'pro', limitType: 'templates' });
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { tier, canSelectTemplate, canUseAI, getRemainingTemplates, getRemainingAIGenerations, getNextResetDate, incrementUsage } = useSubscriptionLimits();
+  const { tier, canSelectTemplate, canUseAI, getRemainingTemplates, getRemainingAIGenerations, getNextResetDate, incrementUsage } = useSubscription();
 
   useEffect(() => {
     fetchTemplates();
