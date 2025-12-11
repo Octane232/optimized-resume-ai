@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes";
 import { lazy, Suspense } from "react";
 import ScrollToTop from "./components/ScrollToTop";
 import ScrollToSection from "./components/ScrollToSection";
+import { SubscriptionProvider } from "./contexts/SubscriptionContext";
 
 // Lazy load pages for better performance
 const Index = lazy(() => import("./pages/Index"));
@@ -36,42 +37,44 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-        <ScrollToTop />
-        <ScrollToSection />
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/features" element={<Index />} />
-            <Route path="/pricing" element={<Index />} />
-            <Route path="/enterprise" element={<Index />} />
-            <Route path="/resources" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/resume-builder" element={<ResumeBuilder />} />
-            <Route path="/job-search" element={<JobSearch />} />
-            <Route path="/templates" element={<Templates />} />
-            <Route path="/ai-features" element={<AIFeatures />} />
-            <Route path="/analytics" element={<Analytics />} />
-            <Route path="/for-individuals" element={<ForIndividuals />} />
-            <Route path="/for-students" element={<ForStudents />} />
-            <Route path="/about-us" element={<AboutUs />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/editor/new" element={<ResumeEditor />} />
-            <Route path="/editor/:resumeId" element={<ResumeEditor />} />
-            <Route path="/terms" element={<TermsOfService />} />
-            <Route path="/privacy" element={<PrivacyPolicy />} />
-            <Route path="/cookie-policy" element={<CookiePolicy />} />
-            <Route path="/documentation" element={<Documentation />} />
-            <Route path="/affiliate-program" element={<AffiliateProgram />} />
-            <Route path="/affiliate-dashboard" element={<AffiliateDashboard />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
+        <SubscriptionProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+          <ScrollToTop />
+          <ScrollToSection />
+          <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/features" element={<Index />} />
+              <Route path="/pricing" element={<Index />} />
+              <Route path="/enterprise" element={<Index />} />
+              <Route path="/resources" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/resume-builder" element={<ResumeBuilder />} />
+              <Route path="/job-search" element={<JobSearch />} />
+              <Route path="/templates" element={<Templates />} />
+              <Route path="/ai-features" element={<AIFeatures />} />
+              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/for-individuals" element={<ForIndividuals />} />
+              <Route path="/for-students" element={<ForStudents />} />
+              <Route path="/about-us" element={<AboutUs />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/editor/new" element={<ResumeEditor />} />
+              <Route path="/editor/:resumeId" element={<ResumeEditor />} />
+              <Route path="/terms" element={<TermsOfService />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/cookie-policy" element={<CookiePolicy />} />
+              <Route path="/documentation" element={<Documentation />} />
+              <Route path="/affiliate-program" element={<AffiliateProgram />} />
+              <Route path="/affiliate-dashboard" element={<AffiliateDashboard />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+        </SubscriptionProvider>
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>

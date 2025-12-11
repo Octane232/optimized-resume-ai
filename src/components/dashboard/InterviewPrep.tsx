@@ -8,12 +8,12 @@ import { Badge } from '@/components/ui/badge';
 import { Brain, MessageCircle, Clock, Target, CheckCircle, Sparkles, Star, Award, Users, RotateCcw, ArrowRight, Loader2, CheckCircle2, Lock, Crown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
-import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import UpgradeModal from './UpgradeModal';
 
 const InterviewPrep = () => {
   const { toast } = useToast();
-  const { tier, limits } = useSubscriptionLimits();
+  const { tier, limits } = useSubscription();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const isLocked = !limits.hasInterviewPrep;
   const [selectedCategory, setSelectedCategory] = useState('ai-interview');

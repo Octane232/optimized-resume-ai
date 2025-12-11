@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Target, TrendingUp, BookOpen, Clock, Lock, Crown, CheckCircle } from "lucide-react";
-import { useSubscriptionLimits } from "@/hooks/useSubscriptionLimits";
+import { useSubscription } from "@/contexts/SubscriptionContext";
 import UpgradeModal from "./UpgradeModal";
 
 export const SkillGapAnalyzer = () => {
@@ -21,7 +21,7 @@ export const SkillGapAnalyzer = () => {
     userSkills: ""
   });
   const { toast } = useToast();
-  const { tier, limits } = useSubscriptionLimits();
+  const { tier, limits } = useSubscription();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const isLocked = !limits.hasSkillGap;
 
