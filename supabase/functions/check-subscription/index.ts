@@ -78,8 +78,15 @@ serve(async (req) => {
     }
 
     const subscription = subscriptions.data[0];
-    const subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
-    const priceId = subscription.items.data[0].price.id;
+    let subscriptionEnd = null;
+    try {
+      if (subscription.current_period_end) {
+        subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
+      }
+    } catch (e) {
+      logStep("Date conversion error", { error: e, rawValue: subscription.current_period_end });
+    }
+    const priceId = subscription.items.data[0]?.price?.id;
     
     // Determine tier based on price ID
     let tier = 'free';
