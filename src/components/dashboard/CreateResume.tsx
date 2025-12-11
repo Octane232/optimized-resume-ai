@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Zap, Clock, Award, Wand2, Edit, Sparkles, Brain, Target, Users, Palette, Download, Star, Loader2, Eye, ShieldCheck, AlertCircle, Upload } from 'lucide-react';
+import { Zap, Clock, Award, Wand2, Edit, Sparkles, Brain, Target, Users, Palette, Download, Star, Loader2, Eye, ShieldCheck, AlertCircle, Upload, Lock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +11,8 @@ import TemplatePreview from './TemplatePreview';
 import TemplateThumbnail from './TemplateThumbnail';
 import AIResumeDialog from './AIResumeDialog';
 import { ResumeImportAnalyzer } from './ResumeImportAnalyzer';
+import UpgradeModal from './UpgradeModal';
+import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
 import {
   Tooltip,
   TooltipContent,
@@ -23,11 +25,13 @@ const CreateResume = () => {
   const [previewTemplate, setPreviewTemplate] = useState(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isAIDialogOpen, setIsAIDialogOpen] = useState(false);
-  const [step, setStep] = useState('templates'); // templates, builder, preview
+  const [step, setStep] = useState('templates');
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [upgradeModal, setUpgradeModal] = useState<{ open: boolean; feature: string; requiredTier: 'pro' | 'premium'; limitType: 'templates' | 'ai' | 'feature' }>({ open: false, feature: '', requiredTier: 'pro', limitType: 'templates' });
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { tier, canSelectTemplate, canUseAI, getRemainingTemplates, getRemainingAIGenerations, getNextResetDate, incrementUsage } = useSubscriptionLimits();
 
   useEffect(() => {
     fetchTemplates();
@@ -208,10 +212,18 @@ const CreateResume = () => {
                   <Button 
                     onClick={() => {
                       if (index === 0) {
-                        // AI-Powered Resume
+                        // AI-Powered Resume - check tier
+                        if (!canUseAI()) {
+                          setUpgradeModal({ open: true, feature: 'AI Resume Generator', requiredTier: 'pro', limitType: tier === 'free' ? 'feature' : 'ai' });
+                          return;
+                        }
                         setIsAIDialogOpen(true);
                       } else if (index === 1) {
-                        // Guided Builder - go to editor with first template
+                        // Guided Builder - check template limit
+                        if (!canSelectTemplate()) {
+                          setUpgradeModal({ open: true, feature: 'Template Selection', requiredTier: 'pro', limitType: 'templates' });
+                          return;
+                        }
                         navigate(`/editor/new${templates[0]?.id ? `?template=${templates[0].id}` : ''}`);
                       } else if (index === 2) {
                         // Import & Analyze
@@ -220,6 +232,7 @@ const CreateResume = () => {
                     }}
                     className={`w-full bg-gradient-to-r ${method.gradient} hover:shadow-lg text-white font-semibold py-3 rounded-xl transition-all duration-300`}
                   >
+                    {index === 0 && tier === 'free' && <Lock className="w-4 h-4 mr-2" />}
                     <Sparkles className="w-5 h-5 mr-2" />
                     Get Started
                   </Button>
@@ -416,18 +429,35 @@ const CreateResume = () => {
                         <Eye className="w-4 h-4 mr-1" />
                         Preview
                       </Button>
-                      <Button 
-                        className={`flex-1 bg-gradient-to-r ${template.color_class || 'from-slate-500 to-slate-600'} hover:shadow-lg text-white font-semibold rounded-xl transition-all duration-300`}
-                        onClick={() => {
-                          if (!template.json_content) {
-                            toast({ title: 'Template not ready', description: 'This template will be available soon. Please choose another with full styles.' });
-                            return;
-                          }
-                          navigate(`/editor/new?template=${template.id}`);
-                        }}
-                      >
-                        Use Template
-                      </Button>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button 
+                              className={`flex-1 bg-gradient-to-r ${template.color_class || 'from-slate-500 to-slate-600'} hover:shadow-lg text-white font-semibold rounded-xl transition-all duration-300 ${!canSelectTemplate() ? 'opacity-60' : ''}`}
+                              onClick={async () => {
+                                if (!canSelectTemplate()) {
+                                  setUpgradeModal({ open: true, feature: 'Template Selection', requiredTier: 'pro', limitType: 'templates' });
+                                  return;
+                                }
+                                if (!template.json_content) {
+                                  toast({ title: 'Template not ready', description: 'This template will be available soon. Please choose another with full styles.' });
+                                  return;
+                                }
+                                await incrementUsage('template');
+                                navigate(`/editor/new?template=${template.id}`);
+                              }}
+                            >
+                              {!canSelectTemplate() && <Lock className="w-4 h-4 mr-1" />}
+                              Use Template
+                            </Button>
+                          </TooltipTrigger>
+                          {!canSelectTemplate() && (
+                            <TooltipContent>
+                              <p>Limit reached. Resets on {getNextResetDate().toLocaleDateString()}</p>
+                            </TooltipContent>
+                          )}
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
                   </div>
                 </div>
@@ -456,6 +486,17 @@ const CreateResume = () => {
         open={isAIDialogOpen}
         onOpenChange={setIsAIDialogOpen}
         selectedTemplate={selectedTemplate}
+      />
+
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        open={upgradeModal.open}
+        onOpenChange={(open) => setUpgradeModal(prev => ({ ...prev, open }))}
+        feature={upgradeModal.feature}
+        requiredTier={upgradeModal.requiredTier}
+        currentTier={tier}
+        resetDate={getNextResetDate()}
+        limitType={upgradeModal.limitType}
       />
     </div>
   );

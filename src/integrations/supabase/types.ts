@@ -928,9 +928,13 @@ export type Database = {
           created_at: string
           downloads: number | null
           id: string
+          monthly_ai_generations: number | null
+          monthly_pdf_downloads: number | null
+          monthly_template_selections: number | null
           resumes_created: number | null
           templates_used: number | null
           updated_at: string
+          usage_cycle_reset_date: string | null
           user_id: string
         }
         Insert: {
@@ -938,9 +942,13 @@ export type Database = {
           created_at?: string
           downloads?: number | null
           id?: string
+          monthly_ai_generations?: number | null
+          monthly_pdf_downloads?: number | null
+          monthly_template_selections?: number | null
           resumes_created?: number | null
           templates_used?: number | null
           updated_at?: string
+          usage_cycle_reset_date?: string | null
           user_id: string
         }
         Update: {
@@ -948,9 +956,13 @@ export type Database = {
           created_at?: string
           downloads?: number | null
           id?: string
+          monthly_ai_generations?: number | null
+          monthly_pdf_downloads?: number | null
+          monthly_template_selections?: number | null
           resumes_created?: number | null
           templates_used?: number | null
           updated_at?: string
+          usage_cycle_reset_date?: string | null
           user_id?: string
         }
         Relationships: []

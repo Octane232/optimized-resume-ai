@@ -2,22 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, Crown, CreditCard, Download, Star, Zap, Shield, Headphones, Sparkles, TrendingUp, Users, Award, Loader2, ExternalLink } from 'lucide-react';
+import { Check, Crown, CreditCard, Download, Star, Zap, Shield, Headphones, Sparkles, TrendingUp, Users, Award, Loader2, ExternalLink, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { STRIPE_TIERS, getPriceId } from '@/lib/stripe';
+import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
+import { TIER_FEATURES } from '@/lib/tierConfig';
 
 const Billing = () => {
   const [billingCycle, setBillingCycle] = useState('monthly');
   const [currentPlan, setCurrentPlan] = useState(null);
   const [plans, setPlans] = useState([]);
   const [invoices, setInvoices] = useState([]);
-  const [usageStats, setUsageStats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [upgradingPlan, setUpgradingPlan] = useState<string | null>(null);
   const { toast } = useToast();
+  const { tier, usage, limits, getNextResetDate, getRemainingTemplates, getRemainingDownloads, getRemainingAIGenerations } = useSubscriptionLimits();
 
   useEffect(() => {
     fetchBillingData();
@@ -56,46 +58,58 @@ const Billing = () => {
 
       if (invoicesError) throw invoicesError;
 
-      // Fetch usage stats
-      const { data: usageData, error: usageError } = await supabase
-        .from('user_usage_stats')
-        .select('*')
-        .single();
-
-      if (usageError && usageError.code !== 'PGRST116') {
-        throw usageError;
-      }
-
-      // Process and set data - filter plans based on billing cycle
-      const filteredPlans = plansData?.filter(plan => {
-        if (plan.name === 'Free') return true;
-        if (billingCycle === 'monthly') {
-          return plan.price_monthly !== null && !plan.name.includes('Yearly');
-        } else {
-          return plan.price_yearly !== null && (plan.name.includes('Yearly') || plan.price_yearly === 0);
-        }
-      }) || [];
-
-      const formattedPlans = filteredPlans.map(plan => ({
-        id: plan.id,
-        name: plan.name.replace(' Yearly', ''),
-        monthlyPrice: plan.price_monthly,
-        yearlyPrice: plan.price_yearly,
-        price: billingCycle === 'monthly' 
-          ? `$${plan.price_monthly || 0}` 
-          : `$${plan.price_yearly || 0}`,
-        period: billingCycle === 'monthly' ? 'per month' : 'per year',
-        originalPrice: billingCycle === 'yearly' && plan.price_monthly ? 
-          `$${plan.price_monthly * 12}` : null,
-        features: plan.features || [],
-        icon: getIconForPlan(plan.icon_name),
-        color: plan.color_class || 'from-slate-500 to-slate-600',
-        popular: plan.is_popular,
-        current: subscriptionData?.plan_id === plan.id,
-        description: plan.description || '',
-        savings: billingCycle === 'yearly' && plan.price_monthly ? 
-          `Save $${(plan.price_monthly * 12) - plan.price_yearly}` : null
-      }));
+      // Process and set plans based on tier config
+      const tierPlans = [
+        {
+          id: 'free',
+          name: 'Free',
+          monthlyPrice: 0,
+          yearlyPrice: 0,
+          price: '$0',
+          period: 'forever',
+          features: TIER_FEATURES.free.features,
+          lockedFeatures: TIER_FEATURES.free.lockedFeatures,
+          icon: Shield,
+          color: 'from-slate-500 to-slate-600',
+          popular: false,
+          current: tier === 'free',
+          description: TIER_FEATURES.free.description,
+        },
+        {
+          id: 'pro',
+          name: 'Pro',
+          monthlyPrice: 12,
+          yearlyPrice: 120,
+          price: billingCycle === 'monthly' ? '$12' : '$120',
+          period: billingCycle === 'monthly' ? 'per month' : 'per year',
+          originalPrice: billingCycle === 'yearly' ? '$144' : null,
+          features: TIER_FEATURES.pro.features,
+          lockedFeatures: TIER_FEATURES.pro.lockedFeatures,
+          icon: Sparkles,
+          color: 'from-blue-500 to-cyan-500',
+          popular: true,
+          current: tier === 'pro',
+          description: TIER_FEATURES.pro.description,
+          savings: billingCycle === 'yearly' ? 'Save $24' : null,
+        },
+        {
+          id: 'premium',
+          name: 'Premium',
+          monthlyPrice: 24,
+          yearlyPrice: 240,
+          price: billingCycle === 'monthly' ? '$24' : '$240',
+          period: billingCycle === 'monthly' ? 'per month' : 'per year',
+          originalPrice: billingCycle === 'yearly' ? '$288' : null,
+          features: TIER_FEATURES.premium.features,
+          lockedFeatures: [],
+          icon: Crown,
+          color: 'from-purple-500 to-pink-600',
+          popular: false,
+          current: tier === 'premium',
+          description: TIER_FEATURES.premium.description,
+          savings: billingCycle === 'yearly' ? 'Save $48' : null,
+        },
+      ];
 
       const formattedInvoices = invoicesData?.map(invoice => ({
         id: invoice.invoice_number,
@@ -106,56 +120,18 @@ const Billing = () => {
         paymentMethod: invoice.payment_method || '•••• 4242'
       })) || [];
 
-      // Find the plan details for the current subscription
-      const currentPlanDetails = subscriptionData ? 
-        plansData?.find(plan => plan.id === subscriptionData.plan_id) : null;
-
-      const currentSubscription = currentPlanDetails ? {
-        name: currentPlanDetails.name,
-        price: `$${subscriptionData.price}/${subscriptionData.billing_cycle}`,
-        nextBilling: subscriptionData.current_period_end ? 
-          new Date(subscriptionData.current_period_end).toLocaleDateString() : 'N/A',
-        features: currentPlanDetails.features || [],
-        status: subscriptionData.plan_status
-      } : {
-        name: 'Free',
-        price: '$0/month',
-        nextBilling: 'N/A',
-        features: ['3 resumes max', 'Basic templates', 'Standard support'],
+      const currentTierInfo = TIER_FEATURES[tier];
+      const currentSubscription = {
+        name: currentTierInfo.name,
+        price: tier === 'free' ? '$0/month' : `$${currentTierInfo.price}/${billingCycle}`,
+        nextBilling: tier === 'free' ? 'N/A' : getNextResetDate().toLocaleDateString(),
+        features: currentTierInfo.features.slice(0, 4),
         status: 'active'
       };
 
-      const currentUsage = usageData ? [
-        { 
-          label: 'Resumes Created', 
-          value: usageData.resumes_created?.toString() || '0', 
-          max: currentSubscription.name === 'Free' ? '3' : '∞', 
-          color: 'from-blue-500 to-blue-600' 
-        },
-        { 
-          label: 'AI Generations', 
-          value: usageData.ai_generations?.toString() || '0', 
-          max: currentSubscription.name === 'Free' ? '10' : '∞', 
-          color: 'from-purple-500 to-purple-600' 
-        },
-        { 
-          label: 'Downloads', 
-          value: usageData.downloads?.toString() || '0', 
-          max: '∞', 
-          color: 'from-emerald-500 to-emerald-600' 
-        },
-        { 
-          label: 'Templates Used', 
-          value: usageData.templates_used?.toString() || '0', 
-          max: currentSubscription.name === 'Free' ? '5' : '∞', 
-          color: 'from-orange-500 to-orange-600' 
-        }
-      ] : [];
-
-      setPlans(formattedPlans);
+      setPlans(tierPlans);
       setCurrentPlan(currentSubscription);
       setInvoices(formattedInvoices);
-      setUsageStats(currentUsage);
     } catch (error) {
       console.error('Error fetching billing data:', error);
     } finally {
@@ -348,23 +324,71 @@ const Billing = () => {
 
       {/* Usage Statistics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {usageStats.map((stat, index) => (
-          <Card key={index} className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 rounded-2xl">
-            <CardContent className="p-4">
-              <div className="text-center">
-                <div className={`w-12 h-12 bg-gradient-to-r ${stat.color} rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg`}>
-                  <TrendingUp className="w-6 h-6 text-white" />
-                </div>
-                <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
-                  {stat.value}
-                  <span className="text-sm text-slate-500 dark:text-slate-400 ml-1">/ {stat.max}</span>
-                </div>
-                <div className="text-xs text-slate-600 dark:text-slate-400">{stat.label}</div>
+        <Card className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 rounded-2xl">
+          <CardContent className="p-4">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
+                <TrendingUp className="w-6 h-6 text-white" />
               </div>
-            </CardContent>
-          </Card>
-        ))}
+              <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
+                {usage.monthlyTemplateSelections}
+                <span className="text-sm text-slate-500 dark:text-slate-400 ml-1">/ {limits.templateSelections === Infinity ? '∞' : limits.templateSelections}</span>
+              </div>
+              <div className="text-xs text-slate-600 dark:text-slate-400">Templates Used</div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 rounded-2xl">
+          <CardContent className="p-4">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
+                <TrendingUp className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
+                {usage.monthlyAiGenerations}
+                <span className="text-sm text-slate-500 dark:text-slate-400 ml-1">/ {limits.aiGenerations === Infinity ? '∞' : limits.aiGenerations}</span>
+              </div>
+              <div className="text-xs text-slate-600 dark:text-slate-400">AI Generations</div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 rounded-2xl">
+          <CardContent className="p-4">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
+                <Download className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
+                {usage.monthlyPdfDownloads}
+                <span className="text-sm text-slate-500 dark:text-slate-400 ml-1">/ {limits.pdfDownloads === Infinity ? '∞' : limits.pdfDownloads}</span>
+              </div>
+              <div className="text-xs text-slate-600 dark:text-slate-400">PDF Downloads</div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 rounded-2xl">
+          <CardContent className="p-4">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
+                <TrendingUp className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
+                {usage.resumesCreated}
+                <span className="text-sm text-slate-500 dark:text-slate-400 ml-1">/ {limits.activeResumes === Infinity ? '∞' : limits.activeResumes}</span>
+              </div>
+              <div className="text-xs text-slate-600 dark:text-slate-400">Resumes Created</div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
+
+      {tier !== 'premium' && (
+        <div className="text-center p-4 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-200/50 dark:border-blue-800/50">
+          <p className="text-sm text-blue-700 dark:text-blue-300">
+            Monthly limits reset on <strong>{getNextResetDate().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}</strong>
+          </p>
+        </div>
+      )}
 
       {/* Billing Toggle */}
       <div className="flex justify-center">
@@ -457,6 +481,14 @@ const Billing = () => {
                           <Check className="w-3 h-3 text-white" />
                         </div>
                         <span className="text-sm text-slate-700 dark:text-slate-300">{feature}</span>
+                      </li>
+                    ))}
+                    {plan.lockedFeatures?.map((feature, featureIndex) => (
+                      <li key={`locked-${featureIndex}`} className="flex items-center gap-3 opacity-50">
+                        <div className="w-5 h-5 bg-slate-300 dark:bg-slate-600 rounded-full flex items-center justify-center flex-shrink-0">
+                          <X className="w-3 h-3 text-white" />
+                        </div>
+                        <span className="text-sm text-slate-500 dark:text-slate-400 line-through">{feature}</span>
                       </li>
                     ))}
                   </ul>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Check, Star, ArrowRight } from 'lucide-react';
+import { Check, Star, ArrowRight, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const PricingSection = () => {
@@ -13,59 +13,69 @@ const PricingSection = () => {
       period: 'forever',
       description: 'Perfect for getting started',
       features: [
-        'Create 1 resume or profile',
-        'Access to basic job search (limited to 10 job listings per day)',
-        'Basic AI interview questions (up to 5 per session)',
-        'Access to 1 job alert or recommendation per week',
-        'Email notifications for new jobs (once per week)',
-        'Save up to 2 job applications',
-        'Basic career tips or articles',
-        'Community support / Help center only'
+        '1 template selection/month',
+        '1 PDF download/month',
+        '1 active resume',
+        'Basic templates only',
+        'Community support',
+      ],
+      lockedFeatures: [
+        'AI Resume Generator',
+        'Cover Letter Generator',
+        'ATS Scoring',
+        'Interview Prep',
+        'Skill Gap Analyzer',
       ],
       cta: 'Start Free',
       popular: false,
       href: '/auth'
     },
     {
-      name: 'Premium',
-      price: '$9',
-      yearlyPrice: '$84',
-      monthlyPrice: '$9',
+      name: 'Pro',
+      price: '$12',
+      yearlyPrice: '$120',
+      monthlyPrice: '$12',
       period: 'per month',
-      description: 'Everything you need to land your dream job',
+      description: 'For serious job seekers',
       features: [
-        'Unlimited job searches & listings',
-        'AI Interview Coach (up to 20 questions per session)',
-        'Generate unlimited AI-based interview answers',
-        'Resume builder (up to 5 resumes)',
-        'Save unlimited jobs',
-        'Daily job alerts (via email or dashboard)',
-        'Download interview prep materials (PDF or notes)',
-        'Priority email support'
+        '5 template selections/month',
+        '10 PDF downloads/month',
+        '5 AI resume generations/month',
+        '5 active resumes',
+        'AI Resume Generator',
+        'Cover Letter Generator',
+        'ATS Scoring',
+        'Email support',
       ],
-      cta: 'Start Premium',
+      lockedFeatures: [
+        'Interview Prep',
+        'Skill Gap Analyzer',
+      ],
+      cta: 'Start Pro',
       popular: true,
       href: '/auth'
     },
     {
-      name: 'Premium Plus',
-      price: '$19',
-      yearlyPrice: '$168',
-      monthlyPrice: '$19',
+      name: 'Premium',
+      price: '$24',
+      yearlyPrice: '$240',
+      monthlyPrice: '$24',
       period: 'per month',
-      description: 'Advanced features for serious job seekers',
+      description: 'Everything you need to land your dream job',
       features: [
-        'Everything in Premium',
-        'Access to global job APIs (worldwide listings)',
-        'Smart job matching (AI recommends top jobs)',
-        'Unlimited AI interview simulations (mock interviews with feedback)',
-        'Resume optimization (AI-enhanced resume scoring)',
-        'Personalized career path suggestions',
-        'Direct recruiter contact (if available via API)',
-        'Exclusive insights & premium resources',
-        'Early access to new features'
+        'Unlimited template selections',
+        'Unlimited PDF downloads',
+        'Unlimited AI generations',
+        'Unlimited active resumes',
+        'AI Resume Generator',
+        'Cover Letter Generator',
+        'Full ATS Analysis',
+        'Interview Prep with AI feedback',
+        'Skill Gap Analyzer',
+        'Priority Support',
       ],
-      cta: 'Get Premium Plus',
+      lockedFeatures: [],
+      cta: 'Get Premium',
       popular: false,
       href: '/auth'
     }
@@ -164,13 +174,21 @@ const PricingSection = () => {
                   </p>
                 </div>
 
-                <ul className="space-y-5 mb-10">
+                <ul className="space-y-4 mb-8">
                   {plan.features.map((feature, featureIndex) => (
                     <li key={featureIndex} className="flex items-start gap-4 group/item">
                       <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg group-hover/item:scale-110 transition-transform">
                         <Check className="w-4 h-4 text-white" />
                       </div>
                       <span className="text-foreground/90 font-medium group-hover/item:text-foreground transition-colors">{feature}</span>
+                    </li>
+                  ))}
+                  {plan.lockedFeatures?.map((feature, featureIndex) => (
+                    <li key={`locked-${featureIndex}`} className="flex items-start gap-4 opacity-50">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-slate-300 dark:bg-slate-600 flex items-center justify-center">
+                        <X className="w-4 h-4 text-white" />
+                      </div>
+                      <span className="text-muted-foreground font-medium line-through">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -186,7 +204,7 @@ const PricingSection = () => {
                 >
                   <Link to={plan.href} className="flex items-center justify-center">
                     {plan.cta}
-                    {plan.name !== 'Enterprise' && <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />}
+                    <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </Button>
               </div>
