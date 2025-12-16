@@ -19,7 +19,7 @@ const Billing = () => {
   const [loading, setLoading] = useState(true);
   const [upgradingPlan, setUpgradingPlan] = useState<string | null>(null);
   const { toast } = useToast();
-  const { tier, usage, limits, getNextResetDate, getRemainingTemplates, getRemainingDownloads, getRemainingAIGenerations } = useSubscription();
+  const { tier, usage, limits, getNextResetDate, getRemainingResumes, getRemainingDownloads, getRemainingAIGenerations } = useSubscription();
 
   useEffect(() => {
     fetchBillingData();

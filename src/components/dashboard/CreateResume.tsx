@@ -31,7 +31,7 @@ const CreateResume = () => {
   const [upgradeModal, setUpgradeModal] = useState<{ open: boolean; feature: string; requiredTier: 'pro' | 'premium'; limitType: 'templates' | 'ai' | 'feature' }>({ open: false, feature: '', requiredTier: 'pro', limitType: 'templates' });
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { tier, canSelectTemplate, canUseAI, getRemainingTemplates, getRemainingAIGenerations, getNextResetDate, incrementUsage } = useSubscription();
+  const { tier, canCreateResume, canUseAI, getRemainingResumes, getRemainingAIGenerations, getNextResetDate, incrementUsage } = useSubscription();
 
   useEffect(() => {
     fetchTemplates();
@@ -219,9 +219,9 @@ const CreateResume = () => {
                         }
                         setIsAIDialogOpen(true);
                       } else if (index === 1) {
-                        // Guided Builder - check template limit
-                        if (!canSelectTemplate()) {
-                          setUpgradeModal({ open: true, feature: 'Template Selection', requiredTier: 'pro', limitType: 'templates' });
+                        // Guided Builder - check resume limit
+                        if (!canCreateResume()) {
+                          setUpgradeModal({ open: true, feature: 'Resume Creation', requiredTier: 'pro', limitType: 'templates' });
                           return;
                         }
                         navigate(`/editor/new${templates[0]?.id ? `?template=${templates[0].id}` : ''}`);
@@ -433,10 +433,10 @@ const CreateResume = () => {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button 
-                              className={`flex-1 bg-gradient-to-r ${template.color_class || 'from-slate-500 to-slate-600'} hover:shadow-lg text-white font-semibold rounded-xl transition-all duration-300 ${!canSelectTemplate() ? 'opacity-60' : ''}`}
+                              className={`flex-1 bg-gradient-to-r ${template.color_class || 'from-slate-500 to-slate-600'} hover:shadow-lg text-white font-semibold rounded-xl transition-all duration-300 ${!canCreateResume() ? 'opacity-60' : ''}`}
                               onClick={async () => {
-                                if (!canSelectTemplate()) {
-                                  setUpgradeModal({ open: true, feature: 'Template Selection', requiredTier: 'pro', limitType: 'templates' });
+                                if (!canCreateResume()) {
+                                  setUpgradeModal({ open: true, feature: 'Resume Creation', requiredTier: 'pro', limitType: 'templates' });
                                   return;
                                 }
                                 if (!template.json_content) {
@@ -447,11 +447,11 @@ const CreateResume = () => {
                                 navigate(`/editor/new?template=${template.id}`);
                               }}
                             >
-                              {!canSelectTemplate() && <Lock className="w-4 h-4 mr-1" />}
+                              {!canCreateResume() && <Lock className="w-4 h-4 mr-1" />}
                               Use Template
                             </Button>
                           </TooltipTrigger>
-                          {!canSelectTemplate() && (
+                          {!canCreateResume() && (
                             <TooltipContent>
                               <p>Limit reached. Resets on {getNextResetDate().toLocaleDateString()}</p>
                             </TooltipContent>
