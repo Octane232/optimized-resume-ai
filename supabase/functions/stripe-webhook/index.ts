@@ -7,6 +7,16 @@ const logStep = (step: string, details?: any) => {
   console.log(`[STRIPE-WEBHOOK] ${step}${detailsStr}`);
 };
 
+// Map Stripe price IDs to tier names - this is the source of truth mapping
+const getTierFromPriceId = (priceId: string): string => {
+  const proPrices = ['price_1SaQC1CcyAnmb029kDR4Mof6', 'price_1SaQDUCcyAnmb029YBXFwjjH'];
+  const premiumPrices = ['price_1SaQCbCcyAnmb0297JqYygrH', 'price_1SaQE7CcyAnmb029QOzfgiQG'];
+  
+  if (proPrices.includes(priceId)) return 'pro';
+  if (premiumPrices.includes(priceId)) return 'premium';
+  return 'free';
+};
+
 serve(async (req) => {
   const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
     apiVersion: "2025-08-27.basil",
@@ -61,6 +71,9 @@ serve(async (req) => {
         if (session.mode === "subscription" && session.subscription) {
           const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
           const priceId = subscription.items.data[0]?.price.id;
+          const tier = getTierFromPriceId(priceId || '');
+          
+          logStep("Determined tier from price", { priceId, tier });
           
           // Get user by email
           const email = session.customer_email || session.customer_details?.email;
@@ -69,16 +82,21 @@ serve(async (req) => {
             const user = users.users.find(u => u.email === email);
             
             if (user) {
-              // Update or create user subscription
-              await supabaseClient.from("user_subscriptions").upsert({
+              // Update or create user subscription with tier
+              const { error } = await supabaseClient.from("user_subscriptions").upsert({
                 user_id: user.id,
                 plan_id: priceId || "unknown",
                 plan_status: "active",
+                tier: tier, // Save tier to database
                 billing_cycle: subscription.items.data[0]?.price.recurring?.interval || "month",
                 current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
               }, { onConflict: "user_id" });
 
-              logStep("User subscription created/updated", { userId: user.id, priceId });
+              if (error) {
+                logStep("ERROR saving subscription", { error: error.message });
+              } else {
+                logStep("User subscription created/updated with tier", { userId: user.id, priceId, tier });
+              }
             }
           }
         }
@@ -99,15 +117,22 @@ serve(async (req) => {
 
           if (user) {
             const priceId = subscription.items.data[0]?.price.id;
-            await supabaseClient.from("user_subscriptions").upsert({
+            const tier = subscription.status === "active" ? getTierFromPriceId(priceId || '') : 'free';
+            
+            const { error } = await supabaseClient.from("user_subscriptions").upsert({
               user_id: user.id,
               plan_id: priceId || "unknown",
               plan_status: subscription.status === "active" ? "active" : "inactive",
+              tier: tier, // Save tier to database
               billing_cycle: subscription.items.data[0]?.price.recurring?.interval || "month",
               current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
             }, { onConflict: "user_id" });
 
-            logStep("User subscription updated", { userId: user.id, status: subscription.status });
+            if (error) {
+              logStep("ERROR updating subscription", { error: error.message });
+            } else {
+              logStep("User subscription updated with tier", { userId: user.id, status: subscription.status, tier });
+            }
           }
         }
         break;
@@ -123,11 +148,16 @@ serve(async (req) => {
           const user = users.users.find(u => u.email === customer.email);
 
           if (user) {
-            await supabaseClient.from("user_subscriptions").update({
+            const { error } = await supabaseClient.from("user_subscriptions").update({
               plan_status: "cancelled",
+              tier: "free", // Reset tier to free when cancelled
             }).eq("user_id", user.id);
 
-            logStep("User subscription cancelled", { userId: user.id });
+            if (error) {
+              logStep("ERROR cancelling subscription", { error: error.message });
+            } else {
+              logStep("User subscription cancelled, tier reset to free", { userId: user.id });
+            }
           }
         }
         break;
@@ -146,11 +176,16 @@ serve(async (req) => {
           const user = users.users.find(u => u.email === customer.email);
 
           if (user) {
-            await supabaseClient.from("user_subscriptions").update({
+            const { error } = await supabaseClient.from("user_subscriptions").update({
               plan_status: "past_due",
+              tier: "free", // Reset tier to free when payment fails
             }).eq("user_id", user.id);
 
-            logStep("User subscription marked as past_due", { userId: user.id });
+            if (error) {
+              logStep("ERROR marking subscription past_due", { error: error.message });
+            } else {
+              logStep("User subscription marked as past_due, tier reset to free", { userId: user.id });
+            }
           }
         }
         break;
