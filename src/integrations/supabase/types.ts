@@ -885,6 +885,7 @@ export type Database = {
           plan_id: string
           plan_status: string
           price: number | null
+          tier: string | null
           updated_at: string
           user_id: string
         }
@@ -897,6 +898,7 @@ export type Database = {
           plan_id: string
           plan_status?: string
           price?: number | null
+          tier?: string | null
           updated_at?: string
           user_id: string
         }
@@ -909,6 +911,7 @@ export type Database = {
           plan_id?: string
           plan_status?: string
           price?: number | null
+          tier?: string | null
           updated_at?: string
           user_id?: string
         }

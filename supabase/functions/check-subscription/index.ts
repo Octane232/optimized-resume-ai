@@ -12,6 +12,16 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CHECK-SUBSCRIPTION] ${step}${detailsStr}`);
 };
 
+// Map Stripe price IDs to tier names
+const getTierFromPriceId = (priceId: string): string => {
+  const proPrices = ['price_1SaQC1CcyAnmb029kDR4Mof6', 'price_1SaQDUCcyAnmb029YBXFwjjH'];
+  const premiumPrices = ['price_1SaQCbCcyAnmb0297JqYygrH', 'price_1SaQE7CcyAnmb029QOzfgiQG'];
+  
+  if (proPrices.includes(priceId)) return 'pro';
+  if (premiumPrices.includes(priceId)) return 'premium';
+  return 'free';
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -41,11 +51,42 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
+    // FIRST: Check database for subscription (source of truth)
+    const { data: dbSubscription, error: dbError } = await supabaseClient
+      .from("user_subscriptions")
+      .select("tier, plan_status, current_period_end")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (dbError) {
+      logStep("Database query error", { error: dbError.message });
+    }
+
+    // If we have an active subscription in the database, use it
+    if (dbSubscription && dbSubscription.plan_status === "active" && dbSubscription.tier) {
+      logStep("Found active subscription in database", { 
+        tier: dbSubscription.tier, 
+        endDate: dbSubscription.current_period_end 
+      });
+      
+      return new Response(JSON.stringify({
+        subscribed: true,
+        tier: dbSubscription.tier,
+        subscription_end: dbSubscription.current_period_end,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    logStep("No active subscription in database, checking Stripe as fallback");
+
+    // FALLBACK: Check Stripe directly and sync to database if found
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
 
     if (customers.data.length === 0) {
-      logStep("No customer found, returning free tier");
+      logStep("No Stripe customer found, returning free tier");
       return new Response(JSON.stringify({ 
         subscribed: false,
         tier: 'free',
@@ -66,7 +107,7 @@ serve(async (req) => {
     });
 
     if (subscriptions.data.length === 0) {
-      logStep("No active subscription found");
+      logStep("No active Stripe subscription found");
       return new Response(JSON.stringify({ 
         subscribed: false,
         tier: 'free',
@@ -77,6 +118,7 @@ serve(async (req) => {
       });
     }
 
+    // Found active subscription in Stripe - sync to database
     const subscription = subscriptions.data[0];
     let subscriptionEnd = null;
     try {
@@ -86,25 +128,34 @@ serve(async (req) => {
     } catch (e) {
       logStep("Date conversion error", { error: e, rawValue: subscription.current_period_end });
     }
+    
     const priceId = subscription.items.data[0]?.price?.id;
-    
-    // Determine tier based on price ID
-    let tier = 'free';
-    const proPrices = ['price_1SaQC1CcyAnmb029kDR4Mof6', 'price_1SaQDUCcyAnmb029YBXFwjjH'];
-    const premiumPrices = ['price_1SaQCbCcyAnmb0297JqYygrH', 'price_1SaQE7CcyAnmb029QOzfgiQG'];
-    
-    if (proPrices.includes(priceId)) {
-      tier = 'pro';
-    } else if (premiumPrices.includes(priceId)) {
-      tier = 'premium';
-    }
+    const tier = getTierFromPriceId(priceId || '');
 
-    logStep("Active subscription found", { 
+    logStep("Active Stripe subscription found, syncing to database", { 
       subscriptionId: subscription.id, 
       tier, 
       priceId,
       endDate: subscriptionEnd 
     });
+
+    // Sync to database so next time we read from DB
+    const { error: upsertError } = await supabaseClient
+      .from("user_subscriptions")
+      .upsert({
+        user_id: user.id,
+        plan_id: priceId || "unknown",
+        plan_status: "active",
+        tier: tier,
+        current_period_end: subscriptionEnd,
+        billing_cycle: subscription.items.data[0]?.price.recurring?.interval || "month",
+      }, { onConflict: "user_id" });
+
+    if (upsertError) {
+      logStep("Error syncing subscription to database", { error: upsertError.message });
+    } else {
+      logStep("Subscription synced to database successfully");
+    }
 
     return new Response(JSON.stringify({
       subscribed: true,
