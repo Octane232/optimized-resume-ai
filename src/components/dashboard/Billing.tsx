@@ -323,7 +323,7 @@ const Billing = () => {
       </Card>
 
       {/* Usage Statistics */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 rounded-2xl">
           <CardContent className="p-4">
             <div className="text-center">
@@ -331,10 +331,10 @@ const Billing = () => {
                 <TrendingUp className="w-6 h-6 text-white" />
               </div>
               <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
-                {usage.monthlyTemplateSelections}
-                <span className="text-sm text-slate-500 dark:text-slate-400 ml-1">/ {limits.templateSelections === Infinity ? '∞' : limits.templateSelections}</span>
+                {usage.resumesCreated}
+                <span className="text-sm text-slate-500 dark:text-slate-400 ml-1">/ {limits.activeResumes === Infinity ? '∞' : limits.activeResumes}</span>
               </div>
-              <div className="text-xs text-slate-600 dark:text-slate-400">Templates Used</div>
+              <div className="text-xs text-slate-600 dark:text-slate-400">Resumes Created</div>
             </div>
           </CardContent>
         </Card>
@@ -342,7 +342,7 @@ const Billing = () => {
           <CardContent className="p-4">
             <div className="text-center">
               <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
-                <TrendingUp className="w-6 h-6 text-white" />
+                <Sparkles className="w-6 h-6 text-white" />
               </div>
               <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
                 {usage.monthlyAiGenerations}
@@ -363,20 +363,6 @@ const Billing = () => {
                 <span className="text-sm text-slate-500 dark:text-slate-400 ml-1">/ {limits.pdfDownloads === Infinity ? '∞' : limits.pdfDownloads}</span>
               </div>
               <div className="text-xs text-slate-600 dark:text-slate-400">PDF Downloads</div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 rounded-2xl">
-          <CardContent className="p-4">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
-                <TrendingUp className="w-6 h-6 text-white" />
-              </div>
-              <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
-                {usage.resumesCreated}
-                <span className="text-sm text-slate-500 dark:text-slate-400 ml-1">/ {limits.activeResumes === Infinity ? '∞' : limits.activeResumes}</span>
-              </div>
-              <div className="text-xs text-slate-600 dark:text-slate-400">Resumes Created</div>
             </div>
           </CardContent>
         </Card>

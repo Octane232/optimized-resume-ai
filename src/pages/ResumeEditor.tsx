@@ -13,12 +13,14 @@ import { useToast } from '@/hooks/use-toast';
 import { ResumeData } from '@/types/resume';
 import ResumeTemplatePreview from '@/components/dashboard/ResumeTemplatePreview';
 import html2pdf from 'html2pdf.js';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 
 const ResumeEditor: React.FC = () => {
   const { resumeId } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const { canDownloadPDF, incrementUsage } = useSubscription();
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const [templates, setTemplates] = useState<any[]>([]);
   const [saving, setSaving] = useState(false);
@@ -329,7 +331,17 @@ const ResumeEditor: React.FC = () => {
     setSaving(false);
   };
 
-  const exportPDF = () => {
+  const exportPDF = async () => {
+    // Check if user can download
+    if (!canDownloadPDF()) {
+      toast({
+        title: "Download limit reached",
+        description: "Please upgrade your plan to download more PDFs.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const element = document.getElementById('resume-preview-content');
     if (element) {
       // Clone the element to avoid modifying the original
@@ -394,9 +406,13 @@ const ResumeEditor: React.FC = () => {
         .set(opt)
         .from(clone)
         .save()
-        .then(() => {
+        .then(async () => {
           // Clean up
           document.body.removeChild(container);
+          
+          // Track download usage
+          await incrementUsage('download');
+          
           toast({
             title: "Success",
             description: "Resume downloaded successfully",

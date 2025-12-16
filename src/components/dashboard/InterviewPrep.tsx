@@ -13,7 +13,7 @@ import UpgradeModal from './UpgradeModal';
 
 const InterviewPrep = () => {
   const { toast } = useToast();
-  const { tier, limits } = useSubscription();
+  const { tier, limits, incrementUsage } = useSubscription();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const isLocked = !limits.hasInterviewPrep;
   const [selectedCategory, setSelectedCategory] = useState('ai-interview');
@@ -147,6 +147,9 @@ const InterviewPrep = () => {
       });
 
       if (error) throw error;
+
+      // Track AI usage
+      await incrementUsage('ai');
 
       const feedbackData = {
         question: interviewQuestions[currentQuestion],

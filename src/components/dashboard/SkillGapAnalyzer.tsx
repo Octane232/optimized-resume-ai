@@ -21,7 +21,7 @@ export const SkillGapAnalyzer = () => {
     userSkills: ""
   });
   const { toast } = useToast();
-  const { tier, limits } = useSubscription();
+  const { tier, limits, incrementUsage } = useSubscription();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const isLocked = !limits.hasSkillGap;
 
@@ -63,6 +63,9 @@ export const SkillGapAnalyzer = () => {
           recommendations: data.recommendations
         });
       }
+
+      // Track AI usage
+      await incrementUsage('ai');
 
       setAnalysis(data);
       toast({
