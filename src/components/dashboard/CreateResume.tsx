@@ -443,7 +443,7 @@ const CreateResume = () => {
                                   toast({ title: 'Template not ready', description: 'This template will be available soon. Please choose another with full styles.' });
                                   return;
                                 }
-                                await incrementUsage('template');
+                                await incrementUsage('resume');
                                 navigate(`/editor/new?template=${template.id}`);
                               }}
                             >

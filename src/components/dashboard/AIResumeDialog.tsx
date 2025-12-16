@@ -14,6 +14,7 @@ import { Loader2, Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 
 interface AIResumeDialogProps {
   open: boolean;
@@ -24,6 +25,7 @@ interface AIResumeDialogProps {
 const AIResumeDialog: React.FC<AIResumeDialogProps> = ({ open, onOpenChange, selectedTemplate }) => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { incrementUsage } = useSubscription();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -98,6 +100,10 @@ const AIResumeDialog: React.FC<AIResumeDialogProps> = ({ open, onOpenChange, sel
         .single();
 
       if (saveError) throw saveError;
+
+      // Track AI and resume usage
+      await incrementUsage('ai');
+      await incrementUsage('resume');
 
       toast({
         title: 'Success!',

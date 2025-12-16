@@ -14,7 +14,7 @@ const CoverLetterGenerator = () => {
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedLetter, setGeneratedLetter] = useState('');
-  const { tier, limits } = useSubscription();
+  const { tier, limits, incrementUsage } = useSubscription();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const isLocked = !limits.hasCoverLetter;
   
@@ -65,6 +65,9 @@ const CoverLetterGenerator = () => {
             console.error('Error saving cover letter:', saveError);
           }
         }
+
+        // Track AI usage
+        await incrementUsage('ai');
         
         toast({
           title: "Cover Letter Generated!",
