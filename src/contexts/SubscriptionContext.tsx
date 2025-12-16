@@ -4,7 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 export type SubscriptionTier = 'free' | 'pro' | 'premium';
 
 export interface TierLimits {
-  templateSelections: number;
   pdfDownloads: number;
   aiGenerations: number;
   activeResumes: number;
@@ -16,7 +15,6 @@ export interface TierLimits {
 }
 
 export interface UsageStats {
-  monthlyTemplateSelections: number;
   monthlyPdfDownloads: number;
   monthlyAiGenerations: number;
   resumesCreated: number;
@@ -25,7 +23,6 @@ export interface UsageStats {
 
 const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
   free: {
-    templateSelections: 1,
     pdfDownloads: 1,
     aiGenerations: 0,
     activeResumes: 1,
@@ -36,7 +33,6 @@ const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
     hasSkillGap: false,
   },
   pro: {
-    templateSelections: 5,
     pdfDownloads: 10,
     aiGenerations: 5,
     activeResumes: 5,
@@ -47,7 +43,6 @@ const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
     hasSkillGap: false,
   },
   premium: {
-    templateSelections: Infinity,
     pdfDownloads: Infinity,
     aiGenerations: Infinity,
     activeResumes: Infinity,
@@ -65,15 +60,14 @@ interface SubscriptionContextType {
   usage: UsageStats;
   loading: boolean;
   subscriptionEnd: string | null;
-  canSelectTemplate: () => boolean;
   canDownloadPDF: () => boolean;
   canUseAI: () => boolean;
   canCreateResume: () => boolean;
-  getRemainingTemplates: () => number;
+  getRemainingResumes: () => number;
   getRemainingDownloads: () => number;
   getRemainingAIGenerations: () => number;
   getNextResetDate: () => Date;
-  incrementUsage: (type: 'template' | 'download' | 'ai' | 'resume') => Promise<void>;
+  incrementUsage: (type: 'download' | 'ai' | 'resume') => Promise<void>;
   refresh: () => Promise<void>;
 }
 
@@ -82,7 +76,6 @@ const SubscriptionContext = createContext<SubscriptionContextType | undefined>(u
 export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
   const [tier, setTier] = useState<SubscriptionTier>('free');
   const [usage, setUsage] = useState<UsageStats>({
-    monthlyTemplateSelections: 0,
     monthlyPdfDownloads: 0,
     monthlyAiGenerations: 0,
     resumesCreated: 0,
@@ -139,7 +132,6 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
           await supabase
             .from('user_usage_stats')
             .update({
-              monthly_template_selections: 0,
               monthly_pdf_downloads: 0,
               monthly_ai_generations: 0,
               usage_cycle_reset_date: now.toISOString(),
@@ -147,7 +139,6 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
             .eq('user_id', session.user.id);
 
           setUsage({
-            monthlyTemplateSelections: 0,
             monthlyPdfDownloads: 0,
             monthlyAiGenerations: 0,
             resumesCreated: usageData.resumes_created || 0,
@@ -155,7 +146,6 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
           });
         } else {
           setUsage({
-            monthlyTemplateSelections: usageData.monthly_template_selections || 0,
             monthlyPdfDownloads: usageData.monthly_pdf_downloads || 0,
             monthlyAiGenerations: usageData.monthly_ai_generations || 0,
             resumesCreated: usageData.resumes_created || 0,
@@ -169,7 +159,6 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
           .from('user_usage_stats')
           .insert({
             user_id: session.user.id,
-            monthly_template_selections: 0,
             monthly_pdf_downloads: 0,
             monthly_ai_generations: 0,
             resumes_created: 0,
@@ -206,7 +195,6 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
       } else if (event === 'SIGNED_OUT') {
         setTier('free');
         setUsage({
-          monthlyTemplateSelections: 0,
           monthlyPdfDownloads: 0,
           monthlyAiGenerations: 0,
           resumesCreated: 0,
@@ -222,11 +210,6 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
   }, [fetchSubscriptionStatus]);
 
   const limits = TIER_LIMITS[tier];
-
-  const canSelectTemplate = () => {
-    if (tier === 'premium') return true;
-    return usage.monthlyTemplateSelections < limits.templateSelections;
-  };
 
   const canDownloadPDF = () => {
     if (tier === 'premium') return true;
@@ -244,9 +227,9 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
     return usage.resumesCreated < limits.activeResumes;
   };
 
-  const getRemainingTemplates = () => {
+  const getRemainingResumes = () => {
     if (tier === 'premium') return Infinity;
-    return Math.max(0, limits.templateSelections - usage.monthlyTemplateSelections);
+    return Math.max(0, limits.activeResumes - usage.resumesCreated);
   };
 
   const getRemainingDownloads = () => {
@@ -266,17 +249,13 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
     return nextMonth;
   };
 
-  const incrementUsage = async (type: 'template' | 'download' | 'ai' | 'resume') => {
+  const incrementUsage = async (type: 'download' | 'ai' | 'resume') => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
 
     const updates: Record<string, number> = {};
     
     switch (type) {
-      case 'template':
-        updates.monthly_template_selections = usage.monthlyTemplateSelections + 1;
-        setUsage(prev => ({ ...prev, monthlyTemplateSelections: prev.monthlyTemplateSelections + 1 }));
-        break;
       case 'download':
         updates.monthly_pdf_downloads = usage.monthlyPdfDownloads + 1;
         setUsage(prev => ({ ...prev, monthlyPdfDownloads: prev.monthlyPdfDownloads + 1 }));
@@ -304,11 +283,10 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
       usage,
       loading,
       subscriptionEnd,
-      canSelectTemplate,
       canDownloadPDF,
       canUseAI,
       canCreateResume,
-      getRemainingTemplates,
+      getRemainingResumes,
       getRemainingDownloads,
       getRemainingAIGenerations,
       getNextResetDate,
