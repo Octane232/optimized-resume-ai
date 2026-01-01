@@ -9,7 +9,6 @@ import ResumeEngine from '@/components/dashboard/ResumeEngine';
 import TheVault from '@/components/dashboard/TheVault';
 import MissionControl from '@/components/dashboard/MissionControl';
 import Settings from '@/components/dashboard/Settings';
-import HelpSupport from '@/components/dashboard/HelpSupport';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState(() => {
@@ -57,30 +56,15 @@ const Dashboard = () => {
       case 'briefing':
         return <Briefing setActiveTab={setActiveTab} />;
       case 'resume-engine':
-        return <ResumeEngine />;
+        return <ResumeEngine setActiveTab={setActiveTab} />;
       case 'vault':
         return <TheVault />;
       case 'mission-control':
         return <MissionControl />;
       case 'settings':
         return <Settings />;
-      case 'help':
-        return <HelpSupport />;
       default:
         return <Briefing setActiveTab={setActiveTab} />;
-    }
-  };
-
-  // Get page title for header
-  const getPageTitle = () => {
-    switch (activeTab) {
-      case 'briefing': return 'Briefing';
-      case 'resume-engine': return 'Resume Engine';
-      case 'vault': return 'The Vault';
-      case 'mission-control': return 'Mission Control';
-      case 'settings': return 'Settings';
-      case 'help': return 'Help & Support';
-      default: return 'Briefing';
     }
   };
 
@@ -88,17 +72,9 @@ const Dashboard = () => {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-        <div className="flex-1 flex flex-col">
-          {/* Contextual Page Header */}
-          <header className="h-14 border-b border-border flex items-center px-6 bg-card/50">
-            <h1 className="text-lg font-semibold text-foreground">{getPageTitle()}</h1>
-          </header>
-          
-          {/* Main Content */}
-          <main className="flex-1 overflow-auto">
-            {renderContent()}
-          </main>
-        </div>
+        <main className="flex-1 overflow-auto">
+          {renderContent()}
+        </main>
       </div>
     </SidebarProvider>
   );
