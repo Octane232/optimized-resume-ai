@@ -106,7 +106,7 @@ const Dashboard = () => {
         return mode === 'hunter' 
           ? <HunterDashboard setActiveTab={setActiveTab} />
           : <GrowthDashboard setActiveTab={setActiveTab} />;
-      case 'scout':
+      case 'resume-engine':
         return <ResumeEngine setActiveTab={setActiveTab} hasResume={hasResume} />;
       case 'vault':
         return <TheVault onResumeChange={(has) => setHasResume(has)} />;
