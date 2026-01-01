@@ -430,7 +430,7 @@ const DashboardMain = ({ setActiveTab }: DashboardMainProps) => {
 
       {/* Modals */}
       {showOnboarding && (
-        <OnboardingFlow onClose={() => setShowOnboarding(false)} />
+        <OnboardingFlow onComplete={() => setShowOnboarding(false)} />
       )}
       
       {showTemplates && (

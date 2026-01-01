@@ -1,30 +1,32 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ChevronRight, ChevronLeft, Briefcase, GraduationCap, Code, Palette, Users, Target } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Briefcase, GraduationCap, Code, Palette, Users, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 interface OnboardingFlowProps {
-  onClose: () => void;
+  onComplete: () => void;
 }
 
-const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onClose }) => {
+const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
   const [currentStep, setCurrentStep] = useState(0);
+  const [saving, setSaving] = useState(false);
   const [selections, setSelections] = useState({
-    jobType: '',
-    experienceLevel: '',
-    industry: '',
-    tone: ''
+    target_role: '',
+    experience_level: '',
+    target_industry: '',
+    preferred_tone: ''
   });
 
   const steps = [
     {
       title: "What type of role are you targeting?",
-      key: 'jobType',
+      key: 'target_role',
       options: [
-        { id: 'tech', label: 'Technology', icon: Code, description: 'Software, Engineering, IT' },
+        { id: 'technology', label: 'Technology', icon: Code, description: 'Software, Engineering, IT' },
         { id: 'creative', label: 'Creative', icon: Palette, description: 'Design, Marketing, Media' },
         { id: 'business', label: 'Business', icon: Briefcase, description: 'Finance, Sales, Consulting' },
         { id: 'education', label: 'Education', icon: GraduationCap, description: 'Teaching, Research, Academia' },
@@ -33,7 +35,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onClose }) => {
     },
     {
       title: "What's your experience level?",
-      key: 'experienceLevel',
+      key: 'experience_level',
       options: [
         { id: 'entry', label: 'Entry Level', description: '0-2 years experience' },
         { id: 'mid', label: 'Mid Level', description: '3-7 years experience' },
@@ -43,7 +45,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onClose }) => {
     },
     {
       title: "Which industry best describes your target?",
-      key: 'industry',
+      key: 'target_industry',
       options: [
         { id: 'startup', label: 'Startup', description: 'Fast-paced, innovative environment' },
         { id: 'corporate', label: 'Corporate', description: 'Large, established companies' },
@@ -54,7 +56,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onClose }) => {
     },
     {
       title: "What tone should your resume have?",
-      key: 'tone',
+      key: 'preferred_tone',
       options: [
         { id: 'professional', label: 'Professional', description: 'Formal, conservative approach' },
         { id: 'modern', label: 'Modern', description: 'Contemporary, innovative style' },
@@ -73,13 +75,48 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onClose }) => {
     }));
   };
 
+  const handleComplete = async () => {
+    setSaving(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { error } = await supabase
+        .from('career_preferences')
+        .upsert({
+          user_id: user.id,
+          target_role: selections.target_role,
+          experience_level: selections.experience_level,
+          target_industry: selections.target_industry,
+          preferred_tone: selections.preferred_tone,
+          onboarding_completed: true
+        }, { onConflict: 'user_id' });
+
+      if (error) throw error;
+
+      toast({
+        title: "Welcome aboard!",
+        description: "Your preferences have been saved. Let's build your career!"
+      });
+      
+      onComplete();
+    } catch (error) {
+      console.error('Error saving preferences:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save preferences. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Complete onboarding
-      console.log('Onboarding completed with selections:', selections);
-      onClose();
+      handleComplete();
     }
   };
 
@@ -92,20 +129,23 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onClose }) => {
   const isCurrentStepComplete = selections[currentStepData.key as keyof typeof selections];
 
   return (
-    <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={true} onOpenChange={() => {}}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center mb-4">
-            Let's Create Your Perfect Resume
+            Welcome to Your Career Command Center
           </DialogTitle>
+          <p className="text-center text-muted-foreground mb-4">
+            Let's personalize your experience to help you land your dream job
+          </p>
           <div className="flex items-center justify-center space-x-2 mb-6">
             {steps.map((_, index) => (
               <div
                 key={index}
                 className={`h-2 rounded-full transition-all duration-300 ${
                   index <= currentStep 
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 w-8' 
-                    : 'bg-slate-200 dark:bg-slate-700 w-6'
+                    ? 'bg-primary w-8' 
+                    : 'bg-muted w-6'
                 }`}
               />
             ))}
@@ -125,8 +165,8 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onClose }) => {
                   key={option.id}
                   className={`cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1 ${
                     isSelected 
-                      ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-                      : 'hover:bg-slate-50 dark:hover:bg-slate-800'
+                      ? 'ring-2 ring-primary bg-primary/10' 
+                      : 'hover:bg-muted/50'
                   }`}
                   onClick={() => handleSelection(option.id)}
                 >
@@ -134,16 +174,16 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onClose }) => {
                     {Icon && (
                       <div className={`w-12 h-12 mx-auto mb-4 rounded-lg flex items-center justify-center ${
                         isSelected 
-                          ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white' 
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                          ? 'bg-primary text-primary-foreground' 
+                          : 'bg-muted text-muted-foreground'
                       }`}>
                         <Icon className="w-6 h-6" />
                       </div>
                     )}
                     <h4 className="font-semibold mb-2">{option.label}</h4>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">{option.description}</p>
+                    <p className="text-sm text-muted-foreground">{option.description}</p>
                     {isSelected && (
-                      <Badge className="mt-3 bg-blue-500 hover:bg-blue-600">Selected</Badge>
+                      <Badge className="mt-3">Selected</Badge>
                     )}
                   </CardContent>
                 </Card>
@@ -156,24 +196,33 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onClose }) => {
           <Button
             variant="outline"
             onClick={handleBack}
-            disabled={currentStep === 0}
+            disabled={currentStep === 0 || saving}
             className="flex items-center gap-2"
           >
             <ChevronLeft className="w-4 h-4" />
             Back
           </Button>
           
-          <div className="text-sm text-slate-600 dark:text-slate-400">
+          <div className="text-sm text-muted-foreground">
             Step {currentStep + 1} of {steps.length}
           </div>
           
           <Button
             onClick={handleNext}
-            disabled={!isCurrentStepComplete}
-            className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+            disabled={!isCurrentStepComplete || saving}
+            className="flex items-center gap-2"
           >
-            {currentStep === steps.length - 1 ? 'Create Resume' : 'Next'}
-            <ChevronRight className="w-4 h-4" />
+            {saving ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                {currentStep === steps.length - 1 ? 'Get Started' : 'Next'}
+                <ChevronRight className="w-4 h-4" />
+              </>
+            )}
           </Button>
         </div>
       </DialogContent>
