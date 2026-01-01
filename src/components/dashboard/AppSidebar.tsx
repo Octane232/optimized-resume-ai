@@ -1,18 +1,14 @@
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
-  FileText,
-  Plus,
-  Search,
-  CreditCard,
+  FileSearch,
+  Database,
+  Kanban,
   Settings,
-  Brain,
   LogOut,
   HelpCircle,
-  Mail,
-  Target,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -28,9 +24,8 @@ import {
   SidebarFooter,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import logo from "@/assets/pitchsora-logo.png";
 
 interface AppSidebarProps {
   activeTab: string;
@@ -39,138 +34,46 @@ interface AppSidebarProps {
 
 export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
   const navigate = useNavigate();
-  const [resumeCount, setResumeCount] = useState<number>(0);
-  const [tagline, setTagline] = useState<string>("");
 
-  const motivationalTaglines = [
-    "Land Your Dream Job",
-    "Your Future Starts Today",
-    "Build Your Success Story",
-    "Stand Out, Get Noticed",
-    "Career Excellence Awaits",
-    "Transform Your Career Path",
-    "Unlock New Opportunities",
-    "Your Next Chapter Begins",
-    "Elevate Your Professional Brand",
-    "Make Your Mark",
-    "Success Is Within Reach",
-    "Craft Your Perfect Resume",
-    "Your Skills Deserve Recognition",
-    "Open Doors to Possibilities",
-    "Shine in Your Interview",
-    "Be The Top Candidate",
-    "Your Potential, Realized",
-    "Career Growth Starts Here",
-    "Get Hired, Get Happy",
-    "Professional Excellence Awaits"
-  ];
-
-  useEffect(() => {
-    // Set initial tagline based on current hour
-    const updateTagline = () => {
-      const hour = new Date().getHours();
-      const index = hour % motivationalTaglines.length;
-      setTagline(motivationalTaglines[index]);
-    };
-
-    updateTagline();
-
-    // Update every hour
-    const interval = setInterval(updateTagline, 60 * 60 * 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    fetchResumeCount();
-  }, []);
-
-  const fetchResumeCount = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { count, error } = await supabase
-        .from('resumes')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-      setResumeCount(count || 0);
-    } catch (error) {
-      console.error('Error fetching resume count:', error);
-    }
-  };
-
+  // Main navigation items as per the document
   const menuItems = [
     {
-      title: "Dashboard",
-      id: "dashboard",
+      title: "Briefing",
+      id: "briefing",
       icon: LayoutDashboard,
-      badge: null,
+      description: "Your daily overview",
     },
     {
-      title: "My Resumes",
-      id: "my-resumes", 
-      icon: FileText,
-      badge: resumeCount > 0 ? resumeCount.toString() : null,
+      title: "Resume Engine",
+      id: "resume-engine",
+      icon: FileSearch,
+      description: "Analyze & optimize",
     },
     {
-      title: "Create Resume",
-      id: "create-resume",
-      icon: Plus,
-      badge: null,
+      title: "The Vault",
+      id: "vault",
+      icon: Database,
+      description: "Career foundation",
     },
     {
-      title: "Cover Letter",
-      id: "cover-letter",
-      icon: Mail,
-      badge: "New",
+      title: "Mission Control",
+      id: "mission-control",
+      icon: Kanban,
+      description: "Track applications",
     },
-    {
-      title: "Job Finder",
-      id: "job-finder",
-      icon: Search,
-      badge: null,
-    },
-    {
-      title: "Application Tracker",
-      id: "application-tracker",
-      icon: Brain,
-      badge: "New",
-    },
-    {
-      title: "Skill Gap Analyzer",
-      id: "skill-gap",
-      icon: Target,
-      badge: "New",
-    },
-    {
-      title: "Interview Prep",
-      id: "interview-prep",
-      icon: Brain,
-      badge: null,
-    },
-    {
-      title: "Billing",
-      id: "billing",
-      icon: CreditCard,
-      badge: null,
-    },
+  ];
+
+  const bottomItems = [
     {
       title: "Settings",
       id: "settings",
       icon: Settings,
-      badge: null,
-    }
-  ];
-
-  const supportItems = [
+    },
     {
-      title: "Help & Support",
+      title: "Help",
       id: "help",
       icon: HelpCircle,
-    }
+    },
   ];
 
   const handleLogout = async () => {
@@ -180,7 +83,7 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
       
       toast({
         title: "Signed out successfully",
-        description: "You have been logged out of your account.",
+        description: "You have been logged out.",
       });
       
       navigate('/auth');
@@ -188,102 +91,89 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
       console.error('Error signing out:', error);
       toast({
         title: "Error signing out",
-        description: "There was a problem signing out. Please try again.",
+        description: "There was a problem signing out.",
         variant: "destructive",
       });
     }
   };
 
   return (
-    <Sidebar className="border-r border-border">
-      {/* Header */}
-      <SidebarHeader className="p-4 border-b border-border">
+    <Sidebar className="border-r border-border bg-sidebar">
+      {/* Header with Logo */}
+      <SidebarHeader className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <span className="text-sm font-bold text-primary-foreground">PS</span>
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold">PitchSora</h2>
-            <p className="text-xs text-muted-foreground transition-all duration-500">
-              {tagline}
-            </p>
-          </div>
+          <img src={logo} alt="Pitchsora" className="h-10 w-auto" />
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
-        <ScrollArea className="h-full">
-          {/* Main Navigation */}
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu className="space-y-1 p-2">
-                {menuItems.map((item) => {
-                  const isActive = activeTab === item.id;
-                  return (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton 
-                        onClick={() => setActiveTab(item.id)}
-                        className={`w-full justify-start gap-3 h-10 ${
-                          isActive 
-                            ? 'bg-accent text-accent-foreground' 
-                            : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
-                        }`}
-                      >
-                        <item.icon className="w-4 h-4" />
-                        <span className="font-medium">{item.title}</span>
-                        {item.badge && (
-                          <Badge 
-                            variant="secondary" 
-                            className="ml-auto text-xs h-5"
-                          >
-                            {item.badge}
-                          </Badge>
+      <SidebarContent className="px-2 py-4">
+        {/* Main Navigation */}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu className="space-y-1">
+              {menuItems.map((item) => {
+                const isActive = activeTab === item.id;
+                return (
+                  <SidebarMenuItem key={item.id}>
+                    <SidebarMenuButton 
+                      onClick={() => setActiveTab(item.id)}
+                      className={`w-full justify-start gap-3 h-12 rounded-lg transition-all ${
+                        isActive 
+                          ? 'bg-primary text-primary-foreground shadow-md' 
+                          : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                      }`}
+                    >
+                      <item.icon className="w-5 h-5" />
+                      <div className="flex flex-col items-start">
+                        <span className="font-semibold text-sm">{item.title}</span>
+                        {!isActive && (
+                          <span className="text-xs text-muted-foreground">{item.description}</span>
                         )}
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+                      </div>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
 
-          <SidebarSeparator className="my-4" />
+        <SidebarSeparator className="my-4" />
 
-          {/* Support Section */}
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu className="space-y-1 p-2">
-                {supportItems.map((item) => {
-                  const isActive = activeTab === item.id;
-                  return (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton 
-                        onClick={() => setActiveTab(item.id)}
-                        className={`w-full justify-start gap-3 h-10 ${
-                          isActive 
-                            ? 'bg-accent text-accent-foreground' 
-                            : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
-                        }`}
-                      >
-                        <item.icon className="w-4 h-4" />
-                        <span className="font-medium">{item.title}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </ScrollArea>
+        {/* Bottom Navigation */}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu className="space-y-1">
+              {bottomItems.map((item) => {
+                const isActive = activeTab === item.id;
+                return (
+                  <SidebarMenuItem key={item.id}>
+                    <SidebarMenuButton 
+                      onClick={() => setActiveTab(item.id)}
+                      className={`w-full justify-start gap-3 h-10 rounded-lg ${
+                        isActive 
+                          ? 'bg-sidebar-accent text-sidebar-accent-foreground' 
+                          : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
+                      }`}
+                    >
+                      <item.icon className="w-4 h-4" />
+                      <span className="font-medium text-sm">{item.title}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer with User Profile */}
-      <SidebarFooter className="p-4 border-t border-border">
+      {/* Footer */}
+      <SidebarFooter className="p-4 border-t border-sidebar-border">
         <Button
           variant="ghost"
           size="sm"
           onClick={handleLogout}
-          className="w-full justify-start h-9 text-muted-foreground hover:text-destructive"
+          className="w-full justify-start h-10 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
         >
           <LogOut className="w-4 h-4 mr-2" />
           Sign Out
