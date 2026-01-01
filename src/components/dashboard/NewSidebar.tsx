@@ -8,7 +8,9 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Stethoscope
+  Stethoscope,
+  Lock,
+  Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -125,7 +127,7 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
               font-medium text-sm transition-all duration-300
               ${mode === 'growth' 
                 ? 'text-white' 
-                : 'text-sidebar-foreground/60 hover:text-sidebar-foreground'
+                : 'text-sidebar-foreground/40 hover:text-sidebar-foreground/60'
               }
             `}
           >
@@ -136,7 +138,18 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
               />
             )}
             <Target className="w-4 h-4 relative z-10 rotate-45" />
-            {!collapsed && <span className="relative z-10">Growth</span>}
+            {!collapsed && (
+              <span className="relative z-10 flex items-center gap-1.5">
+                Growth
+                <span className="flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-[hsl(262,83%,58%)]/20 text-[hsl(262,83%,58%)]">
+                  <Sparkles className="w-2.5 h-2.5" />
+                  Soon
+                </span>
+              </span>
+            )}
+            {collapsed && (
+              <Lock className="w-3 h-3 absolute -top-1 -right-1 text-[hsl(262,83%,58%)]" />
+            )}
           </button>
         </div>
       </div>
