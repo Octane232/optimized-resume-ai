@@ -7,7 +7,8 @@ import {
   Settings,
   LogOut,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Stethoscope
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -42,7 +43,7 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
 
   const navItems = [
     { id: 'briefing', label: 'Briefing', icon: Home },
-    { id: 'scout', label: mode === 'hunter' ? 'The Scout' : 'Strategy', icon: Target },
+    { id: 'resume-engine', label: 'Resume Engine', icon: Stethoscope },
     { id: 'vault', label: 'Master Vault', icon: FolderLock },
     { id: 'mission-control', label: 'Mission Control', icon: Crosshair },
   ];
