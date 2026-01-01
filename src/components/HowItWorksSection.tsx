@@ -1,135 +1,113 @@
 
 import React from 'react';
-import { Upload, Bot, Download, Zap, CheckCircle, FileText, Sparkles, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Upload, FileSearch, Target, Kanban, ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 const HowItWorksSection = () => {
   const steps = [
     {
       number: '01',
-      title: 'Choose Your Template',
-      description: 'Select from our collection of professional, industry-specific templates designed by experts.',
-      icon: FileText,
-      color: 'from-blue-500 via-blue-600 to-purple-600'
+      title: 'Upload Your Master Resume',
+      description: 'Start by uploading your existing resume. This becomes your career foundation—the source of truth for all analysis.',
+      icon: Upload,
+      color: 'from-electric to-blue-400',
+      details: ['PDF or DOCX format', 'Secure & private', 'One-time setup']
     },
     {
-      number: '02', 
-      title: 'AI Generates Content',
-      description: 'Our AI analyzes your information and generates optimized content tailored to your target role.',
-      icon: Sparkles,
-      color: 'from-purple-500 via-pink-600 to-purple-600'
+      number: '02',
+      title: 'Paste a Job Description',
+      description: 'Copy and paste any job posting you\'re interested in. Our AI instantly analyzes the match between your skills and requirements.',
+      icon: Target,
+      color: 'from-emerald-500 to-teal-400',
+      details: ['Instant analysis', 'Keyword extraction', 'Gap identification']
     },
     {
       number: '03',
-      title: 'Customize & Download',
-      description: 'Make final adjustments, preview your resume, and download in multiple formats instantly.',
-      icon: Download,
-      color: 'from-emerald-500 via-blue-600 to-emerald-600'
+      title: 'Get Your Match Score',
+      description: 'See exactly how well your resume matches the job. Identify missing keywords, skill gaps, and ATS optimization opportunities.',
+      icon: FileSearch,
+      color: 'from-purple-500 to-pink-400',
+      details: ['Match percentage', 'Missing keywords', 'ATS readiness score']
+    },
+    {
+      number: '04',
+      title: 'Track Your Applications',
+      description: 'Use Mission Control to track every application. Never lose sight of where you\'ve applied or miss a follow-up.',
+      icon: Kanban,
+      color: 'from-amber-500 to-orange-400',
+      details: ['Kanban board', 'Follow-up reminders', 'Status tracking']
     }
   ];
 
   return (
-    <section id="how-it-works" className="relative py-32 overflow-hidden bg-background">
-      {/* Diagonal background sections */}
-      <div className="absolute inset-0 bg-[var(--gradient-mesh)] opacity-40"></div>
-      <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-transparent skew-y-3 transform origin-top-left"></div>
-      <div className="absolute bottom-0 right-0 w-full h-1/2 bg-gradient-to-tl from-emerald-500/5 via-blue-500/5 to-transparent -skew-y-3 transform origin-bottom-right"></div>
+    <section id="how-it-works" className="py-24 bg-secondary/30 relative overflow-hidden">
+      {/* Background elements */}
+      <div className="absolute inset-0 bg-[var(--gradient-mesh)] opacity-50"></div>
+      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent"></div>
       
       <div className="container mx-auto px-6 lg:px-8 relative">
-        <div className="text-center mb-24">
-          <div className="inline-flex items-center gap-3 glass-card rounded-full px-8 py-4 mb-10 animate-fade-in hover:scale-105 transition-transform">
-            <Zap className="w-6 h-6 text-yellow-500 animate-pulse" />
-            <span className="text-base font-bold gradient-text bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
-              Simple 3-Step Process
-            </span>
-          </div>
-          <h2 className="text-5xl md:text-6xl lg:text-7xl font-black mb-8 leading-[0.95] tracking-tighter animate-fade-in" style={{ animationDelay: '0.1s' }}>
-            <span className="block text-foreground/40 text-2xl md:text-3xl font-bold mb-4 uppercase tracking-wide">How It Works</span>
-            <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-[0_2px_20px_rgba(59,130,246,0.5)]">
-              Create in Minutes
-            </span>
+        {/* Section header */}
+        <div className="text-center mb-16">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
+            How It Works
+          </span>
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+            From Resume to Results in 
+            <span className="gradient-text"> 4 Steps</span>
           </h2>
-          <p className="text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            <span className="text-foreground/80">From blank page to professional resume in </span><span className="font-bold text-foreground">under 3 minutes</span>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Pitchsora guides you from upload to hired with a clear, focused workflow designed for action.
           </p>
         </div>
 
-        {/* Asymmetric stepped layout */}
-        <div className="max-w-7xl mx-auto space-y-16">
+        {/* Steps grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
           {steps.map((step, index) => {
             const Icon = step.icon;
-            const isEven = index % 2 === 0;
-            
             return (
-              <div 
-                key={index}
-                className={`grid lg:grid-cols-2 gap-12 items-center animate-fade-in ${isEven ? '' : 'lg:grid-flow-dense'}`}
-                style={{ animationDelay: `${0.3 + index * 0.15}s` }}
-              >
-                {/* Content side */}
-                <div className={`space-y-6 ${isEven ? '' : 'lg:col-start-2'}`}>
-                  <div className="inline-flex items-center gap-4 glass-card rounded-2xl px-6 py-3">
-                    <div className="text-4xl font-black gradient-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-[length:200%_auto] animate-gradient">
-                      {step.number}
-                    </div>
-                    <div className="h-8 w-px bg-border"></div>
-                    <div className="text-sm font-bold text-muted-foreground">STEP {index + 1}</div>
+              <div key={index} className="relative group">
+                {/* Connector line */}
+                {index < steps.length - 1 && (
+                  <div className="hidden lg:block absolute top-16 left-full w-full h-px bg-gradient-to-r from-border via-primary/30 to-border z-0 -translate-x-1/2">
+                    <ArrowRight className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-4 h-4 text-primary/50" />
                   </div>
-
-                  <h3 className="text-4xl md:text-5xl font-black text-foreground leading-tight drop-shadow-sm">
-                    {step.title}
-                  </h3>
+                )}
+                
+                <div className="command-card p-6 h-full relative z-10">
+                  {/* Step number */}
+                  <span className="text-5xl font-black text-muted/20 absolute top-4 right-4">{step.number}</span>
                   
-                  <p className="text-lg md:text-xl leading-relaxed text-foreground/80 font-medium">
-                    {step.description}
-                  </p>
-
-                  <div className="flex flex-wrap gap-4 pt-4">
-                    <div className="flex items-center gap-2 glass-card rounded-full px-4 py-2">
-                      <CheckCircle className="w-4 h-4 text-emerald-500" />
-                      <span className="text-sm font-medium text-foreground">Fast</span>
-                    </div>
-                    <div className="flex items-center gap-2 glass-card rounded-full px-4 py-2">
-                      <CheckCircle className="w-4 h-4 text-emerald-500" />
-                      <span className="text-sm font-medium text-foreground">Easy</span>
-                    </div>
-                    <div className="flex items-center gap-2 glass-card rounded-full px-4 py-2">
-                      <CheckCircle className="w-4 h-4 text-emerald-500" />
-                      <span className="text-sm font-medium text-foreground">Professional</span>
-                    </div>
+                  {/* Icon */}
+                  <div className={`w-14 h-14 bg-gradient-to-br ${step.color} rounded-xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform`}>
+                    <Icon className="w-7 h-7 text-white" />
                   </div>
-                </div>
-
-                {/* Visual side */}
-                <div className={`relative ${isEven ? '' : 'lg:col-start-1 lg:row-start-1'}`}>
-                  <div className="card-3d glass-card-strong rounded-3xl p-12 relative group">
-                    {/* Animated gradient background */}
-                    <div className={`absolute inset-0 bg-gradient-to-br ${step.color} opacity-10 group-hover:opacity-20 transition-opacity duration-500 rounded-3xl`}></div>
-                    
-                    {/* Large icon */}
-                    <div className="relative z-10 flex items-center justify-center">
-                      <div className={`w-48 h-48 bg-gradient-to-br ${step.color} rounded-[3rem] flex items-center justify-center shadow-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}>
-                        <Icon className="w-24 h-24 text-white" />
-                      </div>
-                    </div>
-
-                    {/* Decorative elements */}
-                    <div className={`absolute top-6 right-6 w-24 h-24 bg-gradient-to-br ${step.color} opacity-20 rounded-3xl blur-2xl`}></div>
-                    <div className={`absolute bottom-6 left-6 w-32 h-32 bg-gradient-to-br ${step.color} opacity-20 rounded-3xl blur-2xl`}></div>
-                  </div>
+                  
+                  {/* Content */}
+                  <h3 className="text-lg font-bold text-foreground mb-2">{step.title}</h3>
+                  <p className="text-sm text-muted-foreground mb-4 leading-relaxed">{step.description}</p>
+                  
+                  {/* Details */}
+                  <ul className="space-y-1.5">
+                    {step.details.map((detail, i) => (
+                      <li key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
+                        {detail}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
             );
           })}
         </div>
 
-        {/* CTA Section */}
-        <div className="mt-24 text-center">
-          <Button asChild size="lg" className="saas-button h-16 px-12 text-lg font-bold group">
-            <Link to="/auth" className="flex items-center">
-              Start Creating Now
-              <ArrowRight className="ml-2 h-6 w-6 transition-transform group-hover:translate-x-2" />
+        {/* CTA */}
+        <div className="text-center">
+          <Button asChild size="lg" className="saas-button h-14 px-10 text-lg font-bold">
+            <Link to="/auth">
+              Start Your Career Command Center
+              <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </Button>
         </div>
