@@ -137,6 +137,48 @@ export type Database = {
         }
         Relationships: []
       }
+      career_preferences: {
+        Row: {
+          created_at: string
+          experience_level: string | null
+          id: string
+          onboarding_completed: boolean | null
+          preferred_tone: string | null
+          target_industry: string | null
+          target_role: string | null
+          target_salary: string | null
+          updated_at: string
+          user_id: string
+          work_style: string | null
+        }
+        Insert: {
+          created_at?: string
+          experience_level?: string | null
+          id?: string
+          onboarding_completed?: boolean | null
+          preferred_tone?: string | null
+          target_industry?: string | null
+          target_role?: string | null
+          target_salary?: string | null
+          updated_at?: string
+          user_id: string
+          work_style?: string | null
+        }
+        Update: {
+          created_at?: string
+          experience_level?: string | null
+          id?: string
+          onboarding_completed?: boolean | null
+          preferred_tone?: string | null
+          target_industry?: string | null
+          target_role?: string | null
+          target_salary?: string | null
+          updated_at?: string
+          user_id?: string
+          work_style?: string | null
+        }
+        Relationships: []
+      }
       commissions: {
         Row: {
           affiliate_id: string

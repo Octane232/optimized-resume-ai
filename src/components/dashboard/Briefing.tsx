@@ -14,6 +14,7 @@ import { Progress } from '@/components/ui/progress';
 
 interface BriefingProps {
   setActiveTab: (tab: string) => void;
+  hasResume?: boolean;
 }
 
 // Daily tips for the mini-tip box

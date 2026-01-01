@@ -18,7 +18,11 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 
-const TheVault = () => {
+interface TheVaultProps {
+  onResumeChange?: (hasResume: boolean) => void;
+}
+
+const TheVault = ({ onResumeChange }: TheVaultProps) => {
   const [hasResume, setHasResume] = useState(false);
   const [resumeTitle, setResumeTitle] = useState('');
   const [skills, setSkills] = useState<string[]>([]);

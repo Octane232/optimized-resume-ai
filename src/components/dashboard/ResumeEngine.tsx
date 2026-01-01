@@ -24,6 +24,7 @@ import {
 
 interface ResumeEngineProps {
   setActiveTab?: (tab: string) => void;
+  hasResume?: boolean;
 }
 
 const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
