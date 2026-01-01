@@ -123,7 +123,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen flex w-full bg-background">
+    <div className="h-screen flex w-full bg-background overflow-hidden">
       {/* Zone A: Left Sidebar */}
       <NewSidebar 
         activeTab={activeTab} 
@@ -134,14 +134,14 @@ const Dashboard = () => {
         setCollapsed={setSidebarCollapsed}
       />
       
-      {/* Zone B: Main Content */}
-      <main className="flex-1 overflow-auto">
+      {/* Zone B: Main Content - Single scroll container */}
+      <main className="flex-1 h-screen overflow-y-auto">
         {renderContent()}
       </main>
 
       {/* Zone C: Sora Sidecar (only on briefing) */}
-      {activeTab === 'briefing' && (
-        <div className="w-80 hidden lg:block">
+      {activeTab === 'briefing' && mode === 'hunter' && (
+        <div className="w-80 hidden lg:block h-screen overflow-y-auto border-l border-border">
           <SoraSidecar mode={mode} />
         </div>
       )}

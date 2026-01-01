@@ -88,7 +88,7 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
   const applicationVelocity = Math.round((stats.applicationsThisWeek / stats.weeklyGoal) * 100);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 pb-12">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">

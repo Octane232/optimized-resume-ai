@@ -47,7 +47,7 @@ const GrowthTeaser: React.FC<GrowthTeaserProps> = ({ setMode }) => {
   ];
 
   return (
-    <div className="p-6 flex flex-col items-center justify-center min-h-[calc(100vh-2rem)]">
+    <div className="p-6 flex flex-col items-center justify-center min-h-full pb-12">
       {/* Hero Section */}
       <div className="text-center max-w-2xl mx-auto mb-12">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[hsl(262,83%,58%)]/10 border border-[hsl(262,83%,58%)]/20 mb-6">
