@@ -170,7 +170,7 @@ const Auth = () => {
               </span>
             </h1>
             <p className="text-muted-foreground text-lg">
-              Create professional resumes with the power of AI
+              Your AI-powered career command center
             </p>
           </div>
 
@@ -191,7 +191,7 @@ const Auth = () => {
                     <div className="text-center">
                       <CardTitle className="text-xl">Welcome back</CardTitle>
                       <CardDescription>
-                        Sign in to your account to continue building amazing resumes
+                        Sign in to access your career command center
                       </CardDescription>
                     </div>
 
@@ -251,7 +251,7 @@ const Auth = () => {
                     <div className="text-center">
                       <CardTitle className="text-xl">Create your account</CardTitle>
                       <CardDescription>
-                        Join thousands of professionals building better resumes
+                        Join thousands of professionals taking control of their careers
                       </CardDescription>
                     </div>
 

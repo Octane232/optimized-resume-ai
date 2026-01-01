@@ -8,10 +8,8 @@ import BenefitsSection from '@/components/BenefitsSection';
 import TestimonialsSection from '@/components/TestimonialsSection';
 import PricingSection from '@/components/PricingSection';
 import FAQSection from '@/components/FAQSection';
-
 import ResourcesSection from '@/components/ResourcesSection';
 import Footer from '@/components/Footer';
-import ResumesShowcase from '@/components/ResumesShowcase';
 
 const Index = () => {
   const location = useLocation();
@@ -33,9 +31,6 @@ const Index = () => {
       <HeroSection />
       <div id="features">
         <HowItWorksSection />
-      </div>
-      <div id="templates">
-        <ResumesShowcase />
       </div>
       <BenefitsSection />
       <TestimonialsSection />
