@@ -1,14 +1,16 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
-  FileSearch,
+  Brain,
   Database,
-  Kanban,
+  Target,
   Settings,
   LogOut,
-  HelpCircle,
+  Crosshair,
+  Rocket,
+  Lock,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -34,45 +36,29 @@ interface AppSidebarProps {
 
 export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
   const navigate = useNavigate();
+  const [mode, setMode] = useState<'hunter' | 'growth'>('hunter');
 
-  // Main navigation items as per the document
+  // Big Four navigation items
   const menuItems = [
     {
       title: "Briefing",
       id: "briefing",
       icon: LayoutDashboard,
-      description: "Your daily overview",
     },
     {
       title: "Resume Engine",
       id: "resume-engine",
-      icon: FileSearch,
-      description: "Analyze & optimize",
+      icon: Brain,
     },
     {
       title: "The Vault",
       id: "vault",
       icon: Database,
-      description: "Career foundation",
     },
     {
       title: "Mission Control",
       id: "mission-control",
-      icon: Kanban,
-      description: "Track applications",
-    },
-  ];
-
-  const bottomItems = [
-    {
-      title: "Settings",
-      id: "settings",
-      icon: Settings,
-    },
-    {
-      title: "Help",
-      id: "help",
-      icon: HelpCircle,
+      icon: Target,
     },
   ];
 
@@ -104,10 +90,33 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
         <div className="flex items-center gap-3">
           <img src={logo} alt="Pitchsora" className="h-10 w-auto" />
         </div>
+
+        {/* Mode Toggle */}
+        <div className="mt-4 p-1 bg-sidebar-accent/30 rounded-lg flex">
+          <button
+            onClick={() => setMode('hunter')}
+            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-xs font-medium transition-all ${
+              mode === 'hunter'
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-sidebar-foreground'
+            }`}
+          >
+            <Crosshair className="w-3.5 h-3.5" />
+            Hunter
+          </button>
+          <button
+            onClick={() => toast({ title: "Coming Soon", description: "Growth Mode will be available in a future update." })}
+            className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-xs font-medium text-muted-foreground/50 cursor-not-allowed"
+          >
+            <Rocket className="w-3.5 h-3.5" />
+            Growth
+            <Lock className="w-3 h-3" />
+          </button>
+        </div>
       </SidebarHeader>
 
       <SidebarContent className="px-2 py-4">
-        {/* Main Navigation */}
+        {/* Big Four Navigation */}
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
@@ -117,19 +126,14 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
                   <SidebarMenuItem key={item.id}>
                     <SidebarMenuButton 
                       onClick={() => setActiveTab(item.id)}
-                      className={`w-full justify-start gap-3 h-12 rounded-lg transition-all ${
+                      className={`w-full justify-start gap-3 h-11 rounded-lg transition-all ${
                         isActive 
                           ? 'bg-primary text-primary-foreground shadow-md' 
                           : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
                       }`}
                     >
                       <item.icon className="w-5 h-5" />
-                      <div className="flex flex-col items-start">
-                        <span className="font-semibold text-sm">{item.title}</span>
-                        {!isActive && (
-                          <span className="text-xs text-muted-foreground">{item.description}</span>
-                        )}
-                      </div>
+                      <span className="font-medium">{item.title}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
@@ -140,28 +144,23 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
 
         <SidebarSeparator className="my-4" />
 
-        {/* Bottom Navigation */}
+        {/* Settings */}
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
-              {bottomItems.map((item) => {
-                const isActive = activeTab === item.id;
-                return (
-                  <SidebarMenuItem key={item.id}>
-                    <SidebarMenuButton 
-                      onClick={() => setActiveTab(item.id)}
-                      className={`w-full justify-start gap-3 h-10 rounded-lg ${
-                        isActive 
-                          ? 'bg-sidebar-accent text-sidebar-accent-foreground' 
-                          : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
-                      }`}
-                    >
-                      <item.icon className="w-4 h-4" />
-                      <span className="font-medium text-sm">{item.title}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  onClick={() => setActiveTab('settings')}
+                  className={`w-full justify-start gap-3 h-10 rounded-lg ${
+                    activeTab === 'settings'
+                      ? 'bg-sidebar-accent text-sidebar-accent-foreground' 
+                      : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
+                  }`}
+                >
+                  <Settings className="w-4 h-4" />
+                  <span className="font-medium text-sm">Settings</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
