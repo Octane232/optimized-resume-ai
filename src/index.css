@@ -38,6 +38,17 @@
     --ring: 217 91% 60%;
     --radius: 0.75rem;
 
+    /* Hunter Mode - Electric Blue */
+    --hunter-primary: 217 100% 50%;
+    --hunter-secondary: 222 80% 20%;
+    --hunter-glow: 217 100% 60%;
+    
+    /* Growth Mode - Royal Purple & Gold */
+    --growth-primary: 262 83% 58%;
+    --growth-secondary: 262 50% 20%;
+    --growth-gold: 43 96% 56%;
+    --growth-glow: 262 83% 68%;
+
     /* Electric Blue Accent */
     --electric-blue: 217 91% 60%;
     --electric-blue-glow: 217 91% 70%;
@@ -67,6 +78,14 @@
                      radial-gradient(at 100% 0%, hsl(230 80% 55% / 0.08) 0%, transparent 50%),
                      radial-gradient(at 100% 100%, hsl(var(--emerald-500) / 0.05) 0%, transparent 50%);
     
+    /* Hunter Mode Gradients */
+    --gradient-hunter: linear-gradient(135deg, hsl(var(--hunter-primary)) 0%, hsl(230 80% 45%) 100%);
+    --gradient-hunter-subtle: linear-gradient(180deg, hsl(var(--hunter-primary) / 0.1) 0%, transparent 100%);
+    
+    /* Growth Mode Gradients */
+    --gradient-growth: linear-gradient(135deg, hsl(var(--growth-primary)) 0%, hsl(280 70% 45%) 100%);
+    --gradient-growth-subtle: linear-gradient(180deg, hsl(var(--growth-primary) / 0.1) 0%, transparent 100%);
+    
     /* Enhanced shadows */
     --shadow-soft: 0 2px 8px -2px hsl(var(--electric-blue) / 0.1);
     --shadow-card: 0 4px 16px -4px hsl(var(--electric-blue) / 0.12), 0 2px 8px -2px hsl(230 80% 55% / 0.08);
@@ -74,6 +93,10 @@
     --shadow-xl: 0 16px 48px -16px hsl(var(--electric-blue) / 0.2), 0 8px 24px -8px hsl(230 80% 55% / 0.15);
     --shadow-glow: 0 0 0 1px hsl(var(--electric-blue) / 0.1), 0 8px 32px -8px hsl(var(--electric-blue) / 0.25);
     --shadow-glow-lg: 0 0 64px -16px hsl(var(--electric-blue) / 0.4);
+    
+    /* Mode-specific shadows */
+    --shadow-hunter: 0 0 32px -8px hsl(var(--hunter-primary) / 0.4);
+    --shadow-growth: 0 0 32px -8px hsl(var(--growth-primary) / 0.4);
 
     --ease-elastic: cubic-bezier(0.175, 0.885, 0.32, 1.275);
     --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);

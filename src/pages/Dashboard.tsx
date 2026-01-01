@@ -1,19 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/dashboard/AppSidebar';
-import Briefing from '@/components/dashboard/Briefing';
-import ResumeEngine from '@/components/dashboard/ResumeEngine';
+import NewSidebar from '@/components/dashboard/NewSidebar';
+import SoraSidecar from '@/components/dashboard/SoraSidecar';
+import NewOnboarding from '@/components/dashboard/NewOnboarding';
+import HunterDashboard from '@/components/dashboard/HunterDashboard';
+import GrowthDashboard from '@/components/dashboard/GrowthDashboard';
 import TheVault from '@/components/dashboard/TheVault';
 import MissionControl from '@/components/dashboard/MissionControl';
 import Settings from '@/components/dashboard/Settings';
-import OnboardingFlow from '@/components/dashboard/OnboardingFlow';
+import ResumeEngine from '@/components/dashboard/ResumeEngine';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem('dashboard-active-tab') || 'briefing';
   });
+  const [mode, setMode] = useState<'hunter' | 'growth'>(() => {
+    return (localStorage.getItem('dashboard-mode') as 'hunter' | 'growth') || 'hunter';
+  });
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [hasResume, setHasResume] = useState(false);
@@ -27,6 +32,10 @@ const Dashboard = () => {
     localStorage.setItem('dashboard-active-tab', activeTab);
   }, [activeTab]);
 
+  useEffect(() => {
+    localStorage.setItem('dashboard-mode', mode);
+  }, [mode]);
+
   const checkAuth = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -35,25 +44,32 @@ const Dashboard = () => {
         return;
       }
 
-      // Check onboarding status
-      const { data: preferences } = await supabase
-        .from('career_preferences')
-        .select('onboarding_completed')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      // Check onboarding status and resume
+      const [preferencesResult, resumesResult] = await Promise.all([
+        supabase
+          .from('career_preferences')
+          .select('onboarding_completed, work_style')
+          .eq('user_id', user.id)
+          .maybeSingle(),
+        supabase
+          .from('resumes')
+          .select('id')
+          .eq('user_id', user.id)
+          .limit(1)
+      ]);
 
-      if (!preferences?.onboarding_completed) {
-        setShowOnboarding(true);
-      }
+      const preferences = preferencesResult.data;
+      const resumes = resumesResult.data;
 
       // Check if user has a resume
-      const { data: resumes } = await supabase
-        .from('resumes')
-        .select('id')
-        .eq('user_id', user.id)
-        .limit(1);
-
       setHasResume(resumes && resumes.length > 0);
+
+      // If no resume or onboarding not completed, show onboarding
+      if (!resumes || resumes.length === 0 || !preferences?.onboarding_completed) {
+        setShowOnboarding(true);
+      } else if (preferences?.work_style) {
+        setMode(preferences.work_style as 'hunter' | 'growth');
+      }
 
     } catch (error) {
       console.error('Auth check error:', error);
@@ -63,8 +79,10 @@ const Dashboard = () => {
     }
   };
 
-  const handleOnboardingComplete = () => {
+  const handleOnboardingComplete = (selectedMode: 'hunter' | 'growth') => {
+    setMode(selectedMode);
     setShowOnboarding(false);
+    setHasResume(true);
   };
 
   if (loading) {
@@ -78,11 +96,17 @@ const Dashboard = () => {
     );
   }
 
+  if (showOnboarding) {
+    return <NewOnboarding onComplete={handleOnboardingComplete} />;
+  }
+
   const renderContent = () => {
     switch (activeTab) {
       case 'briefing':
-        return <Briefing setActiveTab={setActiveTab} hasResume={hasResume} />;
-      case 'resume-engine':
+        return mode === 'hunter' 
+          ? <HunterDashboard setActiveTab={setActiveTab} />
+          : <GrowthDashboard setActiveTab={setActiveTab} />;
+      case 'scout':
         return <ResumeEngine setActiveTab={setActiveTab} hasResume={hasResume} />;
       case 'vault':
         return <TheVault onResumeChange={(has) => setHasResume(has)} />;
@@ -91,20 +115,36 @@ const Dashboard = () => {
       case 'settings':
         return <Settings />;
       default:
-        return <Briefing setActiveTab={setActiveTab} hasResume={hasResume} />;
+        return mode === 'hunter' 
+          ? <HunterDashboard setActiveTab={setActiveTab} />
+          : <GrowthDashboard setActiveTab={setActiveTab} />;
     }
   };
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <AppSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-        <main className="flex-1 overflow-auto">
-          {renderContent()}
-        </main>
-      </div>
-      {showOnboarding && <OnboardingFlow onComplete={handleOnboardingComplete} />}
-    </SidebarProvider>
+    <div className="min-h-screen flex w-full bg-background">
+      {/* Zone A: Left Sidebar */}
+      <NewSidebar 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab}
+        mode={mode}
+        setMode={setMode}
+        collapsed={sidebarCollapsed}
+        setCollapsed={setSidebarCollapsed}
+      />
+      
+      {/* Zone B: Main Content */}
+      <main className="flex-1 overflow-auto">
+        {renderContent()}
+      </main>
+
+      {/* Zone C: Sora Sidecar (only on briefing) */}
+      {activeTab === 'briefing' && (
+        <div className="w-80 hidden lg:block">
+          <SoraSidecar mode={mode} />
+        </div>
+      )}
+    </div>
   );
 };
 
