@@ -5,7 +5,7 @@ import NewSidebar from '@/components/dashboard/NewSidebar';
 import SoraSidecar from '@/components/dashboard/SoraSidecar';
 import NewOnboarding from '@/components/dashboard/NewOnboarding';
 import HunterDashboard from '@/components/dashboard/HunterDashboard';
-import GrowthDashboard from '@/components/dashboard/GrowthDashboard';
+import GrowthTeaser from '@/components/dashboard/GrowthTeaser';
 import TheVault from '@/components/dashboard/TheVault';
 import MissionControl from '@/components/dashboard/MissionControl';
 import Settings from '@/components/dashboard/Settings';
@@ -101,11 +101,14 @@ const Dashboard = () => {
   }
 
   const renderContent = () => {
+    // If in growth mode, always show teaser
+    if (mode === 'growth') {
+      return <GrowthTeaser setMode={setMode} />;
+    }
+
     switch (activeTab) {
       case 'briefing':
-        return mode === 'hunter' 
-          ? <HunterDashboard setActiveTab={setActiveTab} />
-          : <GrowthDashboard setActiveTab={setActiveTab} />;
+        return <HunterDashboard setActiveTab={setActiveTab} />;
       case 'resume-engine':
         return <ResumeEngine setActiveTab={setActiveTab} hasResume={hasResume} />;
       case 'vault':
@@ -115,9 +118,7 @@ const Dashboard = () => {
       case 'settings':
         return <Settings />;
       default:
-        return mode === 'hunter' 
-          ? <HunterDashboard setActiveTab={setActiveTab} />
-          : <GrowthDashboard setActiveTab={setActiveTab} />;
+        return <HunterDashboard setActiveTab={setActiveTab} />;
     }
   };
 
