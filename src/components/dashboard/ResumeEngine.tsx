@@ -216,9 +216,9 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
   };
 
   return (
-    <div className="h-full bg-background">
+    <div className="min-h-full bg-background">
       {/* Header */}
-      <div className="border-b border-border px-6 py-4 flex items-center justify-between">
+      <div className="sticky top-0 z-10 border-b border-border px-6 py-4 flex items-center justify-between bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div>
           <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
             <Settings2 className="w-5 h-5 text-primary" />
@@ -233,7 +233,7 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
       </div>
 
       {/* Main Content */}
-      <div className="p-6 grid lg:grid-cols-2 gap-6 max-w-7xl mx-auto">
+      <div className="p-6 pb-12 grid lg:grid-cols-2 gap-6 max-w-7xl mx-auto">
         {/* Left Column */}
         <div className="space-y-6">
           {/* Score Overview */}
