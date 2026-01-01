@@ -1,15 +1,35 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, CheckCircle, Star, Sparkles, Zap, FileText, Brain, Shield, Target } from 'lucide-react';
+import { ArrowRight, Upload, Target, Brain, Shield, Briefcase, FileSearch, Database, Kanban } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const HeroSection = () => {
   const features = [
-    { icon: Brain, label: 'Smart Tools', desc: 'AI-assisted writing', color: 'from-blue-500 to-purple-500' },
-    { icon: Target, label: 'ATS-Ready', desc: 'Pass tracking systems', color: 'from-purple-500 to-pink-500' },
-    { icon: Zap, label: 'Quick Setup', desc: 'Start in minutes', color: 'from-emerald-500 to-blue-500' },
-    { icon: Shield, label: 'Private', desc: 'Your data stays yours', color: 'from-orange-500 to-red-500' }
+    { 
+      icon: FileSearch, 
+      label: 'Resume Engine', 
+      desc: 'AI-powered resume analysis & optimization',
+      color: 'from-electric to-blue-400'
+    },
+    { 
+      icon: Database, 
+      label: 'The Vault', 
+      desc: 'Your career foundation & assets',
+      color: 'from-emerald-500 to-teal-400'
+    },
+    { 
+      icon: Kanban, 
+      label: 'Mission Control', 
+      desc: 'Track every application',
+      color: 'from-amber-500 to-orange-400'
+    },
+    { 
+      icon: Brain, 
+      label: 'AI Briefing', 
+      desc: 'Daily career intelligence',
+      color: 'from-purple-500 to-pink-400'
+    }
   ];
 
   return (
@@ -18,143 +38,159 @@ const HeroSection = () => {
       <div className="absolute inset-0 bg-[var(--gradient-mesh)] opacity-90"></div>
       
       {/* Animated gradient orbs */}
-      <div className="absolute w-[800px] h-[800px] bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20 dark:from-blue-500/10 dark:via-purple-500/10 dark:to-pink-500/10 rounded-full blur-3xl pointer-events-none -left-40 -top-40"></div>
-      <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-gradient-to-tl from-emerald-400/20 via-blue-400/20 to-transparent dark:from-emerald-500/10 dark:via-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+      <div className="absolute w-[800px] h-[800px] bg-gradient-to-br from-electric/15 via-blue-500/10 to-purple-500/10 rounded-full blur-3xl pointer-events-none -left-40 -top-40 animate-float"></div>
+      <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-gradient-to-tl from-emerald-500/10 via-electric/15 to-transparent rounded-full blur-3xl"></div>
       
-      {/* Diagonal accent */}
-      <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-bl from-blue-500/5 via-purple-500/5 to-transparent skew-x-12 transform origin-top-right"></div>
+      {/* Grid overlay for command center feel */}
+      <div className="absolute inset-0 bg-[linear-gradient(hsl(var(--border)/0.03)_1px,transparent_1px),linear-gradient(90deg,hsl(var(--border)/0.03)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
       
       <div className="container mx-auto px-6 lg:px-8 relative pt-32 pb-20">
-        {/* Main content - Asymmetric grid layout */}
-        <div className="grid lg:grid-cols-12 gap-8 items-center min-h-[80vh]">
+        {/* Main content */}
+        <div className="grid lg:grid-cols-12 gap-12 items-center min-h-[80vh]">
           {/* Left - Main hero content (spans 7 columns) */}
           <div className="lg:col-span-7 space-y-8">
-            {/* Trust badge */}
-            <div className="inline-flex items-center gap-2 glass-card rounded-full px-4 py-2 animate-fade-in hover:scale-105 transition-transform cursor-default">
-              <div className="flex items-center gap-1.5">
-                <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                <span className="text-sm font-semibold text-foreground">4.6</span>
-              </div>
-              <div className="h-4 w-px bg-border"></div>
-              <span className="text-sm text-muted-foreground">from 1,200+ reviews</span>
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 command-card rounded-full px-4 py-2 animate-fade-in">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+              <span className="text-sm font-medium text-muted-foreground">Your Career Command Center</span>
             </div>
 
-            {/* Main headline with advanced typography */}
+            {/* Main headline */}
             <div className="space-y-4">
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-[0.95] tracking-tighter animate-fade-in">
-                <span className="block text-foreground drop-shadow-sm">AI-Powered Resume Builder</span>
-                <span className="block bg-gradient-to-r from-primary via-purple-600 to-primary bg-clip-text text-transparent drop-shadow-[0_2px_20px_rgba(59,130,246,0.4)]">
-                  Land Your Dream Job
-                </span>
+                <span className="block text-foreground">Take Control of</span>
+                <span className="block gradient-text">Your Career</span>
               </h1>
               
-              {/* Decorative line */}
-              <div className="flex items-center gap-3 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-                <div className="h-1 w-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"></div>
-                <Sparkles className="w-4 h-4 text-purple-600" />
-                <div className="h-1 w-12 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full"></div>
+              {/* Decorative element */}
+              <div className="flex items-center gap-3 animate-fade-in stagger-1">
+                <div className="h-1 w-16 bg-gradient-to-r from-electric to-blue-400 rounded-full"></div>
+                <Target className="w-5 h-5 text-electric" />
               </div>
             </div>
 
-            {/* Subtitle with better spacing */}
-            <p className="text-lg md:text-xl leading-relaxed max-w-xl animate-fade-in" style={{ animationDelay: '0.2s' }}>
-              <span className="text-foreground/80">Create ATS-optimized resumes in minutes using AI. Get instant feedback, track applications, analyze skill gaps, and practice interviews—all in one platform.</span>
+            {/* Subtitle */}
+            <p className="text-lg md:text-xl leading-relaxed max-w-xl text-muted-foreground animate-fade-in stagger-2">
+              Pitchsora is your AI-powered career intelligence platform. Upload your resume, paste job descriptions, 
+              and get instant match analysis, keyword gaps, and ATS optimization—all in one focused command center.
             </p>
 
-            {/* CTA buttons with enhanced styling */}
-            <div className="flex flex-col sm:flex-row gap-4 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-              <Button asChild size="lg" className="saas-button h-16 px-12 text-lg font-bold group relative overflow-hidden">
+            {/* CTA buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 animate-fade-in stagger-3">
+              <Button asChild size="lg" className="saas-button h-14 px-10 text-lg font-bold group relative overflow-hidden">
                 <Link to="/auth" className="flex items-center">
-                  <span className="relative z-10">Start Building Free</span>
-                  <ArrowRight className="ml-2 h-6 w-6 transition-transform group-hover:translate-x-2 relative z-10" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
+                  <Upload className="mr-2 h-5 w-5" />
+                  <span>Upload Your Resume</span>
+                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="glass-card h-16 px-12 text-lg font-bold hover:scale-105 transition-all border-2">
+              <Button asChild variant="outline" size="lg" className="h-14 px-10 text-lg font-semibold border-2 hover:bg-secondary/50">
                 <Link to="#how-it-works" className="flex items-center">
-                  <Zap className="mr-2 h-5 w-5 text-yellow-500" />
-                  Watch Demo
+                  <Brain className="mr-2 h-5 w-5 text-electric" />
+                  See How It Works
                 </Link>
               </Button>
             </div>
 
             {/* Trust indicators */}
-            <div className="flex flex-wrap gap-6 items-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <CheckCircle className="w-4 h-4 text-emerald-500" />
-                <span>Free to start</span>
+            <div className="flex flex-wrap gap-6 items-center text-sm text-muted-foreground animate-fade-in stagger-4">
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4 text-emerald-500" />
+                <span>Your data stays private</span>
               </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <CheckCircle className="w-4 h-4 text-emerald-500" />
-                <span>ATS-friendly</span>
+              <div className="flex items-center gap-2">
+                <Target className="w-4 h-4 text-electric" />
+                <span>ATS-optimized results</span>
               </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <CheckCircle className="w-4 h-4 text-emerald-500" />
-                <span>Export as PDF</span>
+              <div className="flex items-center gap-2">
+                <Briefcase className="w-4 h-4 text-amber-500" />
+                <span>Track all applications</span>
               </div>
             </div>
           </div>
 
-          {/* Right - Bento grid features (spans 5 columns) */}
-          <div className="lg:col-span-5 space-y-6 animate-fade-in" style={{ animationDelay: '0.5s' }}>
-            {/* Feature cards in bento grid */}
+          {/* Right - Feature grid (spans 5 columns) */}
+          <div className="lg:col-span-5 space-y-6">
+            {/* Feature cards in grid */}
             <div className="grid grid-cols-2 gap-4">
               {features.map((feature, index) => {
                 const Icon = feature.icon;
                 return (
                   <div 
                     key={index}
-                    className="card-3d glass-card-strong rounded-3xl p-6 group cursor-pointer animate-fade-in"
-                    style={{ animationDelay: `${0.6 + index * 0.1}s` }}
+                    className="command-card p-6 group cursor-pointer animate-fade-in"
+                    style={{ animationDelay: `${0.5 + index * 0.1}s` }}
                   >
-                    <div className={`w-14 h-14 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center mb-4 shadow-xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
-                      <Icon className="w-7 h-7 text-white" />
+                    <div className={`w-12 h-12 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform`}>
+                      <Icon className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="font-bold text-foreground mb-1 text-base">{feature.label}</h3>
+                    <h3 className="font-bold text-foreground mb-1">{feature.label}</h3>
                     <p className="text-xs text-muted-foreground leading-relaxed">{feature.desc}</p>
                   </div>
                 );
               })}
             </div>
 
-            {/* Large preview card */}
-            <div className="card-3d glass-card-strong rounded-3xl p-8 relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 group-hover:opacity-100 opacity-0 transition-opacity duration-500"></div>
+            {/* Command Center Preview Card */}
+            <div className="command-card p-6 relative overflow-hidden group animate-fade-in" style={{ animationDelay: '0.9s' }}>
+              <div className="absolute inset-0 bg-gradient-to-br from-electric/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
               
-              <div className="relative z-10 space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-2xl animate-gradient bg-[length:200%_200%]">
-                    <FileText className="w-8 h-8 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="h-4 bg-gradient-to-r from-foreground/20 to-foreground/5 rounded-lg w-32 mb-2"></div>
-                    <div className="h-3 bg-gradient-to-r from-muted-foreground/20 to-muted-foreground/5 rounded-lg w-24"></div>
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-sm font-semibold text-muted-foreground">Resume Match Score</span>
+                  <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-xs font-bold">
+                    <span>Ready</span>
                   </div>
                 </div>
                 
-                <div className="space-y-2">
-                  <div className="h-2 bg-gradient-to-r from-foreground/15 to-foreground/5 rounded-full w-full"></div>
-                  <div className="h-2 bg-gradient-to-r from-foreground/15 to-foreground/5 rounded-full w-[85%]"></div>
-                  <div className="h-2 bg-gradient-to-r from-foreground/15 to-foreground/5 rounded-full w-[60%]"></div>
-                </div>
-
-                <div className="flex gap-2 pt-2">
-                  <div className="h-8 flex-1 bg-gradient-to-r from-blue-500/20 to-blue-500/5 rounded-lg"></div>
-                  <div className="h-8 flex-1 bg-gradient-to-r from-purple-500/20 to-purple-500/5 rounded-lg"></div>
-                </div>
-              </div>
-
-              {/* AI Badge */}
-              <div className="absolute -top-3 -right-3 saas-button px-4 py-2 rounded-xl text-xs font-bold shadow-2xl">
-                <div className="flex items-center gap-1">
-                  <Brain className="w-4 h-4" />
-                  <span>AI</span>
+                {/* Score visualization */}
+                <div className="flex items-center gap-4">
+                  <div className="relative w-20 h-20">
+                    <svg className="w-20 h-20 transform -rotate-90">
+                      <circle
+                        cx="40"
+                        cy="40"
+                        r="36"
+                        stroke="hsl(var(--muted))"
+                        strokeWidth="8"
+                        fill="none"
+                      />
+                      <circle
+                        cx="40"
+                        cy="40"
+                        r="36"
+                        stroke="hsl(var(--primary))"
+                        strokeWidth="8"
+                        fill="none"
+                        strokeDasharray={`${0.85 * 226} 226`}
+                        strokeLinecap="round"
+                        className="transition-all duration-1000"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-xl font-bold text-foreground">85%</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex-1 space-y-2">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted-foreground">Keywords</span>
+                      <span className="text-emerald-500 font-medium">12/14</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted-foreground">ATS Ready</span>
+                      <span className="text-electric font-medium">Yes</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted-foreground">Improvements</span>
+                      <span className="text-amber-500 font-medium">3 found</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
       </div>
     </section>
   );
