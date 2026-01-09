@@ -20,15 +20,41 @@ serve(async (req) => {
 
     const systemPrompt = `You are an expert ATS (Applicant Tracking System) and resume optimization specialist with 15+ years of recruiting experience. You analyze resumes against specific job descriptions to provide actionable, specific feedback that helps candidates get past ATS filters and impress hiring managers.
 
+IMPORTANT: The resume data you receive may include enriched "Vault" data:
+- "allSkills": Combined skills from the resume AND manually added skills the candidate has
+- "certifications": Professional certifications the candidate holds
+- "projects": Side projects or portfolio work with technologies used
+
+When analyzing, consider ALL this data - not just the core resume content. A candidate may have relevant skills or certifications in their Vault that should boost their match score even if not yet in their resume. Point out opportunities to add these to the resume.
+
 Your analysis should be:
 - Specific and actionable (not generic advice)
 - Focused on what will actually improve their chances
 - Honest about gaps while being encouraging
-- Prioritized by impact`;
+- Prioritized by impact
+- Consider certifications and projects when evaluating qualifications`;
 
     const jobContext = jobTitle || company 
       ? `\n\nTarget Position: ${jobTitle || 'Not specified'}${company ? ` at ${company}` : ''}`
       : '';
+
+    // Parse the resume to check for vault data
+    let parsedResume;
+    try {
+      parsedResume = typeof resumeText === 'string' ? JSON.parse(resumeText) : resumeText;
+    } catch {
+      parsedResume = { rawText: resumeText };
+    }
+
+    const hasVaultData = parsedResume?.vaultEnriched === true;
+    const vaultContext = hasVaultData ? `
+
+ADDITIONAL VAULT DATA (candidate's enriched profile):
+- All Skills (resume + manually added): ${parsedResume.allSkills?.join(', ') || 'None'}
+- Certifications: ${parsedResume.certifications?.map((c: any) => c.name + (c.issuer ? ` (${c.issuer})` : '')).join(', ') || 'None'}
+- Projects: ${parsedResume.projects?.map((p: any) => p.name + (p.technologies ? `: ${p.technologies}` : '')).join('; ') || 'None'}
+
+Consider these Vault items when scoring and providing recommendations. If they have relevant certifications or projects, suggest adding them to the resume.` : '';
 
     const userPrompt = `Analyze this resume for the following job opportunity:
 ${jobContext}
@@ -38,12 +64,14 @@ ${jobDescription}
 
 RESUME CONTENT:
 ${resumeText}
+${vaultContext}
 
 Provide a comprehensive match analysis with specific, actionable recommendations. Consider:
 1. How well does the candidate's experience align with the role requirements?
-2. What specific keywords from the job posting are missing?
-3. What concrete changes would improve their match score?
-4. Are there any red flags an ATS might catch?`;
+2. What specific keywords from the job posting are missing from the resume?
+3. If they have relevant certifications or projects in their Vault, recommend adding them
+4. What concrete changes would improve their match score?
+5. Are there any red flags an ATS might catch?`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

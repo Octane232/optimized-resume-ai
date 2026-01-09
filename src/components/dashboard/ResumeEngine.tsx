@@ -58,6 +58,9 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
   const isPremium = tier === 'pro' || tier === 'premium';
   
   const [resumeContent, setResumeContent] = useState<any>(null);
+  const [vaultSkills, setVaultSkills] = useState<string[]>([]);
+  const [vaultCertifications, setVaultCertifications] = useState<{ name: string; issuer?: string }[]>([]);
+  const [vaultProjects, setVaultProjects] = useState<{ name: string; technologies?: string }[]>([]);
   const [bulletPoints, setBulletPoints] = useState<BulletPoint[]>([]);
   const [overallScore, setOverallScore] = useState(0);
   
@@ -90,12 +93,33 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
         .limit(1);
 
       if (resumes && resumes.length > 0) {
-        setResumeContent(resumes[0].content);
-        analyzeResumeBasic(resumes[0].content);
+        const content = resumes[0].content as any;
+        setResumeContent(content);
+        
+        // Extract skills from resume content for Vault data
+        if (content?.skills) {
+          setVaultSkills(content.skills);
+        }
+        
+        analyzeResumeBasic(content);
       }
     } catch (error) {
       console.error('Error fetching resume:', error);
     }
+  };
+
+  // Helper to build enriched resume data with all Vault content
+  const getEnrichedResumeData = () => {
+    const resumeSkills = resumeContent?.skills || [];
+    const allSkills = [...new Set([...resumeSkills, ...vaultSkills])];
+    
+    return {
+      ...resumeContent,
+      allSkills,
+      certifications: vaultCertifications,
+      projects: vaultProjects,
+      vaultEnriched: true
+    };
   };
 
   const analyzeResumeBasic = (content: any) => {
@@ -183,9 +207,12 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
 
     setIsAnalyzingMatch(true);
     try {
+      // Get enriched resume data including all Vault content
+      const enrichedData = getEnrichedResumeData();
+      
       const { data, error } = await supabase.functions.invoke('analyze-resume-match', {
         body: { 
-          resumeText: JSON.stringify(resumeContent),
+          resumeText: JSON.stringify(enrichedData),
           jobDescription,
           jobTitle: jobTitle || undefined,
           company: company || undefined
@@ -208,6 +235,11 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
       setIsAnalyzingMatch(false);
     }
   };
+
+  // Allow external components to update Vault data
+  const updateVaultSkills = (skills: string[]) => setVaultSkills(skills);
+  const updateVaultCertifications = (certs: { name: string; issuer?: string }[]) => setVaultCertifications(certs);
+  const updateVaultProjects = (projects: { name: string; technologies?: string }[]) => setVaultProjects(projects);
 
   const handleAutoOptimize = async () => {
     toast({ title: "Optimizing...", description: "Applying AI improvements to your resume" });
