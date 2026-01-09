@@ -11,24 +11,39 @@ serve(async (req) => {
   }
 
   try {
-    const { resumeText, jobDescription } = await req.json();
+    const { resumeText, jobDescription, jobTitle, company } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const systemPrompt = `You are an expert resume and job matching analyst. Analyze the resume against the job description and provide detailed feedback on how well the resume matches the job requirements.`;
+    const systemPrompt = `You are an expert ATS (Applicant Tracking System) and resume optimization specialist with 15+ years of recruiting experience. You analyze resumes against specific job descriptions to provide actionable, specific feedback that helps candidates get past ATS filters and impress hiring managers.
 
-    const userPrompt = `Analyze this resume for the following job:
+Your analysis should be:
+- Specific and actionable (not generic advice)
+- Focused on what will actually improve their chances
+- Honest about gaps while being encouraging
+- Prioritized by impact`;
 
-Job Description:
+    const jobContext = jobTitle || company 
+      ? `\n\nTarget Position: ${jobTitle || 'Not specified'}${company ? ` at ${company}` : ''}`
+      : '';
+
+    const userPrompt = `Analyze this resume for the following job opportunity:
+${jobContext}
+
+JOB DESCRIPTION:
 ${jobDescription}
 
-Resume Content:
+RESUME CONTENT:
 ${resumeText}
 
-Provide a comprehensive match analysis.`;
+Provide a comprehensive match analysis with specific, actionable recommendations. Consider:
+1. How well does the candidate's experience align with the role requirements?
+2. What specific keywords from the job posting are missing?
+3. What concrete changes would improve their match score?
+4. Are there any red flags an ATS might catch?`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -37,7 +52,7 @@ Provide a comprehensive match analysis.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
@@ -46,45 +61,86 @@ Provide a comprehensive match analysis.`;
           type: "function",
           function: {
             name: "provide_match_analysis",
-            description: "Provide detailed resume-job match analysis",
+            description: "Provide detailed resume-job match analysis with specific actionable recommendations",
             parameters: {
               type: "object",
               properties: {
                 match_score: { 
                   type: "number", 
-                  description: "Overall match score (0-100)" 
+                  description: "Overall match score (0-100) based on skills, experience, and keyword alignment" 
                 },
                 is_good_fit: {
                   type: "boolean",
-                  description: "Whether the resume is a good fit for the job"
+                  description: "Whether the resume is a good fit for the job (score >= 70)"
+                },
+                fit_summary: {
+                  type: "string",
+                  description: "A 1-2 sentence summary of overall fit and main recommendation"
                 },
                 strengths: {
                   type: "array",
-                  items: { type: "string" },
-                  description: "Key strengths and matches"
+                  items: { 
+                    type: "object",
+                    properties: {
+                      point: { type: "string", description: "The strength" },
+                      impact: { type: "string", enum: ["high", "medium"], description: "How much this helps their candidacy" }
+                    },
+                    required: ["point", "impact"]
+                  },
+                  description: "Key strengths that align with the job (max 5)"
                 },
                 gaps: {
                   type: "array",
-                  items: { type: "string" },
-                  description: "Missing skills or experience"
+                  items: { 
+                    type: "object",
+                    properties: {
+                      gap: { type: "string", description: "The missing skill or experience" },
+                      severity: { type: "string", enum: ["critical", "moderate", "minor"], description: "How important this gap is" },
+                      suggestion: { type: "string", description: "How to address this gap in the resume" }
+                    },
+                    required: ["gap", "severity", "suggestion"]
+                  },
+                  description: "Missing skills or experience gaps (max 5)"
                 },
                 recommendations: {
                   type: "array",
-                  items: { type: "string" },
-                  description: "Specific recommendations to improve the resume for this job"
+                  items: { 
+                    type: "object",
+                    properties: {
+                      action: { type: "string", description: "Specific action to take" },
+                      section: { type: "string", enum: ["summary", "experience", "skills", "education", "other"], description: "Which resume section to modify" },
+                      priority: { type: "string", enum: ["high", "medium", "low"], description: "Priority level" },
+                      example: { type: "string", description: "Optional: example text or rewording" }
+                    },
+                    required: ["action", "section", "priority"]
+                  },
+                  description: "Specific, actionable recommendations to improve match (max 6)"
                 },
                 keyword_matches: {
                   type: "array",
                   items: { type: "string" },
-                  description: "Important keywords that match"
+                  description: "Important keywords from the job that are present in the resume"
                 },
                 missing_keywords: {
                   type: "array",
+                  items: { 
+                    type: "object",
+                    properties: {
+                      keyword: { type: "string" },
+                      importance: { type: "string", enum: ["must-have", "nice-to-have"] },
+                      context: { type: "string", description: "Where/how to add this keyword" }
+                    },
+                    required: ["keyword", "importance"]
+                  },
+                  description: "Important keywords missing from the resume"
+                },
+                ats_warnings: {
+                  type: "array",
                   items: { type: "string" },
-                  description: "Important keywords missing from resume"
+                  description: "Any formatting or content issues that might cause ATS problems"
                 }
               },
-              required: ["match_score", "is_good_fit", "strengths", "gaps", "recommendations"],
+              required: ["match_score", "is_good_fit", "fit_summary", "strengths", "gaps", "recommendations", "keyword_matches", "missing_keywords"],
               additionalProperties: false
             }
           }

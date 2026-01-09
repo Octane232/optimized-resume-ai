@@ -16,6 +16,7 @@ import IndustryBenchmark from './resume-engine/IndustryBenchmark';
 import BulletRewriter from './resume-engine/BulletRewriter';
 import ATSSimulationView from './resume-engine/ATSSimulationView';
 import AutoOptimizeButton from './resume-engine/AutoOptimizeButton';
+import RecommendationsPanel from './resume-engine/RecommendationsPanel';
 import UpgradeModal from './UpgradeModal';
 
 interface ResumeEngineProps {
@@ -43,11 +44,13 @@ interface ATSAnalysis {
 interface MatchAnalysis {
   match_score: number;
   is_good_fit: boolean;
-  strengths: string[];
-  gaps: string[];
-  recommendations: string[];
+  fit_summary?: string;
+  strengths: { point: string; impact: 'high' | 'medium' }[];
+  gaps: { gap: string; severity: 'critical' | 'moderate' | 'minor'; suggestion: string }[];
+  recommendations: { action: string; section: 'summary' | 'experience' | 'skills' | 'education' | 'other'; priority: 'high' | 'medium' | 'low'; example?: string }[];
   keyword_matches?: string[];
-  missing_keywords?: string[];
+  missing_keywords?: { keyword: string; importance: 'must-have' | 'nice-to-have'; context?: string }[];
+  ats_warnings?: string[];
 }
 
 const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
@@ -183,14 +186,22 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
       const { data, error } = await supabase.functions.invoke('analyze-resume-match', {
         body: { 
           resumeText: JSON.stringify(resumeContent),
-          jobDescription 
+          jobDescription,
+          jobTitle: jobTitle || undefined,
+          company: company || undefined
         }
       });
 
       if (error) throw error;
       setMatchAnalysis(data);
       
-      toast({ title: "Match analysis complete", description: `${data.match_score}% match score` });
+      const fitMessage = data.is_good_fit 
+        ? "You're a strong match for this role!" 
+        : "See recommendations to improve your fit.";
+      toast({ 
+        title: `${data.match_score}% Match Score`, 
+        description: fitMessage
+      });
     } catch (error: any) {
       toast({ title: "Analysis failed", description: error.message, variant: "destructive" });
     } finally {
@@ -243,17 +254,42 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
 
         {/* Match Results (if job was analyzed) */}
         {matchAnalysis && (
-          <div className="grid lg:grid-cols-2 gap-6">
-            <MatchMeter 
-              score={matchAnalysis.match_score} 
-              missingCount={matchAnalysis.missing_keywords?.length || 0}
-              isAnalyzing={isAnalyzingMatch}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-6"
+          >
+            {/* Score & Keywords Row */}
+            <div className="grid lg:grid-cols-2 gap-6">
+              <MatchMeter 
+                score={matchAnalysis.match_score} 
+                missingCount={matchAnalysis.missing_keywords?.length || 0}
+                isAnalyzing={isAnalyzingMatch}
+              />
+              <KeywordGap
+                matchingKeywords={matchAnalysis.keyword_matches || []}
+                missingKeywords={(matchAnalysis.missing_keywords || []).map(k => 
+                  typeof k === 'string' 
+                    ? { keyword: k, reason: 'Required in job description' }
+                    : { keyword: k.keyword, reason: k.context || `${k.importance === 'must-have' ? 'Must-have' : 'Nice-to-have'} skill` }
+                )}
+              />
+            </div>
+            
+            {/* Recommendations Panel */}
+            <RecommendationsPanel
+              recommendations={matchAnalysis.recommendations}
+              gaps={matchAnalysis.gaps}
+              fitSummary={matchAnalysis.fit_summary}
+              atsWarnings={matchAnalysis.ats_warnings}
+              onApplyRecommendation={(rec) => {
+                toast({
+                  title: `Apply to ${rec.section}`,
+                  description: rec.action
+                });
+              }}
             />
-            <KeywordGap
-              matchingKeywords={matchAnalysis.keyword_matches || []}
-              missingKeywords={(matchAnalysis.missing_keywords || []).map(k => ({ keyword: k, reason: 'Required in job description' }))}
-            />
-          </div>
+          </motion.div>
         )}
 
         {/* Main Grid */}
