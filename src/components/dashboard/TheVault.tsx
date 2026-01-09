@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { 
@@ -9,32 +8,70 @@ import {
   CheckCircle,
   Award,
   FolderKanban,
-  Tag,
-  Tags
+  Tags,
+  Lock,
+  ChevronDown,
+  ChevronUp,
+  Link as LinkIcon,
+  Calendar
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
+import { useSubscription } from '@/contexts/SubscriptionContext';
+import { useNavigate } from 'react-router-dom';
+
+// Vault sub-components
+import CareerStrengthMeter from './vault/CareerStrengthMeter';
+import VaultInsightsTeaser from './vault/VaultInsightsTeaser';
+import AchievementBadges from './vault/AchievementBadges';
+import QuickActionsBar from './vault/QuickActionsBar';
+import AISkillsExtractor from './vault/AISkillsExtractor';
+import TrendingSkillBadge from './vault/TrendingSkillBadge';
+import UpgradeModal from './UpgradeModal';
 
 interface TheVaultProps {
   onResumeChange?: (hasResume: boolean) => void;
+  setActiveTab?: (tab: string) => void;
 }
 
-const TheVault = ({ onResumeChange }: TheVaultProps) => {
+interface RichCertification {
+  name: string;
+  issuer?: string;
+  dateEarned?: string;
+  credentialLink?: string;
+}
+
+interface RichProject {
+  name: string;
+  description?: string;
+  technologies?: string;
+  liveLink?: string;
+}
+
+const TheVault = ({ onResumeChange, setActiveTab }: TheVaultProps) => {
   const [hasResume, setHasResume] = useState(false);
   const [resumeTitle, setResumeTitle] = useState('');
+  const [resumeSkills, setResumeSkills] = useState<string[]>([]);
   const [skills, setSkills] = useState<string[]>([]);
   const [newSkill, setNewSkill] = useState('');
-  const [certifications, setCertifications] = useState<string[]>([]);
+  const [certifications, setCertifications] = useState<RichCertification[]>([]);
   const [newCert, setNewCert] = useState('');
-  const [projects, setProjects] = useState<string[]>([]);
+  const [projects, setProjects] = useState<RichProject[]>([]);
   const [newProject, setNewProject] = useState('');
   const [resumeTags, setResumeTags] = useState<string[]>(['General']);
   const [newTag, setNewTag] = useState('');
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [expandedCert, setExpandedCert] = useState<number | null>(null);
+  const [expandedProject, setExpandedProject] = useState<number | null>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [upgradeFeature, setUpgradeFeature] = useState('');
+
+  const { tier } = useSubscription();
+  const navigate = useNavigate();
+  const isPremium = tier === 'pro' || tier === 'premium';
 
   useEffect(() => {
     fetchVaultData();
@@ -56,7 +93,10 @@ const TheVault = ({ onResumeChange }: TheVaultProps) => {
         setHasResume(true);
         setResumeTitle(resumes[0].title);
         const content = resumes[0].content as any;
-        if (content?.skills) setSkills(content.skills);
+        if (content?.skills) {
+          setResumeSkills(content.skills);
+          setSkills(content.skills);
+        }
       }
 
     } catch (error) {
@@ -132,6 +172,12 @@ const TheVault = ({ onResumeChange }: TheVaultProps) => {
     }, 1500);
   };
 
+  const addSkill = (skill: string) => {
+    if (skill.trim() && !skills.includes(skill.trim())) {
+      setSkills([...skills, skill.trim()]);
+    }
+  };
+
   const addItem = (
     item: string, 
     setItem: (val: string) => void, 
@@ -144,8 +190,55 @@ const TheVault = ({ onResumeChange }: TheVaultProps) => {
     }
   };
 
-  const removeItem = (index: number, items: string[], setItems: (items: string[]) => void) => {
-    setItems(items.filter((_, i) => i !== index));
+  const removeSkill = (index: number) => {
+    setSkills(skills.filter((_, i) => i !== index));
+  };
+
+  const handleUpgradeClick = (feature: string) => {
+    setUpgradeFeature(feature);
+    setShowUpgradeModal(true);
+  };
+
+  const handleNavigate = (tab: string) => {
+    if (setActiveTab) {
+      setActiveTab(tab);
+    }
+  };
+
+  const addCertification = () => {
+    if (newCert.trim()) {
+      setCertifications([...certifications, { name: newCert.trim() }]);
+      setNewCert('');
+    }
+  };
+
+  const removeCertification = (index: number) => {
+    setCertifications(certifications.filter((_, i) => i !== index));
+    if (expandedCert === index) setExpandedCert(null);
+  };
+
+  const updateCertification = (index: number, updates: Partial<RichCertification>) => {
+    const updated = [...certifications];
+    updated[index] = { ...updated[index], ...updates };
+    setCertifications(updated);
+  };
+
+  const addProject = () => {
+    if (newProject.trim()) {
+      setProjects([...projects, { name: newProject.trim() }]);
+      setNewProject('');
+    }
+  };
+
+  const removeProject = (index: number) => {
+    setProjects(projects.filter((_, i) => i !== index));
+    if (expandedProject === index) setExpandedProject(null);
+  };
+
+  const updateProject = (index: number, updates: Partial<RichProject>) => {
+    const updated = [...projects];
+    updated[index] = { ...updated[index], ...updates };
+    setProjects(updated);
   };
 
   const completeness = calculateCompleteness();
@@ -161,34 +254,35 @@ const TheVault = ({ onResumeChange }: TheVaultProps) => {
 
   return (
     <div className="p-6 space-y-5 max-w-4xl mx-auto">
-      {/* Vault Completeness Meter */}
-      <div className="command-card p-5">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <h2 className="text-lg font-bold text-foreground">Vault Completeness</h2>
-            <p className="text-xs text-muted-foreground">The more complete, the better your insights</p>
-          </div>
-          <div className="text-right">
-            <span className={`text-2xl font-bold ${completeness >= 75 ? 'text-emerald-500' : completeness >= 50 ? 'text-amber-500' : 'text-muted-foreground'}`}>
-              {completeness}%
-            </span>
-          </div>
-        </div>
-        <Progress value={completeness} className="h-2" />
-        
-        {/* Completion hints */}
-        <div className="flex flex-wrap gap-2 mt-3">
-          {!hasResume && (
-            <span className="text-xs text-amber-500">• Upload master resume (+40%)</span>
-          )}
-          {skills.length < 5 && (
-            <span className="text-xs text-amber-500">• Add {5 - skills.length} more skills (+{skills.length > 0 ? '10' : '20'}%)</span>
-          )}
-          {certifications.length === 0 && (
-            <span className="text-xs text-muted-foreground">• Add certifications (+15%)</span>
-          )}
-        </div>
-      </div>
+      {/* Career Profile Strength Meter (Enhanced) */}
+      <CareerStrengthMeter 
+        completeness={completeness}
+        hasResume={hasResume}
+        skillsCount={skills.length}
+        certificationsCount={certifications.length}
+        projectsCount={projects.length}
+        isPremium={isPremium}
+      />
+
+      {/* Quick Actions Bar */}
+      <QuickActionsBar 
+        isPremium={isPremium}
+        onNavigate={handleNavigate}
+        onUpgrade={() => handleUpgradeClick('Quick Actions')}
+      />
+
+      {/* Vault Insights Teaser (Locked for Free) */}
+      {!isPremium && (
+        <VaultInsightsTeaser onUpgrade={() => handleUpgradeClick('Vault Insights')} />
+      )}
+
+      {/* Achievement Badges */}
+      <AchievementBadges 
+        hasResume={hasResume}
+        skillsCount={skills.length}
+        certificationsCount={certifications.length}
+        projectsCount={projects.length}
+      />
 
       {/* Master Resume - Mandatory */}
       <div className="command-card p-5">
@@ -275,7 +369,7 @@ const TheVault = ({ onResumeChange }: TheVaultProps) => {
               {tag}
               {resumeTags.length > 1 && (
                 <button 
-                  onClick={() => removeItem(i, resumeTags, setResumeTags)}
+                  onClick={() => setResumeTags(resumeTags.filter((_, idx) => idx !== i))}
                   className="ml-1 hover:text-destructive"
                 >
                   <X className="w-3 h-3" />
@@ -286,31 +380,50 @@ const TheVault = ({ onResumeChange }: TheVaultProps) => {
         </div>
       </div>
 
-      {/* Skills */}
+      {/* Skills with AI Extractor and Trending Badges */}
       <div className="command-card p-5">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 bg-gradient-to-br from-purple-500 to-pink-400 rounded-lg flex items-center justify-center">
-            <Tag className="w-4 h-4 text-white" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-foreground text-sm">Skills</h3>
-            <p className="text-xs text-muted-foreground">Technical and soft skills</p>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-gradient-to-br from-purple-500 to-pink-400 rounded-lg flex items-center justify-center">
+              <span className="text-white text-sm font-bold">#</span>
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground text-sm">Skills</h3>
+              <p className="text-xs text-muted-foreground">Technical and soft skills</p>
+            </div>
           </div>
         </div>
 
-        <div className="flex gap-2 mb-3">
+        {/* AI Skills Extractor */}
+        <AISkillsExtractor 
+          isPremium={isPremium}
+          existingSkills={skills}
+          resumeSkills={resumeSkills}
+          onAddSkill={addSkill}
+          onUpgrade={() => handleUpgradeClick('AI Skills Extractor')}
+        />
+
+        <div className="flex gap-2 my-3">
           <Input 
             placeholder="Add a skill..."
             value={newSkill}
             onChange={(e) => setNewSkill(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && addItem(newSkill, setNewSkill, skills, setSkills)}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                addSkill(newSkill);
+                setNewSkill('');
+              }
+            }}
             className="h-9 text-sm"
           />
           <Button 
             variant="outline" 
             size="icon"
             className="h-9 w-9"
-            onClick={() => addItem(newSkill, setNewSkill, skills, setSkills)}
+            onClick={() => {
+              addSkill(newSkill);
+              setNewSkill('');
+            }}
           >
             <Plus className="w-4 h-4" />
           </Button>
@@ -318,15 +431,12 @@ const TheVault = ({ onResumeChange }: TheVaultProps) => {
 
         <div className="flex flex-wrap gap-1.5">
           {skills.map((skill, i) => (
-            <Badge key={i} variant="secondary" className="gap-1 pr-1 text-xs">
-              {skill}
-              <button 
-                onClick={() => removeItem(i, skills, setSkills)}
-                className="ml-1 hover:text-destructive"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </Badge>
+            <TrendingSkillBadge
+              key={i}
+              skill={skill}
+              isPremium={isPremium}
+              onRemove={() => removeSkill(i)}
+            />
           ))}
           {skills.length === 0 && (
             <p className="text-xs text-muted-foreground">No skills added yet</p>
@@ -334,15 +444,20 @@ const TheVault = ({ onResumeChange }: TheVaultProps) => {
         </div>
       </div>
 
-      {/* Certifications */}
+      {/* Certifications with Rich Details */}
       <div className="command-card p-5">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 bg-gradient-to-br from-amber-500 to-orange-400 rounded-lg flex items-center justify-center">
-            <Award className="w-4 h-4 text-white" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-foreground text-sm">Certifications</h3>
-            <p className="text-xs text-muted-foreground">Professional certifications and courses</p>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-gradient-to-br from-amber-500 to-orange-400 rounded-lg flex items-center justify-center">
+              <Award className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground text-sm">Certifications</h3>
+              <p className="text-xs text-muted-foreground">
+                Professional certifications
+                {!isPremium && <span className="text-muted-foreground/60"> • Upgrade for rich details</span>}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -351,14 +466,14 @@ const TheVault = ({ onResumeChange }: TheVaultProps) => {
             placeholder="Add a certification..."
             value={newCert}
             onChange={(e) => setNewCert(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && addItem(newCert, setNewCert, certifications, setCertifications)}
+            onKeyPress={(e) => e.key === 'Enter' && addCertification()}
             className="h-9 text-sm"
           />
           <Button 
             variant="outline" 
             size="icon"
             className="h-9 w-9"
-            onClick={() => addItem(newCert, setNewCert, certifications, setCertifications)}
+            onClick={addCertification}
           >
             <Plus className="w-4 h-4" />
           </Button>
@@ -366,14 +481,67 @@ const TheVault = ({ onResumeChange }: TheVaultProps) => {
 
         <div className="space-y-2">
           {certifications.map((cert, i) => (
-            <div key={i} className="flex items-center justify-between p-2.5 bg-secondary/50 rounded-lg">
-              <span className="text-sm text-foreground">{cert}</span>
-              <button 
-                onClick={() => removeItem(i, certifications, setCertifications)}
-                className="text-muted-foreground hover:text-destructive"
-              >
-                <X className="w-4 h-4" />
-              </button>
+            <div key={i} className="bg-secondary/50 rounded-lg overflow-hidden">
+              <div className="flex items-center justify-between p-2.5">
+                <span className="text-sm text-foreground">{cert.name}</span>
+                <div className="flex items-center gap-1">
+                  {isPremium ? (
+                    <button 
+                      onClick={() => setExpandedCert(expandedCert === i ? null : i)}
+                      className="p-1 hover:bg-background rounded"
+                    >
+                      {expandedCert === i ? (
+                        <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                      )}
+                    </button>
+                  ) : (
+                    <Lock className="w-3.5 h-3.5 text-muted-foreground/50" />
+                  )}
+                  <button 
+                    onClick={() => removeCertification(i)}
+                    className="p-1 text-muted-foreground hover:text-destructive"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              
+              {/* Expanded Rich Details (Premium Only) */}
+              {isPremium && expandedCert === i && (
+                <div className="px-2.5 pb-2.5 space-y-2 border-t border-border/50 pt-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-xs text-muted-foreground">Issuer</label>
+                      <Input 
+                        placeholder="e.g., AWS, Google"
+                        value={cert.issuer || ''}
+                        onChange={(e) => updateCertification(i, { issuer: e.target.value })}
+                        className="h-8 text-xs mt-1"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-muted-foreground">Date Earned</label>
+                      <Input 
+                        placeholder="e.g., Jan 2024"
+                        value={cert.dateEarned || ''}
+                        onChange={(e) => updateCertification(i, { dateEarned: e.target.value })}
+                        className="h-8 text-xs mt-1"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground">Credential Link</label>
+                    <Input 
+                      placeholder="https://..."
+                      value={cert.credentialLink || ''}
+                      onChange={(e) => updateCertification(i, { credentialLink: e.target.value })}
+                      className="h-8 text-xs mt-1"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           ))}
           {certifications.length === 0 && (
@@ -382,15 +550,20 @@ const TheVault = ({ onResumeChange }: TheVaultProps) => {
         </div>
       </div>
 
-      {/* Projects */}
+      {/* Projects with Rich Details */}
       <div className="command-card p-5">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-teal-400 rounded-lg flex items-center justify-center">
-            <FolderKanban className="w-4 h-4 text-white" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-foreground text-sm">Projects</h3>
-            <p className="text-xs text-muted-foreground">Notable projects you've worked on</p>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-teal-400 rounded-lg flex items-center justify-center">
+              <FolderKanban className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground text-sm">Projects</h3>
+              <p className="text-xs text-muted-foreground">
+                Notable projects
+                {!isPremium && <span className="text-muted-foreground/60"> • Upgrade for rich details</span>}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -399,14 +572,14 @@ const TheVault = ({ onResumeChange }: TheVaultProps) => {
             placeholder="Add a project..."
             value={newProject}
             onChange={(e) => setNewProject(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && addItem(newProject, setNewProject, projects, setProjects)}
+            onKeyPress={(e) => e.key === 'Enter' && addProject()}
             className="h-9 text-sm"
           />
           <Button 
             variant="outline" 
             size="icon"
             className="h-9 w-9"
-            onClick={() => addItem(newProject, setNewProject, projects, setProjects)}
+            onClick={addProject}
           >
             <Plus className="w-4 h-4" />
           </Button>
@@ -414,14 +587,65 @@ const TheVault = ({ onResumeChange }: TheVaultProps) => {
 
         <div className="space-y-2">
           {projects.map((project, i) => (
-            <div key={i} className="flex items-center justify-between p-2.5 bg-secondary/50 rounded-lg">
-              <span className="text-sm text-foreground">{project}</span>
-              <button 
-                onClick={() => removeItem(i, projects, setProjects)}
-                className="text-muted-foreground hover:text-destructive"
-              >
-                <X className="w-4 h-4" />
-              </button>
+            <div key={i} className="bg-secondary/50 rounded-lg overflow-hidden">
+              <div className="flex items-center justify-between p-2.5">
+                <span className="text-sm text-foreground">{project.name}</span>
+                <div className="flex items-center gap-1">
+                  {isPremium ? (
+                    <button 
+                      onClick={() => setExpandedProject(expandedProject === i ? null : i)}
+                      className="p-1 hover:bg-background rounded"
+                    >
+                      {expandedProject === i ? (
+                        <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                      )}
+                    </button>
+                  ) : (
+                    <Lock className="w-3.5 h-3.5 text-muted-foreground/50" />
+                  )}
+                  <button 
+                    onClick={() => removeProject(i)}
+                    className="p-1 text-muted-foreground hover:text-destructive"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              
+              {/* Expanded Rich Details (Premium Only) */}
+              {isPremium && expandedProject === i && (
+                <div className="px-2.5 pb-2.5 space-y-2 border-t border-border/50 pt-2">
+                  <div>
+                    <label className="text-xs text-muted-foreground">Description</label>
+                    <Input 
+                      placeholder="Brief description..."
+                      value={project.description || ''}
+                      onChange={(e) => updateProject(i, { description: e.target.value })}
+                      className="h-8 text-xs mt-1"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground">Technologies</label>
+                    <Input 
+                      placeholder="React, Node.js, AWS..."
+                      value={project.technologies || ''}
+                      onChange={(e) => updateProject(i, { technologies: e.target.value })}
+                      className="h-8 text-xs mt-1"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground">Live Link / GitHub</label>
+                    <Input 
+                      placeholder="https://..."
+                      value={project.liveLink || ''}
+                      onChange={(e) => updateProject(i, { liveLink: e.target.value })}
+                      className="h-8 text-xs mt-1"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           ))}
           {projects.length === 0 && (
@@ -429,6 +653,16 @@ const TheVault = ({ onResumeChange }: TheVaultProps) => {
           )}
         </div>
       </div>
+
+      {/* Upgrade Modal */}
+      <UpgradeModal 
+        open={showUpgradeModal}
+        onOpenChange={setShowUpgradeModal}
+        feature={upgradeFeature}
+        requiredTier="pro"
+        currentTier={tier}
+        limitType="feature"
+      />
     </div>
   );
 };
