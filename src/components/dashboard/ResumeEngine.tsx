@@ -320,6 +320,9 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
       <UpgradeModal 
         open={showUpgrade} 
         onOpenChange={setShowUpgrade}
+        feature="Resume Optimization Studio"
+        requiredTier="pro"
+        currentTier={tier}
         limitType="feature"
       />
     </div>
