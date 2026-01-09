@@ -10,7 +10,8 @@ import {
   ChevronRight,
   Stethoscope,
   Lock,
-  Sparkles
+  Sparkles,
+  Telescope
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -45,6 +46,7 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
 
   const navItems = [
     { id: 'briefing', label: 'Briefing', icon: Home },
+    { id: 'scout', label: 'Scout', icon: Telescope },
     { id: 'resume-engine', label: 'Resume Engine', icon: Stethoscope },
     { id: 'vault', label: 'Master Vault', icon: FolderLock },
     { id: 'mission-control', label: 'Mission Control', icon: Crosshair },
