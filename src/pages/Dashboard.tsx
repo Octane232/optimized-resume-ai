@@ -10,6 +10,7 @@ import TheVault from '@/components/dashboard/TheVault';
 import MissionControl from '@/components/dashboard/MissionControl';
 import Settings from '@/components/dashboard/Settings';
 import ResumeEngine from '@/components/dashboard/ResumeEngine';
+import Scout from '@/components/dashboard/Scout';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState(() => {
@@ -109,6 +110,8 @@ const Dashboard = () => {
     switch (activeTab) {
       case 'briefing':
         return <HunterDashboard setActiveTab={setActiveTab} />;
+      case 'scout':
+        return <Scout />;
       case 'resume-engine':
         return <ResumeEngine setActiveTab={setActiveTab} hasResume={hasResume} />;
       case 'vault':
