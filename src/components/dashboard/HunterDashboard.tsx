@@ -75,11 +75,29 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
     return 'Good evening';
   };
 
-  const scoutJobs = [
-    { company: 'Google', role: 'Senior Product Manager', match: 94, color: 'bg-blue-500' },
-    { company: 'Spotify', role: 'Product Lead', match: 91, color: 'bg-green-500' },
-    { company: 'Stripe', role: 'Growth PM', match: 88, color: 'bg-purple-500' },
-  ];
+  const [scoutJobs, setScoutJobs] = useState<Array<{ company: string; role: string; match: number; color: string }>>([]);
+
+  useEffect(() => {
+    const fetchScoutJobs = async () => {
+      const { data } = await supabase
+        .from('scouted_jobs')
+        .select('*')
+        .eq('is_active', true)
+        .limit(3)
+        .order('created_at', { ascending: false });
+      
+      if (data && data.length > 0) {
+        const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500'];
+        setScoutJobs(data.map((job, i) => ({
+          company: job.company_name || 'Unknown',
+          role: job.job_title || 'Position',
+          match: Math.floor(Math.random() * 10) + 85, // Placeholder match score
+          color: colors[i % colors.length]
+        })));
+      }
+    };
+    fetchScoutJobs();
+  }, []);
 
   const applicationVelocity = Math.round((stats.applicationsThisWeek / stats.weeklyGoal) * 100);
 

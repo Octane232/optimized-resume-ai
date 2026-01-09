@@ -795,6 +795,42 @@ export type Database = {
         }
         Relationships: []
       }
+      scouted_jobs: {
+        Row: {
+          company_name: string | null
+          created_at: string
+          id: number
+          is_active: boolean | null
+          job_title: string | null
+          job_url: string | null
+          location: string | null
+          salary_range: string | null
+          skills: string[] | null
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string
+          id?: number
+          is_active?: boolean | null
+          job_title?: string | null
+          job_url?: string | null
+          location?: string | null
+          salary_range?: string | null
+          skills?: string[] | null
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string
+          id?: number
+          is_active?: boolean | null
+          job_title?: string | null
+          job_url?: string | null
+          location?: string | null
+          salary_range?: string | null
+          skills?: string[] | null
+        }
+        Relationships: []
+      }
       skill_gaps: {
         Row: {
           created_at: string
