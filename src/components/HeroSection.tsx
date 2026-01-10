@@ -59,7 +59,7 @@ const HeroSection = () => {
             <div className="space-y-4">
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-[0.95] tracking-tighter animate-fade-in">
                 <span className="block text-foreground">Hi, I'm</span>
-                <span className="block gradient-text">Sora</span>
+                <span className="block gradient-text">Helix</span>
               </h1>
               
               {/* Decorative element */}
@@ -80,14 +80,14 @@ const HeroSection = () => {
               <Button asChild size="lg" className="saas-button h-14 px-10 text-lg font-bold group relative overflow-hidden">
                 <Link to="/auth" className="flex items-center">
                   <MessageCircle className="mr-2 h-5 w-5" />
-                  <span>Chat with Sora</span>
+                  <span>Chat with Helix</span>
                   <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg" className="h-14 px-10 text-lg font-semibold border-2 hover:bg-secondary/50">
                 <Link to="#how-it-works" className="flex items-center">
                   <Brain className="mr-2 h-5 w-5 text-primary" />
-                  See Sora in Action
+                  See Helix in Action
                 </Link>
               </Button>
             </div>

@@ -16,7 +16,7 @@ const SoraChatPreview = () => {
   const conversation: Message[] = [
     { 
       role: 'sora', 
-      content: "Hi! I'm Sora, your AI career assistant. I see you're targeting Product Manager roles. Let me analyze your resume..." 
+      content: "Hi! I'm Helix, your AI career assistant. I see you're targeting Product Manager roles. Let me analyze your resume..." 
     },
     { 
       role: 'sora', 
@@ -61,7 +61,7 @@ const SoraChatPreview = () => {
         </div>
         <div>
           <h3 className="font-bold text-foreground flex items-center gap-1.5">
-            Sora
+            Helix
             <span className="text-xs font-normal text-primary bg-primary/10 px-1.5 py-0.5 rounded">AI</span>
           </h3>
           <p className="text-xs text-muted-foreground">Your Career Assistant</p>
@@ -117,7 +117,7 @@ const SoraChatPreview = () => {
       <div className="px-4 pb-4">
         <Button asChild className="w-full saas-button h-11 font-bold group">
           <Link to="/auth">
-            Start Chatting with Sora
+            Start Chatting with Helix
             <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </Button>

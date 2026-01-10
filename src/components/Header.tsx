@@ -14,7 +14,7 @@ const Header = () => {
   };
 
   const navItems = [
-    { label: 'How Sora Works', href: '#how-it-works' },
+    { label: 'How Helix Works', href: '#how-it-works' },
     { label: 'Features', href: '#features' },
     { label: 'Pricing', href: '#pricing' },
   ];
@@ -67,7 +67,7 @@ const Header = () => {
             <Button asChild size="sm" className="saas-button font-bold">
               <Link to="/auth" className="flex items-center gap-1.5">
                 <Sparkles className="w-4 h-4" />
-                Chat with Sora
+                Chat with Helix
               </Link>
             </Button>
           </div>
@@ -110,7 +110,7 @@ const Header = () => {
                 <Button asChild size="sm" className="saas-button font-bold">
                   <Link to="/auth" className="flex items-center gap-1.5">
                     <Sparkles className="w-4 h-4" />
-                    Chat with Sora
+                    Chat with Helix
                   </Link>
                 </Button>
               </div>
