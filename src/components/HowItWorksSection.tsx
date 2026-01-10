@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Upload, FileSearch, Target, Kanban, ArrowRight, CheckCircle } from 'lucide-react';
+import { Upload, FileSearch, Target, Kanban, ArrowRight, CheckCircle, Sparkles, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
@@ -8,35 +7,39 @@ const HowItWorksSection = () => {
   const steps = [
     {
       number: '01',
-      title: 'Upload Your Master Resume',
-      description: 'Start by uploading your existing resume. This becomes your career foundation—the source of truth for all analysis.',
+      title: 'Upload & Meet Sora',
+      description: 'Upload your resume and Sora instantly analyzes your skills, experience, and career trajectory.',
       icon: Upload,
-      color: 'from-electric to-blue-400',
-      details: ['PDF or DOCX format', 'Secure & private', 'One-time setup']
+      color: 'from-primary to-blue-400',
+      soraQuote: '"I see you have 5 years in product management. Let me identify your strongest selling points..."',
+      details: ['PDF or DOCX format', 'AI skill extraction', 'Instant analysis']
     },
     {
       number: '02',
-      title: 'Paste a Job Description',
-      description: 'Copy and paste any job posting you\'re interested in. Our AI instantly analyzes the match between your skills and requirements.',
+      title: 'Sora Finds the Gaps',
+      description: 'Paste any job description. Sora compares it against your profile and shows exactly what\'s missing.',
       icon: Target,
       color: 'from-emerald-500 to-teal-400',
-      details: ['Instant analysis', 'Keyword extraction', 'Gap identification']
+      soraQuote: '"This role needs Agile experience—I found 3 ways to highlight yours better."',
+      details: ['Keyword matching', 'Gap identification', 'Match scoring']
     },
     {
       number: '03',
-      title: 'Get Your Match Score',
-      description: 'See exactly how well your resume matches the job. Identify missing keywords, skill gaps, and ATS optimization opportunities.',
+      title: 'AI-Powered Optimization',
+      description: 'Sora rewrites bullet points, suggests improvements, and tailors your resume for each opportunity.',
       icon: FileSearch,
       color: 'from-purple-500 to-pink-400',
-      details: ['Match percentage', 'Missing keywords', 'ATS readiness score']
+      soraQuote: '"I\'ve optimized your experience section. Your ATS score jumped from 67% to 89%!"',
+      details: ['Auto-rewrite bullets', 'ATS optimization', 'Tailored versions']
     },
     {
       number: '04',
-      title: 'Track Your Applications',
-      description: 'Use Mission Control to track every application. Never lose sight of where you\'ve applied or miss a follow-up.',
+      title: 'Apply with Confidence',
+      description: 'Track every application in Mission Control while Sora reminds you when to follow up.',
       icon: Kanban,
       color: 'from-amber-500 to-orange-400',
-      details: ['Kanban board', 'Follow-up reminders', 'Status tracking']
+      soraQuote: '"You applied to Stripe 5 days ago. Want me to draft a follow-up email?"',
+      details: ['Application tracking', 'Smart reminders', 'Follow-up drafts']
     }
   ];
 
@@ -49,15 +52,16 @@ const HowItWorksSection = () => {
       <div className="container mx-auto px-6 lg:px-8 relative">
         {/* Section header */}
         <div className="text-center mb-16">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
-            How It Works
-          </span>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
+            <Sparkles className="w-4 h-4" />
+            How Sora Works
+          </div>
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            From Resume to Results in 
-            <span className="gradient-text"> 4 Steps</span>
+            Your AI Guide from 
+            <span className="gradient-text"> Resume to Hired</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Pitchsora guides you from upload to hired with a clear, focused workflow designed for action.
+            Sora walks you through every step, providing personalized guidance and doing the heavy lifting.
           </p>
         </div>
 
@@ -87,6 +91,16 @@ const HowItWorksSection = () => {
                   <h3 className="text-lg font-bold text-foreground mb-2">{step.title}</h3>
                   <p className="text-sm text-muted-foreground mb-4 leading-relaxed">{step.description}</p>
                   
+                  {/* Sora Quote */}
+                  <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 mb-4">
+                    <div className="flex items-start gap-2">
+                      <div className="w-5 h-5 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center shrink-0 mt-0.5">
+                        <Bot className="w-3 h-3 text-white" />
+                      </div>
+                      <p className="text-xs text-foreground/80 italic leading-relaxed">{step.soraQuote}</p>
+                    </div>
+                  </div>
+                  
                   {/* Details */}
                   <ul className="space-y-1.5">
                     {step.details.map((detail, i) => (
@@ -106,7 +120,7 @@ const HowItWorksSection = () => {
         <div className="text-center">
           <Button asChild size="lg" className="saas-button h-14 px-10 text-lg font-bold">
             <Link to="/auth">
-              Start Your Career Command Center
+              Start Chatting with Sora
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </Button>

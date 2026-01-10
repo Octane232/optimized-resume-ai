@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Sun, Moon } from 'lucide-react';
+import { Menu, X, Sun, Moon, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTheme } from 'next-themes';
 import logo from '@/assets/pitchsora-logo.png';
@@ -15,9 +14,9 @@ const Header = () => {
   };
 
   const navItems = [
+    { label: 'How Sora Works', href: '#how-it-works' },
     { label: 'Features', href: '#features' },
     { label: 'Pricing', href: '#pricing' },
-    { label: 'Resources', href: '#resources' },
   ];
 
   const scrollToSection = (href: string) => {
@@ -66,7 +65,10 @@ const Header = () => {
               <Link to="/auth">Sign In</Link>
             </Button>
             <Button asChild size="sm" className="saas-button font-bold">
-              <Link to="/auth">Get Started</Link>
+              <Link to="/auth" className="flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4" />
+                Chat with Sora
+              </Link>
             </Button>
           </div>
 
@@ -106,7 +108,10 @@ const Header = () => {
                   <Link to="/auth">Sign In</Link>
                 </Button>
                 <Button asChild size="sm" className="saas-button font-bold">
-                  <Link to="/auth">Get Started</Link>
+                  <Link to="/auth" className="flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4" />
+                    Chat with Sora
+                  </Link>
                 </Button>
               </div>
             </nav>
