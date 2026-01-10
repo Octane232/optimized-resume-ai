@@ -82,11 +82,11 @@ const PricingSection = () => {
   ];
 
   return (
-    <section id="pricing" className="relative py-32 overflow-hidden bg-background">
+    <section id="pricing" className="relative py-32 overflow-hidden bg-charcoal">
       {/* Premium background effects */}
-      <div className="absolute inset-0 bg-[var(--gradient-mesh)] opacity-50"></div>
-      <div className="absolute top-1/2 left-0 w-96 h-96 bg-gradient-to-br from-blue-400/20 to-purple-500/20 dark:from-blue-500/10 dark:to-purple-600/10 rounded-full blur-3xl"></div>
-      <div className="absolute top-1/2 right-0 w-96 h-96 bg-gradient-to-bl from-purple-400/20 to-emerald-400/20 dark:from-purple-500/10 dark:to-emerald-500/10 rounded-full blur-3xl"></div>
+      <div className="absolute inset-0 bg-[linear-gradient(hsl(var(--lime)/0.02)_1px,transparent_1px),linear-gradient(90deg,hsl(var(--lime)/0.02)_1px,transparent_1px)] bg-[size:48px_48px]"></div>
+      <div className="absolute top-1/2 left-0 w-96 h-96 bg-lime/5 rounded-full blur-[150px]"></div>
+      <div className="absolute top-1/2 right-0 w-96 h-96 bg-electric/5 rounded-full blur-[150px]"></div>
       
       <div className="container mx-auto px-6 lg:px-8 relative">
         <div className="text-center mb-24">
