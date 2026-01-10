@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { Briefcase, Code2, DollarSign } from 'lucide-react';
+import { Users, FileText, DollarSign, Sparkles } from 'lucide-react';
 
 interface CounterProps {
   end: number;
@@ -47,26 +47,26 @@ const AnimatedCounter = ({ end, suffix = '', prefix = '', duration = 2 }: Counte
 const TrustSection = () => {
   const stats = [
     {
-      icon: Briefcase,
-      value: 12400,
+      icon: Users,
+      value: 50000,
       suffix: '+',
-      label: 'Jobs Scouted',
-      description: 'Fresh opportunities indexed and refined'
+      label: 'Careers Guided',
+      description: 'Job seekers transformed by Sora'
     },
     {
-      icon: Code2,
-      value: 450000,
-      suffix: '',
-      label: 'HTML Tags Removed',
-      description: 'Corporate noise stripped away'
+      icon: FileText,
+      value: 250000,
+      suffix: '+',
+      label: 'Resumes Optimized',
+      description: 'ATS-ready resumes generated'
     },
     {
       icon: DollarSign,
-      value: 1.2,
+      value: 12,
       prefix: '$',
-      suffix: 'M',
-      label: 'in Salaries Unlocked',
-      description: 'Hidden compensation data extracted'
+      suffix: 'M+',
+      label: 'Salary Increases',
+      description: 'Negotiated for our users'
     }
   ];
 
@@ -86,10 +86,11 @@ const TrustSection = () => {
           className="text-center mb-16"
         >
           <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-lime/30 bg-lime/5 mb-6">
-            <span className="text-sm font-mono text-lime">DATA PROOF</span>
+            <Sparkles className="w-4 h-4 text-lime" />
+            <span className="text-sm font-mono text-lime">SORA'S IMPACT</span>
           </span>
           <h2 className="text-4xl md:text-5xl font-black text-foreground">
-            Numbers Don't <span className="text-lime">Lie</span>
+            Real Results. <span className="text-lime">Real Careers.</span>
           </h2>
         </motion.div>
 
@@ -112,17 +113,11 @@ const TrustSection = () => {
                 </div>
 
                 {/* Counter */}
-                {typeof stat.value === 'number' && stat.value >= 1 ? (
-                  <AnimatedCounter 
-                    end={stat.value} 
-                    suffix={stat.suffix}
-                    prefix={stat.prefix}
-                  />
-                ) : (
-                  <div className="text-5xl md:text-6xl lg:text-7xl font-black text-lime">
-                    {stat.prefix}{stat.value}{stat.suffix}
-                  </div>
-                )}
+                <AnimatedCounter 
+                  end={stat.value} 
+                  suffix={stat.suffix}
+                  prefix={stat.prefix}
+                />
 
                 {/* Label */}
                 <h3 className="text-xl font-bold text-foreground mt-4 mb-2">{stat.label}</h3>
