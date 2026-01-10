@@ -1,12 +1,14 @@
+
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Header from '@/components/Header';
-import CyberHeroSection from '@/components/landing/CyberHeroSection';
-import SoraDemoSection from '@/components/landing/SoraDemoSection';
-import EngineSection from '@/components/landing/EngineSection';
-import TrustSection from '@/components/landing/TrustSection';
+import HeroSection from '@/components/HeroSection';
+import HowItWorksSection from '@/components/HowItWorksSection';
+import BenefitsSection from '@/components/BenefitsSection';
+import TestimonialsSection from '@/components/TestimonialsSection';
 import PricingSection from '@/components/PricingSection';
 import FAQSection from '@/components/FAQSection';
+import ResourcesSection from '@/components/ResourcesSection';
 import Footer from '@/components/Footer';
 
 const Index = () => {
@@ -24,16 +26,19 @@ const Index = () => {
   }, [location]);
 
   return (
-    <div className="min-h-screen bg-charcoal">
+    <div className="min-h-screen">
       <Header />
-      <CyberHeroSection />
-      <SoraDemoSection />
-      <EngineSection />
-      <TrustSection />
-      <div id="pricing">
-        <PricingSection />
+      <HeroSection />
+      <div id="features">
+        <HowItWorksSection />
       </div>
+      <BenefitsSection />
+      <TestimonialsSection />
+      <PricingSection />
       <FAQSection />
+      <div id="resources">
+        <ResourcesSection />
+      </div>
       <Footer />
     </div>
   );

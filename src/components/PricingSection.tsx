@@ -8,81 +8,85 @@ const PricingSection = () => {
 
   const plans = [
     {
-      name: 'Scout Mode',
+      name: 'Free',
       price: '$0',
       period: 'forever',
-      description: 'Explore with Sora - free forever',
+      description: 'Perfect for getting started',
       features: [
-        'Browse curated job listings',
-        '5 Sora conversations/month',
-        '1 resume stored',
-        'Basic job matching',
+        '1 template selection/month',
+        '1 PDF download/month',
+        '1 active resume',
+        'Basic templates only',
         'Community support',
       ],
       lockedFeatures: [
-        'AI Resume Optimization',
-        'Interview Coaching',
-        'Salary Insights',
-        'Priority matching',
+        'AI Resume Generator',
+        'Cover Letter Generator',
+        'ATS Scoring',
+        'Interview Prep',
+        'Skill Gap Analyzer',
       ],
       cta: 'Start Free',
       popular: false,
       href: '/auth'
     },
     {
-      name: 'Co-Pilot Mode',
-      price: '$19',
-      yearlyPrice: '$190',
-      monthlyPrice: '$19',
+      name: 'Pro',
+      price: '$12',
+      yearlyPrice: '$120',
+      monthlyPrice: '$12',
       period: 'per month',
-      description: 'Sora becomes your career partner',
+      description: 'For serious job seekers',
       features: [
-        'Unlimited Sora conversations',
-        'AI Resume Optimization',
-        'ATS Score Analysis',
+        '5 template selections/month',
+        '10 PDF downloads/month',
+        '5 AI resume generations/month',
+        '5 active resumes',
+        'AI Resume Generator',
         'Cover Letter Generator',
-        '10 active resumes',
-        'Interview prep basics',
+        'ATS Scoring',
         'Email support',
       ],
       lockedFeatures: [
-        'Advanced Interview Coaching',
-        'Salary Negotiation Scripts',
+        'Interview Prep',
+        'Skill Gap Analyzer',
       ],
-      cta: 'Upgrade to Co-Pilot',
+      cta: 'Start Pro',
       popular: true,
       href: '/auth'
     },
     {
-      name: 'Command Center',
-      price: '$39',
-      yearlyPrice: '$390',
-      monthlyPrice: '$39',
+      name: 'Premium',
+      price: '$24',
+      yearlyPrice: '$240',
+      monthlyPrice: '$24',
       period: 'per month',
-      description: 'Full AI career command — unlimited power',
+      description: 'Everything you need to land your dream job',
       features: [
-        'Everything in Co-Pilot',
-        'Advanced Interview Coaching',
-        'AI Mock Interviews',
-        'Salary Negotiation Scripts',
-        'Skill Gap Analysis',
-        'Career Roadmap Planning',
-        'Priority job matching',
+        'Unlimited template selections',
+        'Unlimited PDF downloads',
+        'Unlimited AI generations',
+        'Unlimited active resumes',
+        'AI Resume Generator',
+        'Cover Letter Generator',
+        'Full ATS Analysis',
+        'Interview Prep with AI feedback',
+        'Skill Gap Analyzer',
         'Priority Support',
       ],
       lockedFeatures: [],
-      cta: 'Get Command Center',
+      cta: 'Get Premium',
       popular: false,
       href: '/auth'
     }
   ];
 
   return (
-    <section id="pricing" className="relative py-32 overflow-hidden bg-charcoal">
+    <section id="pricing" className="relative py-32 overflow-hidden bg-background">
       {/* Premium background effects */}
-      <div className="absolute inset-0 bg-[linear-gradient(hsl(var(--lime)/0.02)_1px,transparent_1px),linear-gradient(90deg,hsl(var(--lime)/0.02)_1px,transparent_1px)] bg-[size:48px_48px]"></div>
-      <div className="absolute top-1/2 left-0 w-96 h-96 bg-lime/5 rounded-full blur-[150px]"></div>
-      <div className="absolute top-1/2 right-0 w-96 h-96 bg-electric/5 rounded-full blur-[150px]"></div>
+      <div className="absolute inset-0 bg-[var(--gradient-mesh)] opacity-50"></div>
+      <div className="absolute top-1/2 left-0 w-96 h-96 bg-gradient-to-br from-blue-400/20 to-purple-500/20 dark:from-blue-500/10 dark:to-purple-600/10 rounded-full blur-3xl"></div>
+      <div className="absolute top-1/2 right-0 w-96 h-96 bg-gradient-to-bl from-purple-400/20 to-emerald-400/20 dark:from-purple-500/10 dark:to-emerald-500/10 rounded-full blur-3xl"></div>
       
       <div className="container mx-auto px-6 lg:px-8 relative">
         <div className="text-center mb-24">
