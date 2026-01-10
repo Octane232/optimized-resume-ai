@@ -5,27 +5,27 @@
 
 @layer base {
   :root {
-    /* Pitchsora Light Theme - Clean & Professional */
-    --background: 220 20% 97%;
-    --foreground: 222 47% 11%;
+    /* Cyber-Minimalism Theme - Deep Charcoal + Electric Lime */
+    --background: 0 0% 10%;
+    --foreground: 0 0% 95%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 217 91% 60%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 68 100% 50%;
+    --primary-foreground: 0 0% 5%;
 
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 95%;
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 60%;
 
-    --accent: 217 91% 60%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 68 100% 50%;
+    --accent-foreground: 0 0% 5%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
@@ -33,10 +33,25 @@
     --success: 160 84% 39%;
     --success-foreground: 0 0% 100%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 217 91% 60%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 68 100% 50%;
     --radius: 0.75rem;
+
+    /* Cyber Colors - Electric Lime (#CCFF00) */
+    --lime: 68 100% 50%;
+    --lime-glow: 68 100% 60%;
+    --lime-dark: 68 100% 40%;
+    
+    /* Hyper Blue accent */
+    --electric: 210 100% 60%;
+    --electric-glow: 210 100% 70%;
+    --electric-dark: 210 100% 50%;
+    
+    /* Deep Charcoal (#1A1A1A) */
+    --charcoal: 0 0% 10%;
+    --charcoal-light: 0 0% 15%;
+    --charcoal-dark: 0 0% 7%;
 
     /* Hunter Mode - Electric Blue */
     --hunter-primary: 217 100% 50%;
@@ -49,10 +64,6 @@
     --growth-gold: 43 96% 56%;
     --growth-glow: 262 83% 68%;
 
-    /* Electric Blue Accent */
-    --electric-blue: 217 91% 60%;
-    --electric-blue-glow: 217 91% 70%;
-    
     /* Navy palette */
     --navy-50: 220 30% 96%;
     --navy-100: 220 25% 90%;
@@ -70,97 +81,82 @@
     --red-500: 0 84% 60%;
     --amber-500: 38 92% 50%;
 
-    /* Premium gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--electric-blue)) 0%, hsl(230 80% 55%) 100%);
-    --gradient-secondary: linear-gradient(135deg, hsl(230 80% 55%) 0%, hsl(var(--electric-blue)) 100%);
-    --gradient-hero: linear-gradient(180deg, hsl(var(--navy-50)) 0%, hsl(var(--background)) 100%);
-    --gradient-mesh: radial-gradient(at 0% 0%, hsl(var(--electric-blue) / 0.08) 0%, transparent 50%),
-                     radial-gradient(at 100% 0%, hsl(230 80% 55% / 0.08) 0%, transparent 50%),
-                     radial-gradient(at 100% 100%, hsl(var(--emerald-500) / 0.05) 0%, transparent 50%);
-    
-    /* Hunter Mode Gradients */
-    --gradient-hunter: linear-gradient(135deg, hsl(var(--hunter-primary)) 0%, hsl(230 80% 45%) 100%);
-    --gradient-hunter-subtle: linear-gradient(180deg, hsl(var(--hunter-primary) / 0.1) 0%, transparent 100%);
-    
-    /* Growth Mode Gradients */
-    --gradient-growth: linear-gradient(135deg, hsl(var(--growth-primary)) 0%, hsl(280 70% 45%) 100%);
-    --gradient-growth-subtle: linear-gradient(180deg, hsl(var(--growth-primary) / 0.1) 0%, transparent 100%);
+    /* Cyber gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--lime)) 0%, hsl(var(--lime-glow)) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(var(--electric)) 0%, hsl(var(--electric-glow)) 100%);
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(var(--lime) / 0.1) 0%, transparent 50%),
+                     radial-gradient(at 100% 0%, hsl(var(--electric) / 0.08) 0%, transparent 50%),
+                     radial-gradient(at 100% 100%, hsl(var(--lime) / 0.05) 0%, transparent 50%);
     
     /* Enhanced shadows */
-    --shadow-soft: 0 2px 8px -2px hsl(var(--electric-blue) / 0.1);
-    --shadow-card: 0 4px 16px -4px hsl(var(--electric-blue) / 0.12), 0 2px 8px -2px hsl(230 80% 55% / 0.08);
-    --shadow-lg: 0 8px 24px -8px hsl(var(--electric-blue) / 0.15), 0 4px 12px -4px hsl(230 80% 55% / 0.1);
-    --shadow-xl: 0 16px 48px -16px hsl(var(--electric-blue) / 0.2), 0 8px 24px -8px hsl(230 80% 55% / 0.15);
-    --shadow-glow: 0 0 0 1px hsl(var(--electric-blue) / 0.1), 0 8px 32px -8px hsl(var(--electric-blue) / 0.25);
-    --shadow-glow-lg: 0 0 64px -16px hsl(var(--electric-blue) / 0.4);
-    
-    /* Mode-specific shadows */
-    --shadow-hunter: 0 0 32px -8px hsl(var(--hunter-primary) / 0.4);
-    --shadow-growth: 0 0 32px -8px hsl(var(--growth-primary) / 0.4);
+    --shadow-soft: 0 2px 8px -2px hsl(var(--lime) / 0.1);
+    --shadow-card: 0 4px 16px -4px hsl(0 0% 0% / 0.5);
+    --shadow-lg: 0 8px 24px -8px hsl(0 0% 0% / 0.6);
+    --shadow-xl: 0 16px 48px -16px hsl(0 0% 0% / 0.7);
+    --shadow-glow: 0 0 20px hsl(var(--lime) / 0.3);
+    --shadow-glow-lg: 0 0 40px hsl(var(--lime) / 0.4);
 
     --ease-elastic: cubic-bezier(0.175, 0.885, 0.32, 1.275);
     --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 68 100% 50%;
+    --sidebar-primary-foreground: 0 0% 5%;
+    --sidebar-accent: 0 0% 12%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 0% 20%;
+    --sidebar-ring: 68 100% 50%;
   }
 
   .dark {
-    /* Pitchsora Dark Theme - Navy Command Center */
-    --background: 222 47% 6%;
-    --foreground: 210 40% 98%;
+    /* Dark theme is the default cyber theme */
+    --background: 0 0% 10%;
+    --foreground: 0 0% 95%;
 
-    --card: 222 45% 10%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 222 45% 10%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 217 91% 60%;
-    --primary-foreground: 222 47% 6%;
+    --primary: 68 100% 50%;
+    --primary-foreground: 0 0% 5%;
 
-    --secondary: 222 35% 15%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 95%;
 
-    --muted: 222 35% 15%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 60%;
 
-    --accent: 217 91% 60%;
-    --accent-foreground: 222 47% 6%;
+    --accent: 68 100% 50%;
+    --accent-foreground: 0 0% 5%;
 
     --destructive: 0 63% 45%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 95%;
 
     --success: 160 84% 39%;
-    --success-foreground: 222 47% 6%;
+    --success-foreground: 0 0% 5%;
 
-    --border: 222 30% 18%;
-    --input: 222 30% 18%;
-    --ring: 217 91% 60%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 68 100% 50%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(var(--electric-blue)) 0%, hsl(230 80% 65%) 100%);
-    --gradient-secondary: linear-gradient(135deg, hsl(230 80% 55%) 0%, hsl(var(--electric-blue)) 100%);
-    --gradient-mesh: radial-gradient(at 0% 0%, hsl(var(--electric-blue) / 0.15) 0%, transparent 50%),
-                     radial-gradient(at 100% 0%, hsl(230 80% 55% / 0.12) 0%, transparent 50%),
-                     radial-gradient(at 100% 100%, hsl(var(--emerald-500) / 0.08) 0%, transparent 50%);
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(var(--lime) / 0.15) 0%, transparent 50%),
+                     radial-gradient(at 100% 0%, hsl(var(--electric) / 0.1) 0%, transparent 50%),
+                     radial-gradient(at 100% 100%, hsl(var(--lime) / 0.08) 0%, transparent 50%);
     
-    --shadow-glow: 0 0 0 1px hsl(var(--electric-blue) / 0.2), 0 8px 32px -8px hsl(var(--electric-blue) / 0.4);
-    --shadow-glow-lg: 0 0 64px -16px hsl(var(--electric-blue) / 0.5);
+    --shadow-glow: 0 0 20px hsl(var(--lime) / 0.4);
+    --shadow-glow-lg: 0 0 40px hsl(var(--lime) / 0.5);
     
-    --sidebar-background: 222 45% 8%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 217 91% 60%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 35% 12%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 222 30% 18%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 68 100% 50%;
+    --sidebar-primary-foreground: 0 0% 5%;
+    --sidebar-accent: 0 0% 12%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 0% 20%;
+    --sidebar-ring: 68 100% 50%;
   }
 }
 
@@ -187,7 +183,7 @@
   }
 }
 
-/* Pitchsora Command Center Utilities */
+/* Cyber-Minimalism Utilities */
 .gradient-bg {
   background: var(--gradient-primary);
 }
@@ -203,7 +199,22 @@
   background-clip: text;
 }
 
-/* Command Center Glass Cards */
+/* Cyber Cards - Glassmorphism */
+.cyber-card {
+  background: hsl(var(--card) / 0.8);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) + 4px);
+  box-shadow: var(--shadow-card);
+  transition: all 0.3s var(--ease-smooth);
+}
+
+.cyber-card:hover {
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  border-color: hsl(var(--lime) / 0.3);
+}
+
 .command-card {
   background: hsl(var(--card));
   border: 1px solid hsl(var(--border));
@@ -215,11 +226,11 @@
 .command-card:hover {
   box-shadow: var(--shadow-lg);
   transform: translateY(-2px);
-  border-color: hsl(var(--primary) / 0.3);
+  border-color: hsl(var(--lime) / 0.3);
 }
 
 .glass-card {
-  background: hsl(var(--background) / 0.8);
+  background: hsl(var(--background) / 0.6);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border: 1px solid hsl(var(--border));
@@ -227,31 +238,22 @@
 }
 
 .glass-card-strong {
-  background: hsl(var(--background) / 0.95);
+  background: hsl(var(--background) / 0.9);
   backdrop-filter: blur(40px) saturate(200%);
   -webkit-backdrop-filter: blur(40px) saturate(200%);
   border: 1px solid hsl(var(--border));
   box-shadow: var(--shadow-lg);
 }
 
-/* Electric Blue Glow Effect */
-.electric-glow {
-  box-shadow: 0 0 20px hsl(var(--electric-blue) / 0.3),
-              0 0 40px hsl(var(--electric-blue) / 0.2),
-              inset 0 0 20px hsl(var(--electric-blue) / 0.1);
+/* Electric Lime Glow Effect */
+.lime-glow {
+  box-shadow: 0 0 20px hsl(var(--lime) / 0.3),
+              0 0 40px hsl(var(--lime) / 0.2),
+              inset 0 0 20px hsl(var(--lime) / 0.1);
 }
 
-.electric-border {
-  border: 1px solid hsl(var(--electric-blue) / 0.5);
-}
-
-/* Score/Progress indicators */
-.score-ring {
-  background: conic-gradient(
-    hsl(var(--primary)) var(--score, 0%),
-    hsl(var(--muted)) var(--score, 0%)
-  );
-  border-radius: 50%;
+.lime-border {
+  border: 1px solid hsl(var(--lime) / 0.5);
 }
 
 /* Header glassmorphism */
@@ -259,12 +261,28 @@
   backdrop-filter: blur(20px) saturate(180%);
   background: hsl(var(--background) / 0.85);
   border-bottom: 1px solid hsl(var(--border));
-  box-shadow: 0 4px 16px -4px hsl(var(--electric-blue) / 0.08);
+  box-shadow: 0 4px 16px -4px hsl(0 0% 0% / 0.3);
+}
+
+/* Cyber button */
+.cyber-button {
+  background: hsl(var(--lime));
+  color: hsl(var(--charcoal-dark));
+  border-radius: var(--radius);
+  font-weight: 800;
+  transition: all 0.3s var(--ease-smooth);
+  box-shadow: var(--shadow-glow);
+}
+
+.cyber-button:hover {
+  background: hsl(var(--lime-glow));
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow-lg);
 }
 
 .saas-button {
-  background: var(--gradient-primary);
-  color: hsl(var(--primary-foreground));
+  background: hsl(var(--lime));
+  color: hsl(var(--charcoal-dark));
   border-radius: var(--radius);
   font-weight: 600;
   transition: all 0.3s var(--ease-smooth);
@@ -272,6 +290,7 @@
 }
 
 .saas-button:hover {
+  background: hsl(var(--lime-glow));
   transform: translateY(-2px);
   box-shadow: var(--shadow-glow-lg);
 }
