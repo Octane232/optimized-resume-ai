@@ -1,9 +1,8 @@
-
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Header from '@/components/Header';
 import CyberHeroSection from '@/components/landing/CyberHeroSection';
-import LiveFeedSection from '@/components/landing/LiveFeedSection';
+import SoraDemoSection from '@/components/landing/SoraDemoSection';
 import EngineSection from '@/components/landing/EngineSection';
 import TrustSection from '@/components/landing/TrustSection';
 import PricingSection from '@/components/PricingSection';
@@ -28,7 +27,7 @@ const Index = () => {
     <div className="min-h-screen bg-charcoal">
       <Header />
       <CyberHeroSection />
-      <LiveFeedSection />
+      <SoraDemoSection />
       <EngineSection />
       <TrustSection />
       <div id="pricing">
