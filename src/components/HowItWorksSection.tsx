@@ -7,38 +7,38 @@ const HowItWorksSection = () => {
   const steps = [
     {
       number: '01',
-      title: 'Upload & Meet Sora',
-      description: 'Upload your resume and Sora instantly analyzes your skills, experience, and career trajectory.',
+      title: 'Upload & Meet Helix',
+      description: 'Upload your resume and Helix instantly analyzes your skills, experience, and career trajectory.',
       icon: Upload,
       color: 'from-primary to-blue-400',
-      soraQuote: '"I see you have 5 years in product management. Let me identify your strongest selling points..."',
+      helixQuote: '"I see you have 5 years in product management. Let me identify your strongest selling points..."',
       details: ['PDF or DOCX format', 'AI skill extraction', 'Instant analysis']
     },
     {
       number: '02',
-      title: 'Sora Finds the Gaps',
-      description: 'Paste any job description. Sora compares it against your profile and shows exactly what\'s missing.',
+      title: 'Helix Finds the Gaps',
+      description: 'Paste any job description. Helix compares it against your profile and shows exactly what\'s missing.',
       icon: Target,
       color: 'from-emerald-500 to-teal-400',
-      soraQuote: '"This role needs Agile experience—I found 3 ways to highlight yours better."',
+      helixQuote: '"This role needs Agile experience—I found 3 ways to highlight yours better."',
       details: ['Keyword matching', 'Gap identification', 'Match scoring']
     },
     {
       number: '03',
       title: 'AI-Powered Optimization',
-      description: 'Sora rewrites bullet points, suggests improvements, and tailors your resume for each opportunity.',
+      description: 'Helix rewrites bullet points, suggests improvements, and tailors your resume for each opportunity.',
       icon: FileSearch,
       color: 'from-purple-500 to-pink-400',
-      soraQuote: '"I\'ve optimized your experience section. Your ATS score jumped from 67% to 89%!"',
+      helixQuote: '"I\'ve optimized your experience section. Your ATS score jumped from 67% to 89%!"',
       details: ['Auto-rewrite bullets', 'ATS optimization', 'Tailored versions']
     },
     {
       number: '04',
       title: 'Apply with Confidence',
-      description: 'Track every application in Mission Control while Sora reminds you when to follow up.',
+      description: 'Track every application in Mission Control while Helix reminds you when to follow up.',
       icon: Kanban,
       color: 'from-amber-500 to-orange-400',
-      soraQuote: '"You applied to Stripe 5 days ago. Want me to draft a follow-up email?"',
+      helixQuote: '"You applied to Stripe 5 days ago. Want me to draft a follow-up email?"',
       details: ['Application tracking', 'Smart reminders', 'Follow-up drafts']
     }
   ];
@@ -54,14 +54,14 @@ const HowItWorksSection = () => {
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
             <Sparkles className="w-4 h-4" />
-            How Sora Works
+            How Helix Works
           </div>
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Your AI Guide from 
             <span className="gradient-text"> Resume to Hired</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Sora walks you through every step, providing personalized guidance and doing the heavy lifting.
+            Helix walks you through every step, providing personalized guidance and doing the heavy lifting.
           </p>
         </div>
 
@@ -91,13 +91,13 @@ const HowItWorksSection = () => {
                   <h3 className="text-lg font-bold text-foreground mb-2">{step.title}</h3>
                   <p className="text-sm text-muted-foreground mb-4 leading-relaxed">{step.description}</p>
                   
-                  {/* Sora Quote */}
+                  {/* Helix Quote */}
                   <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 mb-4">
                     <div className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center shrink-0 mt-0.5">
                         <Bot className="w-3 h-3 text-white" />
                       </div>
-                      <p className="text-xs text-foreground/80 italic leading-relaxed">{step.soraQuote}</p>
+                      <p className="text-xs text-foreground/80 italic leading-relaxed">{step.helixQuote}</p>
                     </div>
                   </div>
                   
@@ -120,7 +120,7 @@ const HowItWorksSection = () => {
         <div className="text-center">
           <Button asChild size="lg" className="saas-button h-14 px-10 text-lg font-bold">
             <Link to="/auth">
-              Start Chatting with Sora
+              Start Chatting with Helix
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </Button>

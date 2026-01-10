@@ -8,25 +8,25 @@ const BenefitsSection = () => {
     {
       icon: MessageCircle,
       title: '24/7 AI Career Coach',
-      description: 'Ask Sora anything about your job search. Get personalized advice instantly, any time.',
+      description: 'Ask Helix anything about your job search. Get personalized advice instantly, any time.',
       color: 'from-primary to-blue-400'
     },
     {
       icon: Brain,
       title: 'Smart Resume Analysis',
-      description: 'Sora reads your resume like a recruiter would, spotting issues and opportunities.',
+      description: 'Helix reads your resume like a recruiter would, spotting issues and opportunities.',
       color: 'from-purple-500 to-pink-400'
     },
     {
       icon: Target,
       title: 'Job Match Scoring',
-      description: 'Paste any job posting. Sora calculates your match percentage and shows gaps.',
+      description: 'Paste any job posting. Helix calculates your match percentage and shows gaps.',
       color: 'from-emerald-500 to-teal-400'
     },
     {
       icon: PenTool,
       title: 'AI Content Writing',
-      description: 'Sora writes tailored cover letters, rewrites bullet points, and drafts follow-ups.',
+      description: 'Helix writes tailored cover letters, rewrites bullet points, and drafts follow-ups.',
       color: 'from-amber-500 to-orange-400'
     },
     {
@@ -38,7 +38,7 @@ const BenefitsSection = () => {
     {
       icon: Zap,
       title: 'Instant Optimization',
-      description: 'One click and Sora optimizes your entire resume for ATS systems.',
+      description: 'One click and Helix optimizes your entire resume for ATS systems.',
       color: 'from-cyan-500 to-blue-400'
     }
   ];
@@ -72,10 +72,10 @@ const BenefitsSection = () => {
           </div>
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             What Can 
-            <span className="gradient-text"> Sora Do?</span>
+            <span className="gradient-text"> Helix Do?</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            From resume analysis to interview prep, Sora handles the heavy lifting so you can focus on landing your dream job.
+            From resume analysis to interview prep, Helix handles the heavy lifting so you can focus on landing your dream job.
           </p>
         </div>
 
@@ -98,7 +98,7 @@ const BenefitsSection = () => {
           })}
         </div>
 
-        {/* Sora Conversation Examples */}
+        {/* Helix Conversation Examples */}
         <div className="command-card p-8 md:p-12 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-purple-500/5"></div>
           
@@ -108,7 +108,7 @@ const BenefitsSection = () => {
                 <Bot className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-                Ask Sora Anything
+                Ask Helix Anything
               </h3>
               <p className="text-muted-foreground">
                 Natural conversations that give you real, actionable career advice
@@ -140,7 +140,7 @@ const BenefitsSection = () => {
             <div className="mt-10 text-center">
               <Button asChild size="lg" className="saas-button h-14 px-10 text-lg font-bold">
                 <Link to="/auth">
-                  Try Sora Free
+                  Try Helix Free
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>

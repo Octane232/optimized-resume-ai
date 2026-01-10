@@ -7,7 +7,7 @@ const TestimonialsSection = () => {
       name: 'Marcus T.',
       role: 'Product Manager', 
       company: 'Tech Startup',
-      content: "Sora is like having a career coach in my pocket. It found keyword gaps I never noticed and rewrote my bullets with real impact. Got 2 interviews in the first week.",
+      content: "Helix is like having a career coach in my pocket. It found keyword gaps I never noticed and rewrote my bullets with real impact. Got 2 interviews in the first week.",
       rating: 5,
       highlight: 'keyword gaps',
       initials: 'MT',
@@ -17,7 +17,7 @@ const TestimonialsSection = () => {
       name: 'Priya S.',
       role: 'Software Engineer',
       company: 'Fortune 500', 
-      content: "After months of silence from applications, I asked Sora to analyze my resume. It showed me exactly why I was getting filtered out. Landed 3 interviews after the fixes.",
+      content: "After months of silence from applications, I asked Helix to analyze my resume. It showed me exactly why I was getting filtered out. Landed 3 interviews after the fixes.",
       rating: 5,
       highlight: 'getting filtered out',
       initials: 'PS',
@@ -27,7 +27,7 @@ const TestimonialsSection = () => {
       name: 'Alex R.',
       role: 'Marketing Specialist',
       company: 'Agency',
-      content: "I was skeptical about an 'AI career assistant' but Sora genuinely understands context. It wrote a cover letter that actually sounded like me, not generic AI fluff.",
+      content: "I was skeptical about an 'AI career assistant' but Helix genuinely understands context. It wrote a cover letter that actually sounded like me, not generic AI fluff.",
       rating: 5,
       highlight: 'sounded like me',
       initials: 'AR',
@@ -37,7 +37,7 @@ const TestimonialsSection = () => {
       name: 'Jordan K.',
       role: 'Data Analyst',
       company: 'Finance',
-      content: "The job match scoring is surprisingly accurate. Sora told me a role was only 62% match and explained why. Saved me from wasting time on jobs I wouldn't get.",
+      content: "The job match scoring is surprisingly accurate. Helix told me a role was only 62% match and explained why. Saved me from wasting time on jobs I wouldn't get.",
       rating: 4,
       highlight: 'job match scoring',
       initials: 'JK',
@@ -47,7 +47,7 @@ const TestimonialsSection = () => {
       name: 'Sam L.',
       role: 'UX Designer',
       company: 'Creative Studio',
-      content: "Asked Sora to help me pivot from graphic design to UX. It identified transferable skills I overlooked and helped me reframe my entire experience. Game changer.",
+      content: "Asked Helix to help me pivot from graphic design to UX. It identified transferable skills I overlooked and helped me reframe my entire experience. Game changer.",
       rating: 5,
       highlight: 'transferable skills',
       initials: 'SL',
@@ -57,7 +57,7 @@ const TestimonialsSection = () => {
       name: 'Taylor M.',
       role: 'Sales Rep',
       company: 'SaaS Company',
-      content: "Sora's follow-up email suggestions are gold. It reminded me to follow up on day 5 and drafted the perfect message. Got me to final round twice.",
+      content: "Helix's follow-up email suggestions are gold. It reminded me to follow up on day 5 and drafted the perfect message. Got me to final round twice.",
       rating: 5,
       highlight: 'follow-up email',
       initials: 'TM',
@@ -82,10 +82,10 @@ const TestimonialsSection = () => {
           </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-4 leading-tight animate-fade-in" style={{ animationDelay: '0.1s' }}>
             <span className="block text-foreground">What People Say About</span>
-            <span className="gradient-text">Sora</span>
+            <span className="gradient-text">Helix</span>
           </h2>
           <p className="text-lg max-w-2xl mx-auto text-muted-foreground animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            Real feedback from job seekers who let Sora guide their career journey
+            Real feedback from job seekers who let Helix guide their career journey
           </p>
           
           {/* Rating summary */}
@@ -111,12 +111,12 @@ const TestimonialsSection = () => {
                 <Quote className="w-8 h-8 text-primary/40" />
               </div>
 
-              {/* Sora mention badge */}
+              {/* Helix mention badge */}
               <div className="flex items-center gap-1.5 mb-4">
                 <div className="w-5 h-5 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center">
                   <Bot className="w-3 h-3 text-white" />
                 </div>
-                <span className="text-xs font-medium text-primary">Sora User</span>
+                <span className="text-xs font-medium text-primary">Helix User</span>
               </div>
 
               {/* Rating Stars with glow effect */}
