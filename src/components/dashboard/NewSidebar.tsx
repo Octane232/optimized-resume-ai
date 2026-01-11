@@ -11,7 +11,11 @@ import {
   Stethoscope,
   Lock,
   Sparkles,
-  Telescope
+  Telescope,
+  FileText,
+  Mic,
+  TrendingUp,
+  Linkedin
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -48,6 +52,10 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
     { id: 'briefing', label: 'Briefing', icon: Home },
     { id: 'scout', label: 'Scout', icon: Telescope },
     { id: 'resume-engine', label: 'Resume Engine', icon: Stethoscope },
+    { id: 'cover-letter', label: 'Cover Letters', icon: FileText },
+    { id: 'interview-prep', label: 'Interview Prep', icon: Mic },
+    { id: 'skill-gap', label: 'Skill Gap', icon: TrendingUp },
+    { id: 'linkedin', label: 'LinkedIn Optimizer', icon: Linkedin },
     { id: 'vault', label: 'Master Vault', icon: FolderLock },
     { id: 'mission-control', label: 'Mission Control', icon: Crosshair },
   ];
