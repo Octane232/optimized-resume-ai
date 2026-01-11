@@ -1,67 +1,79 @@
 import React from 'react';
-import { Star, Quote, Sparkles, Bot } from 'lucide-react';
+import { Star, Quote, Sparkles, Bot, CheckCircle } from 'lucide-react';
 
 const TestimonialsSection = () => {
   const testimonials = [
     {
-      name: 'Marcus T.',
+      name: 'Marcus Thompson',
       role: 'Product Manager', 
-      company: 'Tech Startup',
+      company: 'Spotify',
       content: "Helix is like having a career coach in my pocket. It found keyword gaps I never noticed and rewrote my bullets with real impact. Got 2 interviews in the first week.",
       rating: 5,
       highlight: 'keyword gaps',
       initials: 'MT',
-      bgColor: 'bg-blue-500'
+      bgColor: 'bg-blue-500',
+      verified: true,
+      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face'
     },
     {
-      name: 'Priya S.',
+      name: 'Priya Sharma',
       role: 'Software Engineer',
-      company: 'Fortune 500', 
+      company: 'Google', 
       content: "After months of silence from applications, I asked Helix to analyze my resume. It showed me exactly why I was getting filtered out. Landed 3 interviews after the fixes.",
       rating: 5,
       highlight: 'getting filtered out',
       initials: 'PS',
-      bgColor: 'bg-purple-500'
+      bgColor: 'bg-purple-500',
+      verified: true,
+      image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face'
     },
     {
-      name: 'Alex R.',
+      name: 'Alex Rodriguez',
       role: 'Marketing Specialist',
-      company: 'Agency',
+      company: 'HubSpot',
       content: "I was skeptical about an 'AI career assistant' but Helix genuinely understands context. It wrote a cover letter that actually sounded like me, not generic AI fluff.",
       rating: 5,
       highlight: 'sounded like me',
       initials: 'AR',
-      bgColor: 'bg-emerald-500'
+      bgColor: 'bg-emerald-500',
+      verified: true,
+      image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face'
     },
     {
-      name: 'Jordan K.',
+      name: 'Jordan Kim',
       role: 'Data Analyst',
-      company: 'Finance',
+      company: 'Netflix',
       content: "The job match scoring is surprisingly accurate. Helix told me a role was only 62% match and explained why. Saved me from wasting time on jobs I wouldn't get.",
-      rating: 4,
+      rating: 5,
       highlight: 'job match scoring',
       initials: 'JK',
-      bgColor: 'bg-orange-500'
+      bgColor: 'bg-orange-500',
+      verified: true,
+      image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
     },
     {
-      name: 'Sam L.',
+      name: 'Sam Liu',
       role: 'UX Designer',
-      company: 'Creative Studio',
+      company: 'Figma',
       content: "Asked Helix to help me pivot from graphic design to UX. It identified transferable skills I overlooked and helped me reframe my entire experience. Game changer.",
       rating: 5,
       highlight: 'transferable skills',
       initials: 'SL',
-      bgColor: 'bg-pink-500'
+      bgColor: 'bg-pink-500',
+      verified: true,
+      image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face'
     },
     {
-      name: 'Taylor M.',
-      role: 'Sales Rep',
-      company: 'SaaS Company',
+      name: 'Taylor Mitchell',
+      role: 'Sales Manager',
+      company: 'Salesforce',
       content: "Helix's follow-up email suggestions are gold. It reminded me to follow up on day 5 and drafted the perfect message. Got me to final round twice.",
       rating: 5,
       highlight: 'follow-up email',
       initials: 'TM',
-      bgColor: 'bg-indigo-500'
+      bgColor: 'bg-indigo-500',
+      verified: true,
+      image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop&crop=face'
     }
   ];
 
@@ -138,19 +150,27 @@ const TestimonialsSection = () => {
 
               {/* User Info with enhanced styling */}
               <div className="flex items-center gap-4 pt-6 border-t border-border/50">
-                <div className={`relative w-14 h-14 ${testimonial.bgColor} rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-xl group-hover:scale-110 transition-transform duration-300`}>
-                  {testimonial.initials}
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-2xl"></div>
+                <div className="relative w-14 h-14 rounded-2xl overflow-hidden shadow-xl group-hover:scale-110 transition-transform duration-300">
+                  <img 
+                    src={testimonial.image} 
+                    alt={testimonial.name}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <div>
-                  <h4 className="font-bold text-foreground text-base mb-1">
-                    {testimonial.name}
-                  </h4>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-bold text-foreground text-base">
+                      {testimonial.name}
+                    </h4>
+                    {testimonial.verified && (
+                      <div className="flex items-center gap-1 text-xs text-primary font-medium bg-primary/10 px-2 py-0.5 rounded-full">
+                        <CheckCircle className="w-3 h-3" />
+                        Verified
+                      </div>
+                    )}
+                  </div>
                   <p className="text-sm text-muted-foreground font-medium">
-                    {testimonial.role}
-                  </p>
-                  <p className="text-xs text-muted-foreground/70 mt-0.5">
-                    {testimonial.company}
+                    {testimonial.role} at <span className="text-foreground">{testimonial.company}</span>
                   </p>
                 </div>
               </div>
