@@ -21,26 +21,27 @@ export interface UsageStats {
   usageCycleResetDate: string | null;
 }
 
+// All features unlocked for restructuring
 const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
   free: {
-    pdfDownloads: 1,
-    aiGenerations: 0,
-    activeResumes: 1,
-    hasAIResume: false,
-    hasCoverLetter: false,
-    hasATSScoring: false,
-    hasInterviewPrep: false,
-    hasSkillGap: false,
-  },
-  pro: {
-    pdfDownloads: 10,
-    aiGenerations: 5,
-    activeResumes: 5,
+    pdfDownloads: Infinity,
+    aiGenerations: Infinity,
+    activeResumes: Infinity,
     hasAIResume: true,
     hasCoverLetter: true,
     hasATSScoring: true,
-    hasInterviewPrep: false,
-    hasSkillGap: false,
+    hasInterviewPrep: true,
+    hasSkillGap: true,
+  },
+  pro: {
+    pdfDownloads: Infinity,
+    aiGenerations: Infinity,
+    activeResumes: Infinity,
+    hasAIResume: true,
+    hasCoverLetter: true,
+    hasATSScoring: true,
+    hasInterviewPrep: true,
+    hasSkillGap: true,
   },
   premium: {
     pdfDownloads: Infinity,
