@@ -15,6 +15,8 @@ import {
   ChevronRight,
   Sparkles
 } from 'lucide-react';
+import CareerStreak from './CareerStreak';
+import UsageIndicator from './UsageIndicator';
 
 interface HunterDashboardProps {
   setActiveTab: (tab: string) => void;
@@ -296,6 +298,12 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Career Streak & Usage */}
+      <div className="grid lg:grid-cols-2 gap-4 mt-4">
+        <CareerStreak compact />
+        <UsageIndicator />
+      </div>
     </div>
   );
 };
