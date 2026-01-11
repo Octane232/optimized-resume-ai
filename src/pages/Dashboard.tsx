@@ -11,6 +11,10 @@ import MissionControl from '@/components/dashboard/MissionControl';
 import Settings from '@/components/dashboard/Settings';
 import ResumeEngine from '@/components/dashboard/ResumeEngine';
 import Scout from '@/components/dashboard/Scout';
+import CoverLetterGenerator from '@/components/dashboard/CoverLetterGenerator';
+import InterviewPrep from '@/components/dashboard/InterviewPrep';
+import { SkillGapAnalyzer } from '@/components/dashboard/SkillGapAnalyzer';
+import LinkedInOptimizer from '@/components/dashboard/LinkedInOptimizer';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState(() => {
@@ -114,6 +118,14 @@ const Dashboard = () => {
         return <Scout />;
       case 'resume-engine':
         return <ResumeEngine setActiveTab={setActiveTab} hasResume={hasResume} />;
+      case 'cover-letter':
+        return <CoverLetterGenerator />;
+      case 'interview-prep':
+        return <InterviewPrep />;
+      case 'skill-gap':
+        return <SkillGapAnalyzer />;
+      case 'linkedin':
+        return <LinkedInOptimizer />;
       case 'vault':
         return <TheVault onResumeChange={(has) => setHasResume(has)} />;
       case 'mission-control':
