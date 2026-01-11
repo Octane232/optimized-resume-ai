@@ -407,7 +407,7 @@ const Scout: React.FC = () => {
                   <div>
                     <h4 className="font-semibold text-sm">Unlock Premium Scout Features</h4>
                     <p className="text-xs text-muted-foreground">
-                      Daily alerts • Auto-apply • Advanced filters • Company insights
+                      Daily alerts • Advanced filters • Company insights • Resume matching
                     </p>
                   </div>
                 </div>
