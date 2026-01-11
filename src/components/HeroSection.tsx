@@ -80,7 +80,7 @@ const HeroSection = () => {
               <Button asChild size="lg" className="saas-button h-14 px-10 text-lg font-bold group relative overflow-hidden">
                 <Link to="/auth" className="flex items-center">
                   <MessageCircle className="mr-2 h-5 w-5" />
-                  <span>Chat with Helix</span>
+                  <span>Start Free — No Credit Card</span>
                   <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
@@ -92,8 +92,14 @@ const HeroSection = () => {
               </Button>
             </div>
 
+            {/* Free Plan Badge */}
+            <div className="inline-flex items-center gap-2 glass-card rounded-full px-4 py-2 animate-fade-in stagger-4">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+              <span className="text-sm font-medium text-foreground">Free plan available • Starting at $0/month</span>
+            </div>
+
             {/* Trust indicators */}
-            <div className="flex flex-wrap gap-6 items-center text-sm text-muted-foreground animate-fade-in stagger-4">
+            <div className="flex flex-wrap gap-6 items-center text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: '0.5s' }}>
               <div className="flex items-center gap-2">
                 <Shield className="w-4 h-4 text-emerald-500" />
                 <span>Private & secure</span>
