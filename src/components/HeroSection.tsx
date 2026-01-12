@@ -1,144 +1,173 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, MessageCircle, Target, Shield, Sparkles, Brain, Zap, FileSearch } from 'lucide-react';
+import { ArrowRight, MessageCircle, Sparkles, Brain, Mic, Send } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import SoraChatPreview from './SoraChatPreview';
 
 const HeroSection = () => {
-  const aiCapabilities = [
-    { 
-      icon: FileSearch, 
-      label: 'Resume Analysis', 
-      desc: 'Instant ATS scoring & optimization',
-      color: 'from-primary to-blue-400'
-    },
-    { 
-      icon: Target, 
-      label: 'Job Matching', 
-      desc: 'Find your perfect role fit',
-      color: 'from-emerald-500 to-teal-400'
-    },
-    { 
-      icon: Brain, 
-      label: 'Smart Suggestions', 
-      desc: 'AI-powered improvements',
-      color: 'from-purple-500 to-pink-400'
-    },
-    { 
-      icon: Zap, 
-      label: 'Instant Help', 
-      desc: '24/7 career guidance',
-      color: 'from-amber-500 to-orange-400'
-    }
+  const quickPrompts = [
+    "Optimize my resume for a Product Manager role",
+    "Find jobs matching my skills",
+    "Prepare me for an interview at Google",
+    "Write a cover letter for this job posting"
   ];
 
   return (
     <section className="relative min-h-screen overflow-hidden bg-background">
-      {/* Advanced animated background */}
-      <div className="absolute inset-0 bg-[var(--gradient-mesh)] opacity-90"></div>
+      {/* Subtle gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background"></div>
       
-      {/* Animated gradient orbs */}
-      <div className="absolute w-[800px] h-[800px] bg-gradient-to-br from-primary/15 via-blue-500/10 to-purple-500/10 rounded-full blur-3xl pointer-events-none -left-40 -top-40 animate-float"></div>
-      <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-gradient-to-tl from-emerald-500/10 via-primary/15 to-transparent rounded-full blur-3xl"></div>
+      {/* Floating orb - represents AI */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-gradient-to-br from-primary/20 via-purple-500/10 to-transparent rounded-full blur-3xl pointer-events-none opacity-60"></div>
       
-      {/* Grid overlay for command center feel */}
-      <div className="absolute inset-0 bg-[linear-gradient(hsl(var(--border)/0.03)_1px,transparent_1px),linear-gradient(90deg,hsl(var(--border)/0.03)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
-      
-      <div className="container mx-auto px-6 lg:px-8 relative pt-32 pb-20">
-        {/* Main content */}
-        <div className="grid lg:grid-cols-12 gap-12 items-center min-h-[80vh]">
-          {/* Left - Main hero content (spans 7 columns) */}
-          <div className="lg:col-span-7 space-y-8">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 command-card rounded-full px-4 py-2 animate-fade-in">
-              <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-foreground">Meet Your AI Career Assistant</span>
-            </div>
-
-            {/* Main headline */}
-            <div className="space-y-4">
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-[0.95] tracking-tighter animate-fade-in">
-                <span className="block text-foreground">Hi, I'm</span>
-                <span className="block gradient-text">Helix</span>
-              </h1>
+      <div className="container mx-auto px-6 lg:px-8 relative pt-28 pb-16">
+        {/* Centered AI Assistant Introduction */}
+        <div className="max-w-4xl mx-auto text-center space-y-8">
+          
+          {/* AI Avatar/Orb */}
+          <div className="relative inline-flex flex-col items-center animate-fade-in">
+            <div className="relative">
+              {/* Pulsing ring */}
+              <div className="absolute inset-0 w-28 h-28 bg-gradient-to-br from-primary/30 to-purple-500/30 rounded-full animate-pulse"></div>
+              <div className="absolute -inset-2 w-32 h-32 bg-gradient-to-br from-primary/10 to-purple-500/10 rounded-full blur-xl"></div>
               
-              {/* Decorative element */}
-              <div className="flex items-center gap-3 animate-fade-in stagger-1">
-                <div className="h-1 w-16 bg-gradient-to-r from-primary to-purple-500 rounded-full"></div>
-                <span className="text-sm font-semibold text-primary">Your AI Career Co-Pilot</span>
+              {/* Main orb */}
+              <div className="relative w-28 h-28 bg-gradient-to-br from-primary via-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-2xl shadow-primary/30">
+                <Sparkles className="w-12 h-12 text-white" />
               </div>
-            </div>
-
-            {/* Subtitle */}
-            <p className="text-lg md:text-xl leading-relaxed max-w-xl text-muted-foreground animate-fade-in stagger-2">
-              I analyze your resume, find perfect job matches, identify skill gaps, and guide you through every application. 
-              Think of me as your personal career coach—available 24/7.
-            </p>
-
-            {/* CTA buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 animate-fade-in stagger-3">
-              <Button asChild size="lg" className="saas-button h-14 px-10 text-lg font-bold group relative overflow-hidden">
-                <Link to="/auth" className="flex items-center">
-                  <MessageCircle className="mr-2 h-5 w-5" />
-                  <span>Start Free — No Credit Card</span>
-                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg" className="h-14 px-10 text-lg font-semibold border-2 hover:bg-secondary/50">
-                <Link to="#how-it-works" className="flex items-center">
-                  <Brain className="mr-2 h-5 w-5 text-primary" />
-                  See Helix in Action
-                </Link>
-              </Button>
-            </div>
-
-            {/* Free Plan Badge */}
-            <div className="inline-flex items-center gap-2 glass-card rounded-full px-4 py-2 animate-fade-in stagger-4">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-              <span className="text-sm font-medium text-foreground">Free plan available • Starting at $0/month</span>
-            </div>
-
-            {/* Trust indicators */}
-            <div className="flex flex-wrap gap-6 items-center text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: '0.5s' }}>
-              <div className="flex items-center gap-2">
-                <Shield className="w-4 h-4 text-emerald-500" />
-                <span>Private & secure</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-primary" />
-                <span>Instant AI responses</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Target className="w-4 h-4 text-amber-500" />
-                <span>Personalized guidance</span>
+              
+              {/* Online indicator */}
+              <div className="absolute bottom-1 right-1 w-6 h-6 bg-emerald-500 rounded-full border-4 border-background flex items-center justify-center">
+                <div className="w-2 h-2 bg-white rounded-full"></div>
               </div>
             </div>
           </div>
 
-          {/* Right - Sora Chat Preview (spans 5 columns) */}
-          <div className="lg:col-span-5 space-y-6">
-            {/* Sora Chat Preview */}
-            <div className="animate-fade-in" style={{ animationDelay: '0.5s' }}>
+          {/* Main headline - conversational */}
+          <div className="space-y-4 animate-fade-in stagger-1">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight">
+              <span className="text-foreground">Hey, I'm </span>
+              <span className="gradient-text">Helix</span>
+              <span className="text-foreground"> 👋</span>
+            </h1>
+            <p className="text-xl md:text-2xl text-muted-foreground font-medium">
+              Your AI career assistant
+            </p>
+          </div>
+
+          {/* What I can do - conversational */}
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in stagger-2">
+            Tell me about your dream job, and I'll help you get there. I can optimize your resume, 
+            find matching jobs, write cover letters, and coach you for interviews — all in one conversation.
+          </p>
+
+          {/* Main CTA - Chat input style */}
+          <div className="max-w-2xl mx-auto animate-fade-in stagger-3">
+            <div className="relative">
+              <div className="command-card p-2 flex items-center gap-3">
+                <div className="flex-1 flex items-center gap-3 px-4 py-3 bg-secondary/50 rounded-xl">
+                  <MessageCircle className="w-5 h-5 text-muted-foreground" />
+                  <span className="text-muted-foreground text-left">Ask me anything about your career...</span>
+                </div>
+                <Button asChild size="lg" className="saas-button h-12 px-6 font-bold shrink-0">
+                  <Link to="/auth" className="flex items-center gap-2">
+                    <span className="hidden sm:inline">Start Chat</span>
+                    <Send className="w-5 h-5" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
+            
+            {/* Quick prompts */}
+            <div className="mt-4 flex flex-wrap justify-center gap-2">
+              {quickPrompts.map((prompt, index) => (
+                <Link 
+                  key={index}
+                  to="/auth"
+                  className="text-xs sm:text-sm px-3 py-1.5 rounded-full bg-secondary/80 hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors border border-border/50"
+                >
+                  {prompt}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Free badge */}
+          <div className="inline-flex items-center gap-2 text-sm text-muted-foreground animate-fade-in stagger-4">
+            <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+            <span>Free to start • No credit card needed</span>
+          </div>
+        </div>
+
+        {/* Live Demo Preview */}
+        <div className="mt-16 max-w-5xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-8 items-start">
+            {/* Chat Preview */}
+            <div className="animate-fade-in" style={{ animationDelay: '0.6s' }}>
+              <div className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
+                <Brain className="w-4 h-4 text-primary" />
+                Watch me in action
+              </div>
               <SoraChatPreview />
             </div>
 
-            {/* AI Capabilities Grid */}
-            <div className="grid grid-cols-2 gap-3 animate-fade-in" style={{ animationDelay: '0.7s' }}>
-              {aiCapabilities.map((capability, index) => {
-                const Icon = capability.icon;
-                return (
+            {/* What I Help With */}
+            <div className="space-y-4 animate-fade-in" style={{ animationDelay: '0.8s' }}>
+              <div className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-primary" />
+                What I can help you with
+              </div>
+              
+              <div className="space-y-3">
+                {[
+                  { 
+                    emoji: "📝", 
+                    title: "Resume Optimization", 
+                    desc: "I'll analyze your resume and make it ATS-friendly in seconds"
+                  },
+                  { 
+                    emoji: "🎯", 
+                    title: "Job Matching", 
+                    desc: "I find jobs that actually fit your skills and experience"
+                  },
+                  { 
+                    emoji: "✍️", 
+                    title: "Cover Letters", 
+                    desc: "I write personalized cover letters for each application"
+                  },
+                  { 
+                    emoji: "🎤", 
+                    title: "Interview Prep", 
+                    desc: "I'll simulate interviews and give you real-time feedback"
+                  },
+                  { 
+                    emoji: "📊", 
+                    title: "Skill Gap Analysis", 
+                    desc: "I identify what skills you need for your target role"
+                  }
+                ].map((item, index) => (
                   <div 
                     key={index}
-                    className="command-card p-4 group cursor-pointer"
+                    className="command-card p-4 flex items-start gap-4 group hover:border-primary/30 transition-colors"
                   >
-                    <div className={`w-10 h-10 bg-gradient-to-br ${capability.color} rounded-xl flex items-center justify-center mb-3 shadow-lg group-hover:scale-110 transition-transform`}>
-                      <Icon className="w-5 h-5 text-white" />
+                    <span className="text-2xl">{item.emoji}</span>
+                    <div>
+                      <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                        {item.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">{item.desc}</p>
                     </div>
-                    <h3 className="font-bold text-sm text-foreground mb-0.5">{capability.label}</h3>
-                    <p className="text-xs text-muted-foreground">{capability.desc}</p>
                   </div>
-                );
-              })}
+                ))}
+              </div>
+
+              <Button asChild variant="outline" className="w-full mt-4 h-12 font-semibold">
+                <Link to="/auth" className="flex items-center gap-2">
+                  <MessageCircle className="w-5 h-5" />
+                  Start a conversation with me
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </Button>
             </div>
           </div>
         </div>

@@ -15,20 +15,24 @@ const SoraChatPreview = () => {
 
   const conversation: Message[] = [
     { 
-      role: 'sora', 
-      content: "Hi! I'm Helix, your AI career assistant. I see you're targeting Product Manager roles. Let me analyze your resume..." 
+      role: 'user', 
+      content: "I want to apply for a Product Manager role at Stripe" 
     },
     { 
       role: 'sora', 
-      content: "Found 3 gaps: missing 'Agile', 'Roadmap', and quantified impact metrics. Want me to fix these?" 
+      content: "Great choice! I found that role. Let me analyze your resume against their requirements..." 
+    },
+    { 
+      role: 'sora', 
+      content: "Your current match: 67%. I found 3 gaps — missing 'Agile', 'Roadmap planning', and impact metrics. Should I optimize your resume?" 
     },
     { 
       role: 'user', 
-      content: "Yes, optimize my resume for the Senior PM role at Stripe" 
+      content: "Yes please!" 
     },
     { 
       role: 'sora', 
-      content: "Done! Your match score jumped from 67% to 89%. I also drafted a tailored cover letter. Ready to apply?" 
+      content: "Done ✓ Match score: 89%. I also drafted a cover letter. Want me to prep you for the interview next?" 
     }
   ];
 
