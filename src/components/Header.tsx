@@ -34,8 +34,8 @@ const Header = () => {
       <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
         <div className="flex items-center justify-between h-14">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
-            <img src={logo} alt="PitchVaya" className="h-10 w-auto object-contain rounded" />
+          <Link to="/" className="flex items-center gap-1.5">
+            <img src={logo} alt="PitchVaya" className="h-8 w-8 object-contain" />
             <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-orange-500 bg-clip-text text-transparent">
               PitchVaya
             </span>
