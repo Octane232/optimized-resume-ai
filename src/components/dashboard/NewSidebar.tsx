@@ -89,7 +89,7 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
       {/* Logo & Toggle */}
       <div className="p-4 flex items-center justify-between border-b border-sidebar-border">
         {!collapsed && (
-          <img src={logo} alt="Pitchsora" className="h-8" />
+          <img src={logo} alt="PitchVaya" className="h-8" />
         )}
         <Button 
           variant="ghost" 

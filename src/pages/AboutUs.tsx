@@ -17,7 +17,7 @@ const AboutUs = () => {
           <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
             <div className="text-center max-w-3xl mx-auto">
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                About Pitchsora
+                About PitchVaya
               </h1>
               <p className="text-lg text-gray-600">
                 We help job seekers create better resumes and get more interviews. That's it.
@@ -36,7 +36,7 @@ const AboutUs = () => {
                   Job hunting is already stressful. Your resume shouldn't add to that stress.
                 </p>
                 <p className="text-lg text-gray-600 mb-4">
-                  We built Pitchsora because we were tired of resume builders that either looked terrible or cost way too much. 
+                  We built PitchVaya because we were tired of resume builders that either looked terrible or cost way too much. 
                   Most of them make promises they can't keep about "guaranteed interviews" or "AI magic."
                 </p>
                 <p className="text-lg text-gray-600">
@@ -52,7 +52,7 @@ const AboutUs = () => {
                     description: "AI-powered matching that connects the right talent with the right opportunities"
                   },
                   {
-                    icon: <img src={logoIcon} alt="Pitchsora" className="w-24 h-24" />,
+                    icon: <img src={logoIcon} alt="PitchVaya" className="w-24 h-24" />,
                     title: "Empathy",
                     description: "Understanding the challenges of job searching and career transitions"
                   },
@@ -85,7 +85,7 @@ const AboutUs = () => {
           <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-bold mb-4">Trusted by Professionals Worldwide</h2>
-              <p className="text-gray-600 text-lg">Join thousands who have transformed their careers with Pitchsora</p>
+              <p className="text-gray-600 text-lg">Join thousands who have transformed their careers with PitchVaya</p>
             </div>
             <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
               {[
@@ -109,7 +109,7 @@ const AboutUs = () => {
         <section className="py-20">
           <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-4xl font-bold text-center mb-12">What Makes Pitchsora Different</h2>
+              <h2 className="text-4xl font-bold text-center mb-12">What Makes PitchVaya Different</h2>
               <div className="space-y-6">
                 {[
                   {
