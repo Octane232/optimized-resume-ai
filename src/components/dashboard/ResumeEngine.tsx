@@ -17,6 +17,7 @@ import BulletRewriter from './resume-engine/BulletRewriter';
 import ATSSimulationView from './resume-engine/ATSSimulationView';
 import AutoOptimizeButton from './resume-engine/AutoOptimizeButton';
 import RecommendationsPanel from './resume-engine/RecommendationsPanel';
+import BuildResumeCard from './resume-engine/BuildResumeCard';
 import UpgradeModal from './UpgradeModal';
 
 interface ResumeEngineProps {
@@ -268,6 +269,9 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
 
       {/* Main Content */}
       <div className="p-6 pb-12 max-w-7xl mx-auto space-y-6">
+        {/* Build Your Resume Card */}
+        <BuildResumeCard />
+
         {/* Auto-Optimize CTA */}
         <AutoOptimizeButton 
           isPremium={isPremium}
