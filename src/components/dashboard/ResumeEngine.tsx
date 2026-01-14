@@ -274,8 +274,6 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
 
         {/* Auto-Optimize CTA */}
         <AutoOptimizeButton 
-          isPremium={isPremium}
-          onUpgrade={() => setShowUpgrade(true)}
           onOptimize={handleAutoOptimize}
           disabled={!resumeContent}
         />
@@ -284,8 +282,6 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
         <JobTargetingPanel
           onAnalyze={handleJobMatch}
           isAnalyzing={isAnalyzingMatch}
-          isPremium={isPremium}
-          onUpgrade={() => setShowUpgrade(true)}
         />
 
         {/* Match Results (if job was analyzed) */}
@@ -335,9 +331,7 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
             <DeepAnalysisCard
               analysis={atsAnalysis}
               isAnalyzing={isAnalyzingATS}
-              isPremium={isPremium}
               onAnalyze={handleDeepAnalysis}
-              onUpgrade={() => setShowUpgrade(true)}
             />
 
             <FixItChecklist
@@ -349,8 +343,6 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
 
             <IndustryBenchmark
               userScore={atsAnalysis?.overall_score || overallScore}
-              isPremium={isPremium}
-              onUpgrade={() => setShowUpgrade(true)}
             />
           </div>
 
@@ -358,15 +350,10 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
           <div className="space-y-6">
             <BulletRewriter
               bullets={bulletPoints}
-              isPremium={isPremium}
-              rewritesRemaining={tier === 'premium' ? -1 : tier === 'pro' ? 5 : 0}
-              onUpgrade={() => setShowUpgrade(true)}
             />
 
             <ATSSimulationView
               resumeContent={resumeContent}
-              isPremium={isPremium}
-              onUpgrade={() => setShowUpgrade(true)}
             />
           </div>
         </div>
