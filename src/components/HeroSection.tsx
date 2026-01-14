@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Sparkles, Briefcase, FileText, Target, Users, TrendingUp, Award } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import SoraChatPreview from './SoraChatPreview';
+import VayaChatPreview from './VayaChatPreview';
 
 const HeroSection = () => {
   return (
@@ -139,10 +139,10 @@ const HeroSection = () => {
               <div className="flex items-center gap-2 mb-4">
                 <Sparkles className="w-4 h-4 text-primary" />
                 <h2 className="text-lg font-semibold text-foreground">
-                  Meet Helix, your AI assistant
+                  Meet Vaya, your AI assistant
                 </h2>
               </div>
-              <SoraChatPreview />
+              <VayaChatPreview />
               <p className="text-sm text-muted-foreground mt-3 text-center">
                 Get instant help optimizing resumes, writing cover letters, and preparing for interviews
               </p>

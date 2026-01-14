@@ -151,7 +151,7 @@ const ForStudents = () => {
           <div className="container mx-auto px-4 lg:px-8 max-w-7xl text-center">
             <h2 className="text-4xl font-bold mb-6">Ready to Start Your Career Journey?</h2>
             <p className="text-xl text-green-100 mb-8 max-w-2xl mx-auto">
-              Join thousands of students and recent graduates who landed their dream jobs with Pitchsora.
+              Join thousands of students and recent graduates who landed their dream jobs with PitchVaya.
             </p>
             <div className="flex justify-center gap-4">
               <Button asChild size="lg" className="bg-white text-green-600 hover:bg-gray-100 px-8 py-4">

@@ -4,12 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
 interface Message {
-  role: 'sora' | 'user';
+  role: 'vaya' | 'user';
   content: string;
   typing?: boolean;
 }
 
-const SoraChatPreview = () => {
+const VayaChatPreview = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -19,11 +19,11 @@ const SoraChatPreview = () => {
       content: "I want to apply for a Product Manager role at Stripe" 
     },
     { 
-      role: 'sora', 
+      role: 'vaya', 
       content: "Great choice! I found that role. Let me analyze your resume against their requirements..." 
     },
     { 
-      role: 'sora', 
+      role: 'vaya', 
       content: "Your current match: 67%. I found 3 gaps — missing 'Agile', 'Roadmap planning', and impact metrics. Should I optimize your resume?" 
     },
     { 
@@ -31,7 +31,7 @@ const SoraChatPreview = () => {
       content: "Yes please!" 
     },
     { 
-      role: 'sora', 
+      role: 'vaya', 
       content: "Done ✓ Match score: 89%. I also drafted a cover letter. Want me to prep you for the interview next?" 
     }
   ];
@@ -65,7 +65,7 @@ const SoraChatPreview = () => {
         </div>
         <div>
           <h3 className="font-bold text-foreground flex items-center gap-1.5">
-            Helix
+            Vaya
             <span className="text-xs font-normal text-primary bg-primary/10 px-1.5 py-0.5 rounded">AI</span>
           </h3>
           <p className="text-xs text-muted-foreground">Your Career Assistant</p>
@@ -80,18 +80,18 @@ const SoraChatPreview = () => {
             className={`flex gap-2.5 animate-fade-in ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
           >
             <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
-              message.role === 'sora' 
+              message.role === 'vaya' 
                 ? 'bg-gradient-to-br from-primary to-purple-500' 
                 : 'bg-secondary'
             }`}>
-              {message.role === 'sora' ? (
+              {message.role === 'vaya' ? (
                 <Bot className="w-4 h-4 text-white" />
               ) : (
                 <User className="w-4 h-4 text-muted-foreground" />
               )}
             </div>
             <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
-              message.role === 'sora' 
+              message.role === 'vaya' 
                 ? 'bg-card border border-border text-foreground' 
                 : 'bg-primary text-primary-foreground'
             }`}>
@@ -121,7 +121,7 @@ const SoraChatPreview = () => {
       <div className="px-4 pb-4">
         <Button asChild className="w-full saas-button h-11 font-bold group">
           <Link to="/auth">
-            Start Chatting with Helix
+            Start Chatting with Vaya
             <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </Button>
@@ -130,4 +130,4 @@ const SoraChatPreview = () => {
   );
 };
 
-export default SoraChatPreview;
+export default VayaChatPreview;
