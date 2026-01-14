@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Menu, X, Sun, Moon, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTheme } from 'next-themes';
-import logo from '@/assets/pitchvaya-logo.jpg';
+import logo from '@/assets/pitchvaya-icon.png';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
