@@ -19,17 +19,13 @@ interface ATSAnalysis {
 interface DeepAnalysisCardProps {
   analysis: ATSAnalysis | null;
   isAnalyzing: boolean;
-  isPremium: boolean;
   onAnalyze: () => void;
-  onUpgrade: () => void;
 }
 
 const DeepAnalysisCard = ({ 
   analysis, 
   isAnalyzing, 
-  isPremium, 
-  onAnalyze, 
-  onUpgrade 
+  onAnalyze
 }: DeepAnalysisCardProps) => {
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-emerald-500';
@@ -60,20 +56,15 @@ const DeepAnalysisCard = ({
         <div className="flex items-center gap-2">
           <Brain className="w-5 h-5 text-primary" />
           <h2 className="font-semibold text-foreground">AI Deep Analysis</h2>
-          {isPremium && (
-            <span className="px-2 py-0.5 text-xs font-medium bg-primary/20 text-primary rounded-full">
-              Premium
-            </span>
-          )}
         </div>
         {!analysis && !isAnalyzing && (
           <Button
-            onClick={isPremium ? onAnalyze : onUpgrade}
+            onClick={onAnalyze}
             size="sm"
             className="gap-2"
           >
             <Sparkles className="w-4 h-4" />
-            {isPremium ? 'Run AI Analysis' : 'Unlock with Pro'}
+            Run AI Analysis
           </Button>
         )}
       </div>
@@ -239,36 +230,17 @@ const DeepAnalysisCard = ({
           )}
         </div>
       ) : (
-        /* Locked/Teaser State */
-        <div className="relative">
-          {!isPremium && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-lg">
-              <div className="text-center p-6">
-                <Lock className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
-                <p className="text-sm font-medium text-foreground mb-1">Premium Feature</p>
-                <p className="text-xs text-muted-foreground mb-4">
-                  Get AI-powered deep analysis with category breakdowns
-                </p>
-                <Button size="sm" onClick={onUpgrade} className="gap-2">
-                  <Sparkles className="w-4 h-4" />
-                  Upgrade to Pro
-                </Button>
+        /* Empty State */
+        <div className="grid grid-cols-2 gap-3 opacity-50">
+          {['Formatting', 'Keywords', 'Experience', 'Education'].map((label) => (
+            <div key={label} className="p-3 rounded-lg bg-muted/30 border border-border">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-muted-foreground">{label}</span>
+                <span className="text-sm font-bold text-muted-foreground">--</span>
               </div>
+              <div className="h-1.5 bg-muted rounded-full" />
             </div>
-          )}
-          <div className={!isPremium ? 'blur-sm pointer-events-none' : ''}>
-            <div className="grid grid-cols-2 gap-3 opacity-50">
-              {['Formatting', 'Keywords', 'Experience', 'Education'].map((label) => (
-                <div key={label} className="p-3 rounded-lg bg-muted/30 border border-border">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-muted-foreground">{label}</span>
-                    <span className="text-sm font-bold text-muted-foreground">--</span>
-                  </div>
-                  <div className="h-1.5 bg-muted rounded-full" />
-                </div>
-              ))}
-            </div>
-          </div>
+          ))}
         </div>
       )}
     </motion.div>

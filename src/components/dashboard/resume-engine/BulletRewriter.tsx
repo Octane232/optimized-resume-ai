@@ -20,17 +20,11 @@ interface RewriteResult {
 
 interface BulletRewriterProps {
   bullets: BulletPoint[];
-  isPremium: boolean;
-  rewritesRemaining?: number;
-  onUpgrade: () => void;
   onBulletUpdated?: (original: string, rewritten: string) => void;
 }
 
 const BulletRewriter = ({ 
   bullets, 
-  isPremium, 
-  rewritesRemaining = 5,
-  onUpgrade,
   onBulletUpdated
 }: BulletRewriterProps) => {
   const [rewritingIndex, setRewritingIndex] = useState<number | null>(null);
@@ -38,11 +32,6 @@ const BulletRewriter = ({
   const [acceptedRewrites, setAcceptedRewrites] = useState<Set<number>>(new Set());
 
   const handleRewrite = async (bullet: BulletPoint, index: number) => {
-    if (!isPremium) {
-      onUpgrade();
-      return;
-    }
-
     setRewritingIndex(index);
 
     try {
@@ -102,11 +91,9 @@ const BulletRewriter = ({
           <Sparkles className="w-5 h-5 text-primary" />
           <h3 className="font-semibold text-foreground">AI Bullet Optimizer</h3>
         </div>
-        {isPremium && (
-          <span className="text-xs text-muted-foreground">
-            {rewritesRemaining === -1 ? '∞' : rewritesRemaining} rewrites left
-          </span>
-        )}
+        <span className="text-xs text-muted-foreground">
+          Unlimited rewrites
+        </span>
       </div>
 
       <div className="space-y-3">
@@ -147,22 +134,17 @@ const BulletRewriter = ({
                         size="sm"
                         onClick={() => handleRewrite(bullet, index)}
                         disabled={isRewriting}
-                        className={`shrink-0 gap-1 ${isPremium ? 'text-primary hover:text-primary' : 'text-muted-foreground'}`}
+                        className="shrink-0 gap-1 text-primary hover:text-primary"
                       >
                         {isRewriting ? (
                           <>
                             <RefreshCw className="w-3 h-3 animate-spin" />
                             Rewriting...
                           </>
-                        ) : isPremium ? (
+                        ) : (
                           <>
                             <Sparkles className="w-3 h-3" />
                             AI Rewrite
-                          </>
-                        ) : (
-                          <>
-                            <Lock className="w-3 h-3" />
-                            Pro
                           </>
                         )}
                       </Button>
@@ -247,31 +229,6 @@ const BulletRewriter = ({
           </div>
         )}
       </div>
-
-      {/* Pro Upsell for Free Users */}
-      {!isPremium && bullets.length > 0 && (
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="mt-4 p-4 rounded-lg bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-              <Sparkles className="w-5 h-5 text-primary" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-foreground">Upgrade to Pro</p>
-              <p className="text-xs text-muted-foreground">
-                Get unlimited AI bullet rewrites and boost your resume score
-              </p>
-            </div>
-            <Button size="sm" onClick={onUpgrade}>
-              Upgrade
-            </Button>
-          </div>
-        </motion.div>
-      )}
     </motion.div>
   );
 };

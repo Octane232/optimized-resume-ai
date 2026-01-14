@@ -8,15 +8,11 @@ import { Input } from '@/components/ui/input';
 interface JobTargetingPanelProps {
   onAnalyze: (jobDescription: string, jobTitle?: string, company?: string) => void;
   isAnalyzing: boolean;
-  isPremium: boolean;
-  onUpgrade: () => void;
 }
 
 const JobTargetingPanel = ({ 
   onAnalyze, 
-  isAnalyzing, 
-  isPremium,
-  onUpgrade 
+  isAnalyzing
 }: JobTargetingPanelProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [jobDescription, setJobDescription] = useState('');
@@ -48,12 +44,6 @@ const JobTargetingPanel = ({
           <div>
             <h3 className="font-semibold text-foreground flex items-center gap-2">
               Target a Specific Job
-              {!isPremium && (
-                <span className="px-2 py-0.5 text-xs font-medium bg-amber-500/20 text-amber-500 rounded-full flex items-center gap-1">
-                  <Lock className="w-3 h-3" />
-                  Pro
-                </span>
-              )}
             </h3>
             <p className="text-xs text-muted-foreground">
               Paste a job description to see how well your resume matches
@@ -121,38 +111,23 @@ const JobTargetingPanel = ({
               </div>
 
               {/* Action Button */}
-              {isPremium ? (
-                <Button
-                  onClick={handleAnalyze}
-                  disabled={!canAnalyze || isAnalyzing}
-                  className="w-full gap-2"
-                >
-                  {isAnalyzing ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Analyzing Match...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-4 h-4" />
-                      Analyze Match
-                    </>
-                  )}
-                </Button>
-              ) : (
-                <div className="space-y-2">
-                  <Button
-                    onClick={onUpgrade}
-                    className="w-full gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700"
-                  >
-                    <Lock className="w-4 h-4" />
-                    Unlock Job Targeting with Pro
-                  </Button>
-                  <p className="text-xs text-muted-foreground text-center">
-                    Pro users can analyze unlimited job descriptions
-                  </p>
-                </div>
-              )}
+              <Button
+                onClick={handleAnalyze}
+                disabled={!canAnalyze || isAnalyzing}
+                className="w-full gap-2"
+              >
+                {isAnalyzing ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Analyzing Match...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4" />
+                    Analyze Match
+                  </>
+                )}
+              </Button>
 
               {/* Quick Tips */}
               <div className="p-3 rounded-lg bg-muted/30 border border-border">

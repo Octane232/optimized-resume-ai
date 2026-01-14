@@ -11,15 +11,11 @@ import {
 } from "@/components/ui/dialog";
 
 interface AutoOptimizeButtonProps {
-  isPremium: boolean;
-  onUpgrade: () => void;
   onOptimize: () => Promise<void>;
   disabled?: boolean;
 }
 
 const AutoOptimizeButton = ({ 
-  isPremium, 
-  onUpgrade,
   onOptimize,
   disabled 
 }: AutoOptimizeButtonProps) => {
@@ -53,37 +49,6 @@ const AutoOptimizeButton = ({
       setIsOptimizing(false);
     }
   };
-
-  if (!isPremium) {
-    return (
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="command-card p-6 bg-gradient-to-br from-primary/10 via-primary/5 to-background border-primary/20"
-      >
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
-            <Wand2 className="w-7 h-7 text-primary" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-semibold text-foreground flex items-center gap-2">
-              One-Click Auto-Optimize
-              <span className="px-2 py-0.5 text-xs font-medium bg-primary/20 text-primary rounded-full">
-                Premium
-              </span>
-            </h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Let AI automatically rewrite weak bullets, add keywords, and optimize your entire resume
-            </p>
-          </div>
-          <Button onClick={onUpgrade} className="gap-2 shrink-0">
-            <Lock className="w-4 h-4" />
-            Unlock
-          </Button>
-        </div>
-      </motion.div>
-    );
-  }
 
   return (
     <>
