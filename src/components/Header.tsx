@@ -40,7 +40,7 @@ const Header = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-1.5">
             
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-orange-500 bg-clip-text text-transparent text-center">
+            <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-orange-500 bg-clip-text text-transparent text-left">
               PitchVaya
             </span>
           </Link>
