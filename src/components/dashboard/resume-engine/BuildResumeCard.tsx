@@ -35,7 +35,7 @@ const BuildResumeCard = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
 
   const handleStartBuilding = (templateId: string) => {
-    navigate(`/resume-editor?template=${templateId}`);
+    navigate(`/editor/new?template=${templateId}`);
   };
 
   return (
