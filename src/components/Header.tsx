@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Menu, X, Sun, Moon, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTheme } from 'next-themes';
-import logo from '@/assets/pitchsora-logo.png';
+import logo from '@/assets/pitchvaya-logo.jpg';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -34,8 +34,11 @@ const Header = () => {
       <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
         <div className="flex items-center justify-between h-14">
           {/* Logo */}
-          <Link to="/" className="flex items-center">
-            <img src={logo} alt="Pitchsora" className="h-32 w-auto object-contain" />
+          <Link to="/" className="flex items-center gap-2">
+            <img src={logo} alt="PitchVaya" className="h-10 w-auto object-contain rounded" />
+            <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-orange-500 bg-clip-text text-transparent">
+              PitchVaya
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
