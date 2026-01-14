@@ -103,10 +103,11 @@ const ResumeEditor: React.FC = () => {
         setLoading(true);
         const templateId = searchParams.get('template');
         
-        // Load templates first
+        // Load only classic templates
         const { data: templatesData, error } = await supabase
           .from('resume_templates')
           .select('*')
+          .eq('category', 'classic')
           .order('created_at', { ascending: false });
         
         if (error) throw error;
@@ -117,10 +118,13 @@ const ResumeEditor: React.FC = () => {
           const usable = templatesData.filter((t: any) => t.json_content);
           const getFallbackTemplate = () => (usable[0] || templatesData[0]);
 
-          // Set initial template
+          // Set initial template - match by id or by name containing the template param
           let initialTemplate = getFallbackTemplate();
           if (templateId) {
-            const urlTemplate = templatesData.find((t: any) => t.id === templateId);
+            const urlTemplate = templatesData.find((t: any) => 
+              t.id === templateId || 
+              t.name.toLowerCase().includes(templateId.toLowerCase())
+            );
             if (urlTemplate && urlTemplate.json_content) {
               initialTemplate = urlTemplate;
             }
