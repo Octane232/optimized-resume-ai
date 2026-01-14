@@ -63,6 +63,7 @@ const App = () => (
               <Route path="/contact" element={<Contact />} />
               <Route path="/editor/new" element={<ResumeEditor />} />
               <Route path="/editor/:resumeId" element={<ResumeEditor />} />
+              <Route path="/resume-editor" element={<ResumeEditor />} />
               <Route path="/terms" element={<TermsOfService />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/cookie-policy" element={<CookiePolicy />} />
