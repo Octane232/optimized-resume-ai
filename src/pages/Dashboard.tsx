@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import NewSidebar from '@/components/dashboard/NewSidebar';
 import SoraSidecar from '@/components/dashboard/SoraSidecar';
-import NewOnboarding from '@/components/dashboard/NewOnboarding';
 import HunterDashboard from '@/components/dashboard/HunterDashboard';
 import GrowthTeaser from '@/components/dashboard/GrowthTeaser';
 import TheVault from '@/components/dashboard/TheVault';
@@ -25,7 +24,6 @@ const Dashboard = () => {
   });
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [showOnboarding, setShowOnboarding] = useState(false);
   const [hasResume, setHasResume] = useState(false);
   const navigate = useNavigate();
 
@@ -49,30 +47,23 @@ const Dashboard = () => {
         return;
       }
 
-      // Check onboarding status and resume
-      const [preferencesResult, resumesResult] = await Promise.all([
-        supabase
-          .from('career_preferences')
-          .select('onboarding_completed, work_style')
-          .eq('user_id', user.id)
-          .maybeSingle(),
-        supabase
-          .from('resumes')
-          .select('id')
-          .eq('user_id', user.id)
-          .limit(1)
-      ]);
-
-      const preferences = preferencesResult.data;
-      const resumes = resumesResult.data;
-
       // Check if user has a resume
+      const { data: resumes } = await supabase
+        .from('resumes')
+        .select('id')
+        .eq('user_id', user.id)
+        .limit(1);
+
       setHasResume(resumes && resumes.length > 0);
 
-      // If no resume or onboarding not completed, show onboarding
-      if (!resumes || resumes.length === 0 || !preferences?.onboarding_completed) {
-        setShowOnboarding(true);
-      } else if (preferences?.work_style) {
+      // Check for saved mode preference
+      const { data: preferences } = await supabase
+        .from('career_preferences')
+        .select('work_style')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (preferences?.work_style) {
         setMode(preferences.work_style as 'hunter' | 'growth');
       }
 
@@ -84,12 +75,6 @@ const Dashboard = () => {
     }
   };
 
-  const handleOnboardingComplete = (selectedMode: 'hunter' | 'growth') => {
-    setMode(selectedMode);
-    setShowOnboarding(false);
-    setHasResume(true);
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -99,10 +84,6 @@ const Dashboard = () => {
         </div>
       </div>
     );
-  }
-
-  if (showOnboarding) {
-    return <NewOnboarding onComplete={handleOnboardingComplete} />;
   }
 
   const renderContent = () => {
