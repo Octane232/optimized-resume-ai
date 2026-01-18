@@ -128,7 +128,7 @@ const Auth = () => {
         });
       } else {
         toast({
-          title: "Welcome to PitchSora!",
+          title: "Welcome to PitchVaya!",
           description: "Please check your email to verify your account."
         });
       }
@@ -166,7 +166,7 @@ const Auth = () => {
           <div className="text-center mb-8">
             <h1 className="text-4xl md:text-5xl font-bold mb-2">
               <span className="bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent animate-gradient">
-                PitchSora
+                PitchVaya
               </span>
             </h1>
             <p className="text-muted-foreground text-lg">

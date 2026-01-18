@@ -245,9 +245,10 @@ const TheVault = ({ onResumeChange, setActiveTab }: TheVaultProps) => {
 
   if (loading) {
     return (
-      <div className="p-6 space-y-6 animate-pulse max-w-4xl mx-auto">
-        <div className="h-24 bg-muted rounded-2xl"></div>
-        <div className="h-48 bg-muted rounded-2xl"></div>
+      <div className="p-6 space-y-6 max-w-4xl mx-auto">
+        <div className="h-24 bg-muted/50 rounded-2xl animate-pulse"></div>
+        <div className="h-48 bg-muted/50 rounded-2xl animate-pulse"></div>
+        <div className="h-32 bg-muted/50 rounded-2xl animate-pulse"></div>
       </div>
     );
   }

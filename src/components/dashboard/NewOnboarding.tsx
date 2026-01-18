@@ -4,7 +4,6 @@ import { Upload, Loader2, Sparkles, Target, Rocket, CheckCircle2 } from 'lucide-
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import logo from '@/assets/pitchsora-logo.png';
 
 interface NewOnboardingProps {
   onComplete: (mode: 'hunter' | 'growth') => void;
@@ -148,8 +147,10 @@ const NewOnboarding: React.FC<NewOnboardingProps> = ({ onComplete }) => {
             className="relative z-10 w-full max-w-2xl px-6"
           >
             <div className="text-center mb-12">
-              <img src={logo} alt="Pitchsora" className="h-12 mx-auto mb-6" />
-              <h1 className="text-3xl font-bold mb-2">Welcome to Pitchsora</h1>
+              <span className="text-3xl font-bold bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent mb-6 block">
+                PitchVaya
+              </span>
+              <h1 className="text-3xl font-bold mb-2">Welcome to PitchVaya</h1>
               <p className="text-muted-foreground text-lg">
                 I'm ready to build your profile. Let's get started.
               </p>
@@ -251,7 +252,7 @@ const NewOnboarding: React.FC<NewOnboardingProps> = ({ onComplete }) => {
                 <span className="text-sm font-medium">Profile Created</span>
               </div>
               <h1 className="text-3xl font-bold mb-2">
-                Sora has analyzed your profile
+                Vaya has analyzed your profile
               </h1>
               <p className="text-muted-foreground text-lg">
                 What is our primary mission right now?
