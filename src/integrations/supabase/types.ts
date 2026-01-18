@@ -149,6 +149,7 @@ export type Database = {
           target_salary: string | null
           updated_at: string
           user_id: string
+          walkthrough_completed: boolean | null
           work_style: string | null
         }
         Insert: {
@@ -162,6 +163,7 @@ export type Database = {
           target_salary?: string | null
           updated_at?: string
           user_id: string
+          walkthrough_completed?: boolean | null
           work_style?: string | null
         }
         Update: {
@@ -175,6 +177,7 @@ export type Database = {
           target_salary?: string | null
           updated_at?: string
           user_id?: string
+          walkthrough_completed?: boolean | null
           work_style?: string | null
         }
         Relationships: []

@@ -14,6 +14,7 @@ import CoverLetterGenerator from '@/components/dashboard/CoverLetterGenerator';
 import InterviewPrep from '@/components/dashboard/InterviewPrep';
 import { SkillGapAnalyzer } from '@/components/dashboard/SkillGapAnalyzer';
 import LinkedInOptimizer from '@/components/dashboard/LinkedInOptimizer';
+import WalkthroughGuide from '@/components/dashboard/WalkthroughGuide';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState(() => {
@@ -25,6 +26,7 @@ const Dashboard = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [hasResume, setHasResume] = useState(false);
+  const [showWalkthrough, setShowWalkthrough] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -56,10 +58,10 @@ const Dashboard = () => {
 
       setHasResume(resumes && resumes.length > 0);
 
-      // Check for saved mode preference
+      // Check for saved mode preference and walkthrough status
       const { data: preferences } = await supabase
         .from('career_preferences')
-        .select('work_style')
+        .select('work_style, walkthrough_completed')
         .eq('user_id', user.id)
         .maybeSingle();
 
@@ -67,11 +69,34 @@ const Dashboard = () => {
         setMode(preferences.work_style as 'hunter' | 'growth');
       }
 
+      // Show walkthrough if not completed
+      if (!preferences?.walkthrough_completed) {
+        setShowWalkthrough(true);
+      }
+
     } catch (error) {
       console.error('Auth check error:', error);
       navigate('/auth');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleWalkthroughComplete = async () => {
+    setShowWalkthrough(false);
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      await supabase
+        .from('career_preferences')
+        .upsert({
+          user_id: user.id,
+          walkthrough_completed: true
+        }, { onConflict: 'user_id' });
+    } catch (error) {
+      console.error('Error saving walkthrough status:', error);
     }
   };
 
@@ -120,6 +145,11 @@ const Dashboard = () => {
 
   return (
     <div className="h-screen flex w-full bg-background overflow-hidden">
+      {/* Walkthrough Guide for first-time users */}
+      {showWalkthrough && (
+        <WalkthroughGuide onComplete={handleWalkthroughComplete} />
+      )}
+
       {/* Zone A: Left Sidebar */}
       <NewSidebar 
         activeTab={activeTab} 
