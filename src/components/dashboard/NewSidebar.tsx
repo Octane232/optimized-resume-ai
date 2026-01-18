@@ -27,7 +27,6 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
-import logo from '@/assets/pitchsora-logo-navbar.png';
 
 interface NewSidebarProps {
   activeTab: string;
@@ -89,7 +88,12 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
       {/* Logo & Toggle */}
       <div className="p-4 flex items-center justify-between border-b border-sidebar-border">
         {!collapsed && (
-          <img src={logo} alt="PitchVaya" className="h-8" />
+          <span className="text-xl font-bold bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
+            PitchVaya
+          </span>
+        )}
+        {collapsed && (
+          <span className="text-lg font-bold text-primary mx-auto">PV</span>
         )}
         <Button 
           variant="ghost" 

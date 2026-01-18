@@ -5,7 +5,7 @@
 
 @layer base {
   :root {
-    /* Pitchsora Light Theme - Clean & Professional */
+    /* PitchVaya Light Theme - Clean & Professional */
     --background: 220 20% 97%;
     --foreground: 222 47% 11%;
 
@@ -112,7 +112,7 @@
   }
 
   .dark {
-    /* Pitchsora Dark Theme - Navy Command Center */
+    /* PitchVaya Dark Theme - Navy Command Center */
     --background: 222 47% 6%;
     --foreground: 210 40% 98%;
 
@@ -187,7 +187,7 @@
   }
 }
 
-/* Pitchsora Command Center Utilities */
+/* PitchVaya Command Center Utilities */
 .gradient-bg {
   background: var(--gradient-primary);
 }

@@ -54,11 +54,11 @@ const WalkthroughGuide: React.FC<WalkthroughGuideProps> = ({ onComplete }) => {
   const Icon = step.icon;
 
   return (
-    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="relative w-full max-w-md bg-card rounded-2xl shadow-2xl border overflow-hidden"
+        className="relative w-full max-w-md bg-card rounded-2xl shadow-2xl border border-border overflow-hidden"
       >
         {/* Skip button */}
         <button 

@@ -33,7 +33,7 @@ const SoraSidecar: React.FC<SoraSidecarProps> = ({ mode }) => {
     setMessages(prev => [...prev, { role: 'user', content: message }]);
     setMessage('');
     
-    // Simulate Sora response
+    // Simulate Vaya response
     setTimeout(() => {
       setMessages(prev => [...prev, { 
         role: 'sora', 
@@ -46,7 +46,7 @@ const SoraSidecar: React.FC<SoraSidecarProps> = ({ mode }) => {
 
   return (
     <div className="h-full flex flex-col bg-card border-l border-border">
-      {/* Sora Header with Orb */}
+      {/* Vaya Header with Orb */}
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-3">
           <div 
@@ -62,7 +62,7 @@ const SoraSidecar: React.FC<SoraSidecarProps> = ({ mode }) => {
             <Sparkles className="w-6 h-6 text-white relative z-10" />
           </div>
           <div>
-            <h3 className="font-semibold">Sora</h3>
+            <h3 className="font-semibold">Vaya</h3>
             <p className="text-xs text-muted-foreground">Your AI Career Assistant</p>
           </div>
         </div>
@@ -122,7 +122,7 @@ const SoraSidecar: React.FC<SoraSidecarProps> = ({ mode }) => {
       <div className="p-4 border-t border-border">
         <div className="flex gap-2">
           <Input
-            placeholder="Ask Sora anything..."
+            placeholder="Ask Vaya anything..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
