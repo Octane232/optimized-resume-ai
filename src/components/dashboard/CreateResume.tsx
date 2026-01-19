@@ -120,22 +120,19 @@ const CreateResume = () => {
     }
   ];
 
-  const categories = ['All', 'Modern', 'Classic', 'Tech', 'Creative'];
-  const [selectedCategory, setSelectedCategory] = useState('All');
   const [showAtsOnly, setShowAtsOnly] = useState(false);
   const [showImport, setShowImport] = useState(false);
 
+  // Only show Classic templates
   const filteredTemplates = useMemo(() => {
-    let filtered = selectedCategory === 'All' 
-      ? templates 
-      : templates.filter(t => t.category?.toLowerCase() === selectedCategory.toLowerCase());
+    let filtered = templates.filter(t => t.category?.toLowerCase() === 'classic');
     
     if (showAtsOnly) {
       filtered = filtered.filter(t => t.ats_friendly);
     }
     
     return filtered;
-  }, [selectedCategory, templates, showAtsOnly]);
+  }, [templates, showAtsOnly]);
 
   const getATSScoreBadge = (score: number) => {
     if (score >= 90) return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
@@ -285,27 +282,8 @@ const CreateResume = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-8">
-          {/* Category Filter */}
-          <div className="space-y-4 mb-8">
-            <div className="flex flex-wrap gap-2 justify-center">
-              {categories.map((category) => (
-                <Button
-                  key={category}
-                  variant={selectedCategory === category ? "default" : "outline"}
-                  onClick={() => setSelectedCategory(category)}
-                  size="sm"
-                  className={`rounded-full font-medium transition-all duration-300 ${
-                    selectedCategory === category 
-                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg' 
-                      : 'hover:bg-slate-50 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  {category}
-                </Button>
-              ))}
-            </div>
-
-            {/* ATS Filter Toggle */}
+          {/* ATS Filter Toggle */}
+          <div className="mb-8">
             <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg max-w-md mx-auto">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-green-600 dark:text-green-400" />
