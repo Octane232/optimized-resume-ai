@@ -157,22 +157,22 @@ const CreateResume = () => {
   }, [toast]);
 
   return (
-    <div className="space-y-8 pb-8">
-      <div className="text-center space-y-4">
-        <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 rounded-2xl border border-blue-200/50 dark:border-blue-800/50">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-white" />
+    <div className="min-h-full bg-background">
+      {/* Header */}
+      <div className="sticky top-0 z-10 border-b border-border px-6 py-4 bg-background/95 backdrop-blur">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-r from-primary to-blue-500 rounded-xl flex items-center justify-center">
+            <Sparkles className="w-5 h-5 text-white" />
           </div>
-          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">AI-Powered Resume Creation</span>
+          <div>
+            <h1 className="text-xl font-bold text-foreground">Resume Builder</h1>
+            <p className="text-sm text-muted-foreground">Create professional resumes with AI assistance</p>
+          </div>
         </div>
-        
-        <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 dark:from-white dark:via-slate-100 dark:to-slate-200 bg-clip-text text-transparent">
-          Create Your Perfect Resume
-        </h1>
-        <p className="text-lg text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
-          Choose from our professionally designed templates or let AI create a custom resume tailored to your career goals
-        </p>
       </div>
+
+      {/* Main Content */}
+      <div className="p-6 pb-12 max-w-7xl mx-auto space-y-8">
 
       {/* Creation Methods */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -498,6 +498,7 @@ const CreateResume = () => {
         resetDate={getNextResetDate()}
         limitType={upgradeModal.limitType}
       />
+      </div>
     </div>
   );
 };

@@ -15,6 +15,7 @@ import InterviewPrep from '@/components/dashboard/InterviewPrep';
 import { SkillGapAnalyzer } from '@/components/dashboard/SkillGapAnalyzer';
 import LinkedInOptimizer from '@/components/dashboard/LinkedInOptimizer';
 import WalkthroughGuide from '@/components/dashboard/WalkthroughGuide';
+import CreateResume from '@/components/dashboard/CreateResume';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState(() => {
@@ -122,6 +123,8 @@ const Dashboard = () => {
         return <HunterDashboard setActiveTab={setActiveTab} />;
       case 'scout':
         return <Scout />;
+      case 'resume-builder':
+        return <CreateResume />;
       case 'resume-engine':
         return <ResumeEngine setActiveTab={setActiveTab} hasResume={hasResume} />;
       case 'cover-letter':
