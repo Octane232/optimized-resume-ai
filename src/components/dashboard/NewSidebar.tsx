@@ -15,9 +15,7 @@ import {
   Telescope,
   FileText,
   Mic,
-  TrendingUp,
-  Linkedin,
-  PenTool
+  TrendingUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -57,7 +55,6 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
     { id: 'cover-letter', label: 'Cover Letters', icon: FileText },
     { id: 'interview-prep', label: 'Interview Prep', icon: Mic },
     { id: 'skill-gap', label: 'Skill Gap', icon: TrendingUp },
-    { id: 'linkedin', label: 'LinkedIn Optimizer', icon: Linkedin },
     { id: 'vault', label: 'Master Vault', icon: FolderLock },
     { id: 'mission-control', label: 'Mission Control', icon: Crosshair },
   ];
