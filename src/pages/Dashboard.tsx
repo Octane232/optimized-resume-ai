@@ -8,6 +8,7 @@ import GrowthTeaser from '@/components/dashboard/GrowthTeaser';
 import TheVault from '@/components/dashboard/TheVault';
 import MissionControl from '@/components/dashboard/MissionControl';
 import Settings from '@/components/dashboard/Settings';
+import Billing from '@/components/dashboard/Billing';
 import ResumeEngine from '@/components/dashboard/ResumeEngine';
 import Scout from '@/components/dashboard/Scout';
 import CoverLetterGenerator from '@/components/dashboard/CoverLetterGenerator';
@@ -139,6 +140,8 @@ const Dashboard = () => {
         return <TheVault onResumeChange={(has) => setHasResume(has)} />;
       case 'mission-control':
         return <MissionControl />;
+      case 'billing':
+        return <Billing />;
       case 'settings':
         return <Settings />;
       default:

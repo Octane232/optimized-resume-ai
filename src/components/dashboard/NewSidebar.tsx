@@ -5,6 +5,7 @@ import {
   FolderLock, 
   Crosshair,
   Settings,
+  CreditCard,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -171,7 +172,7 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-3 space-y-1">
+      <nav className="flex-1 p-3 space-y-1 overflow-hidden">
         <TooltipProvider delayDuration={0}>
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -215,6 +216,28 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
       {/* Bottom Actions */}
       <div className="p-3 border-t border-sidebar-border space-y-1">
         <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => setActiveTab('billing')}
+                className={`
+                  w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
+                  transition-all duration-200 text-left
+                  ${activeTab === 'billing'
+                    ? 'bg-sidebar-accent text-sidebar-foreground' 
+                    : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
+                  }
+                `}
+              >
+                <CreditCard className="w-5 h-5 shrink-0" />
+                {!collapsed && <span className="font-medium text-sm">Billing</span>}
+              </button>
+            </TooltipTrigger>
+            {collapsed && (
+              <TooltipContent side="right">Billing</TooltipContent>
+            )}
+          </Tooltip>
+
           <Tooltip>
             <TooltipTrigger asChild>
               <button
