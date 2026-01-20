@@ -267,176 +267,128 @@ const CreateResume = () => {
       </div>
 
       {/* Templates */}
-      <Card className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl border border-white/20 dark:border-slate-700/20 shadow-xl rounded-2xl">
-        <CardHeader className="border-b border-slate-200/60 dark:border-slate-700/60">
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl">
-                <Palette className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Professional Templates</h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Choose from our curated collection of industry-specific designs</p>
-              </div>
+      <Card className="bg-card border-border shadow-sm rounded-xl">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Palette className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">Classic Templates</h2>
+              <p className="text-sm text-muted-foreground font-normal">Professional and timeless designs</p>
             </div>
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-8">
-          {/* ATS Filter Toggle */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg max-w-md mx-auto">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-green-600 dark:text-green-400" />
-                <span className="font-medium text-sm">ATS-friendly only (90+)</span>
-              </div>
-              <Button
-                variant={showAtsOnly ? "default" : "outline"}
-                size="sm"
-                onClick={() => setShowAtsOnly(!showAtsOnly)}
-                className="rounded-full h-8"
-              >
-                {showAtsOnly ? "On" : "Off"}
-              </Button>
-            </div>
+        <CardContent className="pt-0">
+          {/* ATS Filter */}
+          <div className="flex items-center gap-3 mb-6 p-3 bg-muted/50 rounded-lg">
+            <ShieldCheck className="w-4 h-4 text-green-600 dark:text-green-400" />
+            <span className="text-sm font-medium">ATS-Optimized Only</span>
+            <Button
+              variant={showAtsOnly ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShowAtsOnly(!showAtsOnly)}
+              className="ml-auto h-7 px-3 text-xs"
+            >
+              {showAtsOnly ? "On" : "Off"}
+            </Button>
           </div>
 
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : filteredTemplates.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <p>No templates found. Try adjusting filters.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredTemplates.map((template) => (
-                <div key={template.id} className="group cursor-pointer">
-                  <div className="relative bg-white dark:bg-slate-800 rounded-2xl p-6 mb-4 group-hover:shadow-2xl transition-all duration-300 group-hover:-translate-y-2 border border-slate-200/50 dark:border-slate-700/50">
-                    {template.is_popular && (
-                      <div className="absolute -top-3 -right-3 bg-gradient-to-r from-orange-400 to-pink-500 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg z-10">
-                        <Star className="w-3 h-3 inline mr-1" />
-                        Popular
-                      </div>
+                <div 
+                  key={template.id} 
+                  className="group bg-background border border-border rounded-lg overflow-hidden hover:shadow-md hover:border-primary/30 transition-all duration-200"
+                >
+                  {/* Template Preview */}
+                  <div className="relative aspect-[3/4] bg-muted overflow-hidden">
+                    {template.preview_image ? (
+                      <img 
+                        src={template.preview_image} 
+                        alt={template.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <TemplateThumbnail 
+                        template={template} 
+                        className="absolute inset-0"
+                      />
                     )}
                     
-                    <div className="w-full h-56 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 rounded-xl border-2 border-slate-200 dark:border-slate-600 shadow-lg mb-4 overflow-hidden relative">
-                      {template.preview_image ? (
-                        <img 
-                          src={template.preview_image} 
-                          alt={template.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <TemplateThumbnail 
-                          template={template} 
-                          className="absolute inset-0"
-                        />
-                      )}
-                    </div>
-
-                    <div className="flex items-center justify-between mb-2">
-                      <Badge variant="outline" className="text-xs border-slate-300 dark:border-slate-600">
-                        {template.category}
-                      </Badge>
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1">
-                          <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                          <span className="text-xs font-medium text-slate-600 dark:text-slate-400">{template.rating}</span>
-                        </div>
-                        <span className="text-xs text-slate-500">•</span>
-                        <span className="text-xs text-slate-600 dark:text-slate-400">{template.downloads > 1000 ? `${(template.downloads / 1000).toFixed(1)}k` : template.downloads}</span>
-                      </div>
-                    </div>
-
-                    {/* ATS Score - Only show when filter is enabled */}
-                    {showAtsOnly && (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="flex items-center gap-2 mb-3 cursor-help">
-                              {template.ats_friendly ? (
-                                <ShieldCheck className="w-4 h-4 text-green-600 dark:text-green-400" />
-                              ) : (
-                                <AlertCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
-                              )}
-                              <span className="text-xs font-medium">ATS:</span>
-                              <Badge className={`text-xs ${getATSScoreBadge(template.ats_score || 0)}`}>
-                                {template.ats_score || 0}/100
-                              </Badge>
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent className="max-w-xs">
-                            <div className="space-y-2">
-                              <p className="font-semibold">ATS Features:</p>
-                              <ul className="text-xs space-y-1">
-                                {(template.ats_features || []).map((feature: string, idx: number) => (
-                                  <li key={idx} className="flex items-center gap-2">
-                                    <div className="w-1 h-1 rounded-full bg-green-500" />
-                                    {feature.split('-').join(' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-2">{template.name}</h3>
-                      <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-3">{template.description}</p>
-                      
-                      <div className="flex flex-wrap gap-1 mb-4">
-                        {(Array.isArray(template.features) ? template.features : []).map((feature, index) => (
-                          <Badge key={index} variant="outline" className="text-xs border-slate-300 dark:border-slate-600 px-2 py-1">
-                            {feature}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-2">
+                    {/* Hover overlay */}
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
                       <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="flex-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl"
+                        variant="secondary" 
+                        size="sm"
+                        className="gap-2"
                         onClick={() => {
                           setPreviewTemplate(template);
                           setIsPreviewOpen(true);
                         }}
                       >
-                        <Eye className="w-4 h-4 mr-1" />
+                        <Eye className="w-4 h-4" />
                         Preview
                       </Button>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button 
-                              className={`flex-1 bg-gradient-to-r ${template.color_class || 'from-slate-500 to-slate-600'} hover:shadow-lg text-white font-semibold rounded-xl transition-all duration-300 ${!canCreateResume() ? 'opacity-60' : ''}`}
-                              onClick={async () => {
-                                if (!canCreateResume()) {
-                                  setUpgradeModal({ open: true, feature: 'Resume Creation', requiredTier: 'pro', limitType: 'templates' });
-                                  return;
-                                }
-                                if (!template.json_content) {
-                                  toast({ title: 'Template not ready', description: 'This template will be available soon. Please choose another with full styles.' });
-                                  return;
-                                }
-                                await incrementUsage('resume');
-                                navigate(`/editor/new?template=${template.id}`);
-                              }}
-                            >
-                              {!canCreateResume() && <Lock className="w-4 h-4 mr-1" />}
-                              Use Template
-                            </Button>
-                          </TooltipTrigger>
-                          {!canCreateResume() && (
-                            <TooltipContent>
-                              <p>Limit reached. Resets on {getNextResetDate().toLocaleDateString()}</p>
-                            </TooltipContent>
-                          )}
-                        </Tooltip>
-                      </TooltipProvider>
                     </div>
+
+                    {/* ATS Badge */}
+                    {template.ats_friendly && (
+                      <div className="absolute top-2 left-2">
+                        <Badge className="bg-green-600 text-white text-xs gap-1">
+                          <ShieldCheck className="w-3 h-3" />
+                          ATS {template.ats_score}%
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Template Info */}
+                  <div className="p-4 space-y-3">
+                    <div>
+                      <h3 className="font-medium text-foreground">{template.name}</h3>
+                      <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{template.description}</p>
+                    </div>
+
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            className="w-full"
+                            size="sm"
+                            disabled={!canCreateResume()}
+                            onClick={async () => {
+                              if (!canCreateResume()) {
+                                setUpgradeModal({ open: true, feature: 'Resume Creation', requiredTier: 'pro', limitType: 'templates' });
+                                return;
+                              }
+                              if (!template.json_content) {
+                                toast({ title: 'Template not ready', description: 'This template will be available soon.' });
+                                return;
+                              }
+                              await incrementUsage('resume');
+                              navigate(`/editor/new?template=${template.id}`);
+                            }}
+                          >
+                            {!canCreateResume() && <Lock className="w-4 h-4 mr-1" />}
+                            Use Template
+                          </Button>
+                        </TooltipTrigger>
+                        {!canCreateResume() && (
+                          <TooltipContent>
+                            <p>Limit reached. Resets on {getNextResetDate().toLocaleDateString()}</p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                 </div>
               ))}
