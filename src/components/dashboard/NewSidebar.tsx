@@ -51,7 +51,7 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
   const navItems = [
     { id: 'briefing', label: 'Briefing', icon: Home },
     { id: 'scout', label: 'Scout', icon: Telescope },
-    { id: 'resume-builder', label: 'Resume Builder', icon: PenTool },
+    { id: 'resume-builder', label: 'Resume Templates', icon: FileText },
     { id: 'resume-engine', label: 'Resume Engine', icon: Stethoscope },
     { id: 'cover-letter', label: 'Cover Letters', icon: FileText },
     { id: 'interview-prep', label: 'Interview Prep', icon: Mic },
