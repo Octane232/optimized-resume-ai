@@ -139,7 +139,7 @@ const HeroSection = () => {
               <div className="flex items-center gap-2 mb-4">
                 <Sparkles className="w-4 h-4 text-primary" />
                 <h2 className="text-lg font-semibold text-foreground">
-                  Meet Vaya, your AI assistant
+                  Meet Vaylance AI, your career assistant
                 </h2>
               </div>
               <VayaChatPreview />

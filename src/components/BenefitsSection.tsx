@@ -8,25 +8,25 @@ const BenefitsSection = () => {
     {
       icon: MessageCircle,
       title: '24/7 AI Career Coach',
-      description: 'Ask Vaya anything about your job search. Get personalized advice instantly, any time.',
+      description: 'Ask Vaylance AI anything about your job search. Get personalized advice instantly, any time.',
       color: 'from-primary to-blue-400'
     },
     {
       icon: Brain,
       title: 'Smart Resume Analysis',
-      description: 'Vaya reads your resume like a recruiter would, spotting issues and opportunities.',
+      description: 'Vaylance AI reads your resume like a recruiter would, spotting issues and opportunities.',
       color: 'from-purple-500 to-pink-400'
     },
     {
       icon: Target,
       title: 'Job Match Scoring',
-      description: 'Paste any job posting. Vaya calculates your match percentage and shows gaps.',
+      description: 'Paste any job posting. Vaylance AI calculates your match percentage and shows gaps.',
       color: 'from-emerald-500 to-teal-400'
     },
     {
       icon: PenTool,
       title: 'AI Content Writing',
-      description: 'Vaya writes tailored cover letters, rewrites bullet points, and drafts follow-ups.',
+      description: 'Vaylance AI writes tailored cover letters, rewrites bullet points, and drafts follow-ups.',
       color: 'from-amber-500 to-orange-400'
     },
     {
@@ -38,7 +38,7 @@ const BenefitsSection = () => {
     {
       icon: Zap,
       title: 'Instant Optimization',
-      description: 'One click and Vaya optimizes your entire resume for ATS systems.',
+      description: 'One click and Vaylance AI optimizes your entire resume for ATS systems.',
       color: 'from-cyan-500 to-blue-400'
     }
   ];
@@ -72,10 +72,10 @@ const BenefitsSection = () => {
           </div>
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             What Can 
-            <span className="gradient-text"> Vaya Do?</span>
+            <span className="gradient-text"> Vaylance AI Do?</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            From resume analysis to interview prep, Vaya handles the heavy lifting so you can focus on landing your dream job.
+            From resume analysis to interview prep, Vaylance AI handles the heavy lifting so you can focus on landing your dream job.
           </p>
         </div>
 
@@ -98,7 +98,7 @@ const BenefitsSection = () => {
           })}
         </div>
 
-        {/* Vaya Conversation Examples */}
+        {/* Vaylance AI Conversation Examples */}
         <div className="command-card p-8 md:p-12 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-purple-500/5"></div>
           
@@ -108,7 +108,7 @@ const BenefitsSection = () => {
                 <Bot className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-                Ask Vaya Anything
+                Ask Vaylance AI Anything
               </h3>
               <p className="text-muted-foreground">
                 Natural conversations that give you real, actionable career advice
@@ -126,7 +126,7 @@ const BenefitsSection = () => {
                     <p className="text-sm font-medium text-foreground">"{cap.question}"</p>
                   </div>
                   
-                  {/* Vaya Answer */}
+                  {/* Vaylance AI Answer */}
                   <div className="flex items-start gap-2">
                     <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center shrink-0">
                       <Sparkles className="w-3 h-3 text-white" />
@@ -140,7 +140,7 @@ const BenefitsSection = () => {
             <div className="mt-10 text-center">
               <Button asChild size="lg" className="saas-button h-14 px-10 text-lg font-bold">
                 <Link to="/auth">
-                  Try Vaya Free
+                  Try Vaylance AI Free
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>

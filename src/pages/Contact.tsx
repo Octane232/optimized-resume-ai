@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 
 const Contact = () => {
   const [copied, setCopied] = React.useState(false);
-  const emailAddress = 'contact-us@pitchsora.com';
+  const emailAddress = 'contact@vaylance.com';
 
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(emailAddress);

@@ -25,7 +25,7 @@ interface SupportOption {
 const HelpSupport = () => {
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
-  const emailAddress = 'contact-us@pitchsora.com';
+  const emailAddress = 'support@vaylance.com';
 
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(emailAddress);

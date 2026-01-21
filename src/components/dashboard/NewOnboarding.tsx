@@ -148,9 +148,9 @@ const NewOnboarding: React.FC<NewOnboardingProps> = ({ onComplete }) => {
           >
             <div className="text-center mb-12">
               <span className="text-3xl font-bold bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent mb-6 block">
-                PitchVaya
+                Vaylance
               </span>
-              <h1 className="text-3xl font-bold mb-2">Welcome to PitchVaya</h1>
+              <h1 className="text-3xl font-bold mb-2">Welcome to Vaylance</h1>
               <p className="text-muted-foreground text-lg">
                 I'm ready to build your profile. Let's get started.
               </p>
@@ -252,7 +252,7 @@ const NewOnboarding: React.FC<NewOnboardingProps> = ({ onComplete }) => {
                 <span className="text-sm font-medium">Profile Created</span>
               </div>
               <h1 className="text-3xl font-bold mb-2">
-                Vaya has analyzed your profile
+                Vaylance AI has analyzed your profile
               </h1>
               <p className="text-muted-foreground text-lg">
                 What is our primary mission right now?

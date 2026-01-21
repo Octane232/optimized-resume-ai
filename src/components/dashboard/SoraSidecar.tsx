@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Send, Sparkles, Briefcase, TrendingUp, Target, Lightbulb, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useState } from 'react';
 
 interface SoraSidecarProps {
   mode: 'hunter' | 'growth';
@@ -10,7 +11,7 @@ interface SoraSidecarProps {
 
 const SoraSidecar: React.FC<SoraSidecarProps> = ({ mode }) => {
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState<Array<{ role: 'user' | 'sora'; content: string }>>([]);
+  const [messages, setMessages] = useState<Array<{ role: 'user' | 'ai'; content: string }>>([]);
 
   const hunterInsights = [
     { icon: Target, title: 'Active Job Alerts', content: '3 new high-match roles found today' },
@@ -33,10 +34,10 @@ const SoraSidecar: React.FC<SoraSidecarProps> = ({ mode }) => {
     setMessages(prev => [...prev, { role: 'user', content: message }]);
     setMessage('');
     
-    // Simulate Vaya response
+    // Simulate Vaylance AI response
     setTimeout(() => {
       setMessages(prev => [...prev, { 
-        role: 'sora', 
+        role: 'ai', 
         content: mode === 'hunter' 
           ? 'I found 3 roles that match your profile. Would you like me to show them?' 
           : 'Great question! Based on your goals, I recommend focusing on leadership skills.'
@@ -46,7 +47,7 @@ const SoraSidecar: React.FC<SoraSidecarProps> = ({ mode }) => {
 
   return (
     <div className="h-full flex flex-col bg-card border-l border-border">
-      {/* Vaya Header with Orb */}
+      {/* Vaylance AI Header with Orb */}
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-3">
           <div 
@@ -62,7 +63,7 @@ const SoraSidecar: React.FC<SoraSidecarProps> = ({ mode }) => {
             <Sparkles className="w-6 h-6 text-white relative z-10" />
           </div>
           <div>
-            <h3 className="font-semibold">Vaya</h3>
+            <h3 className="font-semibold">Vaylance AI</h3>
             <p className="text-xs text-muted-foreground">Your AI Career Assistant</p>
           </div>
         </div>
@@ -122,7 +123,7 @@ const SoraSidecar: React.FC<SoraSidecarProps> = ({ mode }) => {
       <div className="p-4 border-t border-border">
         <div className="flex gap-2">
           <Input
-            placeholder="Ask Vaya anything..."
+            placeholder="Ask Vaylance AI anything..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}

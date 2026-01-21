@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Menu, X, Sun, Moon, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTheme } from 'next-themes';
-import logo from '@/assets/pitchvaya-icon.png';
+
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const {
@@ -14,7 +14,7 @@ const Header = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
   const navItems = [{
-    label: 'How Vaya Works',
+    label: 'How It Works',
     href: '#how-it-works'
   }, {
     label: 'Features',
@@ -41,7 +41,7 @@ const Header = () => {
           <Link to="/" className="flex items-center gap-1.5">
             
             <span className="font-bold bg-gradient-to-r from-blue-500 to-orange-500 bg-clip-text text-transparent text-left text-3xl">
-              PitchVaya
+              Vaylance
             </span>
           </Link>
 
@@ -63,7 +63,7 @@ const Header = () => {
             <Button asChild size="sm" className="saas-button font-bold">
               <Link to="/auth" className="flex items-center gap-1.5">
                 <Sparkles className="w-4 h-4" />
-                Chat with Vaya
+                Get Started
               </Link>
             </Button>
           </div>
@@ -90,7 +90,7 @@ const Header = () => {
                 <Button asChild size="sm" className="saas-button font-bold">
                   <Link to="/auth" className="flex items-center gap-1.5">
                     <Sparkles className="w-4 h-4" />
-                    Chat with Vaya
+                    Get Started
                   </Link>
                 </Button>
               </div>

@@ -1,8 +1,6 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Linkedin, Twitter, Github, Mail } from 'lucide-react';
-import logo from '@/assets/pitchsora-logo.png';
 
 const Footer = () => {
   const footerSections = [
@@ -53,7 +51,9 @@ const Footer = () => {
           <div className="md:col-span-1">
             <div className="flex items-center mb-6">
               <Link to="/" className="flex items-center">
-                <img src={logo} alt="Pitchsora" className="h-36 w-auto object-contain" />
+                <span className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-orange-500 bg-clip-text text-transparent">
+                  Vaylance
+                </span>
               </Link>
             </div>
             <p className="text-muted-foreground mb-8 leading-relaxed text-sm">
@@ -64,7 +64,7 @@ const Footer = () => {
                 { Icon: Linkedin, href: '#' },
                 { Icon: Twitter, href: '#' },
                 { Icon: Github, href: '#' },
-                { Icon: Mail, href: 'mailto:contact-us@pitchsora.com' }
+                { Icon: Mail, href: 'mailto:contact@vaylance.com' }
               ].map(({ Icon, href }, i) => (
                 <a 
                   key={i}
@@ -112,7 +112,7 @@ const Footer = () => {
         <div className="container mx-auto px-4 lg:px-8 py-6 max-w-7xl">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-muted-foreground text-sm">
-              © 2024 Pitchsora. All rights reserved.
+              © 2024 Vaylance. All rights reserved.
             </p>
             <div className="flex gap-6 text-sm">
               <Link to="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">Privacy</Link>
