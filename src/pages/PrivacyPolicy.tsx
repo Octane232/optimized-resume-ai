@@ -34,7 +34,7 @@ const PrivacyPolicy = () => {
                 <h2 className="text-3xl font-bold mb-4">1. Information We Collect</h2>
                 <div className="space-y-4 text-muted-foreground leading-relaxed">
                   <p>
-                    PitchSora collects various types of information to provide and improve our AI-powered resume building service:
+                    Vaylance collects various types of information to provide and improve our AI-powered resume building service:
                   </p>
                   
                   <div className="space-y-3">
@@ -163,7 +163,7 @@ const PrivacyPolicy = () => {
                     <li><strong>Data Portability:</strong> Transfer your data to another service provider</li>
                   </ul>
                   <p className="mt-3">
-                    To exercise these rights, please contact us at contact-us@pitchsora.com. We will respond within 30 days.
+                    To exercise these rights, please contact us at contact@vaylance.com. We will respond within 30 days.
                   </p>
                 </div>
               </div>
@@ -222,14 +222,14 @@ const PrivacyPolicy = () => {
               If you have questions about this Privacy Policy or how we handle your information, please contact us:
             </p>
             <div className="bg-primary/5 rounded-xl p-6 space-y-2">
-              <p className="font-semibold text-foreground">PitchSora Privacy Team</p>
-              <p className="text-muted-foreground">Email: contact-us@pitchsora.com</p>
+              <p className="font-semibold text-foreground">Vaylance Privacy Team</p>
+              <p className="text-muted-foreground">Email: contact@vaylance.com</p>
             </div>
           </section>
 
           <div className="mt-12 p-6 bg-primary/5 rounded-xl border border-primary/10">
             <p className="text-sm text-muted-foreground leading-relaxed">
-              <strong className="text-foreground">Your Trust Matters:</strong> At PitchSora, we are committed to transparency and protecting your privacy. We will never sell your personal information to third parties. Your resume data is yours, and you maintain full control over how it's used and shared.
+              <strong className="text-foreground">Your Trust Matters:</strong> At Vaylance, we are committed to transparency and protecting your privacy. We will never sell your personal information to third parties. Your resume data is yours, and you maintain full control over how it's used and shared.
             </p>
           </div>
         </div>

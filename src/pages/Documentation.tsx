@@ -27,7 +27,7 @@ const Documentation = () => {
         },
         {
           question: "Choosing the Right Template",
-          answer: "PitchVaya offers multiple template styles: Classic templates for traditional industries, Modern templates for tech and creative fields, Executive templates for senior positions. Browse the template gallery and preview each design before selecting."
+          answer: "Vaylance offers multiple template styles: Classic templates for traditional industries, Modern templates for tech and creative fields, Executive templates for senior positions. Browse the template gallery and preview each design before selecting."
         },
         {
           question: "Understanding the Dashboard",
@@ -95,11 +95,11 @@ const Documentation = () => {
       items: [
         {
           question: "AI-Powered Suggestions",
-          answer: "PitchVaya's AI assistant Vaya helps you: Generate professional bullet points, Suggest skill keywords, Optimize for ATS systems, Improve writing clarity. Click 'AI Suggestions' while editing any section."
+          answer: "Vaylance AI helps you: Generate professional bullet points, Suggest skill keywords, Optimize for ATS systems, Improve writing clarity. Click 'AI Suggestions' while editing any section."
         },
         {
           question: "Cover Letter Generator",
-          answer: "Generate tailored cover letters: Paste the job description, Vaya creates a customized letter, Edit and personalize the content, Download as PDF. Access from the 'Cover Letter' section in the dashboard."
+          answer: "Generate tailored cover letters: Paste the job description, Vaylance AI creates a customized letter, Edit and personalize the content, Download as PDF. Access from the 'Cover Letter' section in the dashboard."
         },
         {
           question: "Interview Preparation",
@@ -161,7 +161,7 @@ const Documentation = () => {
             <h1 className="text-4xl font-bold">Documentation</h1>
           </div>
           <p className="text-muted-foreground text-lg">
-            Everything you need to know about using PitchVaya
+            Everything you need to know about using Vaylance
           </p>
         </div>
       </div>
@@ -209,7 +209,7 @@ const Documentation = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm">
-                <strong>Email Support:</strong> support@pitchvaya.com
+                <strong>Email Support:</strong> support@vaylance.com
               </p>
               <Link to="/dashboard">
                 <Button variant="outline">

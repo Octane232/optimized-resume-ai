@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
 interface Message {
-  role: 'vaya' | 'user';
+  role: 'ai' | 'user';
   content: string;
   typing?: boolean;
 }
@@ -19,11 +19,11 @@ const VayaChatPreview = () => {
       content: "I want to apply for a Product Manager role at Stripe" 
     },
     { 
-      role: 'vaya', 
+      role: 'ai', 
       content: "Great choice! I found that role. Let me analyze your resume against their requirements..." 
     },
     { 
-      role: 'vaya', 
+      role: 'ai', 
       content: "Your current match: 67%. I found 3 gaps — missing 'Agile', 'Roadmap planning', and impact metrics. Should I optimize your resume?" 
     },
     { 
@@ -31,7 +31,7 @@ const VayaChatPreview = () => {
       content: "Yes please!" 
     },
     { 
-      role: 'vaya', 
+      role: 'ai', 
       content: "Done ✓ Match score: 89%. I also drafted a cover letter. Want me to prep you for the interview next?" 
     }
   ];
@@ -65,7 +65,7 @@ const VayaChatPreview = () => {
         </div>
         <div>
           <h3 className="font-bold text-foreground flex items-center gap-1.5">
-            Vaya
+            Vaylance AI
             <span className="text-xs font-normal text-primary bg-primary/10 px-1.5 py-0.5 rounded">AI</span>
           </h3>
           <p className="text-xs text-muted-foreground">Your Career Assistant</p>
@@ -80,18 +80,18 @@ const VayaChatPreview = () => {
             className={`flex gap-2.5 animate-fade-in ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
           >
             <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
-              message.role === 'vaya' 
+              message.role === 'ai' 
                 ? 'bg-gradient-to-br from-primary to-purple-500' 
                 : 'bg-secondary'
             }`}>
-              {message.role === 'vaya' ? (
+              {message.role === 'ai' ? (
                 <Bot className="w-4 h-4 text-white" />
               ) : (
                 <User className="w-4 h-4 text-muted-foreground" />
               )}
             </div>
             <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
-              message.role === 'vaya' 
+              message.role === 'ai' 
                 ? 'bg-card border border-border text-foreground' 
                 : 'bg-primary text-primary-foreground'
             }`}>
@@ -121,7 +121,7 @@ const VayaChatPreview = () => {
       <div className="px-4 pb-4">
         <Button asChild className="w-full saas-button h-11 font-bold group">
           <Link to="/auth">
-            Start Chatting with Vaya
+            Start Chatting with Vaylance AI
             <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </Button>

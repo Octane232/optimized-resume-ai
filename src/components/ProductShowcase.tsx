@@ -37,7 +37,7 @@ const ProductShowcase = () => {
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 glass-card rounded-full px-4 py-2 mb-6 animate-fade-in">
             <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-foreground">See PitchVaya in Action</span>
+            <span className="text-sm font-medium text-foreground">See Vaylance in Action</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-4 leading-tight animate-fade-in" style={{ animationDelay: '0.1s' }}>
             <span className="block text-foreground">Everything You Need to</span>
