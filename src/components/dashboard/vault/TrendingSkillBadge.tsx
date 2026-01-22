@@ -1,5 +1,5 @@
 import React from 'react';
-import { Flame, TrendingUp, Lock } from 'lucide-react';
+import { Flame, TrendingUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -18,11 +18,10 @@ const TRENDING_SKILLS = [
 
 interface TrendingSkillBadgeProps {
   skill: string;
-  isPremium: boolean;
   onRemove: () => void;
 }
 
-const TrendingSkillBadge = ({ skill, isPremium, onRemove }: TrendingSkillBadgeProps) => {
+const TrendingSkillBadge = ({ skill, onRemove }: TrendingSkillBadgeProps) => {
   const isTrending = TRENDING_SKILLS.some(
     ts => ts.toLowerCase() === skill.toLowerCase()
   );
@@ -50,20 +49,13 @@ const TrendingSkillBadge = ({ skill, isPremium, onRemove }: TrendingSkillBadgePr
               <Flame className="w-3 h-3 text-orange-500" />
               <span className="font-medium text-orange-500">Trending Skill</span>
             </div>
-            {isPremium ? (
-              <div className="space-y-1">
-                <div className="flex items-center gap-1 text-xs">
-                  <TrendingUp className="w-3 h-3 text-emerald-500" />
-                  <span>High demand (+34% YoY)</span>
-                </div>
-                <p className="text-xs text-muted-foreground">+$12k avg salary impact</p>
+            <div className="space-y-1">
+              <div className="flex items-center gap-1 text-xs">
+                <TrendingUp className="w-3 h-3 text-emerald-500" />
+                <span>High demand (+34% YoY)</span>
               </div>
-            ) : (
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Lock className="w-3 h-3" />
-                <span>Upgrade for salary insights</span>
-              </div>
-            )}
+              <p className="text-xs text-muted-foreground">+$12k avg salary impact</p>
+            </div>
           </TooltipContent>
         )}
       </Tooltip>

@@ -4,30 +4,21 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 interface AISkillsExtractorProps {
-  isPremium: boolean;
   existingSkills: string[];
   resumeSkills: string[];
   onAddSkill: (skill: string) => void;
-  onUpgrade: () => void;
 }
 
 const AISkillsExtractor = ({ 
-  isPremium, 
   existingSkills, 
   resumeSkills,
-  onAddSkill, 
-  onUpgrade 
+  onAddSkill
 }: AISkillsExtractorProps) => {
   const [isExtracting, setIsExtracting] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   const handleExtract = () => {
-    if (!isPremium) {
-      onUpgrade();
-      return;
-    }
-
     setIsExtracting(true);
     
     // Simulate AI extraction (uses existing resume skills)
@@ -70,9 +61,6 @@ const AISkillsExtractor = ({
           <Sparkles className="w-3.5 h-3.5 text-primary" />
         )}
         {isExtracting ? 'Extracting...' : 'AI Extract Skills'}
-        {!isPremium && (
-          <Badge variant="secondary" className="ml-1 text-[10px] px-1 py-0">PRO</Badge>
-        )}
       </Button>
 
       {showSuggestions && suggestions.length > 0 && (
