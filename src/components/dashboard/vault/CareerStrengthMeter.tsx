@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp, Lock, CheckCircle, AlertCircle, XCircle } from 'lucide-react';
+import { TrendingUp, CheckCircle, AlertCircle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CareerStrengthMeterProps {
@@ -8,7 +8,6 @@ interface CareerStrengthMeterProps {
   skillsCount: number;
   certificationsCount: number;
   projectsCount: number;
-  isPremium: boolean;
 }
 
 const CareerStrengthMeter = ({ 
@@ -16,8 +15,7 @@ const CareerStrengthMeter = ({
   hasResume, 
   skillsCount, 
   certificationsCount,
-  projectsCount,
-  isPremium 
+  projectsCount
 }: CareerStrengthMeterProps) => {
   const getStrengthLabel = () => {
     if (completeness >= 80) return { label: 'Excellent', color: 'text-emerald-500' };
@@ -105,22 +103,13 @@ const CareerStrengthMeter = ({
             ))}
           </div>
 
-          {/* Premium benchmark */}
-          {isPremium ? (
-            <div className="mt-3 p-2 bg-primary/5 rounded-lg flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-primary" />
-              <span className="text-xs text-foreground">
-                You're in the <span className="font-semibold text-primary">top 23%</span> of Product Managers
-              </span>
-            </div>
-          ) : (
-            <div className="mt-3 p-2 bg-muted/50 rounded-lg flex items-center gap-2">
-              <Lock className="w-3.5 h-3.5 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">
-                Upgrade to see your industry benchmark
-              </span>
-            </div>
-          )}
+          {/* Industry benchmark - now visible to all */}
+          <div className="mt-3 p-2 bg-primary/5 rounded-lg flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-primary" />
+            <span className="text-xs text-foreground">
+              You're in the <span className="font-semibold text-primary">top 23%</span> of Product Managers
+            </span>
+          </div>
         </div>
       </div>
     </div>

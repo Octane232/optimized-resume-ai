@@ -9,7 +9,6 @@ import {
   Award,
   FolderKanban,
   Tags,
-  Lock,
   ChevronDown,
   ChevronUp,
   Link as LinkIcon,
@@ -19,7 +18,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
-import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useNavigate } from 'react-router-dom';
 
 // Vault sub-components
@@ -29,7 +27,7 @@ import AchievementBadges from './vault/AchievementBadges';
 import QuickActionsBar from './vault/QuickActionsBar';
 import AISkillsExtractor from './vault/AISkillsExtractor';
 import TrendingSkillBadge from './vault/TrendingSkillBadge';
-import UpgradeModal from './UpgradeModal';
+
 
 interface TheVaultProps {
   onResumeChange?: (hasResume: boolean) => void;
@@ -66,12 +64,8 @@ const TheVault = ({ onResumeChange, setActiveTab }: TheVaultProps) => {
   const [uploading, setUploading] = useState(false);
   const [expandedCert, setExpandedCert] = useState<number | null>(null);
   const [expandedProject, setExpandedProject] = useState<number | null>(null);
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [upgradeFeature, setUpgradeFeature] = useState('');
 
-  const { tier } = useSubscription();
   const navigate = useNavigate();
-  const isPremium = tier === 'pro' || tier === 'premium';
 
   useEffect(() => {
     fetchVaultData();
@@ -194,10 +188,6 @@ const TheVault = ({ onResumeChange, setActiveTab }: TheVaultProps) => {
     setSkills(skills.filter((_, i) => i !== index));
   };
 
-  const handleUpgradeClick = (feature: string) => {
-    setUpgradeFeature(feature);
-    setShowUpgradeModal(true);
-  };
 
   const handleNavigate = (tab: string) => {
     if (setActiveTab) {
@@ -262,7 +252,6 @@ const TheVault = ({ onResumeChange, setActiveTab }: TheVaultProps) => {
         skillsCount={skills.length}
         certificationsCount={certifications.length}
         projectsCount={projects.length}
-        isPremium={isPremium}
       />
 
       {/* Quick Actions Bar */}
@@ -393,11 +382,9 @@ const TheVault = ({ onResumeChange, setActiveTab }: TheVaultProps) => {
 
         {/* AI Skills Extractor */}
         <AISkillsExtractor 
-          isPremium={isPremium}
           existingSkills={skills}
           resumeSkills={resumeSkills}
           onAddSkill={addSkill}
-          onUpgrade={() => handleUpgradeClick('AI Skills Extractor')}
         />
 
         <div className="flex gap-2 my-3">
@@ -431,7 +418,6 @@ const TheVault = ({ onResumeChange, setActiveTab }: TheVaultProps) => {
             <TrendingSkillBadge
               key={i}
               skill={skill}
-              isPremium={isPremium}
               onRemove={() => removeSkill(i)}
             />
           ))}
@@ -450,10 +436,7 @@ const TheVault = ({ onResumeChange, setActiveTab }: TheVaultProps) => {
             </div>
             <div>
               <h3 className="font-semibold text-foreground text-sm">Certifications</h3>
-              <p className="text-xs text-muted-foreground">
-                Professional certifications
-                {!isPremium && <span className="text-muted-foreground/60"> • Upgrade for rich details</span>}
-              </p>
+              <p className="text-xs text-muted-foreground">Professional certifications</p>
             </div>
           </div>
         </div>
@@ -482,20 +465,16 @@ const TheVault = ({ onResumeChange, setActiveTab }: TheVaultProps) => {
               <div className="flex items-center justify-between p-2.5">
                 <span className="text-sm text-foreground">{cert.name}</span>
                 <div className="flex items-center gap-1">
-                  {isPremium ? (
-                    <button 
-                      onClick={() => setExpandedCert(expandedCert === i ? null : i)}
-                      className="p-1 hover:bg-background rounded"
-                    >
-                      {expandedCert === i ? (
-                        <ChevronUp className="w-4 h-4 text-muted-foreground" />
-                      ) : (
-                        <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                      )}
-                    </button>
-                  ) : (
-                    <Lock className="w-3.5 h-3.5 text-muted-foreground/50" />
-                  )}
+                  <button 
+                    onClick={() => setExpandedCert(expandedCert === i ? null : i)}
+                    className="p-1 hover:bg-background rounded"
+                  >
+                    {expandedCert === i ? (
+                      <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                    )}
+                  </button>
                   <button 
                     onClick={() => removeCertification(i)}
                     className="p-1 text-muted-foreground hover:text-destructive"
@@ -505,8 +484,8 @@ const TheVault = ({ onResumeChange, setActiveTab }: TheVaultProps) => {
                 </div>
               </div>
               
-              {/* Expanded Rich Details (Premium Only) */}
-              {isPremium && expandedCert === i && (
+              {/* Expanded Rich Details */}
+              {expandedCert === i && (
                 <div className="px-2.5 pb-2.5 space-y-2 border-t border-border/50 pt-2">
                   <div className="grid grid-cols-2 gap-2">
                     <div>
@@ -556,10 +535,7 @@ const TheVault = ({ onResumeChange, setActiveTab }: TheVaultProps) => {
             </div>
             <div>
               <h3 className="font-semibold text-foreground text-sm">Projects</h3>
-              <p className="text-xs text-muted-foreground">
-                Notable projects
-                {!isPremium && <span className="text-muted-foreground/60"> • Upgrade for rich details</span>}
-              </p>
+              <p className="text-xs text-muted-foreground">Notable projects</p>
             </div>
           </div>
         </div>
@@ -588,20 +564,16 @@ const TheVault = ({ onResumeChange, setActiveTab }: TheVaultProps) => {
               <div className="flex items-center justify-between p-2.5">
                 <span className="text-sm text-foreground">{project.name}</span>
                 <div className="flex items-center gap-1">
-                  {isPremium ? (
-                    <button 
-                      onClick={() => setExpandedProject(expandedProject === i ? null : i)}
-                      className="p-1 hover:bg-background rounded"
-                    >
-                      {expandedProject === i ? (
-                        <ChevronUp className="w-4 h-4 text-muted-foreground" />
-                      ) : (
-                        <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                      )}
-                    </button>
-                  ) : (
-                    <Lock className="w-3.5 h-3.5 text-muted-foreground/50" />
-                  )}
+                  <button 
+                    onClick={() => setExpandedProject(expandedProject === i ? null : i)}
+                    className="p-1 hover:bg-background rounded"
+                  >
+                    {expandedProject === i ? (
+                      <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                    )}
+                  </button>
                   <button 
                     onClick={() => removeProject(i)}
                     className="p-1 text-muted-foreground hover:text-destructive"
@@ -611,8 +583,8 @@ const TheVault = ({ onResumeChange, setActiveTab }: TheVaultProps) => {
                 </div>
               </div>
               
-              {/* Expanded Rich Details (Premium Only) */}
-              {isPremium && expandedProject === i && (
+              {/* Expanded Rich Details */}
+              {expandedProject === i && (
                 <div className="px-2.5 pb-2.5 space-y-2 border-t border-border/50 pt-2">
                   <div>
                     <label className="text-xs text-muted-foreground">Description</label>
@@ -650,16 +622,6 @@ const TheVault = ({ onResumeChange, setActiveTab }: TheVaultProps) => {
           )}
         </div>
       </div>
-
-      {/* Upgrade Modal */}
-      <UpgradeModal 
-        open={showUpgradeModal}
-        onOpenChange={setShowUpgradeModal}
-        feature={upgradeFeature}
-        requiredTier="pro"
-        currentTier={tier}
-        limitType="feature"
-      />
     </div>
   );
 };

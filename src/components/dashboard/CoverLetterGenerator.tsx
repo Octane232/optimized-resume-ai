@@ -4,19 +4,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { FileText, Sparkles, Download, Copy, Loader2, Lock, Crown, CheckCircle } from 'lucide-react';
+import { FileText, Sparkles, Download, Copy, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useSubscription } from '@/contexts/SubscriptionContext';
-import UpgradeModal from './UpgradeModal';
 
 const CoverLetterGenerator = () => {
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedLetter, setGeneratedLetter] = useState('');
-  const { tier, limits, incrementUsage } = useSubscription();
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const isLocked = !limits.hasCoverLetter;
+  const { incrementUsage } = useSubscription();
   
   const [formData, setFormData] = useState({
     jobTitle: '',
@@ -108,72 +105,6 @@ const CoverLetterGenerator = () => {
       description: "Cover letter downloaded successfully."
     });
   };
-
-  if (isLocked) {
-    return (
-      <div className="space-y-8">
-        <div className="text-center space-y-4">
-          <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 rounded-2xl border border-amber-200/50 dark:border-amber-800/50">
-            <div className="w-8 h-8 bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl flex items-center justify-center">
-              <Lock className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Pro Feature</span>
-          </div>
-          
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 dark:from-white dark:via-slate-100 dark:to-slate-200 bg-clip-text text-transparent">
-            Cover Letter Generator
-          </h1>
-        </div>
-
-        <Card className="max-w-lg mx-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl rounded-2xl">
-          <CardContent className="p-8 text-center space-y-6">
-            <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
-              <Crown className="w-10 h-10 text-white" />
-            </div>
-            
-            <div>
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Unlock Cover Letter Generator</h3>
-              <p className="text-slate-600 dark:text-slate-400">
-                Upgrade to Pro to create AI-powered, personalized cover letters in seconds.
-              </p>
-            </div>
-
-            <ul className="text-left space-y-3">
-              <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                <CheckCircle className="w-5 h-5 text-emerald-500" />
-                AI-generated personalized letters
-              </li>
-              <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                <CheckCircle className="w-5 h-5 text-emerald-500" />
-                Tailored to job descriptions
-              </li>
-              <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                <CheckCircle className="w-5 h-5 text-emerald-500" />
-                Download & copy instantly
-              </li>
-            </ul>
-
-            <Button 
-              onClick={() => setShowUpgradeModal(true)}
-              className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-xl shadow-lg"
-            >
-              <Crown className="w-5 h-5 mr-2" />
-              Upgrade to Pro
-            </Button>
-          </CardContent>
-        </Card>
-
-        <UpgradeModal
-          open={showUpgradeModal}
-          onOpenChange={setShowUpgradeModal}
-          feature="Cover Letter Generator"
-          requiredTier="pro"
-          currentTier={tier}
-          limitType="feature"
-        />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-8">
