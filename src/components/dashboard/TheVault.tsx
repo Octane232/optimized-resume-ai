@@ -267,15 +267,11 @@ const TheVault = ({ onResumeChange, setActiveTab }: TheVaultProps) => {
 
       {/* Quick Actions Bar */}
       <QuickActionsBar 
-        isPremium={isPremium}
         onNavigate={handleNavigate}
-        onUpgrade={() => handleUpgradeClick('Quick Actions')}
       />
 
-      {/* Vault Insights Teaser (Locked for Free) */}
-      {!isPremium && (
-        <VaultInsightsTeaser onUpgrade={() => handleUpgradeClick('Vault Insights')} />
-      )}
+      {/* Vault Insights */}
+      <VaultInsightsTeaser />
 
       {/* Achievement Badges */}
       <AchievementBadges 

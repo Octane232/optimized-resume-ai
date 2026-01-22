@@ -1,15 +1,13 @@
 import React from 'react';
-import { FileText, Briefcase, Download, Lock } from 'lucide-react';
+import { FileText, Briefcase, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface QuickActionsBarProps {
-  isPremium: boolean;
   onNavigate: (tab: string) => void;
-  onUpgrade: () => void;
 }
 
-const QuickActionsBar = ({ isPremium, onNavigate, onUpgrade }: QuickActionsBarProps) => {
+const QuickActionsBar = ({ onNavigate }: QuickActionsBarProps) => {
   return (
     <div className="flex flex-wrap gap-2">
       <TooltipProvider>
@@ -36,15 +34,14 @@ const QuickActionsBar = ({ isPremium, onNavigate, onUpgrade }: QuickActionsBarPr
               variant="outline" 
               size="sm" 
               className="h-8 text-xs gap-1.5"
-              onClick={() => isPremium ? onNavigate('scout') : onUpgrade()}
+              onClick={() => onNavigate('scout')}
             >
               <Briefcase className="w-3.5 h-3.5" />
               Match with Jobs
-              {!isPremium && <Lock className="w-3 h-3 ml-0.5 text-muted-foreground" />}
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            {isPremium ? 'Find jobs that match your profile' : 'Pro feature: AI job matching'}
+            <p>Find jobs that match your profile</p>
           </TooltipContent>
         </Tooltip>
         
@@ -54,15 +51,13 @@ const QuickActionsBar = ({ isPremium, onNavigate, onUpgrade }: QuickActionsBarPr
               variant="outline" 
               size="sm" 
               className="h-8 text-xs gap-1.5"
-              onClick={() => isPremium ? {} : onUpgrade()}
             >
               <Download className="w-3.5 h-3.5" />
               Export Summary
-              {!isPremium && <Lock className="w-3 h-3 ml-0.5 text-muted-foreground" />}
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            {isPremium ? 'Download your career summary PDF' : 'Premium feature: Career summary export'}
+            <p>Download your career summary PDF</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
