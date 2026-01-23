@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Linkedin, 
   Sparkles, 
@@ -9,7 +9,9 @@ import {
   Target,
   TrendingUp,
   Eye,
-  RefreshCw
+  RefreshCw,
+  History,
+  Trash2
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,6 +22,16 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { motion } from 'framer-motion';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
+interface LinkedInOptimization {
+  id: string;
+  type: string;
+  original_content: string | null;
+  optimized_content: string;
+  target_role: string | null;
+  created_at: string;
+}
 
 const LinkedInOptimizer: React.FC = () => {
   const [activeTab, setActiveTab] = useState('headline');
@@ -29,35 +41,102 @@ const LinkedInOptimizer: React.FC = () => {
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [optimizedContent, setOptimizedContent] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [recentOptimizations, setRecentOptimizations] = useState<LinkedInOptimization[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const profileScore = 72; // Mock score
+  useEffect(() => {
+    fetchRecentOptimizations();
+  }, []);
+
+  const fetchRecentOptimizations = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from('linkedin_optimizations')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (data) {
+        setRecentOptimizations(data);
+      }
+    } catch (error) {
+      console.error('Error fetching optimizations:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const calculateProfileScore = () => {
+    let score = 50; // Base score
+    if (recentOptimizations.some(o => o.type === 'headline')) score += 25;
+    if (recentOptimizations.some(o => o.type === 'summary')) score += 25;
+    return Math.min(score, 100);
+  };
+
+  const profileScore = calculateProfileScore();
 
   const handleOptimize = async () => {
     setIsOptimizing(true);
-    // Simulate AI optimization
-    await new Promise(resolve => setTimeout(resolve, 2000));
     
-    if (activeTab === 'headline') {
-      setOptimizedContent(
-        `${targetRole || 'Software Engineer'} | Helping companies build scalable solutions | Ex-${currentHeadline.split(' ')[0] || 'Tech'} | Open to opportunities`
-      );
-    } else {
-      setOptimizedContent(
-        `🚀 Passionate ${targetRole || 'professional'} with a track record of delivering results.\n\n` +
-        `I specialize in:\n` +
-        `✅ Building high-impact solutions\n` +
-        `✅ Leading cross-functional teams\n` +
-        `✅ Driving measurable business outcomes\n\n` +
-        `${currentSummary ? `Previously: ${currentSummary.slice(0, 100)}...` : ''}\n\n` +
-        `Let's connect! Always happy to chat about ${targetRole || 'opportunities'}.`
-      );
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // Generate optimized content
+      let newOptimizedContent = '';
+      
+      if (activeTab === 'headline') {
+        newOptimizedContent = `${targetRole || 'Software Engineer'} | Helping companies build scalable solutions | Ex-${currentHeadline.split(' ')[0] || 'Tech'} | Open to opportunities`;
+      } else {
+        newOptimizedContent = 
+          `🚀 Passionate ${targetRole || 'professional'} with a track record of delivering results.\n\n` +
+          `I specialize in:\n` +
+          `✅ Building high-impact solutions\n` +
+          `✅ Leading cross-functional teams\n` +
+          `✅ Driving measurable business outcomes\n\n` +
+          `${currentSummary ? `Previously: ${currentSummary.slice(0, 100)}...` : ''}\n\n` +
+          `Let's connect! Always happy to chat about ${targetRole || 'opportunities'}.`;
+      }
+
+      // Save to database
+      const { data: newOptimization, error } = await supabase
+        .from('linkedin_optimizations')
+        .insert({
+          user_id: user.id,
+          type: activeTab,
+          original_content: activeTab === 'headline' ? currentHeadline : currentSummary,
+          optimized_content: newOptimizedContent,
+          target_role: targetRole
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setOptimizedContent(newOptimizedContent);
+      
+      if (newOptimization) {
+        setRecentOptimizations([newOptimization, ...recentOptimizations.slice(0, 4)]);
+      }
+
+      toast({
+        title: "Optimization complete!",
+        description: "Your optimized content is ready to copy."
+      });
+    } catch (error) {
+      console.error('Optimization error:', error);
+      toast({
+        title: "Error",
+        description: "Could not optimize content. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsOptimizing(false);
     }
-    
-    setIsOptimizing(false);
-    toast({
-      title: "Optimization complete!",
-      description: "Your optimized content is ready to copy."
-    });
   };
 
   const handleCopy = () => {
@@ -69,6 +148,33 @@ const LinkedInOptimizer: React.FC = () => {
         title: "Copied!",
         description: "Content copied to clipboard."
       });
+    }
+  };
+
+  const deleteOptimization = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('linkedin_optimizations')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setRecentOptimizations(recentOptimizations.filter(o => o.id !== id));
+      toast({
+        title: "Deleted",
+        description: "Optimization removed."
+      });
+    } catch (error) {
+      console.error('Delete error:', error);
+    }
+  };
+
+  const useOptimization = (optimization: LinkedInOptimization) => {
+    setOptimizedContent(optimization.optimized_content);
+    setActiveTab(optimization.type);
+    if (optimization.target_role) {
+      setTargetRole(optimization.target_role);
     }
   };
 
@@ -142,7 +248,7 @@ const LinkedInOptimizer: React.FC = () => {
                 </div>
               </div>
               <Badge className="bg-[#0A66C2]/10 text-[#0A66C2] border-0">
-                Intermediate
+                {profileScore >= 100 ? 'All-Star' : profileScore >= 75 ? 'Expert' : 'Intermediate'}
               </Badge>
             </div>
           </CardContent>
@@ -256,6 +362,56 @@ const LinkedInOptimizer: React.FC = () => {
                   </div>
                 </motion.div>
               )}
+
+              {/* Recent Optimizations */}
+              {recentOptimizations.length > 0 && (
+                <div className="pt-4 border-t border-border/50">
+                  <div className="flex items-center gap-2 mb-3">
+                    <History className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Recent Optimizations</span>
+                  </div>
+                  <div className="space-y-2">
+                    {recentOptimizations.map((opt) => (
+                      <div 
+                        key={opt.id} 
+                        className="flex items-center justify-between p-2 bg-muted/30 rounded-lg group"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {opt.type}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(opt.created_at).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate mt-1">
+                            {opt.optimized_content.slice(0, 60)}...
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            className="h-7 px-2"
+                            onClick={() => useOptimization(opt)}
+                          >
+                            Use
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            className="h-7 px-2 text-destructive"
+                            onClick={() => deleteOptimization(opt.id)}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </motion.div>
@@ -291,8 +447,8 @@ const LinkedInOptimizer: React.FC = () => {
               <h4 className="font-medium text-sm">Profile Checklist</h4>
               {[
                 { label: 'Professional Photo', done: true },
-                { label: 'Optimized Headline', done: false },
-                { label: 'Compelling Summary', done: false },
+                { label: 'Optimized Headline', done: recentOptimizations.some(o => o.type === 'headline') },
+                { label: 'Compelling Summary', done: recentOptimizations.some(o => o.type === 'summary') },
                 { label: 'Skills Added (10+)', done: true },
                 { label: 'Experience Detailed', done: true },
               ].map((item, i) => (

@@ -5,20 +5,15 @@ import {
   Target, 
   Calendar, 
   Star, 
-  Crown,
   Zap,
   TrendingUp,
   Award,
   CheckCircle2
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
-import { useSubscription } from '@/contexts/SubscriptionContext';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 
 interface CareerStreakProps {
   compact?: boolean;
@@ -35,73 +30,195 @@ interface Achievement {
 }
 
 const CareerStreak: React.FC<CareerStreakProps> = ({ compact = false }) => {
-  const navigate = useNavigate();
-  const { tier } = useSubscription();
-  const isPremium = tier === 'premium' || tier === 'pro';
-
-  // Simulated streak data (would come from database in production)
+  const [loading, setLoading] = useState(true);
   const [streakData, setStreakData] = useState({
-    currentStreak: 7,
-    longestStreak: 14,
-    totalDaysActive: 23,
-    weeklyGoalProgress: 3,
+    currentStreak: 0,
+    longestStreak: 0,
+    totalDaysActive: 0,
+    weeklyGoalProgress: 0,
     weeklyGoal: 5,
     lastActiveDate: new Date().toISOString(),
-    xpEarned: 1250,
-    level: 3
+    xpEarned: 0,
+    level: 1
   });
 
-  const [achievements, setAchievements] = useState<Achievement[]>([
-    {
-      id: 'first-resume',
-      name: 'Resume Builder',
-      description: 'Create your first resume',
-      icon: <CheckCircle2 className="w-4 h-4" />,
-      unlocked: true
-    },
-    {
-      id: 'week-warrior',
-      name: 'Week Warrior',
-      description: '7-day login streak',
-      icon: <Flame className="w-4 h-4" />,
-      unlocked: true
-    },
-    {
-      id: 'goal-crusher',
-      name: 'Goal Crusher',
-      description: 'Hit weekly goal 4 weeks in a row',
-      icon: <Target className="w-4 h-4" />,
-      unlocked: false,
-      progress: 2,
-      target: 4
-    },
-    {
-      id: 'application-master',
-      name: 'Application Master',
-      description: 'Apply to 50 jobs',
-      icon: <Trophy className="w-4 h-4" />,
-      unlocked: false,
-      progress: 12,
-      target: 50
-    },
-    {
-      id: 'interview-ace',
-      name: 'Interview Ace',
-      description: 'Complete 10 mock interviews',
-      icon: <Award className="w-4 h-4" />,
-      unlocked: false,
-      progress: 3,
-      target: 10
+  const [activeDays, setActiveDays] = useState<boolean[]>([false, false, false, false, false, false, false]);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+
+  useEffect(() => {
+    fetchStreakData();
+  }, []);
+
+  const fetchStreakData = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Fetch or create streak data
+      let { data: streakRecord } = await supabase
+        .from('career_streaks')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!streakRecord) {
+        // Create initial streak record
+        const { data: newRecord, error } = await supabase
+          .from('career_streaks')
+          .insert({
+            user_id: user.id,
+            current_streak: 1,
+            longest_streak: 1,
+            total_days_active: 1,
+            weekly_goal: 5,
+            weekly_goal_progress: 0,
+            xp_earned: 10,
+            level: 1,
+            week_activity: [true, false, false, false, false, false, false]
+          })
+          .select()
+          .single();
+        
+        if (!error && newRecord) {
+          streakRecord = newRecord;
+        }
+      } else {
+        // Update streak if it's a new day
+        const lastActive = new Date(streakRecord.last_active_date);
+        const today = new Date();
+        const isNewDay = lastActive.toDateString() !== today.toDateString();
+        
+        if (isNewDay) {
+          const daysSinceLastActive = Math.floor((today.getTime() - lastActive.getTime()) / (1000 * 60 * 60 * 24));
+          const newStreak = daysSinceLastActive === 1 ? streakRecord.current_streak + 1 : 1;
+          const dayOfWeek = today.getDay();
+          const adjustedDay = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Convert Sunday=0 to Monday=0
+          
+          const weekActivity = [...(streakRecord.week_activity || [false, false, false, false, false, false, false])];
+          weekActivity[adjustedDay] = true;
+
+          const { data: updated } = await supabase
+            .from('career_streaks')
+            .update({
+              current_streak: newStreak,
+              longest_streak: Math.max(newStreak, streakRecord.longest_streak),
+              total_days_active: streakRecord.total_days_active + 1,
+              last_active_date: today.toISOString().split('T')[0],
+              xp_earned: streakRecord.xp_earned + 10,
+              level: Math.floor((streakRecord.xp_earned + 10) / 500) + 1,
+              week_activity: weekActivity
+            })
+            .eq('user_id', user.id)
+            .select()
+            .single();
+
+          if (updated) {
+            streakRecord = updated;
+          }
+        }
+      }
+
+      if (streakRecord) {
+        setStreakData({
+          currentStreak: streakRecord.current_streak || 0,
+          longestStreak: streakRecord.longest_streak || 0,
+          totalDaysActive: streakRecord.total_days_active || 0,
+          weeklyGoalProgress: streakRecord.weekly_goal_progress || 0,
+          weeklyGoal: streakRecord.weekly_goal || 5,
+          lastActiveDate: streakRecord.last_active_date,
+          xpEarned: streakRecord.xp_earned || 0,
+          level: streakRecord.level || 1
+        });
+        setActiveDays(streakRecord.week_activity || [false, false, false, false, false, false, false]);
+        
+        // Parse achievements from DB or use defaults
+        const dbAchievements = (streakRecord.achievements as any[]) || [];
+        setAchievements(buildAchievements(streakRecord, dbAchievements));
+      }
+
+      // Get job applications count for weekly goal
+      const startOfWeek = new Date();
+      startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+      
+      const { count: applicationsThisWeek } = await supabase
+        .from('job_applications')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .gte('created_at', startOfWeek.toISOString());
+
+      if (applicationsThisWeek !== null) {
+        setStreakData(prev => ({ ...prev, weeklyGoalProgress: applicationsThisWeek }));
+      }
+
+    } catch (error) {
+      console.error('Error fetching streak data:', error);
+    } finally {
+      setLoading(false);
     }
-  ]);
+  };
+
+  const buildAchievements = (streakRecord: any, dbAchievements: any[]): Achievement[] => {
+    return [
+      {
+        id: 'first-resume',
+        name: 'Resume Builder',
+        description: 'Create your first resume',
+        icon: <CheckCircle2 className="w-4 h-4" />,
+        unlocked: dbAchievements.some(a => a.id === 'first-resume') || streakRecord.total_days_active > 0
+      },
+      {
+        id: 'week-warrior',
+        name: 'Week Warrior',
+        description: '7-day login streak',
+        icon: <Flame className="w-4 h-4" />,
+        unlocked: streakRecord.current_streak >= 7 || streakRecord.longest_streak >= 7
+      },
+      {
+        id: 'goal-crusher',
+        name: 'Goal Crusher',
+        description: 'Hit weekly goal 4 weeks in a row',
+        icon: <Target className="w-4 h-4" />,
+        unlocked: false,
+        progress: 0,
+        target: 4
+      },
+      {
+        id: 'application-master',
+        name: 'Application Master',
+        description: 'Apply to 50 jobs',
+        icon: <Trophy className="w-4 h-4" />,
+        unlocked: false,
+        progress: streakRecord.weekly_goal_progress || 0,
+        target: 50
+      },
+      {
+        id: 'interview-ace',
+        name: 'Interview Ace',
+        description: 'Complete 10 mock interviews',
+        icon: <Award className="w-4 h-4" />,
+        unlocked: false,
+        progress: 0,
+        target: 10
+      }
+    ];
+  };
 
   const xpForNextLevel = 500;
   const currentLevelXp = streakData.xpEarned % xpForNextLevel;
   const levelProgress = (currentLevelXp / xpForNextLevel) * 100;
 
-  // Weekly days indicator
   const weekDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-  const activeDays = [true, true, true, true, false, true, true]; // Example
+
+  if (loading) {
+    return (
+      <Card className="border-0 shadow-sm overflow-hidden">
+        <div className="h-1 bg-gradient-to-r from-orange-500 to-red-500" />
+        <CardContent className="p-4">
+          <div className="h-16 bg-muted/50 animate-pulse rounded-lg" />
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (compact) {
     return (
@@ -194,13 +311,10 @@ const CareerStreak: React.FC<CareerStreakProps> = ({ compact = false }) => {
               </div>
             </div>
 
-            {/* Premium XP Bonus */}
-            {isPremium && (
-              <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 gap-1">
-                <Zap className="w-3 h-3" />
-                2x XP
-              </Badge>
-            )}
+            <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 gap-1">
+              <Zap className="w-3 h-3" />
+              Active
+            </Badge>
           </div>
 
           {/* Level Progress */}
@@ -239,7 +353,7 @@ const CareerStreak: React.FC<CareerStreakProps> = ({ compact = false }) => {
               <motion.div 
                 className="h-full bg-emerald-500 rounded-full"
                 initial={{ width: 0 }}
-                animate={{ width: `${(streakData.weeklyGoalProgress / streakData.weeklyGoal) * 100}%` }}
+                animate={{ width: `${Math.min((streakData.weeklyGoalProgress / streakData.weeklyGoal) * 100, 100)}%` }}
                 transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
               />
             </div>
@@ -328,17 +442,6 @@ const CareerStreak: React.FC<CareerStreakProps> = ({ compact = false }) => {
               </motion.div>
             ))}
           </div>
-
-          {!isPremium && (
-            <Button 
-              className="w-full mt-4 gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
-              size="sm"
-              onClick={() => navigate('/dashboard?tab=settings')}
-            >
-              <Crown className="w-4 h-4" />
-              Get 2x XP with Pro
-            </Button>
-          )}
         </CardContent>
       </Card>
     </div>
