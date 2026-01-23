@@ -12,7 +12,8 @@ import {
   ChevronDown,
   ChevronUp,
   Link as LinkIcon,
-  Calendar
+  Calendar,
+  Save
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -62,8 +63,10 @@ const TheVault = ({ onResumeChange, setActiveTab }: TheVaultProps) => {
   const [newTag, setNewTag] = useState('');
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [expandedCert, setExpandedCert] = useState<number | null>(null);
   const [expandedProject, setExpandedProject] = useState<number | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const navigate = useNavigate();
 
@@ -71,11 +74,22 @@ const TheVault = ({ onResumeChange, setActiveTab }: TheVaultProps) => {
     fetchVaultData();
   }, []);
 
+  // Auto-save when data changes (debounced)
+  useEffect(() => {
+    if (!loading && hasUnsavedChanges) {
+      const timer = setTimeout(() => {
+        saveVaultData();
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [skills, certifications, projects, resumeTags, hasUnsavedChanges]);
+
   const fetchVaultData = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // Fetch resume data
       const { data: resumes } = await supabase
         .from('resumes')
         .select('*')
@@ -89,7 +103,28 @@ const TheVault = ({ onResumeChange, setActiveTab }: TheVaultProps) => {
         const content = resumes[0].content as any;
         if (content?.skills) {
           setResumeSkills(content.skills);
-          setSkills(content.skills);
+        }
+      }
+
+      // Fetch vault data
+      const { data: vaultData } = await supabase
+        .from('user_vault')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (vaultData) {
+        setSkills(vaultData.skills || []);
+        setCertifications((vaultData.certifications as unknown as RichCertification[]) || []);
+        setProjects((vaultData.projects as unknown as RichProject[]) || []);
+        setResumeTags(vaultData.resume_tags || ['General']);
+      } else {
+        // Initialize with resume skills if no vault data exists
+        if (resumes && resumes.length > 0) {
+          const content = resumes[0].content as any;
+          if (content?.skills) {
+            setSkills(content.skills);
+          }
         }
       }
 
@@ -97,6 +132,36 @@ const TheVault = ({ onResumeChange, setActiveTab }: TheVaultProps) => {
       console.error('Error fetching vault data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const saveVaultData = async () => {
+    try {
+      setSaving(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await supabase
+        .from('user_vault')
+        .upsert({
+          user_id: user.id,
+          skills,
+          certifications: certifications as any,
+          projects: projects as any,
+          resume_tags: resumeTags
+        }, { onConflict: 'user_id' });
+
+      if (error) throw error;
+      setHasUnsavedChanges(false);
+    } catch (error) {
+      console.error('Error saving vault data:', error);
+      toast({
+        title: "Save failed",
+        description: "Could not save your vault data. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -169,6 +234,7 @@ const TheVault = ({ onResumeChange, setActiveTab }: TheVaultProps) => {
   const addSkill = (skill: string) => {
     if (skill.trim() && !skills.includes(skill.trim())) {
       setSkills([...skills, skill.trim()]);
+      setHasUnsavedChanges(true);
     }
   };
 
@@ -181,11 +247,13 @@ const TheVault = ({ onResumeChange, setActiveTab }: TheVaultProps) => {
     if (item.trim() && !items.includes(item.trim())) {
       setItems([...items, item.trim()]);
       setItem('');
+      setHasUnsavedChanges(true);
     }
   };
 
   const removeSkill = (index: number) => {
     setSkills(skills.filter((_, i) => i !== index));
+    setHasUnsavedChanges(true);
   };
 
 
@@ -199,36 +267,42 @@ const TheVault = ({ onResumeChange, setActiveTab }: TheVaultProps) => {
     if (newCert.trim()) {
       setCertifications([...certifications, { name: newCert.trim() }]);
       setNewCert('');
+      setHasUnsavedChanges(true);
     }
   };
 
   const removeCertification = (index: number) => {
     setCertifications(certifications.filter((_, i) => i !== index));
     if (expandedCert === index) setExpandedCert(null);
+    setHasUnsavedChanges(true);
   };
 
   const updateCertification = (index: number, updates: Partial<RichCertification>) => {
     const updated = [...certifications];
     updated[index] = { ...updated[index], ...updates };
     setCertifications(updated);
+    setHasUnsavedChanges(true);
   };
 
   const addProject = () => {
     if (newProject.trim()) {
       setProjects([...projects, { name: newProject.trim() }]);
       setNewProject('');
+      setHasUnsavedChanges(true);
     }
   };
 
   const removeProject = (index: number) => {
     setProjects(projects.filter((_, i) => i !== index));
     if (expandedProject === index) setExpandedProject(null);
+    setHasUnsavedChanges(true);
   };
 
   const updateProject = (index: number, updates: Partial<RichProject>) => {
     const updated = [...projects];
     updated[index] = { ...updated[index], ...updates };
     setProjects(updated);
+    setHasUnsavedChanges(true);
   };
 
   const completeness = calculateCompleteness();
@@ -245,6 +319,25 @@ const TheVault = ({ onResumeChange, setActiveTab }: TheVaultProps) => {
 
   return (
     <div className="p-6 space-y-5 max-w-4xl mx-auto">
+      {/* Save indicator */}
+      {(hasUnsavedChanges || saving) && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <Badge variant="secondary" className="gap-2 px-3 py-1.5">
+            {saving ? (
+              <>
+                <div className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="w-3 h-3" />
+                Unsaved changes
+              </>
+            )}
+          </Badge>
+        </div>
+      )}
+
       {/* Career Profile Strength Meter (Enhanced) */}
       <CareerStrengthMeter 
         completeness={completeness}
@@ -355,7 +448,10 @@ const TheVault = ({ onResumeChange, setActiveTab }: TheVaultProps) => {
               {tag}
               {resumeTags.length > 1 && (
                 <button 
-                  onClick={() => setResumeTags(resumeTags.filter((_, idx) => idx !== i))}
+                  onClick={() => {
+                    setResumeTags(resumeTags.filter((_, idx) => idx !== i));
+                    setHasUnsavedChanges(true);
+                  }}
                   className="ml-1 hover:text-destructive"
                 >
                   <X className="w-3 h-3" />

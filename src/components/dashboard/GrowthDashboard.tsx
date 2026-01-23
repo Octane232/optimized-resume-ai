@@ -15,17 +15,28 @@ import {
   BookOpen,
   DollarSign,
   Star,
-  Send
+  Send,
+  History
 } from 'lucide-react';
 
 interface GrowthDashboardProps {
   setActiveTab: (tab: string) => void;
 }
 
+interface CareerWin {
+  id: string;
+  content: string;
+  formatted_content: string | null;
+  created_at: string;
+}
+
 const GrowthDashboard: React.FC<GrowthDashboardProps> = ({ setActiveTab }) => {
   const [userName, setUserName] = useState('');
   const [weeklyWin, setWeeklyWin] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [recentWins, setRecentWins] = useState<CareerWin[]>([]);
+  const [winsCount, setWinsCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchUserData();
@@ -36,6 +47,7 @@ const GrowthDashboard: React.FC<GrowthDashboardProps> = ({ setActiveTab }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // Fetch profile
       const { data: profile } = await supabase
         .from('profiles')
         .select('full_name')
@@ -47,8 +59,26 @@ const GrowthDashboard: React.FC<GrowthDashboardProps> = ({ setActiveTab }) => {
       } else {
         setUserName(user.email?.split('@')[0] || 'there');
       }
+
+      // Fetch recent wins
+      const { data: wins, count } = await supabase
+        .from('career_wins')
+        .select('*', { count: 'exact' })
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (wins) {
+        setRecentWins(wins);
+      }
+      if (count !== null) {
+        setWinsCount(count);
+      }
+
     } catch (error) {
       console.error('Error fetching user data:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -64,16 +94,56 @@ const GrowthDashboard: React.FC<GrowthDashboardProps> = ({ setActiveTab }) => {
     
     setIsSubmitting(true);
     
-    // Simulate AI enhancement
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    toast({
-      title: "Win Logged!",
-      description: "I've formatted this for your annual review."
-    });
-    
-    setWeeklyWin('');
-    setIsSubmitting(false);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // Calculate week number and year
+      const now = new Date();
+      const start = new Date(now.getFullYear(), 0, 1);
+      const weekNumber = Math.ceil((((now.getTime() - start.getTime()) / 86400000) + start.getDay() + 1) / 7);
+      const year = now.getFullYear();
+
+      // Format the win for annual review (simulated AI enhancement)
+      const formattedContent = `• ${weeklyWin.trim().charAt(0).toUpperCase() + weeklyWin.trim().slice(1)}${weeklyWin.endsWith('.') ? '' : '.'}`;
+
+      const { data: newWin, error } = await supabase
+        .from('career_wins')
+        .insert({
+          user_id: user.id,
+          content: weeklyWin.trim(),
+          formatted_content: formattedContent,
+          week_number: weekNumber,
+          year: year,
+          category: 'general'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast({
+        title: "Win Logged!",
+        description: "I've formatted this for your annual review."
+      });
+
+      // Update local state
+      if (newWin) {
+        setRecentWins([newWin, ...recentWins.slice(0, 4)]);
+        setWinsCount(prev => prev + 1);
+      }
+      
+      setWeeklyWin('');
+    } catch (error) {
+      console.error('Error saving win:', error);
+      toast({
+        title: "Error",
+        description: "Could not save your win. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const skillsProgress = [
@@ -81,6 +151,16 @@ const GrowthDashboard: React.FC<GrowthDashboardProps> = ({ setActiveTab }) => {
     { skill: 'Team Leadership', current: 85, required: 100, status: 'almost' },
     { skill: 'Strategic Planning', current: 100, required: 100, status: 'complete' },
   ];
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="h-20 bg-muted/50 rounded-xl animate-pulse" />
+        <div className="h-48 bg-muted/50 rounded-xl animate-pulse" />
+        <div className="h-48 bg-muted/50 rounded-xl animate-pulse" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -140,6 +220,23 @@ const GrowthDashboard: React.FC<GrowthDashboardProps> = ({ setActiveTab }) => {
                     )}
                   </Button>
                 </div>
+
+                {/* Recent Wins */}
+                {recentWins.length > 0 && (
+                  <div className="mt-4 pt-4 border-t border-border/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <History className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">Recent Wins</span>
+                    </div>
+                    <div className="space-y-2">
+                      {recentWins.slice(0, 3).map((win) => (
+                        <div key={win.id} className="text-sm text-muted-foreground p-2 bg-muted/30 rounded-lg">
+                          {win.formatted_content || win.content}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
@@ -245,7 +342,7 @@ const GrowthDashboard: React.FC<GrowthDashboardProps> = ({ setActiveTab }) => {
                 <Trophy className="w-5 h-5 text-[hsl(262,83%,58%)]" />
               </div>
               <div>
-                <p className="text-2xl font-bold">12</p>
+                <p className="text-2xl font-bold">{winsCount}</p>
                 <p className="text-sm text-muted-foreground">Wins Logged</p>
               </div>
             </CardContent>

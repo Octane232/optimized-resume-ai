@@ -182,6 +182,90 @@ export type Database = {
         }
         Relationships: []
       }
+      career_streaks: {
+        Row: {
+          achievements: Json | null
+          created_at: string
+          current_streak: number | null
+          id: string
+          last_active_date: string | null
+          level: number | null
+          longest_streak: number | null
+          total_days_active: number | null
+          updated_at: string
+          user_id: string
+          week_activity: boolean[] | null
+          weekly_goal: number | null
+          weekly_goal_progress: number | null
+          xp_earned: number | null
+        }
+        Insert: {
+          achievements?: Json | null
+          created_at?: string
+          current_streak?: number | null
+          id?: string
+          last_active_date?: string | null
+          level?: number | null
+          longest_streak?: number | null
+          total_days_active?: number | null
+          updated_at?: string
+          user_id: string
+          week_activity?: boolean[] | null
+          weekly_goal?: number | null
+          weekly_goal_progress?: number | null
+          xp_earned?: number | null
+        }
+        Update: {
+          achievements?: Json | null
+          created_at?: string
+          current_streak?: number | null
+          id?: string
+          last_active_date?: string | null
+          level?: number | null
+          longest_streak?: number | null
+          total_days_active?: number | null
+          updated_at?: string
+          user_id?: string
+          week_activity?: boolean[] | null
+          weekly_goal?: number | null
+          weekly_goal_progress?: number | null
+          xp_earned?: number | null
+        }
+        Relationships: []
+      }
+      career_wins: {
+        Row: {
+          category: string | null
+          content: string
+          created_at: string
+          formatted_content: string | null
+          id: string
+          user_id: string
+          week_number: number | null
+          year: number | null
+        }
+        Insert: {
+          category?: string | null
+          content: string
+          created_at?: string
+          formatted_content?: string | null
+          id?: string
+          user_id: string
+          week_number?: number | null
+          year?: number | null
+        }
+        Update: {
+          category?: string | null
+          content?: string
+          created_at?: string
+          formatted_content?: string | null
+          id?: string
+          user_id?: string
+          week_number?: number | null
+          year?: number | null
+        }
+        Relationships: []
+      }
       commissions: {
         Row: {
           affiliate_id: string
@@ -441,6 +525,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      linkedin_optimizations: {
+        Row: {
+          created_at: string
+          id: string
+          optimized_content: string
+          original_content: string | null
+          target_role: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          optimized_content: string
+          original_content?: string | null
+          target_role?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          optimized_content?: string
+          original_content?: string | null
+          target_role?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       payouts: {
         Row: {
@@ -1047,6 +1161,39 @@ export type Database = {
           templates_used?: number | null
           updated_at?: string
           usage_cycle_reset_date?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_vault: {
+        Row: {
+          certifications: Json | null
+          created_at: string
+          id: string
+          projects: Json | null
+          resume_tags: string[] | null
+          skills: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          certifications?: Json | null
+          created_at?: string
+          id?: string
+          projects?: Json | null
+          resume_tags?: string[] | null
+          skills?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          certifications?: Json | null
+          created_at?: string
+          id?: string
+          projects?: Json | null
+          resume_tags?: string[] | null
+          skills?: string[] | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
