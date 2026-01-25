@@ -381,9 +381,18 @@ const TheVault = ({ onResumeChange, setActiveTab }: TheVaultProps) => {
               <CheckCircle className="w-5 h-5 text-emerald-500" />
               <span className="font-medium text-foreground text-sm">{resumeTitle}</span>
             </div>
-            <Button variant="outline" size="sm" className="text-xs h-8">
-              Replace
-            </Button>
+            <label>
+              <Button variant="outline" size="sm" className="text-xs h-8 cursor-pointer" asChild>
+                <span>Replace</span>
+              </Button>
+              <input 
+                type="file" 
+                className="hidden" 
+                accept=".pdf,.doc,.docx"
+                onChange={handleFileUpload}
+                disabled={uploading}
+              />
+            </label>
           </div>
         ) : (
           <label className="block">
