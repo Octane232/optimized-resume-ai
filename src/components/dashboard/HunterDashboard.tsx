@@ -77,10 +77,15 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
     return 'Good evening';
   };
 
-  const [scoutJobs, setScoutJobs] = useState<Array<{ company: string; role: string; match: number; color: string }>>([]);
+  const [scoutJobs, setScoutJobs] = useState<Array<{ company: string; role: string; match: number; color: string; url?: string }>>([]);
+  const [staleApplication, setStaleApplication] = useState<{ company: string; jobTitle: string; daysSince: number } | null>(null);
 
   useEffect(() => {
     const fetchScoutJobs = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Fetch scouted jobs
       const { data } = await supabase
         .from('scouted_jobs')
         .select('*')
@@ -90,12 +95,53 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
       
       if (data && data.length > 0) {
         const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500'];
-        setScoutJobs(data.map((job, i) => ({
-          company: job.company_name || 'Unknown',
-          role: job.job_title || 'Position',
-          match: Math.floor(Math.random() * 10) + 85, // Placeholder match score
-          color: colors[i % colors.length]
-        })));
+        // Calculate match score based on skills overlap with user vault
+        const { data: vaultData } = await supabase
+          .from('user_vault')
+          .select('skills')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        const userSkills = (vaultData?.skills || []).map((s: string) => s.toLowerCase());
+        
+        setScoutJobs(data.map((job, i) => {
+          const jobSkills = (job.skills || []).map((s: string) => s.toLowerCase());
+          const matchingSkills = jobSkills.filter((s: string) => userSkills.includes(s));
+          const matchScore = jobSkills.length > 0 
+            ? Math.round((matchingSkills.length / jobSkills.length) * 100)
+            : 75;
+          
+          return {
+            company: job.company_name || 'Unknown',
+            role: job.job_title || 'Position',
+            match: Math.max(matchScore, 60), // Minimum 60% for display
+            color: colors[i % colors.length],
+            url: job.job_url
+          };
+        }));
+      }
+
+      // Fetch stale applications (applied > 5 days ago)
+      const { data: applications } = await supabase
+        .from('job_applications')
+        .select('company_name, job_title, applied_date')
+        .eq('user_id', user.id)
+        .eq('status', 'applied')
+        .order('applied_date', { ascending: true })
+        .limit(1);
+
+      if (applications && applications.length > 0) {
+        const app = applications[0];
+        const appliedDate = new Date(app.applied_date);
+        const daysSince = Math.floor((Date.now() - appliedDate.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (daysSince >= 5) {
+          setStaleApplication({
+            company: app.company_name,
+            jobTitle: app.job_title,
+            daysSince
+          });
+        }
       }
     };
     fetchScoutJobs();
@@ -229,36 +275,51 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/5 to-orange-500/5 border border-amber-500/10 mb-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center text-white font-bold text-sm shrink-0">
-                    G
+              {staleApplication ? (
+                <>
+                  <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/5 to-orange-500/5 border border-amber-500/10 mb-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                        {staleApplication.company.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm">{staleApplication.company}</p>
+                        <p className="text-xs text-muted-foreground mb-2">No reply in {staleApplication.daysSince} days</p>
+                        <p className="text-xs text-muted-foreground/80 line-clamp-2">
+                          Consider sending a follow-up for your {staleApplication.jobTitle} application.
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm">Google</p>
-                    <p className="text-xs text-muted-foreground mb-2">No reply in 5 days</p>
-                    <p className="text-xs text-muted-foreground/80 line-clamp-2">
-                      I've drafted a follow-up email for you. Review and send to keep momentum.
-                    </p>
-                  </div>
-                </div>
-              </div>
 
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="flex-1 gap-1.5">
-                  <Mail className="w-3 h-3" />
-                  Review Email
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => setActiveTab('mission-control')}
-                  className="gap-1"
-                >
-                  View All
-                  <ArrowRight className="w-3 h-3" />
-                </Button>
-              </div>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1 gap-1.5"
+                      onClick={() => setActiveTab('mission-control')}
+                    >
+                      <Mail className="w-3 h-3" />
+                      View Application
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setActiveTab('mission-control')}
+                      className="gap-1"
+                    >
+                      View All
+                      <ArrowRight className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-4">
+                  <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
+                  <p className="text-sm font-medium text-foreground">All caught up!</p>
+                  <p className="text-xs text-muted-foreground">No pending follow-ups needed</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </motion.div>
