@@ -112,7 +112,7 @@ const Footer = () => {
         <div className="container mx-auto px-4 lg:px-8 py-6 max-w-7xl">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-muted-foreground text-sm">
-              © 2024 Vaylance. All rights reserved.
+              © {new Date().getFullYear()} Vaylance. All rights reserved.
             </p>
             <div className="flex gap-6 text-sm">
               <Link to="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">Privacy</Link>

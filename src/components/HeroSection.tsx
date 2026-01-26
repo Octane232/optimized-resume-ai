@@ -46,10 +46,16 @@ const HeroSection = () => {
                 <ArrowRight className="w-5 h-5" />
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="h-14 px-8 text-lg font-semibold">
-              <Link to="#how-it-works">
-                See How It Works
-              </Link>
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="h-14 px-8 text-lg font-semibold"
+              onClick={() => {
+                const element = document.getElementById('how-it-works');
+                if (element) element.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              See How It Works
             </Button>
           </div>
 
