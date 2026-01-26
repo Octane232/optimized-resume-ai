@@ -61,6 +61,20 @@ const Scout: React.FC = () => {
 
   const fetchJobs = async () => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Fetch user skills from vault for dynamic match calculation
+      let userSkills: string[] = [];
+      if (user) {
+        const { data: vault } = await supabase
+          .from('user_vault')
+          .select('skills')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        userSkills = (vault?.skills || []).map((s: string) => s.toLowerCase());
+      }
+
       const { data, error } = await supabase
         .from('scouted_jobs')
         .select('*')
@@ -70,13 +84,21 @@ const Scout: React.FC = () => {
 
       if (error) throw error;
 
-      // Add mock match scores for demonstration
-      const jobsWithScores = (data || []).map(job => ({
-        ...job,
-        matchScore: Math.floor(Math.random() * 25) + 75 // 75-99% match
-      }));
+      // Calculate dynamic match scores based on user skills
+      const jobsWithScores = (data || []).map(job => {
+        const jobSkills = (job.skills || []).map((s: string) => s.toLowerCase());
+        const matchingSkills = jobSkills.filter((s: string) => userSkills.includes(s));
+        const matchScore = jobSkills.length > 0 
+          ? Math.round((matchingSkills.length / jobSkills.length) * 100)
+          : 50; // Default score if no skills listed
+        
+        return {
+          ...job,
+          matchScore: Math.max(matchScore, 40) // Minimum 40% for display
+        };
+      });
 
-      // Sort by match score
+      // Sort by match score (highest first)
       jobsWithScores.sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
       
       setJobs(jobsWithScores);
