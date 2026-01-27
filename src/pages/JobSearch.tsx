@@ -1,10 +1,10 @@
-
 import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Search, Target, Zap, TrendingUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const JobSearch = () => {
   const features = [
@@ -31,22 +31,22 @@ const JobSearch = () => {
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Header />
       <main className="pt-24">
         {/* Hero Section */}
-        <section className="py-20 bg-gradient-to-br from-green-50 to-white">
+        <section className="py-20 bg-gradient-to-br from-emerald-500/10 to-background">
           <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
             <div className="text-center max-w-4xl mx-auto">
-              <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+              <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
                 AI Job Search
               </h1>
-              <p className="text-xl text-gray-600 mb-8">
+              <p className="text-xl text-muted-foreground mb-8">
                 Let our AI find and apply to jobs for you. Get matched with opportunities 
                 that align with your skills, experience, and career goals.
               </p>
-              <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white px-8 py-4">
-                Start Your Job Search
+              <Button asChild size="lg" className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-4">
+                <Link to="/auth">Start Your Job Search</Link>
               </Button>
             </div>
           </div>
@@ -55,16 +55,16 @@ const JobSearch = () => {
         {/* Features Section */}
         <section className="py-20">
           <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
-            <h2 className="text-3xl font-bold text-center mb-12">Smart Job Search Features</h2>
+            <h2 className="text-3xl font-bold text-center text-foreground mb-12">Smart Job Search Features</h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
               {features.map((feature, index) => (
-                <Card key={index} className="text-center p-6">
+                <Card key={index} className="text-center p-6 bg-card border-border">
                   <CardContent className="p-0">
-                    <div className="text-green-600 mb-4 flex justify-center">
+                    <div className="text-emerald-500 mb-4 flex justify-center">
                       {feature.icon}
                     </div>
-                    <h3 className="text-lg font-semibold mb-3">{feature.title}</h3>
-                    <p className="text-gray-600 text-sm">{feature.description}</p>
+                    <h3 className="text-lg font-semibold text-foreground mb-3">{feature.title}</h3>
+                    <p className="text-muted-foreground text-sm">{feature.description}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -73,11 +73,11 @@ const JobSearch = () => {
         </section>
 
         {/* Statistics */}
-        <section className="py-20 bg-gray-50">
+        <section className="py-20 bg-secondary/50">
           <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4">Job Search Success</h2>
-              <p className="text-gray-600">See how our AI job search helps professionals land their dream jobs</p>
+              <h2 className="text-3xl font-bold text-foreground mb-4">Job Search Success</h2>
+              <p className="text-muted-foreground">See how our AI job search helps professionals land their dream jobs</p>
             </div>
             <div className="grid md:grid-cols-4 gap-8">
               {[
@@ -87,8 +87,8 @@ const JobSearch = () => {
                 { number: "95%", label: "Match Accuracy" }
               ].map((stat, index) => (
                 <div key={index} className="text-center">
-                  <div className="text-4xl font-bold text-green-600 mb-2">{stat.number}</div>
-                  <p className="text-gray-600">{stat.label}</p>
+                  <div className="text-4xl font-bold text-emerald-500 mb-2">{stat.number}</div>
+                  <p className="text-muted-foreground">{stat.label}</p>
                 </div>
               ))}
             </div>

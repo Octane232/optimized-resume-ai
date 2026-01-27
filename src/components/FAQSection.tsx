@@ -22,7 +22,7 @@ const FAQSection = () => {
     },
     {
       question: "What if I want a refund?",
-      answer: "We offer a 7-day money-back guarantee on all paid plans. If you're not satisfied, just email us at contact-us@pitchsora.com and we'll process your refund, no questions asked."
+      answer: "We offer a 7-day money-back guarantee on all paid plans. If you're not satisfied, just email us at contact@vaylance.com and we'll process your refund, no questions asked."
     },
     {
       question: "Do you sell my data?",

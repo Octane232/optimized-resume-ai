@@ -218,9 +218,8 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const canUseAI = () => {
-    if (tier === 'premium') return true;
-    if (tier === 'free') return false;
-    return usage.monthlyAiGenerations < limits.aiGenerations;
+    // All features currently unlocked for restructuring
+    return true;
   };
 
   const canCreateResume = () => {

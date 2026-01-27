@@ -7,7 +7,7 @@ const TrustedBySection = () => {
     { name: 'Microsoft', logo: 'https://cdn.simpleicons.org/microsoft/00A4EF' },
     { name: 'Amazon', logo: 'https://cdn.simpleicons.org/amazon/FF9900' },
     { name: 'Meta', logo: 'https://cdn.simpleicons.org/meta/0081FB' },
-    { name: 'Apple', logo: 'https://cdn.simpleicons.org/apple/000000' },
+    { name: 'Apple', logo: 'https://cdn.simpleicons.org/apple/A2AAAD' },
     { name: 'Netflix', logo: 'https://cdn.simpleicons.org/netflix/E50914' },
     { name: 'Spotify', logo: 'https://cdn.simpleicons.org/spotify/1DB954' },
     { name: 'Salesforce', logo: 'https://cdn.simpleicons.org/salesforce/00A1E0' }

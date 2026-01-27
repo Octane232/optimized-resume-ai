@@ -33,7 +33,7 @@ const TermsOfService = () => {
               <div>
                 <h2 className="text-3xl font-bold mb-4">1. Acceptance of Terms</h2>
                 <p className="text-muted-foreground leading-relaxed">
-                  By accessing and using PitchSora (the "Service"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these Terms of Service, please do not use our Service. Our Service is a comprehensive AI-powered resume building and career acceleration platform designed to help professionals create compelling resumes, find job opportunities, and advance their careers.
+                  By accessing and using Vaylance (the "Service"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these Terms of Service, please do not use our Service. Our Service is a comprehensive AI-powered resume building and career acceleration platform designed to help professionals create compelling resumes, find job opportunities, and advance their careers.
                 </p>
               </div>
             </div>
@@ -70,7 +70,7 @@ const TermsOfService = () => {
                 <h2 className="text-3xl font-bold mb-4">3. Intellectual Property</h2>
                 <div className="space-y-3 text-muted-foreground leading-relaxed">
                   <p>
-                    The Service and its original content, features, and functionality are owned by PitchSora and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws.
+                    The Service and its original content, features, and functionality are owned by Vaylance and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws.
                   </p>
                   <p className="font-semibold text-foreground">User Content:</p>
                   <ul className="list-disc list-inside space-y-2 ml-4">
@@ -134,7 +134,7 @@ const TermsOfService = () => {
             <h2 className="text-3xl font-bold mb-4">7. Limitation of Liability</h2>
             <div className="space-y-3 text-muted-foreground leading-relaxed">
               <p>
-                To the maximum extent permitted by law, PitchSora shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including loss of profits, data, or other intangible losses resulting from:
+                To the maximum extent permitted by law, Vaylance shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including loss of profits, data, or other intangible losses resulting from:
               </p>
               <ul className="list-disc list-inside space-y-2 ml-4">
                 <li>Your use or inability to use the Service</li>
@@ -162,7 +162,7 @@ const TermsOfService = () => {
           <section className="space-y-4">
             <h2 className="text-3xl font-bold mb-4">10. Governing Law</h2>
             <p className="text-muted-foreground leading-relaxed">
-              These Terms shall be governed by and construed in accordance with the laws of the jurisdiction in which PitchSora operates, without regard to its conflict of law provisions. Any disputes arising from these Terms or the Service will be subject to the exclusive jurisdiction of the courts in that jurisdiction.
+              These Terms shall be governed by and construed in accordance with the laws of the jurisdiction in which Vaylance operates, without regard to its conflict of law provisions. Any disputes arising from these Terms or the Service will be subject to the exclusive jurisdiction of the courts in that jurisdiction.
             </p>
           </section>
 
@@ -172,8 +172,8 @@ const TermsOfService = () => {
               If you have any questions about these Terms of Service, please contact us at:
             </p>
             <div className="bg-primary/5 rounded-xl p-6 space-y-2">
-              <p className="font-semibold text-foreground">PitchSora Support Team</p>
-              <p className="text-muted-foreground">Email: contact-us@pitchsora.com</p>
+              <p className="font-semibold text-foreground">Vaylance Support Team</p>
+              <p className="text-muted-foreground">Email: contact@vaylance.com</p>
             </div>
           </section>
         </div>
