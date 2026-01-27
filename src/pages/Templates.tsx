@@ -6,7 +6,7 @@ import ResumesShowcase from '@/components/ResumesShowcase';
 
 const Templates = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Header />
       <main className="pt-24">
         <ResumesShowcase />

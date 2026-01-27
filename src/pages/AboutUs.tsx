@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -10,16 +9,16 @@ import logoIcon from '@/assets/logo-icon.png';
 
 const AboutUs = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Header />
       <main className="pt-24">
-        <section className="py-20 bg-gradient-to-br from-gray-50 to-white">
+        <section className="py-20 bg-gradient-to-br from-primary/5 to-background">
           <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
             <div className="text-center max-w-3xl mx-auto">
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
                 About Vaylance
               </h1>
-              <p className="text-lg text-gray-600">
+              <p className="text-lg text-muted-foreground">
                 We help job seekers create better resumes and get more interviews. That's it.
               </p>
             </div>
@@ -31,15 +30,15 @@ const AboutUs = () => {
           <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
             <div className="grid lg:grid-cols-2 gap-12 items-center mb-20">
               <div>
-                <h2 className="text-3xl font-bold mb-4">Why we built this</h2>
-                <p className="text-lg text-gray-600 mb-4">
+                <h2 className="text-3xl font-bold text-foreground mb-4">Why we built this</h2>
+                <p className="text-lg text-muted-foreground mb-4">
                   Job hunting is already stressful. Your resume shouldn't add to that stress.
                 </p>
-                <p className="text-lg text-gray-600 mb-4">
+                <p className="text-lg text-muted-foreground mb-4">
                   We built Vaylance because we were tired of resume builders that either looked terrible or cost way too much. 
                   Most of them make promises they can't keep about "guaranteed interviews" or "AI magic."
                 </p>
-                <p className="text-lg text-gray-600">
+                <p className="text-lg text-muted-foreground">
                   We focus on what actually matters: clean templates that pass ATS systems, simple editing tools, 
                   and helpful suggestions when you need them. No BS.
                 </p>
@@ -67,11 +66,11 @@ const AboutUs = () => {
                     description: "Building a supportive network of professionals helping each other succeed"
                   }
                 ].map((value, index) => (
-                  <Card key={index} className="p-6 text-center hover:shadow-lg transition-shadow">
+                  <Card key={index} className="p-6 text-center hover:shadow-lg transition-shadow bg-card border-border">
                     <CardContent className="p-0">
-                      <div className="text-blue-600 mb-4 flex justify-center">{value.icon}</div>
-                      <h3 className="text-lg font-bold mb-2">{value.title}</h3>
-                      <p className="text-gray-600 text-sm">{value.description}</p>
+                      <div className="text-primary mb-4 flex justify-center">{value.icon}</div>
+                      <h3 className="text-lg font-bold text-foreground mb-2">{value.title}</h3>
+                      <p className="text-muted-foreground text-sm">{value.description}</p>
                     </CardContent>
                   </Card>
                 ))}
@@ -81,11 +80,11 @@ const AboutUs = () => {
         </section>
 
         {/* Statistics */}
-        <section className="py-20 bg-gradient-to-br from-blue-50 to-purple-50">
+        <section className="py-20 bg-gradient-to-br from-primary/5 to-purple-500/5">
           <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
             <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold mb-4">Trusted by Professionals Worldwide</h2>
-              <p className="text-gray-600 text-lg">Join thousands who have transformed their careers with Vaylance</p>
+              <h2 className="text-4xl font-bold text-foreground mb-4">Trusted by Professionals Worldwide</h2>
+              <p className="text-muted-foreground text-lg">Join thousands who have transformed their careers with Vaylance</p>
             </div>
             <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
               {[
@@ -93,11 +92,11 @@ const AboutUs = () => {
                 { number: "3,400+", label: "Resumes Created", icon: <TrendingUp className="w-6 h-6" /> },
                 { number: "4.6★", label: "Average Rating", icon: <Award className="w-6 h-6" /> }
               ].map((stat, index) => (
-                <Card key={index} className="p-6 text-center">
+                <Card key={index} className="p-6 text-center bg-card border-border">
                   <CardContent className="p-0">
-                    <div className="text-blue-600 mb-2 flex justify-center">{stat.icon}</div>
-                    <div className="text-3xl font-bold text-gray-900 mb-1">{stat.number}</div>
-                    <p className="text-gray-600 text-sm">{stat.label}</p>
+                    <div className="text-primary mb-2 flex justify-center">{stat.icon}</div>
+                    <div className="text-3xl font-bold text-foreground mb-1">{stat.number}</div>
+                    <p className="text-muted-foreground text-sm">{stat.label}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -109,7 +108,7 @@ const AboutUs = () => {
         <section className="py-20">
           <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-4xl font-bold text-center mb-12">What Makes Vaylance Different</h2>
+              <h2 className="text-4xl font-bold text-center text-foreground mb-12">What Makes Vaylance Different</h2>
               <div className="space-y-6">
                 {[
                   {
@@ -129,11 +128,11 @@ const AboutUs = () => {
                     description: "Your data is encrypted and never shared without your permission. We're SOC 2 compliant and take your privacy seriously."
                   }
                 ].map((item, index) => (
-                  <div key={index} className="flex items-start p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                    <CheckCircle className="w-6 h-6 text-green-500 mr-4 flex-shrink-0 mt-1" />
+                  <div key={index} className="flex items-start p-6 bg-card border border-border rounded-lg hover:shadow-md transition-shadow">
+                    <CheckCircle className="w-6 h-6 text-emerald-500 mr-4 flex-shrink-0 mt-1" />
                     <div>
-                      <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-                      <p className="text-gray-600">{item.description}</p>
+                      <h3 className="text-xl font-bold text-foreground mb-2">{item.title}</h3>
+                      <p className="text-muted-foreground">{item.description}</p>
                     </div>
                   </div>
                 ))}
@@ -143,14 +142,14 @@ const AboutUs = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+        <section className="py-20 bg-gradient-to-r from-primary to-purple-600 text-white">
           <div className="container mx-auto px-4 lg:px-8 max-w-7xl text-center">
             <h2 className="text-4xl font-bold mb-6">Ready to Transform Your Career?</h2>
-            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+            <p className="text-xl text-white/80 mb-8 max-w-2xl mx-auto">
               Join our community of professionals and start building your future today.
             </p>
             <div className="flex justify-center gap-4">
-              <Button asChild size="lg" className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4">
+              <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 px-8 py-4">
                 <Link to="/auth">Get Started Free</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="border-white text-white hover:bg-white/10 px-8 py-4">
