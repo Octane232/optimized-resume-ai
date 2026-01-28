@@ -5,7 +5,6 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Sun, Moon, Crown, Home, ChevronRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useTheme } from 'next-themes';
-import logo from '@/assets/pitchsora-logo.png';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Breadcrumb,
@@ -73,8 +72,8 @@ const DashboardHeader = ({ activeTab, setActiveTab }: DashboardHeaderProps) => {
           .single();
 
         if (plan?.name) {
-          // Remove "Pitchsora" prefix and "Yearly" suffix for cleaner display
-          const planName = plan.name.replace('Pitchsora ', '').replace(' Yearly', '');
+          // Remove "Vaylance" prefix and "Yearly" suffix for cleaner display
+          const planName = plan.name.replace('Vaylance ', '').replace('Pitchsora ', '').replace(' Yearly', '');
           setCurrentPlan(planName);
         }
       }
@@ -115,7 +114,9 @@ const DashboardHeader = ({ activeTab, setActiveTab }: DashboardHeaderProps) => {
             onClick={() => setActiveTab?.('dashboard')}
             className="flex items-center group transition-all duration-300 hover:opacity-80"
           >
-            <img src={logo} alt="Pitchsora" className="h-36 w-auto object-contain" />
+            <span className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-orange-500 bg-clip-text text-transparent">
+              Vaylance
+            </span>
           </button>
         </div>
 

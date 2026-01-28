@@ -102,7 +102,7 @@ const handler = async (req: Request): Promise<Response> => {
     await client.send({
       from: zohoEmail,
       to: email,
-      subject: `${updateInfo.title} - PitchSora`,
+      subject: `${updateInfo.title} - Vaylance`,
       content: `
         <!DOCTYPE html>
         <html>
@@ -133,19 +133,19 @@ const handler = async (req: Request): Promise<Response> => {
                 ${updateType === "cancel" ? `
                   <p>We're sorry to see you go! If you change your mind, you can reactivate your subscription anytime before ${effectiveDate || "the end of your billing period"}.</p>
                 ` : `
-                  <p>Thank you for continuing to use PitchSora to advance your career!</p>
+                  <p>Thank you for continuing to use Vaylance to advance your career!</p>
                 `}
 
                 <p style="text-align: center;">
-                  <a href="https://yourapp.com/dashboard/billing" class="button">View Billing Details</a>
+                  <a href="https://vaylance.com/dashboard/billing" class="button">View Billing Details</a>
                 </p>
 
                 <p>If you have any questions, our support team is here to help.</p>
 
-                <p>Best regards,<br>The PitchSora Team</p>
+                <p>Best regards,<br>The Vaylance Team</p>
               </div>
               <div class="footer">
-                <p>&copy; 2025 PitchSora. All rights reserved.</p>
+                <p>&copy; ${new Date().getFullYear()} Vaylance. All rights reserved.</p>
               </div>
             </div>
           </body>

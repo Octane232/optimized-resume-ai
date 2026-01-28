@@ -73,7 +73,7 @@ const handler = async (req: Request): Promise<Response> => {
     await client.send({
       from: zohoEmail,
       to: email,
-      subject: "Welcome to PitchSora! 🎉",
+      subject: "Welcome to Vaylance! 🎉",
       content: `
         <!DOCTYPE html>
         <html>
@@ -81,21 +81,21 @@ const handler = async (req: Request): Promise<Response> => {
             <style>
               body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
               .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+              .header { background: linear-gradient(135deg, #3b82f6 0%, #f97316 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
               .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
-              .button { display: inline-block; background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+              .button { display: inline-block; background: linear-gradient(135deg, #3b82f6, #f97316); color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
               .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
             </style>
           </head>
           <body>
             <div class="container">
               <div class="header">
-                <h1>Welcome to PitchSora!</h1>
+                <h1>Welcome to Vaylance!</h1>
               </div>
               <div class="content">
                 <p>Hi ${name || "there"},</p>
-                <p>Thank you for joining PitchSora! We're excited to have you on board.</p>
-                <p>With PitchSora, you can:</p>
+                <p>Thank you for joining Vaylance! We're excited to have you on board.</p>
+                <p>With Vaylance, you can:</p>
                 <ul>
                   <li>Create professional resumes with AI-powered suggestions</li>
                   <li>Generate customized cover letters instantly</li>
@@ -103,13 +103,13 @@ const handler = async (req: Request): Promise<Response> => {
                   <li>Find your dream job faster</li>
                 </ul>
                 <p style="text-align: center;">
-                  <a href="https://yourapp.com/dashboard" class="button">Get Started</a>
+                  <a href="https://vaylance.com/dashboard" class="button">Get Started</a>
                 </p>
                 <p>If you have any questions, feel free to reach out to our support team.</p>
-                <p>Best regards,<br>The PitchSora Team</p>
+                <p>Best regards,<br>The Vaylance Team</p>
               </div>
               <div class="footer">
-                <p>&copy; 2025 PitchSora. All rights reserved.</p>
+                <p>&copy; ${new Date().getFullYear()} Vaylance. All rights reserved.</p>
               </div>
             </div>
           </body>

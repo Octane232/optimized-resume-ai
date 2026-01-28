@@ -7,7 +7,7 @@ const ResourcesSection = () => {
     {
       icon: MessageSquare,
       title: 'Help Center',
-      description: 'Get instant answers to common questions, troubleshooting guides, and step-by-step tutorials to maximize your Pitchsora experience.',
+      description: 'Get instant answers to common questions, troubleshooting guides, and step-by-step tutorials to maximize your Vaylance experience.',
       features: ['Email Support', 'Video Tutorials', 'FAQ Database', 'Response within 24h']
     },
     {

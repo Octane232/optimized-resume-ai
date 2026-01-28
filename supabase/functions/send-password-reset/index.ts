@@ -73,7 +73,7 @@ const handler = async (req: Request): Promise<Response> => {
     await client.send({
       from: zohoEmail,
       to: email,
-      subject: "Reset Your Password - PitchSora",
+      subject: "Reset Your Password - Vaylance",
       content: `
         <!DOCTYPE html>
         <html>
@@ -81,9 +81,9 @@ const handler = async (req: Request): Promise<Response> => {
             <style>
               body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
               .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background: #667eea; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+              .header { background: linear-gradient(135deg, #3b82f6, #f97316); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
               .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
-              .button { display: inline-block; background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+              .button { display: inline-block; background: linear-gradient(135deg, #3b82f6, #f97316); color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
               .warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; }
               .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
             </style>
@@ -95,7 +95,7 @@ const handler = async (req: Request): Promise<Response> => {
               </div>
               <div class="content">
                 <p>Hello,</p>
-                <p>We received a request to reset your password for your PitchSora account.</p>
+                <p>We received a request to reset your password for your Vaylance account.</p>
                 <p style="text-align: center;">
                   <a href="${resetLink}" class="button">Reset Password</a>
                 </p>
@@ -108,11 +108,11 @@ const handler = async (req: Request): Promise<Response> => {
                   </ul>
                 </div>
                 <p>If the button doesn't work, copy and paste this link into your browser:</p>
-                <p style="word-break: break-all; color: #667eea;">${resetLink}</p>
-                <p>Best regards,<br>The PitchSora Team</p>
+                <p style="word-break: break-all; color: #3b82f6;">${resetLink}</p>
+                <p>Best regards,<br>The Vaylance Team</p>
               </div>
               <div class="footer">
-                <p>&copy; 2025 PitchSora. All rights reserved.</p>
+                <p>&copy; ${new Date().getFullYear()} Vaylance. All rights reserved.</p>
               </div>
             </div>
           </body>
