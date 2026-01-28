@@ -174,7 +174,7 @@ const AffiliateProgram = () => {
           </div>
           
           <h1 className="text-5xl font-bold bg-gradient-to-r from-slate-900 via-purple-800 to-pink-700 dark:from-white dark:via-purple-200 dark:to-pink-200 bg-clip-text text-transparent">
-            Earn Money Sharing PitchSora
+            Earn Money Sharing Vaylance
           </h1>
           <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
             Join our affiliate program and earn <strong>20% commission</strong> on every subscription you refer
@@ -236,7 +236,7 @@ const AffiliateProgram = () => {
               <Textarea
                 value={applicationNote}
                 onChange={(e) => setApplicationNote(e.target.value)}
-                placeholder="Tell us about your audience, marketing channels, and why you're interested in promoting PitchSora..."
+                placeholder="Tell us about your audience, marketing channels, and why you're interested in promoting Vaylance..."
                 rows={6}
                 className="resize-none"
               />

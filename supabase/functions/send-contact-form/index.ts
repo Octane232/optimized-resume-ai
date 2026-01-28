@@ -59,7 +59,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send email to your contact email
     await client.send({
       from: zohoEmail,
-      to: "contact-us@pitchsora.com",
+      to: "contact@vaylance.com",
       subject: `New Contact Form Submission from ${firstName} ${lastName}`,
       content: `
         <!DOCTYPE html>

@@ -160,7 +160,7 @@ const CookiePolicy = () => {
                   If you have any questions about our use of cookies, please contact us at:
                 </p>
                 <p className="text-muted-foreground mt-2">
-                  Email: <a href="mailto:contact-us@pitchsora.com" className="text-primary hover:underline">contact-us@pitchsora.com</a>
+                  Email: <a href="mailto:contact@vaylance.com" className="text-primary hover:underline">contact@vaylance.com</a>
                 </p>
               </section>
             </div>
