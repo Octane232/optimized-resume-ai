@@ -1,17 +1,26 @@
-import React from 'react';
-import { Send, Sparkles, Briefcase, TrendingUp, Target, Lightbulb, MessageCircle } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Send, Sparkles, Briefcase, TrendingUp, Target, Lightbulb, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface SoraSidecarProps {
   mode: 'hunter' | 'growth';
 }
 
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 const SoraSidecar: React.FC<SoraSidecarProps> = ({ mode }) => {
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState<Array<{ role: 'user' | 'ai'; content: string }>>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   const hunterInsights = [
     { icon: Target, title: 'Active Job Alerts', content: '3 new high-match roles found today' },
@@ -28,21 +37,53 @@ const SoraSidecar: React.FC<SoraSidecarProps> = ({ mode }) => {
   const insights = mode === 'hunter' ? hunterInsights : growthInsights;
   const accentColor = mode === 'hunter' ? 'hsl(217, 100%, 50%)' : 'hsl(262, 83%, 58%)';
 
-  const handleSend = () => {
-    if (!message.trim()) return;
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  const handleSend = async () => {
+    if (!message.trim() || isLoading) return;
     
-    setMessages(prev => [...prev, { role: 'user', content: message }]);
+    const userMessage: Message = { role: 'user', content: message };
+    setMessages(prev => [...prev, userMessage]);
     setMessage('');
-    
-    // Simulate Vaylance AI response
-    setTimeout(() => {
+    setIsLoading(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('vaylance-chat', {
+        body: { 
+          messages: [...messages, userMessage],
+          mode 
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.error) {
+        toast({
+          title: 'AI Error',
+          description: data.error,
+          variant: 'destructive'
+        });
+        return;
+      }
+
       setMessages(prev => [...prev, { 
-        role: 'ai', 
-        content: mode === 'hunter' 
-          ? 'I found 3 roles that match your profile. Would you like me to show them?' 
-          : 'Great question! Based on your goals, I recommend focusing on leadership skills.'
+        role: 'assistant', 
+        content: data.content 
       }]);
-    }, 1000);
+    } catch (error) {
+      console.error('Chat error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to get AI response. Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -70,7 +111,7 @@ const SoraSidecar: React.FC<SoraSidecarProps> = ({ mode }) => {
       </div>
 
       {/* Context-Aware Feed */}
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1" ref={scrollRef}>
         <div className="p-4 space-y-3">
           {insights.map((insight, index) => {
             const Icon = insight.icon;
@@ -114,6 +155,14 @@ const SoraSidecar: React.FC<SoraSidecarProps> = ({ mode }) => {
                   </div>
                 </div>
               ))}
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="bg-muted rounded-lg px-3 py-2 text-sm flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span className="text-muted-foreground">Thinking...</span>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -126,15 +175,21 @@ const SoraSidecar: React.FC<SoraSidecarProps> = ({ mode }) => {
             placeholder="Ask Vaylance AI anything..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+            onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
+            disabled={isLoading}
             className="flex-1"
           />
           <Button 
             size="icon" 
             onClick={handleSend}
+            disabled={isLoading || !message.trim()}
             style={{ backgroundColor: accentColor }}
           >
-            <Send className="w-4 h-4" />
+            {isLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Send className="w-4 h-4" />
+            )}
           </Button>
         </div>
       </div>
