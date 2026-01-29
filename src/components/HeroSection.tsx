@@ -18,24 +18,24 @@ const HeroSection = () => {
         <div className="max-w-4xl mx-auto text-center space-y-6">
           
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-primary/10 rounded-full px-4 py-2 animate-fade-in">
-            <Briefcase className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-foreground">Your Complete Career Platform</span>
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/15 to-purple-500/15 rounded-full px-4 py-2 animate-fade-in border border-primary/20">
+            <Sparkles className="w-4 h-4 text-primary" />
+            <span className="text-sm font-medium text-foreground">AI-Powered Career Assistant</span>
           </div>
 
           {/* Main headline */}
           <div className="space-y-4 animate-fade-in stagger-1">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight">
-              <span className="text-foreground">Land Your Dream Job</span>
+              <span className="text-foreground">Your AI Career Coach</span>
               <br />
-              <span className="gradient-text">Faster & Smarter</span>
+              <span className="gradient-text">That Gets You Hired</span>
             </h1>
           </div>
 
           {/* Subtitle */}
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in stagger-2">
-            Build ATS-optimized resumes, discover matching jobs, track applications, 
-            and get AI-powered coaching — all in one place.
+            Vaylance AI writes your resume, finds matching jobs, tracks applications, 
+            and coaches you through interviews — like having a career expert by your side 24/7.
           </p>
 
           {/* CTAs */}
