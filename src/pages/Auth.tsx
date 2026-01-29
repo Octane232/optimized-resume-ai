@@ -201,25 +201,25 @@ const Auth = () => {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_60%,hsl(var(--primary)/0.05)_0%,transparent_70%)]"></div>
 
       {/* Header */}
-      <header className="relative z-10 p-6">
+      <header className="relative z-10 p-4 sm:p-6">
         <div className="container mx-auto flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 text-foreground hover:opacity-80 transition-opacity">
-            <ArrowLeft className="h-5 w-5" />
-            <span className="font-semibold">Back to Home</span>
+          <Link to="/" className="flex items-center gap-2 sm:gap-3 text-foreground hover:opacity-80 transition-opacity">
+            <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+            <span className="font-semibold text-sm sm:text-base">Back to Home</span>
           </Link>
         </div>
       </header>
 
       {/* Main Content */}
-      <div className="relative z-10 flex items-center justify-center min-h-[calc(100vh-100px)] p-6">
+      <div className="relative z-10 flex items-center justify-center min-h-[calc(100vh-80px)] sm:min-h-[calc(100vh-100px)] p-4 sm:p-6">
         <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl md:text-5xl font-bold mb-2">
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2">
               <span className="bg-gradient-to-r from-blue-500 to-orange-500 bg-clip-text text-transparent">
                 Vaylance
               </span>
             </h1>
-            <p className="text-muted-foreground text-lg">
+            <p className="text-muted-foreground text-base sm:text-lg">
               Your AI-powered career command center
             </p>
           </div>
@@ -227,20 +227,20 @@ const Auth = () => {
           <Card className="glass-morphism border-border/20 shadow-xl">
             <CardContent className="p-0">
               <Tabs defaultValue="signin" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted/50">
-                  <TabsTrigger value="signin" className="data-[state=active]:bg-background">
+                <TabsList className="grid w-full grid-cols-2 mb-4 sm:mb-6 bg-muted/50">
+                  <TabsTrigger value="signin" className="data-[state=active]:bg-background text-xs sm:text-sm">
                     Sign In
                   </TabsTrigger>
-                  <TabsTrigger value="signup" className="data-[state=active]:bg-background">
+                  <TabsTrigger value="signup" className="data-[state=active]:bg-background text-xs sm:text-sm">
                     Sign Up
                   </TabsTrigger>
                 </TabsList>
 
-                <div className="px-6 pb-6">
-                  <TabsContent value="signin" className="space-y-6 mt-0">
+                <div className="px-4 sm:px-6 pb-4 sm:pb-6">
+                  <TabsContent value="signin" className="space-y-4 sm:space-y-6 mt-0">
                     <div className="text-center">
-                      <CardTitle className="text-xl">Welcome back</CardTitle>
-                      <CardDescription>
+                      <CardTitle className="text-lg sm:text-xl">Welcome back</CardTitle>
+                      <CardDescription className="text-xs sm:text-sm">
                         Sign in to access your career command center
                       </CardDescription>
                     </div>
@@ -249,7 +249,7 @@ const Auth = () => {
                     <Button
                       type="button"
                       variant="outline"
-                      className="w-full h-12 font-semibold"
+                      className="w-full h-11 sm:h-12 font-semibold text-sm sm:text-base"
                       onClick={handleGoogleSignIn}
                       disabled={isGoogleLoading}
                     >
@@ -326,10 +326,10 @@ const Auth = () => {
                     </form>
                   </TabsContent>
 
-                  <TabsContent value="signup" className="space-y-6 mt-0">
+                  <TabsContent value="signup" className="space-y-4 sm:space-y-6 mt-0">
                     <div className="text-center">
-                      <CardTitle className="text-xl">Create your account</CardTitle>
-                      <CardDescription>
+                      <CardTitle className="text-lg sm:text-xl">Create your account</CardTitle>
+                      <CardDescription className="text-xs sm:text-sm">
                         Join thousands of professionals taking control of their careers
                       </CardDescription>
                     </div>
@@ -338,7 +338,7 @@ const Auth = () => {
                     <Button
                       type="button"
                       variant="outline"
-                      className="w-full h-12 font-semibold"
+                      className="w-full h-11 sm:h-12 font-semibold text-sm sm:text-base"
                       onClick={handleGoogleSignIn}
                       disabled={isGoogleLoading}
                     >
@@ -363,12 +363,12 @@ const Auth = () => {
                       </div>
                     </div>
 
-                    <form onSubmit={handleSignUp} className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="signup-firstname">First Name *</Label>
+                    <form onSubmit={handleSignUp} className="space-y-3 sm:space-y-4">
+                      <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                        <div className="space-y-1.5 sm:space-y-2">
+                          <Label htmlFor="signup-firstname" className="text-xs sm:text-sm">First Name *</Label>
                           <div className="relative">
-                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
                             <Input
                               id="signup-firstname"
                               name="firstName"
@@ -376,16 +376,16 @@ const Auth = () => {
                               placeholder="First name"
                               value={formData.firstName}
                               onChange={handleInputChange}
-                              className="pl-10"
+                              className="pl-9 sm:pl-10 h-10 sm:h-11 text-sm"
                               required
                             />
                           </div>
                         </div>
 
-                        <div className="space-y-2">
-                          <Label htmlFor="signup-lastname">Last Name *</Label>
+                        <div className="space-y-1.5 sm:space-y-2">
+                          <Label htmlFor="signup-lastname" className="text-xs sm:text-sm">Last Name *</Label>
                           <div className="relative">
-                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
                             <Input
                               id="signup-lastname"
                               name="lastName"
@@ -393,7 +393,7 @@ const Auth = () => {
                               placeholder="Last name"
                               value={formData.lastName}
                               onChange={handleInputChange}
-                              className="pl-10"
+                              className="pl-9 sm:pl-10 h-10 sm:h-11 text-sm"
                               required
                             />
                           </div>
@@ -472,7 +472,7 @@ const Auth = () => {
             </CardContent>
           </Card>
 
-          <div className="text-center mt-6 text-sm text-muted-foreground">
+          <div className="text-center mt-4 sm:mt-6 text-xs sm:text-sm text-muted-foreground px-4">
             By continuing, you agree to our{' '}
             <Link to="/terms" className="text-primary hover:underline">Terms of Service</Link>
             {' '}and{' '}

@@ -13,9 +13,9 @@ const HeroSection = () => {
       {/* Floating orb */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-gradient-to-br from-primary/15 via-purple-500/10 to-transparent rounded-full blur-3xl pointer-events-none opacity-50"></div>
       
-      <div className="container mx-auto px-6 lg:px-8 relative pt-28 pb-16">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative pt-20 sm:pt-24 lg:pt-28 pb-12 sm:pb-16">
         {/* Centered Introduction */}
-        <div className="max-w-4xl mx-auto text-center space-y-6">
+        <div className="max-w-4xl mx-auto text-center space-y-4 sm:space-y-6">
           
           {/* Badge */}
           <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/15 to-purple-500/15 rounded-full px-4 py-2 animate-fade-in border border-primary/20">
@@ -24,8 +24,8 @@ const HeroSection = () => {
           </div>
 
           {/* Main headline */}
-          <div className="space-y-4 animate-fade-in stagger-1">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight">
+          <div className="space-y-3 sm:space-y-4 animate-fade-in stagger-1">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight">
               <span className="text-foreground">Your AI Career Coach</span>
               <br />
               <span className="gradient-text">That Gets You Hired</span>
@@ -33,23 +33,23 @@ const HeroSection = () => {
           </div>
 
           {/* Subtitle */}
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in stagger-2">
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in stagger-2 px-2">
             Vaylance AI writes your resume, finds matching jobs, tracks applications, 
             and coaches you through interviews — like having a career expert by your side 24/7.
           </p>
 
           {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in stagger-3">
-            <Button asChild size="lg" className="saas-button h-14 px-8 text-lg font-bold">
-              <Link to="/auth" className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center animate-fade-in stagger-3 px-4 sm:px-0">
+            <Button asChild size="lg" className="saas-button h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg font-bold w-full sm:w-auto">
+              <Link to="/auth" className="flex items-center justify-center gap-2">
                 Get Started Free
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </Link>
             </Button>
             <Button 
               variant="outline" 
               size="lg" 
-              className="h-14 px-8 text-lg font-semibold"
+              className="h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg font-semibold w-full sm:w-auto"
               onClick={() => {
                 const element = document.getElementById('how-it-works');
                 if (element) element.scrollIntoView({ behavior: 'smooth' });
@@ -67,16 +67,16 @@ const HeroSection = () => {
         </div>
 
         {/* Features Grid + Chat Preview */}
-        <div className="mt-20 max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-10 items-start">
+        <div className="mt-12 sm:mt-16 lg:mt-20 max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-10 items-start">
             
             {/* Left - Core Features */}
-            <div className="space-y-4 animate-fade-in" style={{ animationDelay: '0.5s' }}>
-              <h2 className="text-lg font-semibold text-foreground mb-4">
+            <div className="space-y-4 animate-fade-in order-2 lg:order-1" style={{ animationDelay: '0.5s' }}>
+              <h2 className="text-base sm:text-lg font-semibold text-foreground mb-4 text-center lg:text-left">
                 Everything you need to succeed
               </h2>
               
-              <div className="grid gap-3">
+              <div className="grid gap-2 sm:gap-3">
                 {[
                   { 
                     icon: FileText,
@@ -117,14 +117,14 @@ const HeroSection = () => {
                 ].map((item, index) => (
                   <div 
                     key={index}
-                    className="command-card p-4 flex items-start gap-4 group hover:border-primary/30 transition-colors"
+                    className="command-card p-3 sm:p-4 flex items-start gap-3 sm:gap-4 group hover:border-primary/30 transition-colors"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-                      <item.icon className="w-5 h-5 text-primary" />
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+                      <item.icon className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-foreground">
+                        <h3 className="font-semibold text-foreground text-sm sm:text-base">
                           {item.title}
                         </h3>
                         {item.badge && (
@@ -141,15 +141,15 @@ const HeroSection = () => {
             </div>
 
             {/* Right - AI Assistant Preview */}
-            <div className="animate-fade-in" style={{ animationDelay: '0.7s' }}>
-              <div className="flex items-center gap-2 mb-4">
+            <div className="animate-fade-in order-1 lg:order-2" style={{ animationDelay: '0.7s' }}>
+              <div className="flex items-center justify-center lg:justify-start gap-2 mb-4">
                 <Sparkles className="w-4 h-4 text-primary" />
-                <h2 className="text-lg font-semibold text-foreground">
+                <h2 className="text-base sm:text-lg font-semibold text-foreground">
                   Meet Vaylance AI, your career assistant
                 </h2>
               </div>
               <VayaChatPreview />
-              <p className="text-sm text-muted-foreground mt-3 text-center">
+              <p className="text-xs sm:text-sm text-muted-foreground mt-3 text-center">
                 Get instant help optimizing resumes, writing cover letters, and preparing for interviews
               </p>
             </div>
