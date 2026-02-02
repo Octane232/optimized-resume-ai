@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
-import { Settings2, Sparkles, FileText, Database } from 'lucide-react';
+import { Settings2, Sparkles, FileText, Telescope } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { useSubscription } from '@/contexts/SubscriptionContext';
@@ -160,10 +160,10 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
     if (!resumeContent) {
       toast({ 
         title: "No resume found", 
-        description: "Please upload a resume in the Master Vault first to run AI analysis", 
+        description: "Create a resume first using Resume Templates to run AI analysis", 
         variant: "destructive" 
       });
-      setActiveTab?.('vault');
+      setActiveTab?.('resume-builder');
       return;
     }
 
@@ -171,7 +171,7 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
     setFixItItems([]); // Clear previous items
     
     try {
-      // Send ONLY resume data for analysis (not vault data)
+      // Send ONLY resume data for analysis
       const resumeData = getResumeOnlyData();
       
       const { data, error } = await supabase.functions.invoke('analyze-resume-ats', {
@@ -208,12 +208,12 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
   };
 
   const handleAutoOptimize = async () => {
-    toast({ title: "Optimizing...", description: "Applying AI improvements using your Vault data" });
+    toast({ title: "Optimizing...", description: "Applying AI improvements to your resume" });
     await new Promise(r => setTimeout(r, 2000));
     toast({ title: "Optimization complete", description: "Your resume has been improved!" });
   };
 
-  const handleNavigateToVault = () => setActiveTab?.('vault');
+  const handleNavigateToResumeBuilder = () => setActiveTab?.('resume-builder');
   const handleNavigateToScout = () => setActiveTab?.('scout');
 
   return (
@@ -271,7 +271,7 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
           {!hasResume && (
             <p className="text-xs text-amber-600 dark:text-amber-400 mt-3 flex items-center gap-1">
               <FileText className="w-3 h-3" />
-              Upload a resume in the Master Vault to enable scanning
+              Create a resume using Resume Templates to enable scanning
             </p>
           )}
         </motion.div>
@@ -291,7 +291,7 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                <Database className="w-5 h-5 text-emerald-600" />
+                <Telescope className="w-5 h-5 text-emerald-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-foreground">Looking for job matches?</p>
@@ -326,7 +326,7 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
               onFixItem={(id) => {
                 setFixItItems(prev => prev.map(i => i.id === id ? { ...i, fixed: true } : i));
               }}
-              onNavigateToVault={handleNavigateToVault}
+              onNavigateToVault={handleNavigateToResumeBuilder}
             />
 
             <IndustryBenchmark
@@ -358,15 +358,12 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
             </div>
             <h3 className="text-xl font-semibold text-foreground mb-3">No Resume to Analyze</h3>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Head to the Master Vault to upload your resume. Once uploaded, our AI will analyze it and provide personalized optimization insights.
+              Create a resume using our templates. Once saved, our AI will analyze it and provide personalized optimization insights.
             </p>
-            <Button onClick={handleNavigateToVault} size="lg" className="gap-2">
-              <Database className="w-4 h-4" />
-              Go to Master Vault
+            <Button onClick={handleNavigateToResumeBuilder} size="lg" className="gap-2">
+              <FileText className="w-4 h-4" />
+              Create Resume
             </Button>
-            <p className="text-xs text-muted-foreground mt-4">
-              The AI combines your resume with skills, certifications, and projects from your Vault for comprehensive analysis
-            </p>
           </motion.div>
         )}
       </div>

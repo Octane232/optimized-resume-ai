@@ -2,7 +2,6 @@ import React from 'react';
 import { 
   Home, 
   Target, 
-  FolderLock, 
   Crosshair,
   Settings,
   CreditCard,
@@ -55,7 +54,6 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
     { id: 'cover-letter', label: 'Cover Letters', icon: FileText },
     { id: 'interview-prep', label: 'Interview Prep', icon: Mic },
     { id: 'skill-gap', label: 'Skill Gap', icon: TrendingUp },
-    { id: 'vault', label: 'Master Vault', icon: FolderLock },
     { id: 'mission-control', label: 'Mission Control', icon: Crosshair },
   ];
 
