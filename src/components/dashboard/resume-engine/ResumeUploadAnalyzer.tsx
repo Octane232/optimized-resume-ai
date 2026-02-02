@@ -8,6 +8,11 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import * as pdfjsLib from 'pdfjs-dist';
+import mammoth from 'mammoth';
+
+// Set up PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js`;
 
 interface ResumeUploadAnalyzerProps {
   onAnalysisComplete: (analysis: any) => void;
@@ -67,27 +72,43 @@ const ResumeUploadAnalyzer = ({ onAnalysisComplete, isAnalyzing, setIsAnalyzing 
     }
   };
 
+  const extractTextFromPDF = async (file: File): Promise<string> => {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    
+    let fullText = '';
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const textContent = await page.getTextContent();
+      const pageText = textContent.items
+        .map((item: any) => item.str)
+        .join(' ');
+      fullText += pageText + '\n';
+    }
+    
+    return fullText.trim();
+  };
+
+  const extractTextFromDOCX = async (file: File): Promise<string> => {
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer });
+    return result.value.trim();
+  };
+
   const extractTextFromFile = async (file: File): Promise<string> => {
     if (file.type === 'text/plain') {
       return await file.text();
     }
     
-    // For PDF/DOCX, read as text (basic extraction)
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const text = new TextDecoder().decode(new Uint8Array(e.target?.result as ArrayBuffer));
-          // Clean up the text - remove non-printable characters
-          const cleanText = text.replace(/[^\x20-\x7E\n\r\t]/g, ' ').replace(/\s+/g, ' ').trim();
-          resolve(cleanText);
-        } catch (error) {
-          reject(error);
-        }
-      };
-      reader.onerror = reject;
-      reader.readAsArrayBuffer(file);
-    });
+    if (file.type === 'application/pdf') {
+      return await extractTextFromPDF(file);
+    }
+    
+    if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      return await extractTextFromDOCX(file);
+    }
+    
+    throw new Error('Unsupported file type');
   };
 
   const handleAnalyze = async () => {
