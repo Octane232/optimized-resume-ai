@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import NewSidebar from '@/components/dashboard/NewSidebar';
+import MobileNav from '@/components/dashboard/MobileNav';
 import SoraSidecar from '@/components/dashboard/SoraSidecar';
 import HunterDashboard from '@/components/dashboard/HunterDashboard';
 import GrowthTeaser from '@/components/dashboard/GrowthTeaser';
@@ -156,18 +157,20 @@ const Dashboard = () => {
         <WalkthroughGuide onComplete={handleWalkthroughComplete} />
       )}
 
-      {/* Zone A: Left Sidebar */}
-      <NewSidebar 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab}
-        mode={mode}
-        setMode={setMode}
-        collapsed={sidebarCollapsed}
-        setCollapsed={setSidebarCollapsed}
-      />
+      {/* Zone A: Left Sidebar - Hidden on mobile */}
+      <div className="hidden md:flex">
+        <NewSidebar 
+          activeTab={activeTab} 
+          setActiveTab={setActiveTab}
+          mode={mode}
+          setMode={setMode}
+          collapsed={sidebarCollapsed}
+          setCollapsed={setSidebarCollapsed}
+        />
+      </div>
       
       {/* Zone B: Main Content - Single scroll container */}
-      <main className="flex-1 h-screen overflow-y-auto">
+      <main className="flex-1 h-screen overflow-y-auto pb-16 md:pb-0">
         {renderContent()}
       </main>
 
@@ -177,6 +180,13 @@ const Dashboard = () => {
           <SoraSidecar mode={mode} />
         </div>
       )}
+
+      {/* Mobile Bottom Navigation */}
+      <MobileNav 
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        mode={mode}
+      />
     </div>
   );
 };
