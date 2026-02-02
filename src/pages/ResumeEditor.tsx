@@ -12,7 +12,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ResumeData } from '@/types/resume';
 import ResumeTemplatePreview from '@/components/dashboard/ResumeTemplatePreview';
-import html2pdf from 'html2pdf.js';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle } from 'docx';
+import { saveAs } from 'file-saver';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 
 const ResumeEditor: React.FC = () => {
@@ -335,102 +336,267 @@ const ResumeEditor: React.FC = () => {
     setSaving(false);
   };
 
-  const exportPDF = async () => {
+  const exportDOCX = async () => {
     // Check if user can download
     if (!canDownloadPDF()) {
       toast({
         title: "Download limit reached",
-        description: "Please upgrade your plan to download more PDFs.",
+        description: "Please upgrade your plan to download more resumes.",
         variant: "destructive",
       });
       return;
     }
 
-    const element = document.getElementById('resume-preview-content');
-    if (element) {
-      // Clone the element to avoid modifying the original
-      const clone = element.cloneNode(true) as HTMLElement;
-      
-      // Create a temporary container
-      const container = document.createElement('div');
-      container.style.position = 'absolute';
-      container.style.left = '-9999px';
-      container.style.top = '0';
-      container.style.width = '210mm'; // A4 width
-      container.appendChild(clone);
-      document.body.appendChild(container);
+    try {
+      const sections: Paragraph[] = [];
 
-      // Compute scale to force single page (A4 @ 96DPI ~ 794x1123)
-      const A4_WIDTH_PX = 794;
-      const A4_HEIGHT_PX = 1123;
-      const mmToPx = (mm: number) => Math.round((mm / 25.4) * 96);
-      const marginTopMm = 5;
-      const marginBottomMm = 5;
-      const verticalMarginPx = mmToPx(marginTopMm + marginBottomMm);
-      const targetContentHeightPx = A4_HEIGHT_PX - verticalMarginPx;
+      // Header - Name and Title
+      sections.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: resumeData.contact.name,
+              bold: true,
+              size: 32,
+            }),
+          ],
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 100 },
+        })
+      );
 
-      // Normalize clone sizing for accurate measurement
-      clone.style.width = `${A4_WIDTH_PX}px`;
-      clone.style.maxWidth = `${A4_WIDTH_PX}px`;
-      clone.style.background = '#ffffff';
-      clone.style.transformOrigin = 'top left';
-
-      // Measure and scale to fit
-      const actualHeight = clone.scrollHeight;
-      if (actualHeight > targetContentHeightPx) {
-        const scaleFactor = targetContentHeightPx / actualHeight;
-        clone.style.transform = `scale(${scaleFactor})`;
-        // Preserve layout height so html2canvas captures full content pre-scale
-        clone.style.height = `${actualHeight}px`;
+      if (resumeData.contact.title) {
+        sections.push(
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: resumeData.contact.title,
+                size: 24,
+                color: "666666",
+              }),
+            ],
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 200 },
+          })
+        );
       }
 
-      const opt = {
-        margin: [marginTopMm, 8, marginBottomMm, 8],
-        filename: `${resumeTitle || 'resume'}.pdf`,
-        image: { type: 'jpeg', quality: 0.95 },
-        html2canvas: { 
-          scale: 2,
-          useCORS: true,
-          logging: false,
-          windowWidth: A4_WIDTH_PX,
-          backgroundColor: '#ffffff',
-        },
-        jsPDF: { 
-          unit: 'mm', 
-          format: 'a4', 
-          orientation: 'portrait',
-          compress: true,
-          putOnlyUsedFonts: true,
-        },
-        // Let CSS control breaks; content is scaled to fit single page
-        pagebreak: { mode: ['css'] }
-      };
+      // Contact Info
+      const contactParts = [
+        resumeData.contact.email,
+        resumeData.contact.phone,
+        resumeData.contact.location,
+        resumeData.contact.linkedin,
+      ].filter(Boolean);
 
-      html2pdf()
-        .set(opt)
-        .from(clone)
-        .save()
-        .then(async () => {
-          // Clean up
-          document.body.removeChild(container);
-          
-          // Track download usage
-          await incrementUsage('download');
-          
-          toast({
-            title: "Success",
-            description: "Resume downloaded successfully",
-          });
-        })
-        .catch((error) => {
-          console.error('PDF export error:', error);
-          document.body.removeChild(container);
-          toast({
-            title: "Error",
-            description: "Failed to export PDF",
-            variant: "destructive",
+      if (contactParts.length > 0) {
+        sections.push(
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: contactParts.join(' | '),
+                size: 20,
+              }),
+            ],
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 300 },
+          })
+        );
+      }
+
+      // Summary Section
+      if (resumeData.summary) {
+        sections.push(
+          new Paragraph({
+            children: [new TextRun({ text: 'PROFESSIONAL SUMMARY', bold: true, size: 24 })],
+            heading: HeadingLevel.HEADING_2,
+            border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: "000000" } },
+            spacing: { before: 300, after: 150 },
+          })
+        );
+        sections.push(
+          new Paragraph({
+            children: [new TextRun({ text: resumeData.summary, size: 22 })],
+            spacing: { after: 200 },
+          })
+        );
+      }
+
+      // Skills Section
+      if (resumeData.skills && resumeData.skills.length > 0) {
+        sections.push(
+          new Paragraph({
+            children: [new TextRun({ text: 'SKILLS', bold: true, size: 24 })],
+            heading: HeadingLevel.HEADING_2,
+            border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: "000000" } },
+            spacing: { before: 300, after: 150 },
+          })
+        );
+        sections.push(
+          new Paragraph({
+            children: [new TextRun({ text: resumeData.skills.join(', '), size: 22 })],
+            spacing: { after: 200 },
+          })
+        );
+      }
+
+      // Experience Section
+      if (resumeData.experience && resumeData.experience.length > 0) {
+        sections.push(
+          new Paragraph({
+            children: [new TextRun({ text: 'PROFESSIONAL EXPERIENCE', bold: true, size: 24 })],
+            heading: HeadingLevel.HEADING_2,
+            border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: "000000" } },
+            spacing: { before: 300, after: 150 },
+          })
+        );
+
+        resumeData.experience.forEach((exp) => {
+          sections.push(
+            new Paragraph({
+              children: [
+                new TextRun({ text: exp.title, bold: true, size: 22 }),
+                new TextRun({ text: ` at ${exp.company}`, size: 22 }),
+              ],
+              spacing: { before: 150 },
+            })
+          );
+          sections.push(
+            new Paragraph({
+              children: [
+                new TextRun({ text: `${exp.startDate} - ${exp.endDate}`, size: 20, italics: true, color: "666666" }),
+              ],
+              spacing: { after: 100 },
+            })
+          );
+          exp.responsibilities?.forEach((resp) => {
+            sections.push(
+              new Paragraph({
+                children: [new TextRun({ text: `• ${resp}`, size: 22 })],
+                indent: { left: 360 },
+              })
+            );
           });
         });
+      }
+
+      // Education Section
+      if (resumeData.education && resumeData.education.length > 0) {
+        sections.push(
+          new Paragraph({
+            children: [new TextRun({ text: 'EDUCATION', bold: true, size: 24 })],
+            heading: HeadingLevel.HEADING_2,
+            border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: "000000" } },
+            spacing: { before: 300, after: 150 },
+          })
+        );
+
+        resumeData.education.forEach((edu) => {
+          sections.push(
+            new Paragraph({
+              children: [
+                new TextRun({ text: edu.degree, bold: true, size: 22 }),
+              ],
+              spacing: { before: 150 },
+            })
+          );
+          sections.push(
+            new Paragraph({
+              children: [
+                new TextRun({ text: edu.institution, size: 22 }),
+                new TextRun({ text: ` | ${edu.startYear} - ${edu.endYear}`, size: 20, color: "666666" }),
+              ],
+              spacing: { after: 100 },
+            })
+          );
+        });
+      }
+
+      // Projects Section
+      if (resumeData.projects && resumeData.projects.length > 0) {
+        sections.push(
+          new Paragraph({
+            children: [new TextRun({ text: 'PROJECTS', bold: true, size: 24 })],
+            heading: HeadingLevel.HEADING_2,
+            border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: "000000" } },
+            spacing: { before: 300, after: 150 },
+          })
+        );
+
+        resumeData.projects.forEach((proj) => {
+          sections.push(
+            new Paragraph({
+              children: [new TextRun({ text: proj.title, bold: true, size: 22 })],
+              spacing: { before: 150 },
+            })
+          );
+          if (proj.description) {
+            sections.push(
+              new Paragraph({
+                children: [new TextRun({ text: proj.description, size: 22 })],
+              })
+            );
+          }
+          if (proj.technologies && proj.technologies.length > 0) {
+            sections.push(
+              new Paragraph({
+                children: [new TextRun({ text: `Technologies: ${proj.technologies.join(', ')}`, size: 20, italics: true })],
+                spacing: { after: 100 },
+              })
+            );
+          }
+        });
+      }
+
+      // Certifications Section
+      if (resumeData.certifications && resumeData.certifications.length > 0) {
+        sections.push(
+          new Paragraph({
+            children: [new TextRun({ text: 'CERTIFICATIONS', bold: true, size: 24 })],
+            heading: HeadingLevel.HEADING_2,
+            border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: "000000" } },
+            spacing: { before: 300, after: 150 },
+          })
+        );
+
+        resumeData.certifications.forEach((cert) => {
+          sections.push(
+            new Paragraph({
+              children: [
+                new TextRun({ text: `• ${cert.name}`, size: 22 }),
+                cert.issuer ? new TextRun({ text: ` - ${cert.issuer}`, size: 20, color: "666666" }) : new TextRun({ text: '' }),
+              ],
+            })
+          );
+        });
+      }
+
+      const doc = new Document({
+        sections: [
+          {
+            properties: {},
+            children: sections,
+          },
+        ],
+      });
+
+      const blob = await Packer.toBlob(doc);
+      saveAs(blob, `${resumeTitle || 'resume'}.docx`);
+
+      // Track download usage
+      await incrementUsage('download');
+
+      toast({
+        title: "Success",
+        description: "Resume downloaded as DOCX",
+      });
+    } catch (error) {
+      console.error('DOCX export error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to export DOCX",
+        variant: "destructive",
+      });
     }
   };
 
@@ -796,9 +962,9 @@ const ResumeEditor: React.FC = () => {
                 <Save className="w-4 h-4 mr-2" />
                 {saving ? 'Saving...' : 'Save'}
               </Button>
-              <Button onClick={exportPDF} variant="outline">
+              <Button onClick={exportDOCX} variant="outline">
                 <Download className="w-4 h-4 mr-2" />
-                Export PDF
+                Export DOCX
               </Button>
               <Button variant="outline">
                 <Share2 className="w-4 h-4 mr-2" />
