@@ -42,6 +42,7 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
   const { tier } = useSubscription();
   
   const [resumeContent, setResumeContent] = useState<any>(null);
+  const [uploadedResumeText, setUploadedResumeText] = useState<string | null>(null);
   const [hasResume, setHasResume] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -58,6 +59,9 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
   
   // Upgrade Modal
   const [showUpgrade, setShowUpgrade] = useState(false);
+
+  // Track which source was last analyzed
+  const [analysisSource, setAnalysisSource] = useState<'saved' | 'uploaded' | null>(null);
 
   useEffect(() => {
     fetchResumeData();
@@ -119,12 +123,11 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
     
     const bullets: BulletPoint[] = [];
     content.experience?.forEach((exp: any) => {
-      if (exp.bullets) {
-        exp.bullets.forEach((bullet: string) => {
-          // Initial score of 0 - will be updated by AI analysis
-          bullets.push({ text: bullet, score: 0 });
-        });
-      }
+      const expBullets = exp.bullets || exp.responsibilities || [];
+      expBullets.forEach((bullet: string) => {
+        // Initial score of 0 - will be updated by AI analysis
+        bullets.push({ text: bullet, score: 0 });
+      });
     });
     setBulletPoints(bullets.slice(0, 6));
   };
@@ -171,6 +174,7 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
 
     setIsAnalyzingATS(true);
     setFixItItems([]); // Clear previous items
+    setAnalysisSource('saved');
     
     try {
       // Send ONLY resume data for analysis
@@ -209,10 +213,16 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
     }
   };
 
-  const handleUploadAnalysisComplete = (data: ATSAnalysis) => {
+  const handleUploadAnalysisComplete = (data: ATSAnalysis, rawText?: string) => {
     setAtsAnalysis(data);
     setOverallScore(data.overall_score);
     convertAnalysisToFixItems(data);
+    setAnalysisSource('uploaded');
+    
+    // Store uploaded text for ATS parser view
+    if (rawText) {
+      setUploadedResumeText(rawText);
+    }
   };
 
   const handleAutoOptimize = async () => {
@@ -223,6 +233,14 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
 
   const handleNavigateToResumeBuilder = () => setActiveTab?.('resume-builder');
   const handleNavigateToScout = () => setActiveTab?.('scout');
+
+  // Determine what content to show in ATS Parser View
+  const getATSParserContent = () => {
+    if (analysisSource === 'uploaded' && uploadedResumeText) {
+      return { rawText: uploadedResumeText };
+    }
+    return resumeContent;
+  };
 
   return (
     <div className="min-h-full bg-background">
@@ -294,7 +312,7 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
         {/* Auto-Optimize CTA */}
         <AutoOptimizeButton 
           onOptimize={handleAutoOptimize}
-          disabled={!resumeContent}
+          disabled={!resumeContent && !uploadedResumeText}
         />
 
         {/* Tip to use Scout for Job Matching */}
@@ -332,7 +350,7 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
           <div className="space-y-6">
             <DeepAnalysisCard
               analysis={atsAnalysis}
-              isAnalyzing={isAnalyzingATS}
+              isAnalyzing={isAnalyzingATS || isAnalyzingUpload}
               onAnalyze={handleDeepAnalysis}
             />
 
@@ -356,13 +374,16 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
             />
 
             <ATSSimulationView
-              resumeContent={resumeContent}
+              resumeContent={getATSParserContent()}
+              uploadedText={uploadedResumeText}
+              analysisSource={analysisSource}
+              atsAnalysis={atsAnalysis}
             />
           </div>
         </div>
 
         {/* No Resume State */}
-        {!resumeContent && !isLoading && (
+        {!resumeContent && !uploadedResumeText && !isLoading && (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -373,7 +394,7 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
             </div>
             <h3 className="text-xl font-semibold text-foreground mb-3">No Resume to Analyze</h3>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Create a resume using our templates. Once saved, our AI will analyze it and provide personalized optimization insights.
+              Create a resume using our templates or upload an existing one. Our AI will analyze it and provide personalized optimization insights.
             </p>
             <Button onClick={handleNavigateToResumeBuilder} size="lg" className="gap-2">
               <FileText className="w-4 h-4" />
