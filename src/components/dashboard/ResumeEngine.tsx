@@ -6,17 +6,13 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 
-// New Premium Components
+// Resume-focused Components only
 import DeepAnalysisCard from './resume-engine/DeepAnalysisCard';
-import JobTargetingPanel from './resume-engine/JobTargetingPanel';
-import MatchMeter from './resume-engine/MatchMeter';
-import KeywordGap from './resume-engine/KeywordGap';
 import FixItChecklist from './resume-engine/FixItChecklist';
 import IndustryBenchmark from './resume-engine/IndustryBenchmark';
 import BulletRewriter from './resume-engine/BulletRewriter';
 import ATSSimulationView from './resume-engine/ATSSimulationView';
 import AutoOptimizeButton from './resume-engine/AutoOptimizeButton';
-import RecommendationsPanel from './resume-engine/RecommendationsPanel';
 import VaultDataIndicator from './resume-engine/VaultDataIndicator';
 import UpgradeModal from './UpgradeModal';
 
@@ -42,18 +38,6 @@ interface ATSAnalysis {
   missing_keywords?: string[];
 }
 
-interface MatchAnalysis {
-  match_score: number;
-  is_good_fit: boolean;
-  fit_summary?: string;
-  strengths: { point: string; impact: 'high' | 'medium' }[];
-  gaps: { gap: string; severity: 'critical' | 'moderate' | 'minor'; suggestion: string }[];
-  recommendations: { action: string; section: 'summary' | 'experience' | 'skills' | 'education' | 'other'; priority: 'high' | 'medium' | 'low'; example?: string }[];
-  keyword_matches?: string[];
-  missing_keywords?: { keyword: string; importance: 'must-have' | 'nice-to-have'; context?: string }[];
-  ats_warnings?: string[];
-}
-
 interface VaultCertification {
   name: string;
   issuer?: string;
@@ -70,7 +54,6 @@ interface VaultProject {
 
 const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
   const { tier } = useSubscription();
-  const isPremium = tier === 'pro' || tier === 'premium';
   
   const [resumeContent, setResumeContent] = useState<any>(null);
   const [hasResume, setHasResume] = useState(false);
@@ -84,11 +67,9 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
   const [bulletPoints, setBulletPoints] = useState<BulletPoint[]>([]);
   const [overallScore, setOverallScore] = useState(0);
   
-  // AI Analysis States
+  // AI Analysis States (Resume-focused only)
   const [isAnalyzingATS, setIsAnalyzingATS] = useState(false);
   const [atsAnalysis, setAtsAnalysis] = useState<ATSAnalysis | null>(null);
-  const [isAnalyzingMatch, setIsAnalyzingMatch] = useState(false);
-  const [matchAnalysis, setMatchAnalysis] = useState<MatchAnalysis | null>(null);
   
   // Fix-it checklist
   const [fixItItems, setFixItItems] = useState<{ id: string; message: string; severity: 'critical' | 'warning' | 'suggestion'; fixed?: boolean }[]>([]);
@@ -276,44 +257,6 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
     }
   };
 
-  const handleJobMatch = async (jobDescription: string, jobTitle?: string, company?: string) => {
-    if (!resumeContent) return;
-
-    setIsAnalyzingMatch(true);
-    try {
-      // Get enriched resume data including all Vault content
-      const enrichedData = getEnrichedResumeData();
-      
-      const { data, error } = await supabase.functions.invoke('analyze-resume-match', {
-        body: { 
-          resumeText: JSON.stringify(enrichedData),
-          jobDescription,
-          jobTitle: jobTitle || undefined,
-          company: company || undefined
-        }
-      });
-
-      if (error) throw error;
-      setMatchAnalysis(data);
-      
-      const vaultBoost = vaultSkills.length + vaultCertifications.length + vaultProjects.length;
-      const boostMessage = vaultBoost > 5 
-        ? `Analysis enhanced with ${vaultBoost} Vault items!` 
-        : data.is_good_fit 
-          ? "You're a strong match for this role!" 
-          : "See recommendations to improve your fit.";
-      
-      toast({ 
-        title: `${data.match_score}% Match Score`, 
-        description: boostMessage
-      });
-    } catch (error: any) {
-      toast({ title: "Analysis failed", description: error.message, variant: "destructive" });
-    } finally {
-      setIsAnalyzingMatch(false);
-    }
-  };
-
   const handleAutoOptimize = async () => {
     toast({ title: "Optimizing...", description: "Applying AI improvements using your Vault data" });
     await new Promise(r => setTimeout(r, 2000));
@@ -321,6 +264,7 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
   };
 
   const handleNavigateToVault = () => setActiveTab?.('vault');
+  const handleNavigateToScout = () => setActiveTab?.('scout');
 
   return (
     <div className="min-h-full bg-background">
@@ -330,12 +274,14 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
           <Settings2 className="w-5 h-5 text-primary" />
           Resume Optimization Studio
         </h1>
-        <p className="text-sm text-muted-foreground">AI-powered resume analysis and optimization</p>
+        <p className="text-sm text-muted-foreground">
+          Analyze your resume for ATS compatibility, formatting, and content quality
+        </p>
       </div>
 
       {/* Main Content */}
       <div className="p-6 pb-12 max-w-7xl mx-auto space-y-6">
-        {/* Scan Profile CTA */}
+        {/* Scan Resume CTA */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -347,9 +293,9 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
                 <Sparkles className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h2 className="font-semibold text-foreground">Scan Your Career Profile</h2>
+                <h2 className="font-semibold text-foreground">Scan Your Resume</h2>
                 <p className="text-sm text-muted-foreground">
-                  AI analyzes your resume + Vault data to give personalized insights
+                  AI analyzes formatting, keywords, and ATS compatibility
                 </p>
               </div>
             </div>
@@ -396,51 +342,34 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
           disabled={!resumeContent}
         />
 
-        {/* Job Targeting Panel */}
-        <JobTargetingPanel
-          onAnalyze={handleJobMatch}
-          isAnalyzing={isAnalyzingMatch}
-        />
-
-        {/* Match Results (if job was analyzed) */}
-        {matchAnalysis && (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
-          >
-            {/* Score & Keywords Row */}
-            <div className="grid lg:grid-cols-2 gap-6">
-              <MatchMeter 
-                score={matchAnalysis.match_score} 
-                missingCount={matchAnalysis.missing_keywords?.length || 0}
-                isAnalyzing={isAnalyzingMatch}
-              />
-              <KeywordGap
-                matchingKeywords={matchAnalysis.keyword_matches || []}
-                missingKeywords={(matchAnalysis.missing_keywords || []).map(k => 
-                  typeof k === 'string' 
-                    ? { keyword: k, reason: 'Required in job description' }
-                    : { keyword: k.keyword, reason: k.context || `${k.importance === 'must-have' ? 'Must-have' : 'Nice-to-have'} skill` }
-                )}
-              />
+        {/* Tip to use Scout for Job Matching */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4 rounded-xl bg-muted/30 border border-border"
+        >
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                <Database className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-foreground">Looking for job matches?</p>
+                <p className="text-xs text-muted-foreground">
+                  Use Scout to find and match with jobs based on your skills
+                </p>
+              </div>
             </div>
-            
-            {/* Recommendations Panel */}
-            <RecommendationsPanel
-              recommendations={matchAnalysis.recommendations}
-              gaps={matchAnalysis.gaps}
-              fitSummary={matchAnalysis.fit_summary}
-              atsWarnings={matchAnalysis.ats_warnings}
-              onApplyRecommendation={(rec) => {
-                toast({
-                  title: `Apply to ${rec.section}`,
-                  description: rec.action
-                });
-              }}
-            />
-          </motion.div>
-        )}
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleNavigateToScout}
+              className="gap-2"
+            >
+              Go to Scout
+            </Button>
+          </div>
+        </motion.div>
 
         {/* Main Grid */}
         <div className="grid lg:grid-cols-2 gap-6">
