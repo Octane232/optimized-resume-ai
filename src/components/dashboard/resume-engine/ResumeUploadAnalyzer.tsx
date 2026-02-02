@@ -25,11 +25,12 @@ const ResumeUploadAnalyzer = ({ onAnalysisComplete, isAnalyzing, setIsAnalyzing 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      const validTypes = ['application/pdf', 'text/plain', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-      if (!validTypes.includes(selectedFile.type)) {
+      const validTypes = ['text/plain', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+      const fileName = selectedFile.name.toLowerCase();
+      if (!validTypes.includes(selectedFile.type) && !fileName.endsWith('.txt') && !fileName.endsWith('.docx')) {
         toast({
           title: "Invalid file type",
-          description: "Please upload a PDF, DOCX, or TXT file",
+          description: "Please upload a DOCX or TXT file",
           variant: "destructive",
         });
         return;
@@ -43,11 +44,12 @@ const ResumeUploadAnalyzer = ({ onAnalysisComplete, isAnalyzing, setIsAnalyzing 
     e.preventDefault();
     const droppedFile = e.dataTransfer.files[0];
     if (droppedFile) {
-      const validTypes = ['application/pdf', 'text/plain', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-      if (!validTypes.includes(droppedFile.type)) {
+      const validTypes = ['text/plain', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+      const fileName = droppedFile.name.toLowerCase();
+      if (!validTypes.includes(droppedFile.type) && !fileName.endsWith('.txt') && !fileName.endsWith('.docx')) {
         toast({
           title: "Invalid file type",
-          description: "Please upload a PDF, DOCX, or TXT file",
+          description: "Please upload a DOCX or TXT file",
           variant: "destructive",
         });
         return;
@@ -206,14 +208,14 @@ const ResumeUploadAnalyzer = ({ onAnalysisComplete, isAnalyzing, setIsAnalyzing 
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept=".pdf,.docx,.txt"
+                  accept=".docx,.txt"
                   onChange={handleFileChange}
                   className="hidden"
                 />
                 <Upload className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
                 <p className="text-sm font-medium text-foreground">Drop your resume here</p>
                 <p className="text-xs text-muted-foreground mt-1">or click to browse</p>
-                <p className="text-xs text-muted-foreground mt-3">Supports PDF, DOCX, TXT</p>
+                <p className="text-xs text-muted-foreground mt-3">Supports DOCX, TXT (no PDF)</p>
               </motion.div>
             ) : (
               <motion.div
