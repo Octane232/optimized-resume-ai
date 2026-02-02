@@ -5,23 +5,49 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 
 interface ResumeContent {
+  // Support both naming conventions for maximum compatibility
   personalInfo?: {
     fullName?: string;
     email?: string;
     phone?: string;
     website?: string;
     location?: string;
+    linkedin?: string;
+  };
+  contact?: {
+    name?: string;
+    title?: string;
+    email?: string;
+    phone?: string;
+    location?: string;
+    linkedin?: string;
+    portfolio?: string;
+    github?: string;
   };
   summary?: string;
   skills?: string[];
   experience?: Array<{
     title?: string;
     company?: string;
+    startDate?: string;
+    endDate?: string;
+    responsibilities?: string[];
     bullets?: string[];
   }>;
   education?: Array<{
     degree?: string;
     institution?: string;
+    startYear?: string;
+    endYear?: string;
+  }>;
+  projects?: Array<{
+    title?: string;
+    description?: string;
+    technologies?: string[];
+  }>;
+  certifications?: Array<{
+    name?: string;
+    issuer?: string;
   }>;
 }
 
@@ -38,19 +64,41 @@ const ATSSimulationView = ({
     return null;
   }
 
+  // Normalize contact info from either personalInfo or contact object
+  const normalizedContact = {
+    name: resumeContent.personalInfo?.fullName || resumeContent.contact?.name || '',
+    email: resumeContent.personalInfo?.email || resumeContent.contact?.email || '',
+    phone: resumeContent.personalInfo?.phone || resumeContent.contact?.phone || '',
+    linkedin: resumeContent.personalInfo?.website || resumeContent.personalInfo?.linkedin || resumeContent.contact?.linkedin || '',
+    location: resumeContent.personalInfo?.location || resumeContent.contact?.location || '',
+    title: resumeContent.contact?.title || '',
+  };
+
+  // Normalize experience data
+  const normalizedExperience = (resumeContent.experience || []).map(exp => ({
+    title: exp.title || '',
+    company: exp.company || '',
+    startDate: exp.startDate || '',
+    endDate: exp.endDate || '',
+    bullets: exp.responsibilities || exp.bullets || [],
+  }));
+
+  // Parse results with normalized data
   const parseResults = {
     contact: {
-      name: { found: !!resumeContent.personalInfo?.fullName, value: resumeContent.personalInfo?.fullName },
-      email: { found: !!resumeContent.personalInfo?.email, value: resumeContent.personalInfo?.email },
-      phone: { found: !!resumeContent.personalInfo?.phone, value: resumeContent.personalInfo?.phone },
-      linkedin: { found: !!resumeContent.personalInfo?.website, value: resumeContent.personalInfo?.website },
-      location: { found: !!resumeContent.personalInfo?.location, value: resumeContent.personalInfo?.location },
+      name: { found: !!normalizedContact.name, value: normalizedContact.name },
+      email: { found: !!normalizedContact.email, value: normalizedContact.email },
+      phone: { found: !!normalizedContact.phone, value: normalizedContact.phone },
+      linkedin: { found: !!normalizedContact.linkedin, value: normalizedContact.linkedin },
+      location: { found: !!normalizedContact.location, value: normalizedContact.location },
     },
     sections: {
-      summary: !!resumeContent.summary,
+      summary: !!resumeContent.summary && resumeContent.summary.length > 10,
       skills: (resumeContent.skills?.length || 0) > 0,
-      experience: (resumeContent.experience?.length || 0) > 0,
-      education: (resumeContent.education?.length || 0) > 0,
+      experience: normalizedExperience.length > 0 && normalizedExperience.some(e => e.title || e.company),
+      education: (resumeContent.education?.length || 0) > 0 && resumeContent.education?.some(e => e.degree || e.institution),
+      projects: (resumeContent.projects?.length || 0) > 0,
+      certifications: (resumeContent.certifications?.length || 0) > 0,
     }
   };
 
@@ -137,25 +185,36 @@ const ATSSimulationView = ({
             {/* Sections Detection */}
             <div>
               <p className="text-xs text-muted-foreground mb-2 uppercase tracking-wide">
-                Detected Sections
+                Detected Sections (ATS Critical)
               </p>
               <div className="grid grid-cols-2 gap-2">
-                {Object.entries(parseResults.sections).map(([section, found]) => (
-                  <div 
-                    key={section}
-                    className={`flex items-center gap-2 p-2 rounded ${
-                      found ? 'bg-emerald-500/10' : 'bg-amber-500/10'
-                    }`}
-                  >
-                    {found ? (
-                      <Check className="w-4 h-4 text-emerald-500" />
-                    ) : (
-                      <AlertTriangle className="w-4 h-4 text-amber-500" />
-                    )}
-                    <span className="text-xs capitalize text-foreground">{section}</span>
-                  </div>
-                ))}
+                {Object.entries(parseResults.sections).map(([section, found]) => {
+                  const isCritical = ['summary', 'experience', 'education', 'skills'].includes(section);
+                  return (
+                    <div 
+                      key={section}
+                      className={`flex items-center gap-2 p-2 rounded ${
+                        found ? 'bg-emerald-500/10' : isCritical ? 'bg-red-500/10' : 'bg-amber-500/10'
+                      }`}
+                    >
+                      {found ? (
+                        <Check className="w-4 h-4 text-emerald-500" />
+                      ) : isCritical ? (
+                        <X className="w-4 h-4 text-red-500" />
+                      ) : (
+                        <AlertTriangle className="w-4 h-4 text-amber-500" />
+                      )}
+                      <span className="text-xs capitalize text-foreground">
+                        {section}
+                        {isCritical && !found && <span className="text-red-500 ml-1">*</span>}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
+              <p className="text-xs text-muted-foreground mt-2 italic">
+                * Critical sections required for ATS parsing
+              </p>
             </div>
 
             {/* Skills Extraction */}
@@ -177,18 +236,82 @@ const ATSSimulationView = ({
               </div>
             )}
 
-            {/* Warnings */}
-            {(!parseResults.contact.email.found || !parseResults.contact.phone.found) && (
-              <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+            {/* Experience Details Check */}
+            {normalizedExperience.length > 0 && (
+              <div>
+                <p className="text-xs text-muted-foreground mb-2 uppercase tracking-wide">
+                  Experience Parsing ({normalizedExperience.length} entries)
+                </p>
+                <div className="space-y-2">
+                  {normalizedExperience.slice(0, 3).map((exp, i) => (
+                    <div key={i} className="p-2 rounded-lg bg-muted/30 border border-border text-xs">
+                      <div className="flex items-center gap-2 mb-1">
+                        {exp.title && exp.company ? (
+                          <Check className="w-3 h-3 text-emerald-500" />
+                        ) : (
+                          <AlertTriangle className="w-3 h-3 text-amber-500" />
+                        )}
+                        <span className="font-medium">{exp.title || 'Missing title'}</span>
+                        <span className="text-muted-foreground">at</span>
+                        <span>{exp.company || 'Missing company'}</span>
+                      </div>
+                      <div className="text-muted-foreground ml-5">
+                        {exp.bullets.length > 0 ? (
+                          <span className="text-emerald-600">{exp.bullets.length} bullet points found</span>
+                        ) : (
+                          <span className="text-amber-600">No bullet points - ATS may rank lower</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Comprehensive Warnings */}
+            {(() => {
+              const warnings: string[] = [];
+              if (!parseResults.contact.email.found) warnings.push('email address');
+              if (!parseResults.contact.phone.found) warnings.push('phone number');
+              if (!parseResults.contact.name.found) warnings.push('full name');
+              if (!parseResults.sections.summary) warnings.push('professional summary');
+              if (!parseResults.sections.experience) warnings.push('work experience');
+              if (!parseResults.sections.education) warnings.push('education');
+              if (!parseResults.sections.skills) warnings.push('skills section');
+              
+              if (warnings.length === 0) return null;
+              
+              return (
+                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                  <div className="flex items-start gap-2">
+                    <X className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
+                    <div className="text-xs text-muted-foreground">
+                      <span className="font-medium text-red-500">ATS Parsing Issues Found:</span>
+                      <p className="mt-1">
+                        Missing or incomplete: {warnings.join(', ')}.
+                        These are critical fields that ATS systems scan for. Your resume may be filtered out.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+            
+            {/* Success message when all critical sections pass */}
+            {parseResults.contact.email.found && 
+             parseResults.contact.phone.found && 
+             parseResults.contact.name.found &&
+             parseResults.sections.summary &&
+             parseResults.sections.experience &&
+             parseResults.sections.education &&
+             parseResults.sections.skills && (
+              <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
                 <div className="flex items-start gap-2">
-                  <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
-                  <div className="text-xs text-muted-foreground">
-                    <span className="font-medium text-amber-500">Missing critical info:</span>
-                    <p className="mt-1">
-                      ATS systems prioritize resumes with complete contact information. 
-                      Add your {!parseResults.contact.email.found ? 'email' : ''} 
-                      {!parseResults.contact.email.found && !parseResults.contact.phone.found ? ' and ' : ''}
-                      {!parseResults.contact.phone.found ? 'phone number' : ''} to improve parsing.
+                  <Check className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+                  <div className="text-xs text-foreground">
+                    <span className="font-medium text-emerald-600">ATS Ready!</span>
+                    <p className="mt-1 text-muted-foreground">
+                      All critical sections detected. This resume structure is optimized for ATS parsing.
                     </p>
                   </div>
                 </div>
