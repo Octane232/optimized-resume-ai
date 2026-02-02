@@ -12,11 +12,21 @@ serve(async (req) => {
   }
 
   try {
-    const { resumeContent, jobDescription } = await req.json();
+    const { resumeContent, jobDescription, mode } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
+    }
+
+    // Handle both structured resume data and raw uploaded text
+    let resumeText = '';
+    if (resumeContent?.rawText) {
+      // Uploaded/pasted resume text
+      resumeText = resumeContent.rawText;
+    } else {
+      // Structured resume data from the app
+      resumeText = JSON.stringify(resumeContent, null, 2);
     }
 
     const systemPrompt = `You are an ATS (Applicant Tracking System) expert. Analyze the provided resume and score it based on ATS compatibility and best practices. Consider:
@@ -25,15 +35,16 @@ serve(async (req) => {
 - Experience relevance
 - Education credentials
 - Overall ATS compatibility
+- Common mistakes (typos, grammar, unclear descriptions)
 
-Provide scores out of 100 for each category and overall.`;
+Provide scores out of 100 for each category and overall. Be thorough in identifying mistakes and areas for improvement.`;
 
     const userPrompt = `Analyze this resume${jobDescription ? ' for the following job' : ''}:
 
 ${jobDescription ? `Job Description:\n${jobDescription}\n\n` : ''}Resume Content:
-${JSON.stringify(resumeContent, null, 2)}
+${resumeText}
 
-Provide a detailed ATS analysis.`;
+Provide a detailed ATS analysis. Focus on finding mistakes, formatting issues, and areas that need improvement.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

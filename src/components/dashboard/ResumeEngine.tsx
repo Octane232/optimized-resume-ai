@@ -13,6 +13,7 @@ import IndustryBenchmark from './resume-engine/IndustryBenchmark';
 import BulletRewriter from './resume-engine/BulletRewriter';
 import ATSSimulationView from './resume-engine/ATSSimulationView';
 import AutoOptimizeButton from './resume-engine/AutoOptimizeButton';
+import ResumeUploadAnalyzer from './resume-engine/ResumeUploadAnalyzer';
 import UpgradeModal from './UpgradeModal';
 
 interface ResumeEngineProps {
@@ -50,6 +51,7 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
   // AI Analysis States (Resume-focused only)
   const [isAnalyzingATS, setIsAnalyzingATS] = useState(false);
   const [atsAnalysis, setAtsAnalysis] = useState<ATSAnalysis | null>(null);
+  const [isAnalyzingUpload, setIsAnalyzingUpload] = useState(false);
   
   // Fix-it checklist
   const [fixItItems, setFixItItems] = useState<{ id: string; message: string; severity: 'critical' | 'warning' | 'suggestion'; fixed?: boolean }[]>([]);
@@ -207,6 +209,12 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
     }
   };
 
+  const handleUploadAnalysisComplete = (data: ATSAnalysis) => {
+    setAtsAnalysis(data);
+    setOverallScore(data.overall_score);
+    convertAnalysisToFixItems(data);
+  };
+
   const handleAutoOptimize = async () => {
     toast({ title: "Optimizing...", description: "Applying AI improvements to your resume" });
     await new Promise(r => setTimeout(r, 2000));
@@ -243,9 +251,9 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
                 <Sparkles className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h2 className="font-semibold text-foreground">Scan Your Resume</h2>
+                <h2 className="font-semibold text-foreground">Scan Your Saved Resume</h2>
                 <p className="text-sm text-muted-foreground">
-                  AI analyzes formatting, keywords, and ATS compatibility
+                  AI analyzes your resume created in Resume Templates
                 </p>
               </div>
             </div>
@@ -275,6 +283,13 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
             </p>
           )}
         </motion.div>
+
+        {/* Upload Resume for Analysis */}
+        <ResumeUploadAnalyzer
+          onAnalysisComplete={handleUploadAnalysisComplete}
+          isAnalyzing={isAnalyzingUpload}
+          setIsAnalyzing={setIsAnalyzingUpload}
+        />
 
         {/* Auto-Optimize CTA */}
         <AutoOptimizeButton 
