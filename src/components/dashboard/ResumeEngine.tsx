@@ -39,8 +39,25 @@ interface ATSAnalysis {
 }
 
 interface ResumeContent {
-  contact?: Record<string, string>;
-  personalInfo?: Record<string, string>;
+  // Classic templates use 'contact', modern use 'personalInfo'
+  contact?: {
+    name?: string;
+    title?: string;
+    email?: string;
+    phone?: string;
+    location?: string;
+    linkedin?: string;
+    portfolio?: string;
+    github?: string;
+  };
+  personalInfo?: {
+    fullName?: string;
+    email?: string;
+    phone?: string;
+    website?: string;
+    location?: string;
+    linkedin?: string;
+  };
   summary?: string;
   skills?: string[];
   experience?: Array<{
@@ -48,6 +65,7 @@ interface ResumeContent {
     company?: string;
     startDate?: string;
     endDate?: string;
+    // Classic templates use 'responsibilities', modern use 'bullets'
     responsibilities?: string[];
     bullets?: string[];
   }>;
@@ -128,15 +146,36 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
   };
 
   // Get ONLY resume data for analysis (no vault mixing)
+  // Normalize data to handle both classic and modern templates
   const getResumeOnlyData = () => {
+    if (!resumeContent) return null;
+    
+    // Handle both classic (contact) and modern (personalInfo) templates
+    const contactSource = (resumeContent.contact || resumeContent.personalInfo || {}) as Record<string, string>;
+    
     return {
-      contact: resumeContent?.contact || {},
-      summary: resumeContent?.summary || '',
-      skills: resumeContent?.skills || [],
-      experience: resumeContent?.experience || [],
-      education: resumeContent?.education || [],
-      projects: resumeContent?.projects || [],
-      certifications: resumeContent?.certifications || []
+      contact: {
+        name: contactSource.name || contactSource.fullName || '',
+        title: contactSource.title || '',
+        email: contactSource.email || '',
+        phone: contactSource.phone || '',
+        location: contactSource.location || '',
+        linkedin: contactSource.linkedin || contactSource.website || contactSource.portfolio || '',
+        github: contactSource.github || '',
+      },
+      summary: resumeContent.summary || '',
+      skills: resumeContent.skills || [],
+      // Normalize experience - handle both responsibilities and bullets
+      experience: (resumeContent.experience || []).map(exp => ({
+        title: exp.title || '',
+        company: exp.company || '',
+        startDate: exp.startDate || '',
+        endDate: exp.endDate || '',
+        responsibilities: exp.responsibilities || exp.bullets || [],
+      })),
+      education: resumeContent.education || [],
+      projects: resumeContent.projects || [],
+      certifications: resumeContent.certifications || []
     };
   };
 
