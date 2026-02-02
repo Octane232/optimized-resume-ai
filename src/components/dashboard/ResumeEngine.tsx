@@ -13,7 +13,6 @@ import IndustryBenchmark from './resume-engine/IndustryBenchmark';
 import BulletRewriter from './resume-engine/BulletRewriter';
 import ATSSimulationView from './resume-engine/ATSSimulationView';
 import AutoOptimizeButton from './resume-engine/AutoOptimizeButton';
-import VaultDataIndicator from './resume-engine/VaultDataIndicator';
 import UpgradeModal from './UpgradeModal';
 
 interface ResumeEngineProps {
@@ -38,31 +37,12 @@ interface ATSAnalysis {
   missing_keywords?: string[];
 }
 
-interface VaultCertification {
-  name: string;
-  issuer?: string;
-  dateEarned?: string;
-  credentialLink?: string;
-}
-
-interface VaultProject {
-  name: string;
-  description?: string;
-  technologies?: string;
-  liveLink?: string;
-}
-
 const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
   const { tier } = useSubscription();
   
   const [resumeContent, setResumeContent] = useState<any>(null);
   const [hasResume, setHasResume] = useState(false);
-  const [isLoadingVault, setIsLoadingVault] = useState(true);
-  
-  // Vault data states
-  const [vaultSkills, setVaultSkills] = useState<string[]>([]);
-  const [vaultCertifications, setVaultCertifications] = useState<VaultCertification[]>([]);
-  const [vaultProjects, setVaultProjects] = useState<VaultProject[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   const [bulletPoints, setBulletPoints] = useState<BulletPoint[]>([]);
   const [overallScore, setOverallScore] = useState(0);
@@ -78,87 +58,56 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
   const [showUpgrade, setShowUpgrade] = useState(false);
 
   useEffect(() => {
-    fetchAllData();
+    fetchResumeData();
   }, []);
 
-  const fetchAllData = async () => {
-    setIsLoadingVault(true);
+  const fetchResumeData = async () => {
+    setIsLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        setIsLoadingVault(false);
+        setIsLoading(false);
         return;
       }
 
-      // Fetch resume and vault data in parallel
-      const [resumeResult, vaultResult] = await Promise.all([
-        supabase
-          .from('resumes')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('updated_at', { ascending: false })
-          .limit(1),
-        supabase
-          .from('user_vault')
-          .select('*')
-          .eq('user_id', user.id)
-          .maybeSingle()
-      ]);
+      // Fetch ONLY resume data (not vault)
+      const { data: resumeData, error } = await supabase
+        .from('resumes')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('updated_at', { ascending: false })
+        .limit(1);
 
-      // Process resume data
-      if (resumeResult.data && resumeResult.data.length > 0) {
-        const content = resumeResult.data[0].content as any;
+      if (error) throw error;
+
+      if (resumeData && resumeData.length > 0) {
+        const content = resumeData[0].content as any;
         setResumeContent(content);
         setHasResume(true);
         extractBulletPoints(content);
       }
-
-      // Process vault data
-      if (vaultResult.data) {
-        setVaultSkills(vaultResult.data.skills || []);
-        setVaultCertifications((vaultResult.data.certifications as unknown as VaultCertification[]) || []);
-        setVaultProjects((vaultResult.data.projects as unknown as VaultProject[]) || []);
-      }
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Error fetching resume:', error);
       toast({
-        title: "Error loading data",
-        description: "Could not load your resume and vault data. Please refresh.",
+        title: "Error loading resume",
+        description: "Could not load your resume. Please refresh.",
         variant: "destructive"
       });
     } finally {
-      setIsLoadingVault(false);
+      setIsLoading(false);
     }
   };
 
-  // Helper to build enriched resume data with all Vault content
-  const getEnrichedResumeData = () => {
-    const resumeSkills = resumeContent?.skills || [];
-    // Combine resume skills with vault skills, removing duplicates
-    const allSkills = [...new Set([...resumeSkills, ...vaultSkills])];
-    
-    // Build comprehensive profile
+  // Get ONLY resume data for analysis (no vault mixing)
+  const getResumeOnlyData = () => {
     return {
-      ...resumeContent,
-      allSkills,
-      totalSkillsCount: allSkills.length,
-      certifications: vaultCertifications.map(c => ({
-        name: c.name,
-        issuer: c.issuer,
-        date: c.dateEarned
-      })),
-      projects: vaultProjects.map(p => ({
-        name: p.name,
-        description: p.description,
-        technologies: p.technologies
-      })),
-      vaultEnriched: true,
-      dataSourceInfo: {
-        resumeSkillsCount: resumeSkills.length,
-        vaultSkillsCount: vaultSkills.length,
-        certificationsCount: vaultCertifications.length,
-        projectsCount: vaultProjects.length
-      }
+      contact: resumeContent?.contact || {},
+      summary: resumeContent?.summary || '',
+      skills: resumeContent?.skills || [],
+      experience: resumeContent?.experience || [],
+      education: resumeContent?.education || [],
+      projects: resumeContent?.projects || [],
+      certifications: resumeContent?.certifications || []
     };
   };
 
@@ -222,11 +171,11 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
     setFixItItems([]); // Clear previous items
     
     try {
-      // Send enriched data with vault content
-      const enrichedData = getEnrichedResumeData();
+      // Send ONLY resume data for analysis (not vault data)
+      const resumeData = getResumeOnlyData();
       
       const { data, error } = await supabase.functions.invoke('analyze-resume-ats', {
-        body: { resumeContent: enrichedData }
+        body: { resumeContent: resumeData }
       });
 
       if (error) throw error;
@@ -242,9 +191,10 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
         extractBulletPoints(resumeContent);
       }
       
+      const skillCount = resumeData.skills?.length || 0;
       toast({ 
         title: `Score: ${data.overall_score}/100`, 
-        description: `AI analyzed ${enrichedData.allSkills.length} skills, ${enrichedData.certifications.length} certifications, and ${enrichedData.projects.length} projects` 
+        description: `AI analyzed your resume: ${skillCount} skills, ${resumeData.experience?.length || 0} jobs, ${resumeData.education?.length || 0} education entries` 
       });
     } catch (error: any) {
       toast({ 
@@ -326,16 +276,6 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
           )}
         </motion.div>
 
-        {/* Vault Data Source Indicator */}
-        <VaultDataIndicator
-          hasResume={hasResume}
-          skillsCount={vaultSkills.length}
-          certificationsCount={vaultCertifications.length}
-          projectsCount={vaultProjects.length}
-          isLoading={isLoadingVault}
-          onNavigateToVault={handleNavigateToVault}
-        />
-
         {/* Auto-Optimize CTA */}
         <AutoOptimizeButton 
           onOptimize={handleAutoOptimize}
@@ -407,7 +347,7 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
         </div>
 
         {/* No Resume State */}
-        {!resumeContent && !isLoadingVault && (
+        {!resumeContent && !isLoading && (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
