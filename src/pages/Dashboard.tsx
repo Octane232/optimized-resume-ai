@@ -6,7 +6,6 @@ import MobileNav from '@/components/dashboard/MobileNav';
 import SoraSidecar from '@/components/dashboard/SoraSidecar';
 import HunterDashboard from '@/components/dashboard/HunterDashboard';
 import GrowthTeaser from '@/components/dashboard/GrowthTeaser';
-import TheVault from '@/components/dashboard/TheVault';
 import MissionControl from '@/components/dashboard/MissionControl';
 import Settings from '@/components/dashboard/Settings';
 import Billing from '@/components/dashboard/Billing';
@@ -137,8 +136,6 @@ const Dashboard = () => {
         return <SkillGapAnalyzer />;
       case 'linkedin':
         return <LinkedInOptimizer />;
-      case 'vault':
-        return <TheVault onResumeChange={(has) => setHasResume(has)} />;
       case 'mission-control':
         return <MissionControl />;
       case 'billing':
