@@ -107,49 +107,50 @@ const CoverLetterGenerator = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="p-6 space-y-8 max-w-5xl mx-auto">
       <div className="text-center space-y-4">
-        <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 rounded-2xl border border-purple-200/50 dark:border-purple-800/50">
+        <div className="inline-flex items-center gap-3 px-6 py-3 bg-primary/5 rounded-2xl border border-primary/10">
           <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
             <FileText className="w-4 h-4 text-white" />
           </div>
-          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">AI-Powered Cover Letter Generator</span>
+          <span className="text-sm font-medium text-foreground">AI-Powered Cover Letter Generator</span>
         </div>
         
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 dark:from-white dark:via-slate-100 dark:to-slate-200 bg-clip-text text-transparent">
+        <h1 className="text-3xl font-bold text-foreground">
           Create Your Perfect Cover Letter
         </h1>
-        <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+        <p className="text-muted-foreground max-w-2xl mx-auto">
           Generate a professional, tailored cover letter in seconds using AI
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Input Form */}
-        <Card className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl rounded-2xl">
-          <CardHeader className="border-b border-slate-200/60 dark:border-slate-700/60">
-            <CardTitle className="flex items-center gap-3">
+        <div className="command-card overflow-hidden">
+          <div className="h-1 bg-gradient-to-r from-purple-500 to-pink-500" />
+          <div className="p-6">
+            <div className="flex items-center gap-3 mb-6">
               <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl">
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold">Your Information</h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400 font-normal">
+                <h2 className="text-lg font-semibold text-foreground">Your Information</h2>
+                <p className="text-sm text-muted-foreground">
                   Tell us about yourself and the job
                 </p>
               </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6 space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="yourName">Your Full Name *</Label>
-              <Input
-                id="yourName"
-                placeholder="John Doe"
-                value={formData.yourName}
-                onChange={(e) => setFormData({ ...formData, yourName: e.target.value })}
-                className="bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-xl"
-              />
+            </div>
+            
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="yourName">Your Full Name *</Label>
+                <Input
+                  id="yourName"
+                  placeholder="John Doe"
+                  value={formData.yourName}
+                  onChange={(e) => setFormData({ ...formData, yourName: e.target.value })}
+                  className="form-input-polished"
+                />
             </div>
 
             <div className="space-y-2">
@@ -159,7 +160,7 @@ const CoverLetterGenerator = () => {
                 placeholder="e.g., Software Engineer, Product Manager"
                 value={formData.jobTitle}
                 onChange={(e) => setFormData({ ...formData, jobTitle: e.target.value })}
-                className="bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-xl"
+                className="form-input-polished"
               />
             </div>
 
@@ -170,7 +171,7 @@ const CoverLetterGenerator = () => {
                 placeholder="e.g., Google, Microsoft"
                 value={formData.companyName}
                 onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                className="bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-xl"
+                className="form-input-polished"
               />
             </div>
 
@@ -181,7 +182,7 @@ const CoverLetterGenerator = () => {
                 placeholder="Briefly describe your relevant work experience..."
                 value={formData.yourExperience}
                 onChange={(e) => setFormData({ ...formData, yourExperience: e.target.value })}
-                className="bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-xl min-h-[100px]"
+                className="form-input-polished min-h-[100px]"
               />
             </div>
 
@@ -192,7 +193,7 @@ const CoverLetterGenerator = () => {
                 placeholder="e.g., Python, React, Team Leadership"
                 value={formData.keySkills}
                 onChange={(e) => setFormData({ ...formData, keySkills: e.target.value })}
-                className="bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-xl"
+                className="form-input-polished"
               />
             </div>
 
@@ -203,14 +204,14 @@ const CoverLetterGenerator = () => {
                 placeholder="What interests you about this position?"
                 value={formData.whyInterested}
                 onChange={(e) => setFormData({ ...formData, whyInterested: e.target.value })}
-                className="bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-xl min-h-[100px]"
+                className="form-input-polished min-h-[100px]"
               />
             </div>
 
             <Button
               onClick={handleGenerate}
               disabled={isGenerating}
-              className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+              className="w-full h-12 text-base font-semibold saas-button"
             >
               {isGenerating ? (
                 <>
@@ -224,20 +225,22 @@ const CoverLetterGenerator = () => {
                 </>
               )}
             </Button>
-          </CardContent>
-        </Card>
+            </div>
+          </div>
+        </div>
 
         {/* Generated Output */}
-        <Card className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl rounded-2xl">
-          <CardHeader className="border-b border-slate-200/60 dark:border-slate-700/60">
-            <CardTitle className="flex items-center justify-between">
+        <div className="command-card overflow-hidden">
+          <div className="h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl">
                   <FileText className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold">Your Cover Letter</h2>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 font-normal">
+                  <h2 className="text-lg font-semibold text-foreground">Your Cover Letter</h2>
+                  <p className="text-sm text-muted-foreground">
                     AI-generated and ready to use
                   </p>
                 </div>
@@ -262,30 +265,29 @@ const CoverLetterGenerator = () => {
                   </Button>
                 </div>
               )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
+            </div>
+            
             {generatedLetter ? (
-              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 min-h-[500px] border border-slate-200 dark:border-slate-700">
-                <pre className="whitespace-pre-wrap font-sans text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+              <div className="bg-muted/30 rounded-xl p-6 min-h-[400px] border border-border">
+                <pre className="whitespace-pre-wrap font-sans text-sm text-foreground leading-relaxed">
                   {generatedLetter}
                 </pre>
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center min-h-[500px] text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-2xl flex items-center justify-center mb-4">
-                  <FileText className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+              <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+                <div className="empty-state-icon">
+                  <FileText className="w-8 h-8 text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
+                <h3 className="text-lg font-semibold text-foreground mb-2">
                   No Cover Letter Yet
                 </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400 max-w-sm">
+                <p className="text-sm text-muted-foreground max-w-sm">
                   Fill in the form and click "Generate Cover Letter" to create your personalized cover letter with AI
                 </p>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

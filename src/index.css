@@ -500,3 +500,206 @@
     padding-left: 12pt !important;
   }
 }
+
+/* ============================================
+   UI/UX Enhancement Utilities
+   ============================================ */
+
+/* Shimmer loading animation */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 0%,
+    hsl(var(--muted-foreground) / 0.08) 50%,
+    hsl(var(--muted)) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Card hover glow effect */
+.card-glow {
+  transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+}
+
+.card-glow:hover {
+  box-shadow: 0 0 24px -8px hsl(var(--primary) / 0.25);
+  border-color: hsl(var(--primary) / 0.2);
+  transform: translateY(-2px);
+}
+
+/* Smooth number transitions for animated counters */
+.number-animate {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Typing indicator animation */
+@keyframes typing-dot {
+  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-4px); }
+}
+
+.typing-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  margin: 0 2px;
+}
+
+.typing-dot:nth-child(1) { animation: typing-dot 1.4s infinite 0s; }
+.typing-dot:nth-child(2) { animation: typing-dot 1.4s infinite 0.2s; }
+.typing-dot:nth-child(3) { animation: typing-dot 1.4s infinite 0.4s; }
+
+/* Message bubble styles */
+.message-user {
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.9) 100%);
+}
+
+.message-ai {
+  background: hsl(var(--muted));
+}
+
+/* Quick chip button styles */
+.quick-chip {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 9999px;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--background));
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.quick-chip:hover {
+  background: hsl(var(--muted));
+  border-color: hsl(var(--primary) / 0.3);
+  transform: translateY(-1px);
+}
+
+/* Stat card animation */
+@keyframes stat-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.stat-card {
+  animation: stat-enter 0.4s ease forwards;
+}
+
+.stat-card:nth-child(1) { animation-delay: 0.1s; }
+.stat-card:nth-child(2) { animation-delay: 0.15s; }
+.stat-card:nth-child(3) { animation-delay: 0.2s; }
+.stat-card:nth-child(4) { animation-delay: 0.25s; }
+
+/* Week dots stagger animation */
+@keyframes dot-pop {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.week-dot {
+  animation: dot-pop 0.3s ease forwards;
+  opacity: 0;
+}
+
+.week-dot:nth-child(1) { animation-delay: 0.1s; }
+.week-dot:nth-child(2) { animation-delay: 0.15s; }
+.week-dot:nth-child(3) { animation-delay: 0.2s; }
+.week-dot:nth-child(4) { animation-delay: 0.25s; }
+.week-dot:nth-child(5) { animation-delay: 0.3s; }
+.week-dot:nth-child(6) { animation-delay: 0.35s; }
+.week-dot:nth-child(7) { animation-delay: 0.4s; }
+
+/* Mobile bottom navigation */
+@media (max-width: 768px) {
+  .mobile-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    padding-bottom: env(safe-area-inset-bottom);
+    background: hsl(var(--background) / 0.95);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid hsl(var(--border));
+  }
+  
+  .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.125rem;
+    padding: 0.5rem 0.75rem;
+    color: hsl(var(--muted-foreground));
+    transition: color 0.2s ease;
+  }
+  
+  .mobile-nav-item.active {
+    color: hsl(var(--primary));
+  }
+  
+  .mobile-nav-item:hover {
+    color: hsl(var(--foreground));
+  }
+}
+
+/* Empty state styling */
+.empty-state-icon {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.1) 0%, hsl(var(--primary) / 0.05) 100%);
+}
+
+/* Kanban drag feedback */
+.kanban-card.dragging {
+  transform: rotate(3deg) scale(1.02);
+  box-shadow: var(--shadow-lg);
+  opacity: 0.9;
+}
+
+/* Celebration animation */
+@keyframes celebrate {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.1) rotate(-3deg); }
+  50% { transform: scale(1.15) rotate(3deg); }
+  75% { transform: scale(1.1) rotate(-2deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+.celebrate {
+  animation: celebrate 0.6s ease-in-out;
+}
+
+/* Form input polish */
+.form-input-polished {
+  border-radius: 0.75rem;
+  background: hsl(var(--muted) / 0.3);
+  border-color: hsl(var(--border));
+  transition: all 0.2s ease;
+}
+
+.form-input-polished:focus {
+  border-color: hsl(var(--primary) / 0.5);
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.1);
+}

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, Briefcase, TrendingUp, Target, Lightbulb, Loader2 } from 'lucide-react';
+import { Send, Sparkles, Briefcase, TrendingUp, Target, Lightbulb, FileText, Mic, Search } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,7 +14,24 @@ interface SoraSidecarProps {
 interface Message {
   role: 'user' | 'assistant';
   content: string;
+  timestamp?: Date;
 }
+
+// Typing indicator component
+const TypingIndicator = () => (
+  <div className="flex items-center gap-1 px-3 py-2">
+    <span className="typing-dot" />
+    <span className="typing-dot" />
+    <span className="typing-dot" />
+  </div>
+);
+
+// Quick suggestion chips
+const quickChips = [
+  { label: 'Review resume', action: 'Review my resume and suggest improvements', icon: FileText },
+  { label: 'Find jobs', action: 'Help me find relevant job opportunities', icon: Search },
+  { label: 'Interview tips', action: 'Give me interview tips for my next interview', icon: Mic },
+];
 
 const SoraSidecar: React.FC<SoraSidecarProps> = ({ mode }) => {
   const [message, setMessage] = useState('');
@@ -40,14 +57,22 @@ const SoraSidecar: React.FC<SoraSidecarProps> = ({ mode }) => {
 
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
     }
-  }, [messages]);
+  }, [messages, isLoading]);
 
-  const handleSend = async () => {
-    if (!message.trim() || isLoading) return;
+  const handleSend = async (customMessage?: string) => {
+    const msgToSend = customMessage || message;
+    if (!msgToSend.trim() || isLoading) return;
     
-    const userMessage: Message = { role: 'user', content: message };
+    const userMessage: Message = { 
+      role: 'user', 
+      content: msgToSend,
+      timestamp: new Date()
+    };
     setMessages(prev => [...prev, userMessage]);
     setMessage('');
     setIsLoading(true);
@@ -73,7 +98,8 @@ const SoraSidecar: React.FC<SoraSidecarProps> = ({ mode }) => {
 
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: data.content 
+        content: data.content,
+        timestamp: new Date()
       }]);
     } catch (error) {
       console.error('Chat error:', error);
@@ -85,6 +111,15 @@ const SoraSidecar: React.FC<SoraSidecarProps> = ({ mode }) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const formatTime = (date?: Date) => {
+    if (!date) return '';
+    return date.toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit',
+      hour12: true 
+    });
   };
 
   return (
@@ -143,13 +178,13 @@ const SoraSidecar: React.FC<SoraSidecarProps> = ({ mode }) => {
               {messages.map((msg, index) => (
                 <div 
                   key={index}
-                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
                 >
                   <div 
-                    className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
+                    className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm ${
                       msg.role === 'user' 
-                        ? 'bg-primary text-primary-foreground' 
-                        : 'bg-muted'
+                        ? 'message-user text-primary-foreground rounded-br-md' 
+                        : 'message-ai rounded-bl-md'
                     }`}
                   >
                     {msg.role === 'assistant' ? (
@@ -160,13 +195,17 @@ const SoraSidecar: React.FC<SoraSidecarProps> = ({ mode }) => {
                       msg.content
                     )}
                   </div>
+                  {msg.timestamp && (
+                    <span className="text-[10px] text-muted-foreground mt-1 px-1">
+                      {formatTime(msg.timestamp)}
+                    </span>
+                  )}
                 </div>
               ))}
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="bg-muted rounded-lg px-3 py-2 text-sm flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span className="text-muted-foreground">Thinking...</span>
+                  <div className="message-ai rounded-2xl rounded-bl-md text-muted-foreground">
+                    <TypingIndicator />
                   </div>
                 </div>
               )}
@@ -174,6 +213,25 @@ const SoraSidecar: React.FC<SoraSidecarProps> = ({ mode }) => {
           )}
         </div>
       </ScrollArea>
+
+      {/* Quick Suggestion Chips */}
+      {messages.length === 0 && (
+        <div className="px-4 pb-2">
+          <div className="flex flex-wrap gap-2">
+            {quickChips.map((chip, i) => (
+              <button
+                key={i}
+                onClick={() => handleSend(chip.action)}
+                className="quick-chip flex items-center gap-1.5"
+                disabled={isLoading}
+              >
+                <chip.icon className="w-3 h-3" />
+                {chip.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Chat Input */}
       <div className="p-4 border-t border-border">
@@ -184,19 +242,16 @@ const SoraSidecar: React.FC<SoraSidecarProps> = ({ mode }) => {
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
             disabled={isLoading}
-            className="flex-1"
+            className="flex-1 rounded-xl"
           />
           <Button 
             size="icon" 
-            onClick={handleSend}
+            onClick={() => handleSend()}
             disabled={isLoading || !message.trim()}
+            className="rounded-xl transition-transform hover:scale-105"
             style={{ backgroundColor: accentColor }}
           >
-            {isLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Send className="w-4 h-4" />
-            )}
+            <Send className="w-4 h-4" />
           </Button>
         </div>
       </div>
