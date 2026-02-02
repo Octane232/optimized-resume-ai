@@ -59,3 +59,9 @@ verify_jwt = false
 
 [functions.rewrite-bullet]
 verify_jwt = false
+
+[functions.parse-resume-file]
+verify_jwt = false
+
+[functions.vaylance-chat]
+verify_jwt = false
