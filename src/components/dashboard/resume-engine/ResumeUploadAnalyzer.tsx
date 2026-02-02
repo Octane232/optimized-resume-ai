@@ -8,11 +8,6 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import * as pdfjsLib from 'pdfjs-dist';
-import mammoth from 'mammoth';
-
-// Set up PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js`;
 
 interface ResumeUploadAnalyzerProps {
   onAnalysisComplete: (analysis: any) => void;
@@ -24,6 +19,7 @@ const ResumeUploadAnalyzer = ({ onAnalysisComplete, isAnalyzing, setIsAnalyzing 
   const [file, setFile] = useState<File | null>(null);
   const [pastedText, setPastedText] = useState('');
   const [activeTab, setActiveTab] = useState<'upload' | 'paste'>('upload');
+  const [isExtracting, setIsExtracting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,59 +68,53 @@ const ResumeUploadAnalyzer = ({ onAnalysisComplete, isAnalyzing, setIsAnalyzing 
     }
   };
 
-  const extractTextFromPDF = async (file: File): Promise<string> => {
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    
-    let fullText = '';
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const textContent = await page.getTextContent();
-      const pageText = textContent.items
-        .map((item: any) => item.str)
-        .join(' ');
-      fullText += pageText + '\n';
-    }
-    
-    return fullText.trim();
-  };
-
-  const extractTextFromDOCX = async (file: File): Promise<string> => {
-    const arrayBuffer = await file.arrayBuffer();
-    const result = await mammoth.extractRawText({ arrayBuffer });
-    return result.value.trim();
-  };
-
   const extractTextFromFile = async (file: File): Promise<string> => {
+    // For text files, read directly
     if (file.type === 'text/plain') {
       return await file.text();
     }
+
+    // For PDF/DOCX, use the edge function
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/parse-resume-file`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: formData,
+      }
+    );
+
+    const result = await response.json();
     
-    if (file.type === 'application/pdf') {
-      return await extractTextFromPDF(file);
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to parse file');
     }
-    
-    if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-      return await extractTextFromDOCX(file);
-    }
-    
-    throw new Error('Unsupported file type');
+
+    return result.text;
   };
 
   const handleAnalyze = async () => {
     let resumeText = '';
 
     if (activeTab === 'upload' && file) {
+      setIsExtracting(true);
       try {
         resumeText = await extractTextFromFile(file);
-      } catch (error) {
+      } catch (error: any) {
         toast({
           title: "Error reading file",
-          description: "Could not read the file. Try pasting the content instead.",
+          description: error.message || "Could not read the file. Try pasting the content instead.",
           variant: "destructive",
         });
+        setIsExtracting(false);
         return;
       }
+      setIsExtracting(false);
     } else if (activeTab === 'paste' && pastedText.trim()) {
       resumeText = pastedText.trim();
     } else {
@@ -174,6 +164,7 @@ const ResumeUploadAnalyzer = ({ onAnalysisComplete, isAnalyzing, setIsAnalyzing 
   };
 
   const hasContent = (activeTab === 'upload' && file) || (activeTab === 'paste' && pastedText.trim().length > 0);
+  const isLoading = isAnalyzing || isExtracting;
 
   return (
     <Card className="overflow-hidden">
@@ -276,13 +267,13 @@ const ResumeUploadAnalyzer = ({ onAnalysisComplete, isAnalyzing, setIsAnalyzing 
         <div className="pt-2 flex items-center gap-3">
           <Button
             onClick={handleAnalyze}
-            disabled={!hasContent || isAnalyzing}
+            disabled={!hasContent || isLoading}
             className="flex-1 gap-2"
           >
-            {isAnalyzing ? (
+            {isLoading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Analyzing...
+                {isExtracting ? 'Reading file...' : 'Analyzing...'}
               </>
             ) : (
               <>
