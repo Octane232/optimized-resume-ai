@@ -327,6 +327,51 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
 
       {/* Main Content */}
       <div className="p-6 pb-12 max-w-7xl mx-auto space-y-6">
+        {/* Scan Profile CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border border-primary/20 rounded-xl p-5"
+        >
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
+                <Sparkles className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h2 className="font-semibold text-foreground">Scan Your Career Profile</h2>
+                <p className="text-sm text-muted-foreground">
+                  AI analyzes your resume + Vault data to give personalized insights
+                </p>
+              </div>
+            </div>
+            <Button 
+              onClick={handleDeepAnalysis}
+              disabled={!hasResume || isAnalyzingATS}
+              className="gap-2 min-w-[140px]"
+              size="lg"
+            >
+              {isAnalyzingATS ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Scanning...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  Scan Now
+                </>
+              )}
+            </Button>
+          </div>
+          {!hasResume && (
+            <p className="text-xs text-amber-600 dark:text-amber-400 mt-3 flex items-center gap-1">
+              <FileText className="w-3 h-3" />
+              Upload a resume in the Master Vault to enable scanning
+            </p>
+          )}
+        </motion.div>
+
         {/* Vault Data Source Indicator */}
         <VaultDataIndicator
           hasResume={hasResume}
