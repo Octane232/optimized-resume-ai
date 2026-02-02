@@ -53,34 +53,42 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = React.memo(({ temp
     };
     return template.theme || defaultTheme;
   }, [template.theme]);
+  // Safe accessors to handle missing or malformed data
+  const safeContact = data.contact || { name: '', title: '', email: '', phone: '', location: '' };
+  const safeExperience = Array.isArray(data.experience) ? data.experience : [];
+  const safeEducation = Array.isArray(data.education) ? data.education : [];
+  const safeSkills = Array.isArray(data.skills) ? data.skills : [];
+  const safeProjects = Array.isArray(data.projects) ? data.projects : [];
+  const safeCertifications = Array.isArray(data.certifications) ? data.certifications : [];
+
   const renderContent = (content: string | any) => {
     if (typeof content === 'string') {
       // Convert data to template-friendly format
       const templateData = {
-        fullName: data.contact.name,
-        title: data.contact.title,
-        email: data.contact.email,
-        phone: data.contact.phone,
-        location: data.contact.location,
-        linkedin: data.contact.linkedin,
-        portfolio: data.contact.portfolio,
-        github: data.contact.github,
-        summary: data.summary,
-        skills: data.skills,
-        experiences: data.experience.map(exp => ({
-          position: exp.title,
-          company: exp.company,
-          startDate: exp.startDate,
-          endDate: exp.endDate,
-          achievements: exp.responsibilities
+        fullName: safeContact.name || '',
+        title: safeContact.title || '',
+        email: safeContact.email || '',
+        phone: safeContact.phone || '',
+        location: safeContact.location || '',
+        linkedin: safeContact.linkedin || '',
+        portfolio: safeContact.portfolio || '',
+        github: safeContact.github || '',
+        summary: data.summary || '',
+        skills: safeSkills,
+        experiences: safeExperience.map(exp => ({
+          position: exp.title || '',
+          company: exp.company || '',
+          startDate: exp.startDate || '',
+          endDate: exp.endDate || '',
+          achievements: Array.isArray(exp.responsibilities) ? exp.responsibilities : []
         })),
-        education: data.education.map(edu => ({
-          degree: edu.degree,
-          institution: edu.institution,
-          graduationDate: `${edu.startYear} - ${edu.endYear}`
+        education: safeEducation.map(edu => ({
+          degree: edu.degree || '',
+          institution: edu.institution || '',
+          graduationDate: `${edu.startYear || ''} - ${edu.endYear || ''}`
         })),
-        projects: data.projects,
-        certifications: data.certifications
+        projects: safeProjects,
+        certifications: safeCertifications
       };
 
       return Mustache.render(content, templateData);
@@ -157,7 +165,7 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = React.memo(({ temp
               fontFamily: section.style?.fontFamily || 'inherit',
               letterSpacing: section.style?.letterSpacing || 'normal',
               textTransform: section.style?.textTransform as any || 'none'
-            }}>{data.contact.name}</h1>
+            }}>{safeContact.name || 'Your Name'}</h1>
             <h2 style={{ 
               fontSize: section.style?.titleFontSize || '1rem', 
               marginBottom: '0.5rem',
@@ -167,7 +175,7 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = React.memo(({ temp
               textTransform: section.style?.titleTextTransform as any || 'none',
               letterSpacing: section.style?.titleLetterSpacing || 'normal',
               fontStyle: section.style?.titleFontStyle as any || 'normal'
-            }}>{data.contact.title}</h2>
+            }}>{safeContact.title || 'Professional Title'}</h2>
             <div style={{ 
               display: 'flex', 
               flexWrap: 'wrap', 
@@ -176,10 +184,10 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = React.memo(({ temp
               fontSize: '0.75rem',
               color: section.style?.color || theme.textColor
             }}>
-              <span>{data.contact.email}</span>
-              <span>{data.contact.phone}</span>
-              <span>{data.contact.location}</span>
-              {data.contact.linkedin && <span>{data.contact.linkedin}</span>}
+              {safeContact.email && <span>{safeContact.email}</span>}
+              {safeContact.phone && <span>{safeContact.phone}</span>}
+              {safeContact.location && <span>{safeContact.location}</span>}
+              {safeContact.linkedin && <span>{safeContact.linkedin}</span>}
             </div>
           </div>
         );
@@ -208,7 +216,7 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = React.memo(({ temp
             <p style={{ 
               lineHeight: section.style?.lineHeight || '1.4',
               fontStyle: section.style?.fontStyle || 'normal'
-            }}>{data.summary}</p>
+            }}>{data.summary || 'Professional summary goes here...'}</p>
           </div>
         );
 
@@ -232,7 +240,7 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = React.memo(({ temp
             }}>
               Experience
             </h3>
-            {data.experience.map((exp, idx) => (
+            {safeExperience.length > 0 ? safeExperience.map((exp, idx) => (
               <div key={idx} className="experience-item" style={{ 
                 marginBottom: section.style?.itemSpacing || '12px',
                 paddingBottom: section.style?.divider ? '0.5rem' : '0',
@@ -245,24 +253,28 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = React.memo(({ temp
                   marginBottom: '0.25rem' 
                 }}>
                   <div>
-                    <h4 style={{ fontWeight: 'bold', fontSize: '0.875rem' }}>{exp.title}</h4>
-                    <p style={{ color: '#6B7280', fontSize: '0.75rem' }}>{exp.company}</p>
+                    <h4 style={{ fontWeight: 'bold', fontSize: '0.875rem' }}>{exp.title || 'Job Title'}</h4>
+                    <p style={{ color: '#6B7280', fontSize: '0.75rem' }}>{exp.company || 'Company Name'}</p>
                   </div>
                   <span style={{ fontSize: '0.75rem', color: '#6B7280', whiteSpace: 'nowrap', marginLeft: '8px' }}>
-                    {exp.startDate} - {exp.endDate}
+                    {exp.startDate || 'Start'} - {exp.endDate || 'End'}
                   </span>
                 </div>
-                <ul style={{ 
-                  listStyleType: 'disc', 
-                  paddingLeft: '1.25rem', 
-                  lineHeight: '1.3' 
-                }}>
-                  {exp.responsibilities.map((resp, i) => (
-                    <li key={i} style={{ fontSize: '0.75rem', marginBottom: '0.125rem' }}>{resp}</li>
-                  ))}
-                </ul>
+                {Array.isArray(exp.responsibilities) && exp.responsibilities.length > 0 && (
+                  <ul style={{ 
+                    listStyleType: 'disc', 
+                    paddingLeft: '1.25rem', 
+                    lineHeight: '1.3' 
+                  }}>
+                    {exp.responsibilities.map((resp, i) => (
+                      <li key={i} style={{ fontSize: '0.75rem', marginBottom: '0.125rem' }}>{resp}</li>
+                    ))}
+                  </ul>
+                )}
               </div>
-            ))}
+            )) : (
+              <p style={{ fontSize: '0.75rem', color: '#9CA3AF' }}>No experience entries added yet.</p>
+            )}
           </div>
         );
 
@@ -289,54 +301,58 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = React.memo(({ temp
               Skills & Expertise
             </h3>
             
-            {displayType === 'tags' ? (
-              <div style={{ 
-                display: 'grid',
-                gridTemplateColumns: `repeat(${section.style?.columns || 3}, 1fr)`,
-                gap: '0.375rem'
-              }}>
-                {data.skills.map((skill, idx) => (
-                  <span 
-                    key={idx}
-                    style={{ 
-                      padding: '0.25rem 0.5rem',
-                      borderRadius: '9999px',
-                      fontSize: '0.75rem',
-                      textAlign: 'center',
-                      backgroundColor: theme.accentColor + '20',
-                      color: theme.primaryColor,
-                      border: `1px solid ${theme.accentColor}`
-                    }}
-                  >
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            ) : displayType === 'list' ? (
-              <ul style={{ 
-                listStyleType: section.style?.listStyle || 'disc',
-                paddingLeft: '1.25rem',
-                lineHeight: '1.4'
-              }}>
-                {data.skills.map((skill, idx) => (
-                  <li key={idx} style={{ 
-                    fontSize: section.style?.fontSize || '0.75rem',
-                    marginBottom: '0.125rem'
-                  }}>{skill}</li>
-                ))}
-              </ul>
+            {safeSkills.length > 0 ? (
+              displayType === 'tags' ? (
+                <div style={{ 
+                  display: 'grid',
+                  gridTemplateColumns: `repeat(${section.style?.columns || 3}, 1fr)`,
+                  gap: '0.375rem'
+                }}>
+                  {safeSkills.map((skill, idx) => (
+                    <span 
+                      key={idx}
+                      style={{ 
+                        padding: '0.25rem 0.5rem',
+                        borderRadius: '9999px',
+                        fontSize: '0.75rem',
+                        textAlign: 'center',
+                        backgroundColor: theme.accentColor + '20',
+                        color: theme.primaryColor,
+                        border: `1px solid ${theme.accentColor}`
+                      }}
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              ) : displayType === 'list' ? (
+                <ul style={{ 
+                  listStyleType: section.style?.listStyle || 'disc',
+                  paddingLeft: '1.25rem',
+                  lineHeight: '1.4'
+                }}>
+                  {safeSkills.map((skill, idx) => (
+                    <li key={idx} style={{ 
+                      fontSize: section.style?.fontSize || '0.75rem',
+                      marginBottom: '0.125rem'
+                    }}>{skill}</li>
+                  ))}
+                </ul>
+              ) : (
+                <div style={{ 
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '0.375rem'
+                }}>
+                  {safeSkills.map((skill, idx) => (
+                    <span key={idx} style={{ fontSize: '0.75rem' }}>
+                      {skill}{idx < safeSkills.length - 1 && (section.style?.separator || ' •')}
+                    </span>
+                  ))}
+                </div>
+              )
             ) : (
-              <div style={{ 
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '0.375rem'
-              }}>
-                {data.skills.map((skill, idx) => (
-                  <span key={idx} style={{ fontSize: '0.75rem' }}>
-                    {skill}{idx < data.skills.length - 1 && (section.style?.separator || ' •')}
-                  </span>
-                ))}
-              </div>
+              <p style={{ fontSize: '0.75rem', color: '#9CA3AF' }}>No skills added yet.</p>
             )}
           </div>
         );
@@ -361,7 +377,7 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = React.memo(({ temp
             }}>
               Education
             </h3>
-            {data.education.map((edu, idx) => (
+            {safeEducation.length > 0 ? safeEducation.map((edu, idx) => (
               <div key={idx} className="education-item" style={{ 
                 marginBottom: section.style?.itemSpacing || '10px'
               }}>
@@ -373,10 +389,10 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = React.memo(({ temp
                     alignItems: 'center'
                   }}>
                     <span style={{ fontSize: '0.75rem', color: '#6B7280' }}>
-                      {edu.startYear} - {edu.endYear}
+                      {edu.startYear || ''} - {edu.endYear || ''}
                     </span>
-                    <span style={{ fontWeight: 'bold', fontSize: '0.875rem' }}>{edu.institution}</span>
-                    <span style={{ fontSize: '0.875rem' }}>{edu.degree}</span>
+                    <span style={{ fontWeight: 'bold', fontSize: '0.875rem' }}>{edu.institution || 'Institution'}</span>
+                    <span style={{ fontSize: '0.875rem' }}>{edu.degree || 'Degree'}</span>
                   </div>
                 ) : (
                   <div style={{ 
@@ -385,16 +401,18 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = React.memo(({ temp
                     alignItems: 'flex-start' 
                   }}>
                     <div>
-                      <h4 style={{ fontWeight: 'bold', fontSize: '0.875rem' }}>{edu.degree}</h4>
-                      <p style={{ color: '#6B7280', fontSize: '0.75rem' }}>{edu.institution}</p>
+                      <h4 style={{ fontWeight: 'bold', fontSize: '0.875rem' }}>{edu.degree || 'Degree'}</h4>
+                      <p style={{ color: '#6B7280', fontSize: '0.75rem' }}>{edu.institution || 'Institution'}</p>
                     </div>
                     <span style={{ fontSize: '0.75rem', color: '#6B7280', whiteSpace: 'nowrap', marginLeft: '8px' }}>
-                      {edu.startYear} - {edu.endYear}
+                      {edu.startYear || ''} - {edu.endYear || ''}
                     </span>
                   </div>
                 )}
               </div>
-            ))}
+            )) : (
+              <p style={{ fontSize: '0.75rem', color: '#9CA3AF' }}>No education entries added yet.</p>
+            )}
           </div>
         );
 
@@ -477,12 +495,12 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = React.memo(({ temp
               fontSize: section.style?.fontSize || '0.75rem',
               lineHeight: section.style?.lineHeight || '1.4'
             }}>
-              <div>{data.contact.email}</div>
-              <div>{data.contact.phone}</div>
-              <div>{data.contact.location}</div>
-              {data.contact.linkedin && <div>{data.contact.linkedin}</div>}
-              {data.contact.portfolio && <div>{data.contact.portfolio}</div>}
-              {data.contact.github && <div>{data.contact.github}</div>}
+              {safeContact.email && <div>{safeContact.email}</div>}
+              {safeContact.phone && <div>{safeContact.phone}</div>}
+              {safeContact.location && <div>{safeContact.location}</div>}
+              {safeContact.linkedin && <div>{safeContact.linkedin}</div>}
+              {safeContact.portfolio && <div>{safeContact.portfolio}</div>}
+              {safeContact.github && <div>{safeContact.github}</div>}
             </div>
           </div>
         );
@@ -521,17 +539,17 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = React.memo(({ temp
             }}>
               Projects
             </h3>
-            {data.projects?.map((project, idx) => (
+            {safeProjects.length > 0 ? safeProjects.map((project, idx) => (
               <div key={idx} className="project-item" style={{ 
                 marginBottom: section.style?.itemSpacing || '12px'
               }}>
-                <h4 style={{ fontWeight: 'bold', fontSize: '0.875rem' }}>{project.title}</h4>
+                <h4 style={{ fontWeight: 'bold', fontSize: '0.875rem' }}>{project.title || 'Project Title'}</h4>
                 {project.description && (
                   <p style={{ fontSize: '0.75rem', color: '#6B7280', marginTop: '0.25rem' }}>
                     {project.description}
                   </p>
                 )}
-                {project.technologies && project.technologies.length > 0 && (
+                {Array.isArray(project.technologies) && project.technologies.length > 0 && (
                   <div style={{ 
                     display: 'flex', 
                     flexWrap: 'wrap', 
@@ -555,7 +573,9 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = React.memo(({ temp
                   </div>
                 )}
               </div>
-            ))}
+            )) : (
+              <p style={{ fontSize: '0.75rem', color: '#9CA3AF' }}>No projects added yet.</p>
+            )}
           </div>
         );
 
