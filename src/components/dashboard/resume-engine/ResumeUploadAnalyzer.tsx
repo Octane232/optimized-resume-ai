@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
 interface ResumeUploadAnalyzerProps {
-  onAnalysisComplete: (analysis: any) => void;
+  onAnalysisComplete: (analysis: any, rawText?: string) => void;
   isAnalyzing: boolean;
   setIsAnalyzing: (val: boolean) => void;
 }
@@ -149,7 +149,7 @@ const ResumeUploadAnalyzer = ({ onAnalysisComplete, isAnalyzing, setIsAnalyzing 
 
       if (error) throw error;
       
-      onAnalysisComplete(data);
+      onAnalysisComplete(data, resumeText);
       toast({ 
         title: `Score: ${data.overall_score}/100`, 
         description: "AI analyzed your uploaded resume for mistakes and improvements" 
