@@ -306,26 +306,24 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = React.memo(({ temp
                 <div style={{ 
                   display: 'grid',
                   gridTemplateColumns: `repeat(${section.style?.columns || 3}, 1fr)`,
-                  gap: '0.5rem 0.75rem',
-                  alignItems: 'stretch'
+                  gap: '0.5rem',
+                  alignItems: 'start'
                 }}>
                   {safeSkills.map((skill, idx) => (
                     <span 
                       key={idx}
                       style={{ 
-                        padding: '0.375rem 0.625rem',
+                        padding: '0.375rem 0.5rem',
                         borderRadius: '4px',
                         fontSize: '0.75rem',
-                        textAlign: 'center',
+                        textAlign: 'left',
                         backgroundColor: theme.accentColor + '15',
                         color: theme.primaryColor,
                         border: `1px solid ${theme.accentColor}40`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        minHeight: '1.75rem',
-                        wordBreak: 'break-word',
-                        lineHeight: '1.2'
+                        display: 'block',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
                       }}
                     >
                       {skill}
