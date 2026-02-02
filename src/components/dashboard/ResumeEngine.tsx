@@ -317,18 +317,12 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
   return (
     <div className="min-h-full bg-background">
       {/* Header */}
-      <div className="sticky top-0 z-10 border-b border-border px-6 py-4 flex items-center justify-between bg-background/95 backdrop-blur">
-        <div>
-          <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
-            <Settings2 className="w-5 h-5 text-primary" />
-            Resume Optimization Studio
-          </h1>
-          <p className="text-sm text-muted-foreground">AI-powered resume analysis and optimization</p>
-        </div>
-        <Button onClick={handleUploadClick} variant="outline" className="gap-2">
-          <Upload className="w-4 h-4" />
-          Upload Resume
-        </Button>
+      <div className="sticky top-0 z-10 border-b border-border px-6 py-4 bg-background/95 backdrop-blur">
+        <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
+          <Settings2 className="w-5 h-5 text-primary" />
+          Resume Optimization Studio
+        </h1>
+        <p className="text-sm text-muted-foreground">AI-powered resume analysis and optimization</p>
       </div>
 
       {/* Main Content */}
