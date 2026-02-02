@@ -457,6 +457,7 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
               onFixItem={(id) => {
                 setFixItItems(prev => prev.map(i => i.id === id ? { ...i, fixed: true } : i));
               }}
+              onNavigateToVault={handleNavigateToVault}
             />
 
             <IndustryBenchmark
