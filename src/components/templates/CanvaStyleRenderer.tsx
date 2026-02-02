@@ -304,36 +304,25 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = React.memo(({ temp
             {safeSkills.length > 0 ? (
               displayType === 'tags' ? (
                 <div style={{ 
-                  display: 'grid',
-                  gridTemplateColumns: `repeat(${section.style?.columns || 3}, 1fr)`,
-                  gap: '0.375rem 1rem',
-                  alignItems: 'center'
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '0.5rem'
                 }}>
                   {safeSkills.map((skill, idx) => (
-                    <div 
+                    <span 
                       key={idx}
                       style={{ 
-                        height: '1.5rem',
-                        padding: '0 0.5rem',
+                        padding: '0.25rem 0.75rem',
                         borderRadius: '4px',
                         fontSize: '0.75rem',
                         backgroundColor: theme.accentColor + '15',
                         color: theme.primaryColor,
                         border: `1px solid ${theme.accentColor}40`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'flex-start',
-                        overflow: 'hidden'
+                        whiteSpace: 'nowrap'
                       }}
                     >
-                      <span style={{ 
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis'
-                      }}>
-                        {skill}
-                      </span>
-                    </div>
+                      {skill}
+                    </span>
                   ))}
                 </div>
               ) : displayType === 'list' ? (
