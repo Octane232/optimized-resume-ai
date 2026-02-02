@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
-import { Settings2, Sparkles, FileText, Telescope } from 'lucide-react';
+import { Settings2, Sparkles, FileText, Telescope, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { useSubscription } from '@/contexts/SubscriptionContext';
@@ -38,10 +38,33 @@ interface ATSAnalysis {
   missing_keywords?: string[];
 }
 
+interface ResumeContent {
+  contact?: Record<string, string>;
+  personalInfo?: Record<string, string>;
+  summary?: string;
+  skills?: string[];
+  experience?: Array<{
+    title?: string;
+    company?: string;
+    startDate?: string;
+    endDate?: string;
+    responsibilities?: string[];
+    bullets?: string[];
+  }>;
+  education?: Array<{
+    degree?: string;
+    institution?: string;
+    startYear?: string;
+    endYear?: string;
+  }>;
+  projects?: Array<any>;
+  certifications?: Array<any>;
+}
+
 const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
   const { tier } = useSubscription();
   
-  const [resumeContent, setResumeContent] = useState<any>(null);
+  const [resumeContent, setResumeContent] = useState<ResumeContent | null>(null);
   const [uploadedResumeText, setUploadedResumeText] = useState<string | null>(null);
   const [hasResume, setHasResume] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -118,19 +141,21 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
   };
 
   // Extract bullet points from resume for display (no scoring - AI will score)
-  const extractBulletPoints = (content: any) => {
+  const extractBulletPoints = useCallback((content: ResumeContent | null) => {
     if (!content) return;
     
     const bullets: BulletPoint[] = [];
-    content.experience?.forEach((exp: any) => {
+    content.experience?.forEach((exp) => {
       const expBullets = exp.bullets || exp.responsibilities || [];
       expBullets.forEach((bullet: string) => {
-        // Initial score of 0 - will be updated by AI analysis
-        bullets.push({ text: bullet, score: 0 });
+        if (typeof bullet === 'string' && bullet.trim()) {
+          // Initial score of 0 - will be updated by AI analysis
+          bullets.push({ text: bullet.trim(), score: 0 });
+        }
       });
     });
     setBulletPoints(bullets.slice(0, 6));
-  };
+  }, []);
 
   // Convert AI analysis to fix-it items
   const convertAnalysisToFixItems = (analysis: ATSAnalysis) => {
@@ -213,7 +238,7 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
     }
   };
 
-  const handleUploadAnalysisComplete = (data: ATSAnalysis, rawText?: string) => {
+  const handleUploadAnalysisComplete = useCallback((data: ATSAnalysis, rawText?: string) => {
     setAtsAnalysis(data);
     setOverallScore(data.overall_score);
     convertAnalysisToFixItems(data);
@@ -223,7 +248,10 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
     if (rawText) {
       setUploadedResumeText(rawText);
     }
-  };
+    
+    // Clear saved resume content when uploading to avoid confusion
+    // The ATS view will now use the uploaded text
+  }, []);
 
   const handleAutoOptimize = async () => {
     toast({ title: "Optimizing...", description: "Applying AI improvements to your resume" });
@@ -234,10 +262,22 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
   const handleNavigateToResumeBuilder = () => setActiveTab?.('resume-builder');
   const handleNavigateToScout = () => setActiveTab?.('scout');
 
+  // Reset to analyze saved resume
+  const handleResetToSaved = useCallback(() => {
+    setAnalysisSource('saved');
+    setUploadedResumeText(null);
+    if (resumeContent) {
+      // Re-run analysis on saved resume
+      handleDeepAnalysis();
+    }
+  }, [resumeContent]);
+
   // Determine what content to show in ATS Parser View
-  const getATSParserContent = () => {
+  const getATSParserContent = (): ResumeContent | null => {
+    // If uploaded text exists and was the last analyzed, return minimal object
+    // ATSSimulationView will handle extracting from uploadedText separately
     if (analysisSource === 'uploaded' && uploadedResumeText) {
-      return { rawText: uploadedResumeText };
+      return null; // Let ATSSimulationView use uploadedText directly
     }
     return resumeContent;
   };
@@ -308,6 +348,36 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
           isAnalyzing={isAnalyzingUpload}
           setIsAnalyzing={setIsAnalyzingUpload}
         />
+
+        {/* Analysis Source Indicator */}
+        {analysisSource && atsAnalysis && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border"
+          >
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">
+                Currently showing analysis for: 
+                <span className="font-medium text-foreground ml-1">
+                  {analysisSource === 'uploaded' ? 'Uploaded Resume' : 'Saved Resume'}
+                </span>
+              </span>
+            </div>
+            {analysisSource === 'uploaded' && hasResume && (
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={handleResetToSaved}
+                className="gap-2 text-xs"
+              >
+                <RefreshCw className="w-3 h-3" />
+                Switch to Saved
+              </Button>
+            )}
+          </motion.div>
+        )}
 
         {/* Auto-Optimize CTA */}
         <AutoOptimizeButton 
