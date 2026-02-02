@@ -113,7 +113,7 @@ const ResumesShowcase = () => {
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {displayTemplates.map((template, index) => {
+            {displayTemplates.map((template) => {
               const sampleData = getSampleData(template.category);
               
               return (
@@ -122,19 +122,28 @@ const ResumesShowcase = () => {
                   className="group hover:shadow-lg transition-all duration-300 bg-card border border-border overflow-hidden cursor-pointer"
                   onClick={() => navigate(`/editor/new?template=${template.id}`)}
                 >
-                  <div className="relative bg-muted h-48 overflow-hidden">
-                    <div className="w-full h-full flex items-center justify-center p-2">
-                      {template.json_content && (
-                        <div className="transform scale-[0.18] origin-center" style={{ width: '850px', height: '1100px' }}>
-                          <CanvaStyleRenderer 
-                            template={template.json_content as any} 
-                            data={sampleData} 
-                          />
-                        </div>
-                      )}
-                    </div>
+                  <div className="relative bg-white aspect-[3/4] overflow-hidden">
+                    {template.json_content && (
+                      <div 
+                        className="absolute inset-0 w-full h-full"
+                        style={{
+                          transform: 'scale(0.25)',
+                          transformOrigin: 'top left',
+                          width: '400%',
+                          height: '400%'
+                        }}
+                      >
+                        <CanvaStyleRenderer 
+                          template={template.json_content as any} 
+                          data={sampleData}
+                          scale={1}
+                        />
+                      </div>
+                    )}
+                    {/* Hover overlay */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200" />
                   </div>
-                  <div className="p-3">
+                  <div className="p-3 border-t border-border">
                     <h3 className="font-medium text-sm text-foreground truncate">
                       {template.name}
                     </h3>

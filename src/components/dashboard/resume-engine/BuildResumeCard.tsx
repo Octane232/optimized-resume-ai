@@ -107,9 +107,17 @@ const BuildResumeCard = () => {
                     onClick={() => setSelectedTemplate(template.id)}
                   >
                     {/* Template Preview */}
-                    <div className="h-48 overflow-hidden bg-white">
+                    <div className="relative h-52 overflow-hidden bg-white">
                       {rendererTemplate ? (
-                        <div className="transform scale-[0.22] origin-top-left w-[455%]">
+                        <div 
+                          className="absolute inset-0"
+                          style={{
+                            transform: 'scale(0.22)',
+                            transformOrigin: 'top left',
+                            width: '455%',
+                            height: '455%'
+                          }}
+                        >
                           <CanvaStyleRenderer 
                             template={rendererTemplate} 
                             data={classicResueSample} 
