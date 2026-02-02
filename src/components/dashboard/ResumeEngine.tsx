@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
-import { Settings2, Upload, Sparkles, FileText, Database } from 'lucide-react';
+import { Settings2, Sparkles, FileText, Database } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { useSubscription } from '@/contexts/SubscriptionContext';
@@ -129,7 +129,7 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
         const content = resumeResult.data[0].content as any;
         setResumeContent(content);
         setHasResume(true);
-        analyzeResumeBasic(content);
+        extractBulletPoints(content);
       }
 
       // Process vault data
@@ -181,69 +181,65 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
     };
   };
 
-  const analyzeResumeBasic = (content: any) => {
+  // Extract bullet points from resume for display (no scoring - AI will score)
+  const extractBulletPoints = (content: any) => {
     if (!content) return;
-
-    let score = 50;
-    const items: typeof fixItItems = [];
-
-    if (!content.personalInfo?.email || !content.personalInfo?.phone) {
-      items.push({ id: 'contact', message: 'Missing contact information', severity: 'critical' });
-    } else {
-      score += 10;
-    }
-
-    if (!content.personalInfo?.website) {
-      items.push({ id: 'linkedin', message: 'No LinkedIn profile URL', severity: 'warning' });
-    } else {
-      score += 5;
-    }
-
-    if (!content.skills || content.skills.length < 5) {
-      items.push({ id: 'skills', message: 'Add more skills (at least 5 recommended)', severity: 'warning' });
-    } else {
-      score += 15;
-    }
-
-    if (!content.summary) {
-      items.push({ id: 'summary', message: 'Add a professional summary', severity: 'suggestion' });
-    } else {
-      score += 10;
-    }
-
-    if (content.experience?.length > 0) {
-      score += 10;
-    }
-
-    setOverallScore(Math.min(score, 100));
-    setFixItItems(items);
-
-    // Extract bullets
+    
     const bullets: BulletPoint[] = [];
     content.experience?.forEach((exp: any) => {
       if (exp.bullets) {
         exp.bullets.forEach((bullet: string) => {
-          let bulletScore = 50;
-          if (/^(Led|Managed|Developed|Created|Implemented|Achieved|Increased|Reduced)/i.test(bullet)) {
-            bulletScore += 20;
-          }
-          if (/\d+%|\$\d+|\d+ (users|customers|projects|team)/i.test(bullet)) {
-            bulletScore += 25;
-          }
-          bullets.push({ text: bullet, score: Math.min(bulletScore, 100) });
+          // Initial score of 0 - will be updated by AI analysis
+          bullets.push({ text: bullet, score: 0 });
         });
       }
     });
     setBulletPoints(bullets.slice(0, 6));
   };
 
+  // Convert AI analysis to fix-it items
+  const convertAnalysisToFixItems = (analysis: ATSAnalysis) => {
+    const items: typeof fixItItems = [];
+    
+    // Convert weaknesses to fix items
+    analysis.weaknesses?.forEach((weakness, index) => {
+      items.push({
+        id: `weakness-${index}`,
+        message: weakness,
+        severity: 'warning'
+      });
+    });
+    
+    // Convert high priority suggestions to critical items
+    analysis.suggestions?.forEach((suggestion, index) => {
+      const severity = suggestion.priority === 'high' ? 'critical' 
+        : suggestion.priority === 'medium' ? 'warning' 
+        : 'suggestion';
+      
+      items.push({
+        id: `suggestion-${index}`,
+        message: suggestion.suggestion,
+        severity
+      });
+    });
+    
+    setFixItItems(items);
+  };
+
   const handleDeepAnalysis = async () => {
     if (!resumeContent) {
-      toast({ title: "No resume", description: "Upload a resume first", variant: "destructive" });
+      toast({ 
+        title: "No resume found", 
+        description: "Please upload a resume in the Master Vault first to run AI analysis", 
+        variant: "destructive" 
+      });
+      setActiveTab?.('vault');
       return;
     }
 
     setIsAnalyzingATS(true);
+    setFixItItems([]); // Clear previous items
+    
     try {
       // Send enriched data with vault content
       const enrichedData = getEnrichedResumeData();
@@ -253,15 +249,28 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
       });
 
       if (error) throw error;
+      
       setAtsAnalysis(data);
       setOverallScore(data.overall_score);
       
+      // Convert AI analysis to actionable fix-it items
+      convertAnalysisToFixItems(data);
+      
+      // Update bullet scores based on AI analysis if available
+      if (resumeContent?.experience) {
+        extractBulletPoints(resumeContent);
+      }
+      
       toast({ 
-        title: "Analysis complete", 
-        description: `Your profile was analyzed using ${enrichedData.allSkills.length} skills and ${enrichedData.certifications.length} certifications from your Vault` 
+        title: `Score: ${data.overall_score}/100`, 
+        description: `AI analyzed ${enrichedData.allSkills.length} skills, ${enrichedData.certifications.length} certifications, and ${enrichedData.projects.length} projects` 
       });
     } catch (error: any) {
-      toast({ title: "Analysis failed", description: error.message, variant: "destructive" });
+      toast({ 
+        title: "Analysis failed", 
+        description: error.message || "Could not complete AI analysis. Please try again.", 
+        variant: "destructive" 
+      });
     } finally {
       setIsAnalyzingATS(false);
     }
@@ -311,7 +320,6 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
     toast({ title: "Optimization complete", description: "Your resume has been improved!" });
   };
 
-  const handleUploadClick = () => setActiveTab?.('vault');
   const handleNavigateToVault = () => setActiveTab?.('vault');
 
   return (
@@ -471,17 +479,24 @@ const ResumeEngine = ({ setActiveTab }: ResumeEngineProps) => {
         {/* No Resume State */}
         {!resumeContent && !isLoadingVault && (
           <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-16"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center py-16 px-6"
           >
-            <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-foreground mb-2">No Resume Found</h3>
-            <p className="text-muted-foreground mb-4">Upload a resume to start optimizing</p>
-            <Button onClick={handleUploadClick} className="gap-2">
-              <Upload className="w-4 h-4" />
-              Upload Resume
+            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+              <FileText className="w-10 h-10 text-primary" />
+            </div>
+            <h3 className="text-xl font-semibold text-foreground mb-3">No Resume to Analyze</h3>
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+              Head to the Master Vault to upload your resume. Once uploaded, our AI will analyze it and provide personalized optimization insights.
+            </p>
+            <Button onClick={handleNavigateToVault} size="lg" className="gap-2">
+              <Database className="w-4 h-4" />
+              Go to Master Vault
             </Button>
+            <p className="text-xs text-muted-foreground mt-4">
+              The AI combines your resume with skills, certifications, and projects from your Vault for comprehensive analysis
+            </p>
           </motion.div>
         )}
       </div>
