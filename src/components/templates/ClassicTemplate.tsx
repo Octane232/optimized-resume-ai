@@ -33,11 +33,11 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, scale = 1 }) =>
       {/* Skills */}
       <section className="mb-6">
         <h3 className="text-lg font-bold border-b border-gray-400 mb-3">CORE COMPETENCIES</h3>
-        <div className="grid grid-cols-2 gap-x-4 text-sm">
+        <div className="grid grid-cols-2 gap-y-1 gap-x-8 text-sm">
           {data.skills.map((skill, index) => (
-            <div key={index} className="flex items-center mb-1">
-              <span className="w-2 h-2 bg-gray-800 rounded-full mr-2"></span>
-              {skill}
+            <div key={index} className="flex items-center h-6">
+              <span className="w-2 h-2 bg-gray-800 rounded-full mr-2 flex-shrink-0"></span>
+              <span className="truncate">{skill}</span>
             </div>
           ))}
         </div>

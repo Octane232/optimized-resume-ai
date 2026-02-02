@@ -306,28 +306,34 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = React.memo(({ temp
                 <div style={{ 
                   display: 'grid',
                   gridTemplateColumns: `repeat(${section.style?.columns || 3}, 1fr)`,
-                  gap: '0.5rem',
-                  alignItems: 'start'
+                  gap: '0.375rem 1rem',
+                  alignItems: 'center'
                 }}>
                   {safeSkills.map((skill, idx) => (
-                    <span 
+                    <div 
                       key={idx}
                       style={{ 
-                        padding: '0.375rem 0.5rem',
+                        height: '1.5rem',
+                        padding: '0 0.5rem',
                         borderRadius: '4px',
                         fontSize: '0.75rem',
-                        textAlign: 'left',
                         backgroundColor: theme.accentColor + '15',
                         color: theme.primaryColor,
                         border: `1px solid ${theme.accentColor}40`,
-                        display: 'block',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'flex-start',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      <span style={{ 
                         whiteSpace: 'nowrap',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis'
-                      }}
-                    >
-                      {skill}
-                    </span>
+                      }}>
+                        {skill}
+                      </span>
+                    </div>
                   ))}
                 </div>
               ) : displayType === 'list' ? (
