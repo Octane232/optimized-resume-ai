@@ -150,6 +150,38 @@ const ATSSimulationView = ({
 }: ATSSimulationViewProps) => {
   const [showATSView, setShowATSView] = useState(false);
 
+  // Normalize resume content from various template formats
+  const normalizeResumeContent = (content: ResumeContent | null) => {
+    if (!content) return null;
+    
+    // Handle both classic (contact) and modern (personalInfo) templates
+    const contactSource = content.contact || content.personalInfo || {};
+    
+    return {
+      contact: {
+        name: (contactSource as any).name || (contactSource as any).fullName || '',
+        email: (contactSource as any).email || '',
+        phone: (contactSource as any).phone || '',
+        linkedin: (contactSource as any).linkedin || (contactSource as any).website || (contactSource as any).portfolio || '',
+        location: (contactSource as any).location || '',
+        title: (contactSource as any).title || '',
+      },
+      summary: content.summary || '',
+      skills: Array.isArray(content.skills) ? content.skills : [],
+      experience: (content.experience || []).map(exp => ({
+        title: exp.title || '',
+        company: exp.company || '',
+        startDate: exp.startDate || '',
+        endDate: exp.endDate || '',
+        // Handle both classic (responsibilities) and modern (bullets) templates
+        bullets: exp.responsibilities || exp.bullets || [],
+      })),
+      education: content.education || [],
+      projects: content.projects || [],
+      certifications: content.certifications || [],
+    };
+  };
+
   // Memoize parsed data
   const parsedData = useMemo(() => {
     const hasContent = resumeContent || uploadedText;
@@ -165,6 +197,7 @@ const ATSSimulationView = ({
     let sections: Record<string, boolean>;
 
     if (isUploadedContent && uploadedText) {
+      // Extract from raw uploaded text
       const extracted = extractFromUploadedText(uploadedText);
       normalizedContact = extracted;
       normalizedExperience = [];
@@ -172,33 +205,37 @@ const ATSSimulationView = ({
       educationArray = [];
       sections = detectSectionsFromText(uploadedText);
     } else if (resumeContent) {
-      // Classic templates use 'contact', modern uses 'personalInfo'
-      const contact = (resumeContent.contact || resumeContent.personalInfo || {}) as Record<string, string | undefined>;
-      normalizedContact = {
-        name: contact.name || contact.fullName || '',
-        email: contact.email || '',
-        phone: contact.phone || '',
-        linkedin: contact.linkedin || contact.website || contact.portfolio || '',
-        location: contact.location || '',
-      };
-      // Classic templates use 'responsibilities', others use 'bullets'
-      normalizedExperience = (resumeContent.experience || []).map(exp => ({
-        title: exp.title || '',
-        company: exp.company || '',
-        startDate: exp.startDate || '',
-        endDate: exp.endDate || '',
-        bullets: exp.responsibilities || exp.bullets || [],
-      }));
-      skillsArray = resumeContent.skills || [];
-      educationArray = resumeContent.education || [];
-      sections = {
-        summary: !!resumeContent.summary && resumeContent.summary.length > 10,
-        skills: skillsArray.length > 0,
-        experience: normalizedExperience.length > 0 && normalizedExperience.some(e => e.title || e.company),
-        education: educationArray.length > 0 && educationArray.some(e => e.degree || e.institution),
-        projects: (resumeContent.projects?.length || 0) > 0,
-        certifications: (resumeContent.certifications?.length || 0) > 0,
-      };
+      // Normalize saved resume content
+      const normalized = normalizeResumeContent(resumeContent);
+      
+      if (normalized) {
+        normalizedContact = normalized.contact;
+        normalizedExperience = normalized.experience;
+        skillsArray = normalized.skills;
+        educationArray = normalized.education;
+        
+        // Determine section presence - check actual data quality
+        const hasValidExperience = normalizedExperience.length > 0 && 
+          normalizedExperience.some(e => (e.title && e.title.length > 0) || (e.company && e.company.length > 0));
+        
+        const hasValidEducation = educationArray.length > 0 && 
+          educationArray.some(e => (e.degree && e.degree.length > 0) || (e.institution && e.institution.length > 0));
+        
+        sections = {
+          summary: typeof normalized.summary === 'string' && normalized.summary.trim().length > 10,
+          skills: skillsArray.length > 0,
+          experience: hasValidExperience,
+          education: hasValidEducation,
+          projects: normalized.projects.length > 0,
+          certifications: normalized.certifications.length > 0,
+        };
+      } else {
+        normalizedContact = { name: '', email: '', phone: '', linkedin: '', location: '' };
+        normalizedExperience = [];
+        skillsArray = [];
+        educationArray = [];
+        sections = { summary: false, skills: false, experience: false, education: false, projects: false, certifications: false };
+      }
     } else {
       normalizedContact = { name: '', email: '', phone: '', linkedin: '', location: '' };
       normalizedExperience = [];
@@ -207,21 +244,22 @@ const ATSSimulationView = ({
       sections = { summary: false, skills: false, experience: false, education: false, projects: false, certifications: false };
     }
 
+    // Build contact items for display
     const contactItems = Object.entries({
-      name: { found: !!normalizedContact.name, value: normalizedContact.name },
-      email: { found: !!normalizedContact.email, value: normalizedContact.email },
-      phone: { found: !!normalizedContact.phone, value: normalizedContact.phone },
-      linkedin: { found: !!normalizedContact.linkedin, value: normalizedContact.linkedin },
-      location: { found: !!normalizedContact.location, value: normalizedContact.location },
+      name: { found: !!normalizedContact.name?.trim(), value: normalizedContact.name || '' },
+      email: { found: !!normalizedContact.email?.trim(), value: normalizedContact.email || '' },
+      phone: { found: !!normalizedContact.phone?.trim(), value: normalizedContact.phone || '' },
+      linkedin: { found: !!normalizedContact.linkedin?.trim(), value: normalizedContact.linkedin || '' },
+      location: { found: !!normalizedContact.location?.trim(), value: normalizedContact.location || '' },
     }) as [string, ParsedField][];
 
     const foundCount = contactItems.filter(([, v]) => v.found).length;
     
-    // Generate warnings
+    // Generate warnings for missing critical fields
     const warnings: string[] = [];
-    if (!normalizedContact.email) warnings.push('email address');
-    if (!normalizedContact.phone) warnings.push('phone number');
-    if (!normalizedContact.name) warnings.push('full name');
+    if (!normalizedContact.email?.trim()) warnings.push('email address');
+    if (!normalizedContact.phone?.trim()) warnings.push('phone number');
+    if (!normalizedContact.name?.trim()) warnings.push('full name');
     if (!sections.summary) warnings.push('professional summary');
     if (!sections.experience) warnings.push('work experience');
     if (!sections.education) warnings.push('education');
