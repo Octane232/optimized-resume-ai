@@ -1,0 +1,1 @@
+DELETE FROM resume_templates;
