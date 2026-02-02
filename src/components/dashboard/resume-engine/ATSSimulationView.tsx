@@ -122,16 +122,20 @@ const ATSSimulationView = ({
     const extracted = extractFromUploadedText(uploadedText);
     normalizedContact = extracted;
     normalizedExperience = [];
-    skillsArray = atsAnalysis?.missing_keywords ? [] : []; // Will show from analysis
+    skillsArray = atsAnalysis?.missing_keywords ? [] : [];
     educationArray = [];
   } else if (resumeContent) {
+    // Classic templates use 'contact', modern uses 'personalInfo'
+    // Prioritize 'contact' since that's what classic templates use
+    const contact = (resumeContent.contact || resumeContent.personalInfo || {}) as Record<string, string | undefined>;
     normalizedContact = {
-      name: resumeContent.personalInfo?.fullName || resumeContent.contact?.name || '',
-      email: resumeContent.personalInfo?.email || resumeContent.contact?.email || '',
-      phone: resumeContent.personalInfo?.phone || resumeContent.contact?.phone || '',
-      linkedin: resumeContent.personalInfo?.website || resumeContent.personalInfo?.linkedin || resumeContent.contact?.linkedin || '',
-      location: resumeContent.personalInfo?.location || resumeContent.contact?.location || '',
+      name: contact.name || contact.fullName || '',
+      email: contact.email || '',
+      phone: contact.phone || '',
+      linkedin: contact.linkedin || contact.website || '',
+      location: contact.location || '',
     };
+    // Classic templates use 'responsibilities', others use 'bullets'
     normalizedExperience = (resumeContent.experience || []).map(exp => ({
       title: exp.title || '',
       company: exp.company || '',

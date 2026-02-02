@@ -12,14 +12,15 @@ function formatResumeAsText(content: any): string {
   
   const sections: string[] = [];
   
-  // Contact Information
+  // Contact Information - prioritize 'contact' (classic templates) over 'personalInfo'
   const contact = content.contact || content.personalInfo || {};
   const name = contact.name || contact.fullName || '';
   const title = contact.title || '';
   const email = contact.email || '';
   const phone = contact.phone || '';
   const location = contact.location || '';
-  const linkedin = contact.linkedin || contact.website || '';
+  const linkedin = contact.linkedin || contact.website || contact.portfolio || '';
+  const github = contact.github || '';
   
   if (name || email || phone) {
     sections.push('=== CONTACT INFORMATION ===');
@@ -29,38 +30,50 @@ function formatResumeAsText(content: any): string {
     if (phone) sections.push(`Phone: ${phone}`);
     if (location) sections.push(`Location: ${location}`);
     if (linkedin) sections.push(`LinkedIn/Website: ${linkedin}`);
+    if (github) sections.push(`GitHub: ${github}`);
   }
   
   // Professional Summary
-  if (content.summary) {
+  if (content.summary && typeof content.summary === 'string' && content.summary.trim().length > 0) {
     sections.push('\n=== PROFESSIONAL SUMMARY ===');
-    sections.push(content.summary);
+    sections.push(content.summary.trim());
   }
   
-  // Skills
-  if (content.skills && content.skills.length > 0) {
+  // Skills - handle both array and string formats
+  const skills = content.skills || [];
+  if (Array.isArray(skills) && skills.length > 0) {
     sections.push('\n=== SKILLS ===');
-    sections.push(content.skills.join(', '));
+    sections.push(skills.join(', '));
+  } else if (typeof skills === 'string' && skills.trim().length > 0) {
+    sections.push('\n=== SKILLS ===');
+    sections.push(skills);
   }
   
-  // Work Experience
-  if (content.experience && content.experience.length > 0) {
+  // Work Experience - handle 'responsibilities' (classic) and 'bullets' (modern)
+  const experience = content.experience || [];
+  if (Array.isArray(experience) && experience.length > 0) {
     sections.push('\n=== WORK EXPERIENCE ===');
-    content.experience.forEach((exp: any, index: number) => {
-      const expTitle = exp.title || exp.position || 'Position';
-      const company = exp.company || 'Company';
+    experience.forEach((exp: any, index: number) => {
+      const expTitle = exp.title || exp.position || '';
+      const company = exp.company || '';
       const startDate = exp.startDate || '';
       const endDate = exp.endDate || 'Present';
-      sections.push(`\n${index + 1}. ${expTitle} at ${company}`);
-      if (startDate || endDate) sections.push(`   Duration: ${startDate} - ${endDate}`);
       
-      const bullets = exp.responsibilities || exp.bullets || exp.description || [];
-      if (Array.isArray(bullets) && bullets.length > 0) {
-        bullets.forEach((bullet: string) => {
-          sections.push(`   • ${bullet}`);
-        });
-      } else if (typeof bullets === 'string') {
-        sections.push(`   ${bullets}`);
+      if (expTitle || company) {
+        sections.push(`\n${index + 1}. ${expTitle || 'Position'}${company ? ` at ${company}` : ''}`);
+        if (startDate || endDate) sections.push(`   Duration: ${startDate} - ${endDate}`);
+        
+        // Handle both 'responsibilities' (classic) and 'bullets' (modern)
+        const bullets = exp.responsibilities || exp.bullets || exp.description || [];
+        if (Array.isArray(bullets) && bullets.length > 0) {
+          bullets.forEach((bullet: string) => {
+            if (bullet && typeof bullet === 'string' && bullet.trim()) {
+              sections.push(`   • ${bullet.trim()}`);
+            }
+          });
+        } else if (typeof bullets === 'string' && bullets.trim()) {
+          sections.push(`   ${bullets.trim()}`);
+        }
       }
     });
   }
