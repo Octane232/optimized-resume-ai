@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, EyeOff, Check, X, AlertTriangle, FileText, Lock, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Eye, Check, X, AlertTriangle, FileText } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 
 interface ResumeContent {
-  // Support both naming conventions for maximum compatibility
   personalInfo?: {
     fullName?: string;
     email?: string;
@@ -55,6 +53,11 @@ interface ATSSimulationViewProps {
   resumeContent: ResumeContent | null;
 }
 
+interface ParsedField {
+  found: boolean;
+  value: string;
+}
+
 const ATSSimulationView = ({ 
   resumeContent
 }: ATSSimulationViewProps) => {
@@ -83,8 +86,17 @@ const ATSSimulationView = ({
     bullets: exp.responsibilities || exp.bullets || [],
   }));
 
+  // Safely check arrays
+  const skillsArray = resumeContent.skills || [];
+  const educationArray = resumeContent.education || [];
+  const projectsArray = resumeContent.projects || [];
+  const certificationsArray = resumeContent.certifications || [];
+
   // Parse results with normalized data
-  const parseResults = {
+  const parseResults: {
+    contact: Record<string, ParsedField>;
+    sections: Record<string, boolean>;
+  } = {
     contact: {
       name: { found: !!normalizedContact.name, value: normalizedContact.name },
       email: { found: !!normalizedContact.email, value: normalizedContact.email },
@@ -94,17 +106,29 @@ const ATSSimulationView = ({
     },
     sections: {
       summary: !!resumeContent.summary && resumeContent.summary.length > 10,
-      skills: (resumeContent.skills?.length || 0) > 0,
+      skills: skillsArray.length > 0,
       experience: normalizedExperience.length > 0 && normalizedExperience.some(e => e.title || e.company),
-      education: (resumeContent.education?.length || 0) > 0 && resumeContent.education?.some(e => e.degree || e.institution),
-      projects: (resumeContent.projects?.length || 0) > 0,
-      certifications: (resumeContent.certifications?.length || 0) > 0,
+      education: educationArray.length > 0 && educationArray.some(e => e.degree || e.institution),
+      projects: projectsArray.length > 0,
+      certifications: certificationsArray.length > 0,
     }
   };
 
-  const contactItems = Object.entries(parseResults.contact);
-  const foundCount = contactItems.filter(([_, v]) => v.found).length;
+  const contactItems = Object.entries(parseResults.contact) as [string, ParsedField][];
+  const foundCount = contactItems.filter(([, v]) => v.found).length;
   const totalCount = contactItems.length;
+
+  // Generate warnings
+  const warnings: string[] = [];
+  if (!parseResults.contact.email?.found) warnings.push('email address');
+  if (!parseResults.contact.phone?.found) warnings.push('phone number');
+  if (!parseResults.contact.name?.found) warnings.push('full name');
+  if (!parseResults.sections.summary) warnings.push('professional summary');
+  if (!parseResults.sections.experience) warnings.push('work experience');
+  if (!parseResults.sections.education) warnings.push('education');
+  if (!parseResults.sections.skills) warnings.push('skills section');
+
+  const isATSReady = warnings.length === 0;
 
   return (
     <motion.div 
@@ -218,13 +242,13 @@ const ATSSimulationView = ({
             </div>
 
             {/* Skills Extraction */}
-            {resumeContent.skills && resumeContent.skills.length > 0 && (
+            {skillsArray.length > 0 && (
               <div>
                 <p className="text-xs text-muted-foreground mb-2 uppercase tracking-wide">
-                  Extracted Skills ({resumeContent.skills.length})
+                  Extracted Skills ({skillsArray.length})
                 </p>
                 <div className="flex flex-wrap gap-1 p-3 rounded-lg bg-muted/30 border border-border font-mono text-xs">
-                  {resumeContent.skills.map((skill, i) => (
+                  {skillsArray.map((skill, i) => (
                     <span 
                       key={i}
                       className="px-2 py-0.5 bg-primary/10 text-primary rounded"
@@ -256,7 +280,7 @@ const ATSSimulationView = ({
                         <span>{exp.company || 'Missing company'}</span>
                       </div>
                       <div className="text-muted-foreground ml-5">
-                        {exp.bullets.length > 0 ? (
+                        {exp.bullets && exp.bullets.length > 0 ? (
                           <span className="text-emerald-600">{exp.bullets.length} bullet points found</span>
                         ) : (
                           <span className="text-amber-600">No bullet points - ATS may rank lower</span>
@@ -268,43 +292,24 @@ const ATSSimulationView = ({
               </div>
             )}
 
-            {/* Comprehensive Warnings */}
-            {(() => {
-              const warnings: string[] = [];
-              if (!parseResults.contact.email.found) warnings.push('email address');
-              if (!parseResults.contact.phone.found) warnings.push('phone number');
-              if (!parseResults.contact.name.found) warnings.push('full name');
-              if (!parseResults.sections.summary) warnings.push('professional summary');
-              if (!parseResults.sections.experience) warnings.push('work experience');
-              if (!parseResults.sections.education) warnings.push('education');
-              if (!parseResults.sections.skills) warnings.push('skills section');
-              
-              if (warnings.length === 0) return null;
-              
-              return (
-                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-                  <div className="flex items-start gap-2">
-                    <X className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
-                    <div className="text-xs text-muted-foreground">
-                      <span className="font-medium text-red-500">ATS Parsing Issues Found:</span>
-                      <p className="mt-1">
-                        Missing or incomplete: {warnings.join(', ')}.
-                        These are critical fields that ATS systems scan for. Your resume may be filtered out.
-                      </p>
-                    </div>
+            {/* Warnings */}
+            {warnings.length > 0 && (
+              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                <div className="flex items-start gap-2">
+                  <X className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
+                  <div className="text-xs text-muted-foreground">
+                    <span className="font-medium text-red-500">ATS Parsing Issues Found:</span>
+                    <p className="mt-1">
+                      Missing or incomplete: {warnings.join(', ')}.
+                      These are critical fields that ATS systems scan for. Your resume may be filtered out.
+                    </p>
                   </div>
                 </div>
-              );
-            })()}
+              </div>
+            )}
             
             {/* Success message when all critical sections pass */}
-            {parseResults.contact.email.found && 
-             parseResults.contact.phone.found && 
-             parseResults.contact.name.found &&
-             parseResults.sections.summary &&
-             parseResults.sections.experience &&
-             parseResults.sections.education &&
-             parseResults.sections.skills && (
+            {isATSReady && (
               <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
                 <div className="flex items-start gap-2">
                   <Check className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
