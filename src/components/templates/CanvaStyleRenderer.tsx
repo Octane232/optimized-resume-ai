@@ -24,6 +24,8 @@ interface TemplateSection {
   backgroundColor?: string;
   textColor?: string;
   gap?: string | number;
+  title?: string;
+  titlePrefix?: string;
 }
 
 interface CanvasTemplate {
@@ -495,6 +497,103 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = React.memo(({ temp
             flexDirection: 'column',
             ...containerStyles
           }}>
+            {section.children?.map((child: TemplateSection) => renderSection(child))}
+          </div>
+        );
+
+      case 'projects':
+        const projectsStyles = getAdvancedStyles(section.style);
+        return (
+          <div 
+            key={section.id}
+            className="resume-section resume-projects"
+            style={{
+              ...projectsStyles,
+              padding: section.style?.padding || '16px 24px',
+              color: section.style?.color || theme.textColor
+            }}
+          >
+            <h3 style={{ 
+              fontSize: '1rem', 
+              fontWeight: 'bold', 
+              marginBottom: '0.5rem', 
+              color: theme.primaryColor 
+            }}>
+              Projects
+            </h3>
+            {data.projects?.map((project, idx) => (
+              <div key={idx} className="project-item" style={{ 
+                marginBottom: section.style?.itemSpacing || '12px'
+              }}>
+                <h4 style={{ fontWeight: 'bold', fontSize: '0.875rem' }}>{project.title}</h4>
+                {project.description && (
+                  <p style={{ fontSize: '0.75rem', color: '#6B7280', marginTop: '0.25rem' }}>
+                    {project.description}
+                  </p>
+                )}
+                {project.technologies && project.technologies.length > 0 && (
+                  <div style={{ 
+                    display: 'flex', 
+                    flexWrap: 'wrap', 
+                    gap: '0.25rem', 
+                    marginTop: '0.375rem' 
+                  }}>
+                    {project.technologies.map((tech, i) => (
+                      <span 
+                        key={i}
+                        style={{ 
+                          fontSize: '0.65rem',
+                          padding: '0.125rem 0.375rem',
+                          backgroundColor: theme.accentColor + '20',
+                          color: theme.primaryColor,
+                          borderRadius: '4px'
+                        }}
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        );
+
+      case 'text':
+        const textStyles = getAdvancedStyles(section.style);
+        const textContent = section.content ? renderContent(section.content) : '';
+        return (
+          <div 
+            key={section.id}
+            style={{
+              ...textStyles,
+              color: section.style?.color || theme.textColor
+            }}
+          >
+            {textContent}
+          </div>
+        );
+
+      case 'section':
+        const sectionStyles = getAdvancedStyles(section.style);
+        return (
+          <div 
+            key={section.id}
+            style={{
+              ...sectionStyles,
+              marginBottom: section.style?.marginBottom || '16px'
+            }}
+          >
+            {section.title && (
+              <h3 style={{ 
+                fontSize: '1rem', 
+                fontWeight: 'bold', 
+                marginBottom: '0.5rem', 
+                color: theme.primaryColor 
+              }}>
+                {section.title}
+              </h3>
+            )}
             {section.children?.map((child: TemplateSection) => renderSection(child))}
           </div>
         );

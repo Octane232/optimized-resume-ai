@@ -116,13 +116,28 @@ const CreateResume = () => {
                     className="group bg-background border border-border rounded-lg overflow-hidden hover:shadow-lg hover:border-primary/40 transition-all duration-200"
                   >
                     {/* Template Preview */}
-                    <div className="relative aspect-[3/4] bg-muted overflow-hidden">
+                    <div className="relative aspect-[3/4] bg-white overflow-hidden">
                       {template.preview_image ? (
                         <img 
                           src={template.preview_image} 
                           alt={template.name}
                           className="w-full h-full object-cover"
                         />
+                      ) : template.json_content ? (
+                        <div 
+                          className="absolute inset-0"
+                          style={{
+                            transform: 'scale(0.25)',
+                            transformOrigin: 'top left',
+                            width: '400%',
+                            height: '400%'
+                          }}
+                        >
+                          <TemplateThumbnail 
+                            template={template} 
+                            className="w-full h-full"
+                          />
+                        </div>
                       ) : (
                         <TemplateThumbnail 
                           template={template} 
