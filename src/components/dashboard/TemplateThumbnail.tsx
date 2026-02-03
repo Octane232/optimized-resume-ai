@@ -77,9 +77,9 @@ const TemplateThumbnail: React.FC<TemplateThumbnailProps> = ({
               <div 
                 className="absolute inset-0 origin-top-left"
                 style={{ 
-                  transform: 'scale(0.35)',
-                  width: '286%',
-                  height: '286%'
+                  transform: 'scale(0.40)',
+                  width: '250%',
+                  height: '250%'
                 }}
               >
                 <CanvaStyleRenderer
