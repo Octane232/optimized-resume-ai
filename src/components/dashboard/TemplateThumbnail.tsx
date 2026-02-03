@@ -69,12 +69,19 @@ const TemplateThumbnail: React.FC<TemplateThumbnailProps> = ({
       } ${className}`}
       onClick={onClick}
     >
-      <CardContent className="p-4">
-        {/* Template Preview */}
-        <div className="mb-4 border rounded-lg overflow-hidden bg-white">
-          <div className="h-48 overflow-hidden flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+      <CardContent className="p-3">
+        {/* Template Preview - A4 aspect ratio (1:1.414) */}
+        <div className="mb-3 border rounded-lg overflow-hidden bg-white aspect-[1/1.4]">
+          <div className="relative w-full h-full overflow-hidden bg-white">
             {template.json_content ? (
-              <div className="w-full h-full overflow-hidden" style={{ transform: 'scale(0.3)', transformOrigin: 'top left', width: '333%' }}>
+              <div 
+                className="absolute inset-0 origin-top-left"
+                style={{ 
+                  transform: 'scale(0.22)',
+                  width: '454%',
+                  height: '454%'
+                }}
+              >
                 <CanvaStyleRenderer
                   template={template.json_content}
                   data={sampleData}
@@ -82,9 +89,9 @@ const TemplateThumbnail: React.FC<TemplateThumbnailProps> = ({
                 />
               </div>
             ) : (
-              <div className="text-center">
-                <FileText className="w-12 h-12 text-primary/30 mx-auto mb-2" />
-                <p className="text-xs text-muted-foreground">Template Preview</p>
+              <div className="flex flex-col items-center justify-center h-full">
+                <FileText className="w-10 h-10 text-primary/30 mb-2" />
+                <p className="text-xs text-muted-foreground">Preview</p>
               </div>
             )}
           </div>
