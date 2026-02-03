@@ -1,7 +1,8 @@
 import React, { memo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Download, X } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Download, X, Code } from 'lucide-react';
 import CanvaStyleRenderer from '@/components/templates/CanvaStyleRenderer';
 import { ResumeData } from '@/types/resume';
 
@@ -11,7 +12,7 @@ interface TemplatePreviewProps {
     name?: string;
     json_content?: any;
     styles?: any;
-    style_settings?: any; // backward compatibility
+    style_settings?: any;
     template?: any;
   } | null;
   isOpen: boolean;
@@ -130,13 +131,22 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = memo(({
   };
 
   const rendererTemplate = getTemplateForRenderer();
+  const isMarkdown = template.json_content?.type === 'markdown';
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl h-[90vh] p-0 overflow-hidden">
         <DialogHeader className="px-6 py-4 border-b">
           <DialogTitle className="flex items-center justify-between">
-            <span>{template.name || 'Template Preview'}</span>
+            <div className="flex items-center gap-3">
+              <span>{template.name || 'Template Preview'}</span>
+              {isMarkdown && (
+                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                  <Code className="w-3 h-3 mr-1" />
+                  Markdown
+                </Badge>
+              )}
+            </div>
             <div className="flex gap-2">
               <Button
                 size="sm"
