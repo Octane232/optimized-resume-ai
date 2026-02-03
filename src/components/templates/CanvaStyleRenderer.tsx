@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { ResumeData } from '@/types/resume';
 import Mustache from 'mustache';
+import MarkdownResumeRenderer, { MarkdownTemplateConfig } from './MarkdownResumeRenderer';
 
 interface TemplateTheme {
   primaryColor: string;
@@ -32,15 +33,29 @@ interface CanvasTemplate {
   layout: string;
   theme: TemplateTheme;
   sections: TemplateSection[];
+  type?: string; // Added for markdown detection
 }
 
 interface CanvaStyleRendererProps {
-  template: CanvasTemplate;
+  template: CanvasTemplate | MarkdownTemplateConfig;
   data: ResumeData;
   scale?: number;
 }
 
 const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = React.memo(({ template, data, scale = 1 }) => {
+  // Check if this is a markdown template
+  if ('type' in template && template.type === 'markdown') {
+    return (
+      <MarkdownResumeRenderer 
+        config={template as MarkdownTemplateConfig} 
+        data={data} 
+        scale={scale} 
+      />
+    );
+  }
+
+  // Cast to CanvasTemplate for the rest of the component
+  const canvasTemplate = template as CanvasTemplate;
   // Memoize theme to prevent recalculation
   const theme = useMemo(() => {
     const defaultTheme: TemplateTheme = {
@@ -51,8 +66,8 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = React.memo(({ temp
       textColor: '#1e293b',
       fontFamily: 'Inter, sans-serif'
     };
-    return template.theme || defaultTheme;
-  }, [template.theme]);
+    return canvasTemplate.theme || defaultTheme;
+  }, [canvasTemplate.theme]);
   // Safe accessors to handle missing or malformed data
   const safeContact = data.contact || { name: '', title: '', email: '', phone: '', location: '' };
   const safeExperience = Array.isArray(data.experience) ? data.experience : [];
@@ -640,7 +655,7 @@ const CanvaStyleRenderer: React.FC<CanvaStyleRendererProps> = React.memo(({ temp
         position: 'relative'
       }}
     >
-      {template.sections.map(section => renderSection(section))}
+      {canvasTemplate.sections.map(section => renderSection(section))}
     </div>
   );
 });
