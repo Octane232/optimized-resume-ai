@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
 import Mustache from 'mustache';
 import { ResumeData } from '@/types/resume';
 
@@ -11,6 +12,8 @@ export interface MarkdownTemplateConfig {
     accentColor: string;
     fontFamily: string;
     headingFont?: string;
+    spacing?: number;
+    borderRadius?: number;
   };
   css: string;
 }
@@ -19,12 +22,39 @@ interface MarkdownResumeRendererProps {
   config: MarkdownTemplateConfig;
   data: ResumeData;
   scale?: number;
+  className?: string;
 }
 
-const MarkdownResumeRenderer: React.FC<MarkdownResumeRendererProps> = React.memo(({ 
-  config, 
-  data, 
-  scale = 1 
+// Helper functions
+function formatDate(date: string): string {
+  if (!date) return '';
+  try {
+    // Handle year-only format
+    if (/^\d{4}$/.test(date)) return date;
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short'
+    });
+  } catch {
+    return date;
+  }
+}
+
+function extractYear(date: string): string {
+  if (!date) return '';
+  try {
+    if (/^\d{4}$/.test(date)) return date;
+    return new Date(date).getFullYear().toString();
+  } catch {
+    return date.split('-')[0] || date;
+  }
+}
+
+const MarkdownResumeRenderer: React.FC<MarkdownResumeRendererProps> = React.memo(({
+  config,
+  data,
+  scale = 1,
+  className = ''
 }) => {
   // Generate unique ID for scoped styles
   const scopeId = useMemo(() => `resume-md-${Math.random().toString(36).substr(2, 9)}`, []);
@@ -53,21 +83,26 @@ const MarkdownResumeRenderer: React.FC<MarkdownResumeRendererProps> = React.memo
       experience: safeExperience.map(exp => ({
         title: exp.title || 'Job Title',
         company: exp.company || 'Company Name',
-        startDate: exp.startDate || 'Start',
-        endDate: exp.endDate || 'Present',
-        responsibilities: Array.isArray(exp.responsibilities) ? exp.responsibilities : []
+        startDate: formatDate(exp.startDate) || 'Start',
+        endDate: formatDate(exp.endDate) || 'Present',
+        responsibilities: Array.isArray(exp.responsibilities) ? exp.responsibilities : [],
+        achievements: Array.isArray(exp.achievements) ? exp.achievements : []
       })),
       education: safeEducation.map(edu => ({
         degree: edu.degree || 'Degree',
         institution: edu.institution || 'Institution',
-        startYear: edu.startYear || '',
-        endYear: edu.endYear || ''
+        startYear: extractYear(edu.startYear) || '',
+        endYear: extractYear(edu.endYear) || '',
+        gpa: edu.gpa || '',
+        honors: edu.honors || ''
       })),
       skills: safeSkills,
       projects: safeProjects.map(proj => ({
         title: proj.title || 'Project',
         description: proj.description || '',
-        technologies: Array.isArray(proj.technologies) ? proj.technologies : []
+        technologies: Array.isArray(proj.technologies) ? proj.technologies : [],
+        link: proj.link || '',
+        github: proj.github || ''
       })),
       certifications: safeCertifications.map(cert => ({
         name: cert.name || 'Certification',
@@ -84,76 +119,98 @@ const MarkdownResumeRenderer: React.FC<MarkdownResumeRendererProps> = React.memo
   }, [data]);
 
   // Process markdown template with Mustache
-  const renderedMarkdown = useMemo(() => {
+  const processedMarkdown = useMemo(() => {
     try {
       return Mustache.render(config.markdown_template || '', templateData);
     } catch (error) {
-      console.error('Mustache render error:', error);
-      return '# Error rendering template';
+      console.error('Error rendering template:', error);
+      return '# Error Rendering Template\n\nPlease check your data format.';
     }
   }, [config.markdown_template, templateData]);
 
-  // Generate scoped CSS
+  // Generate CSS with scaling
+  const scaledCSS = useMemo(() => {
+    const baseCSS = config.css || '';
+    
+    if (scale === 1) return baseCSS;
+    
+    // Scale font sizes and spacing
+    return baseCSS
+      .replace(/(\d+(?:\.\d+)?)px/g, (_, value) => `${parseFloat(value) * scale}px`)
+      .replace(/(\d+(?:\.\d+)?)rem/g, (_, value) => `${parseFloat(value) * scale}rem`)
+      .replace(/(\d+(?:\.\d+)?)em/g, (_, value) => `${parseFloat(value) * scale}em`);
+  }, [config.css, scale]);
+
+  // Generate scoped CSS with theme variables
   const scopedCss = useMemo(() => {
-    const { theme, css } = config;
-    const baseStyles = `
+    const { theme } = config;
+    const themeVars = `
       #${scopeId} {
-        font-family: ${theme.fontFamily};
-        color: ${theme.primaryColor};
+        --primary-color: ${theme.primaryColor};
+        --accent-color: ${theme.accentColor};
+        --font-family: ${theme.fontFamily};
+        --heading-font: ${theme.headingFont || theme.fontFamily};
+        --spacing: ${theme.spacing || 1.5};
+        --border-radius: ${theme.borderRadius || 6}px;
+        
+        font-family: var(--font-family);
+        color: var(--primary-color);
         line-height: 1.6;
         padding: 40px;
         background: white;
       }
-      #${scopeId} h1 {
-        font-family: ${theme.headingFont || theme.fontFamily};
-        color: ${theme.primaryColor};
+      #${scopeId} .resume-h1 {
+        font-family: var(--heading-font);
+        color: var(--primary-color);
         margin-bottom: 0.25rem;
       }
-      #${scopeId} h2 {
-        font-family: ${theme.headingFont || theme.fontFamily};
-        color: ${theme.primaryColor};
+      #${scopeId} .resume-h2 {
+        font-family: var(--heading-font);
+        color: var(--primary-color);
         margin-top: 1.5rem;
         margin-bottom: 0.75rem;
       }
-      #${scopeId} h3 {
-        font-family: ${theme.headingFont || theme.fontFamily};
-        color: ${theme.primaryColor};
+      #${scopeId} .resume-h3 {
+        font-family: var(--heading-font);
+        color: var(--primary-color);
         margin-top: 1rem;
         margin-bottom: 0.25rem;
       }
-      #${scopeId} p {
+      #${scopeId} .resume-p {
         margin-bottom: 0.5rem;
       }
-      #${scopeId} ul {
+      #${scopeId} .resume-ul {
         margin-left: 1.5rem;
         margin-bottom: 0.5rem;
       }
-      #${scopeId} li {
+      #${scopeId} .resume-li {
         margin-bottom: 0.25rem;
       }
-      #${scopeId} hr {
+      #${scopeId} .resume-hr {
         border: none;
         border-top: 1px solid ${theme.accentColor}40;
         margin: 1rem 0;
       }
-      #${scopeId} strong {
-        color: ${theme.primaryColor};
+      #${scopeId} .resume-strong {
+        color: var(--primary-color);
       }
-      #${scopeId} a {
-        color: ${theme.accentColor};
+      #${scopeId} .resume-a {
+        color: var(--accent-color);
         text-decoration: none;
       }
     `;
     
     // Replace generic selectors in custom CSS with scoped ones
-    const customCss = css ? css.replace(/\.resume-md/g, `#${scopeId}`) : '';
+    const customCss = scaledCSS 
+      ? scaledCSS.replace(/\.resume-md/g, `#${scopeId}`).replace(/#SCOPE/g, `#${scopeId}`)
+      : '';
     
-    return baseStyles + customCss;
-  }, [config, scopeId]);
+    return themeVars + customCss;
+  }, [config, scopeId, scaledCSS]);
 
   return (
     <div 
-      className="resume-container bg-white"
+      className={`resume-container bg-white ${className}`}
       style={{
         transform: `scale(${scale})`,
         transformOrigin: 'top center',
@@ -166,9 +223,32 @@ const MarkdownResumeRenderer: React.FC<MarkdownResumeRendererProps> = React.memo
         position: 'relative'
       }}
     >
-      <style>{scopedCss}</style>
-      <div id={scopeId} className="resume-md-content">
-        <ReactMarkdown>{renderedMarkdown}</ReactMarkdown>
+      <style dangerouslySetInnerHTML={{ __html: scopedCss }} />
+      <div id={scopeId} className="markdown-content">
+        <ReactMarkdown 
+          rehypePlugins={[rehypeRaw]}
+          components={{
+            h1: ({ children }) => <h1 className="resume-h1">{children}</h1>,
+            h2: ({ children }) => <h2 className="resume-h2">{children}</h2>,
+            h3: ({ children }) => <h3 className="resume-h3">{children}</h3>,
+            p: ({ children }) => <p className="resume-p">{children}</p>,
+            ul: ({ children }) => <ul className="resume-ul">{children}</ul>,
+            li: ({ children }) => <li className="resume-li">{children}</li>,
+            a: ({ href, children }) => (
+              <a href={href} className="resume-a" target="_blank" rel="noopener noreferrer">
+                {children}
+              </a>
+            ),
+            hr: () => <hr className="resume-hr" />,
+            strong: ({ children }) => <strong className="resume-strong">{children}</strong>,
+            em: ({ children }) => <em className="resume-em">{children}</em>,
+            code: ({ children }) => <code className="resume-code">{children}</code>,
+            pre: ({ children }) => <pre className="resume-pre">{children}</pre>,
+            blockquote: ({ children }) => <blockquote className="resume-blockquote">{children}</blockquote>
+          }}
+        >
+          {processedMarkdown}
+        </ReactMarkdown>
       </div>
     </div>
   );
