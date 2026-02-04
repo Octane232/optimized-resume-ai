@@ -125,7 +125,7 @@ const ResumeEngine: React.FC<ResumeEngineProps> = ({ setActiveTab }) => {
             const canNav = canNavigateToStep(step.id);
 
             return (
-              <React.Fragment key={step.id}>
+              <div key={step.id} className="flex items-center gap-2">
                 <button
                   onClick={() => canNav && setCurrentStep(step.id)}
                   disabled={!canNav}
@@ -153,7 +153,7 @@ const ResumeEngine: React.FC<ResumeEngineProps> = ({ setActiveTab }) => {
                 {index < STEPS.length - 1 && (
                   <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
                 )}
-              </React.Fragment>
+              </div>
             );
           })}
         </div>
