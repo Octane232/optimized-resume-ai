@@ -1,7 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileSearch, Check, X, AlertTriangle, User, Briefcase, GraduationCap, Wrench, FileText, Award } from 'lucide-react';
+import { FileSearch, Check, X, AlertTriangle, User, Briefcase, GraduationCap, Wrench, FileText, Award, Loader2, Sparkles } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 // Parsed resume structure following standard taxonomy
 export interface ParsedContact {
@@ -16,11 +18,11 @@ export interface ParsedContact {
 
 export interface ParsedExperience {
   title: string;
-  normalizedTitle: string; // Standardized title (e.g., "Sr. SWE" → "Senior Software Engineer")
+  normalizedTitle: string;
   company: string;
   startDate: string;
   endDate: string;
-  duration: number; // Months
+  duration: number;
   isCurrent: boolean;
   bullets: string[];
   keywords: string[];
@@ -37,10 +39,10 @@ export interface ParsedEducation {
 
 export interface ParsedSkill {
   name: string;
-  normalizedName: string; // Mapped to taxonomy (e.g., "JS" → "JavaScript")
+  normalizedName: string;
   category: 'technical' | 'soft' | 'tool' | 'language';
-  confidence: number; // 0-100 based on frequency and context
-  isExplicit: boolean; // From skills section vs. inferred
+  confidence: number;
+  isExplicit: boolean;
 }
 
 export interface ParsedResume {
@@ -62,365 +64,103 @@ interface ResumeParserProps {
   onParsingComplete?: (parsed: ParsedResume) => void;
 }
 
-// Skill normalization map
-const SKILL_NORMALIZATION: Record<string, string> = {
-  'js': 'JavaScript',
-  'ts': 'TypeScript',
-  'py': 'Python',
-  'node': 'Node.js',
-  'nodejs': 'Node.js',
-  'react.js': 'React',
-  'reactjs': 'React',
-  'vue.js': 'Vue',
-  'vuejs': 'Vue',
-  'angular.js': 'Angular',
-  'angularjs': 'Angular',
-  'postgres': 'PostgreSQL',
-  'mongo': 'MongoDB',
-  'k8s': 'Kubernetes',
-  'aws': 'Amazon Web Services',
-  'gcp': 'Google Cloud Platform',
-  'azure': 'Microsoft Azure',
-};
-
-// Title normalization map
-const TITLE_NORMALIZATION: Record<string, string> = {
-  'sr.': 'Senior',
-  'sr ': 'Senior ',
-  'jr.': 'Junior',
-  'jr ': 'Junior ',
-  'swe': 'Software Engineer',
-  'sde': 'Software Development Engineer',
-  'pm': 'Product Manager',
-  'em': 'Engineering Manager',
-  'vp': 'Vice President',
-  'cto': 'Chief Technology Officer',
-  'ceo': 'Chief Executive Officer',
-};
-
-// Section detection patterns
-const SECTION_PATTERNS: Record<string, RegExp> = {
-  summary: /\b(summary|professional summary|objective|profile|about me|career summary)\b/i,
-  experience: /\b(experience|work experience|employment|professional experience|work history|career history)\b/i,
-  education: /\b(education|academic|qualifications|degrees?|university|college)\b/i,
-  skills: /\b(skills|technical skills|competencies|expertise|proficiencies|technologies)\b/i,
-  projects: /\b(projects|portfolio|personal projects|side projects)\b/i,
-  certifications: /\b(certifications?|certificates?|licenses?|credentials?|accreditations?)\b/i,
-  awards: /\b(awards?|honors?|achievements?|recognition)\b/i,
-};
-
-// Common skills database for detection
-const COMMON_SKILLS = {
-  technical: [
-    'javascript', 'typescript', 'python', 'java', 'c++', 'c#', 'ruby', 'php', 'go', 'rust', 'swift', 'kotlin',
-    'react', 'angular', 'vue', 'node.js', 'express', 'django', 'flask', 'spring', 'rails', 'laravel',
-    'html', 'css', 'sass', 'less', 'tailwind', 'bootstrap', 'material ui',
-    'sql', 'mysql', 'postgresql', 'mongodb', 'redis', 'elasticsearch', 'dynamodb', 'cassandra',
-    'aws', 'azure', 'gcp', 'docker', 'kubernetes', 'terraform', 'ansible', 'jenkins', 'gitlab ci',
-    'git', 'github', 'gitlab', 'bitbucket', 'jira', 'confluence',
-    'rest api', 'graphql', 'grpc', 'websocket', 'microservices', 'serverless',
-    'machine learning', 'deep learning', 'nlp', 'computer vision', 'tensorflow', 'pytorch',
-    'data science', 'data analysis', 'pandas', 'numpy', 'scikit-learn',
-  ],
-  soft: [
-    'leadership', 'communication', 'teamwork', 'problem solving', 'critical thinking',
-    'project management', 'time management', 'collaboration', 'mentoring', 'presentation',
-    'agile', 'scrum', 'kanban', 'strategic planning', 'decision making',
-  ],
-  tool: [
-    'excel', 'powerpoint', 'word', 'tableau', 'power bi', 'looker', 'figma', 'sketch',
-    'photoshop', 'illustrator', 'vs code', 'intellij', 'xcode', 'postman', 'insomnia',
-  ],
-};
-
-// Parse resume text
-const parseResumeText = (rawText: string): ParsedResume => {
-  const text = rawText.trim();
-  const lines = text.split('\n').filter(l => l.trim());
-  const lowerText = text.toLowerCase();
-
-  // Detect sections
-  const detectedSections = Object.entries(SECTION_PATTERNS)
-    .filter(([, pattern]) => pattern.test(text))
-    .map(([section]) => section);
-
-  // Extract contact info
-  const contact = extractContact(text, lines);
-
-  // Extract summary
-  const summary = extractSummary(text);
-
-  // Extract skills with confidence scoring
-  const skills = extractSkills(text);
-
-  // Extract experience
-  const experience = extractExperience(text);
-
-  // Extract education
-  const education = extractEducation(text);
-
-  // Extract certifications
-  const certifications = extractCertifications(text);
-
-  // Calculate total experience
-  const totalYearsExperience = experience.reduce((acc, exp) => acc + (exp.duration / 12), 0);
-
-  // Determine seniority level
-  const seniorityLevel = determineSeniority(totalYearsExperience, experience);
-
-  // Calculate parsing confidence
-  const parsingConfidence = calculateParsingConfidence(contact, skills, experience, education, detectedSections);
-
-  return {
-    contact,
-    summary,
-    skills,
-    experience,
-    education,
-    certifications,
-    projects: [], // Would extract from projects section
-    totalYearsExperience: Math.round(totalYearsExperience * 10) / 10,
-    seniorityLevel,
-    detectedSections,
-    parsingConfidence,
-  };
-};
-
-// Extract contact information
-const extractContact = (text: string, lines: string[]): ParsedContact => {
-  const emailMatch = text.match(/[\w.+-]+@[\w.-]+\.\w+/);
-  const phoneMatch = text.match(/(?:\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/);
-  const linkedinMatch = text.match(/linkedin\.com\/in\/[\w-]+/i);
-  const githubMatch = text.match(/github\.com\/[\w-]+/i);
-  const portfolioMatch = text.match(/(?:portfolio|website):\s*(https?:\/\/[^\s]+)/i) || 
-                         text.match(/(https?:\/\/(?!linkedin|github)[^\s]+\.(com|io|dev|me))/i);
-  const locationMatch = text.match(/([A-Z][a-z]+(?:\s[A-Z][a-z]+)*),\s*([A-Z]{2})\b/);
-  
-  // First non-trivial line is likely the name
-  const possibleName = lines.find(l => {
-    const trimmed = l.trim();
-    return trimmed.length > 2 && 
-           trimmed.length < 50 && 
-           !trimmed.includes('@') &&
-           !trimmed.includes('http') &&
-           !/\d{3}/.test(trimmed);
-  })?.trim() || '';
-
-  return {
-    name: possibleName,
-    email: emailMatch?.[0] || '',
-    phone: phoneMatch?.[0] || '',
-    location: locationMatch?.[0] || '',
-    linkedin: linkedinMatch?.[0] || '',
-    github: githubMatch?.[0] || '',
-    portfolio: portfolioMatch?.[1] || '',
-  };
-};
-
-// Extract summary section
-const extractSummary = (text: string): string => {
-  const summaryMatch = text.match(/(?:summary|professional summary|objective|profile|about me)[:\s]*\n?([\s\S]*?)(?=\n\s*(?:experience|education|skills|work|employment)|\n\n\n|$)/i);
-  if (summaryMatch) {
-    return summaryMatch[1].trim().slice(0, 500);
-  }
-  return '';
-};
-
-// Extract and normalize skills
-const extractSkills = (text: string): ParsedSkill[] => {
-  const lowerText = text.toLowerCase();
-  const skills: ParsedSkill[] = [];
-  const seenSkills = new Set<string>();
-
-  // Extract from explicit skills section
-  const skillsSectionMatch = text.match(/(?:skills|technical skills|competencies)[:\s]*\n?([\s\S]*?)(?=\n\s*(?:experience|education|projects|certifications)|\n\n\n|$)/i);
-  const skillsSectionText = skillsSectionMatch?.[1]?.toLowerCase() || '';
-
-  // Check all common skills
-  const allSkills = [
-    ...COMMON_SKILLS.technical.map(s => ({ name: s, category: 'technical' as const })),
-    ...COMMON_SKILLS.soft.map(s => ({ name: s, category: 'soft' as const })),
-    ...COMMON_SKILLS.tool.map(s => ({ name: s, category: 'tool' as const })),
-  ];
-
-  allSkills.forEach(({ name, category }) => {
-    const lowerName = name.toLowerCase();
-    if (lowerText.includes(lowerName) && !seenSkills.has(lowerName)) {
-      seenSkills.add(lowerName);
-      
-      // Normalize skill name
-      const normalizedName = SKILL_NORMALIZATION[lowerName] || 
-        name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-      
-      // Calculate confidence based on frequency and location
-      const inSkillsSection = skillsSectionText.includes(lowerName);
-      const occurrences = (lowerText.match(new RegExp(lowerName, 'g')) || []).length;
-      const confidence = Math.min(100, (inSkillsSection ? 50 : 20) + (occurrences * 10));
-
-      skills.push({
-        name,
-        normalizedName,
-        category,
-        confidence,
-        isExplicit: inSkillsSection,
-      });
-    }
-  });
-
-  return skills.sort((a, b) => b.confidence - a.confidence);
-};
-
-// Extract experience
-const extractExperience = (text: string): ParsedExperience[] => {
-  const experiences: ParsedExperience[] = [];
-  
-  // Simple pattern matching for job entries
-  const jobPatterns = [
-    /([A-Za-z\s]+)\s+(?:at|@|–|-)\s+([A-Za-z\s&.]+)\s*[|•·]\s*((?:\d{4}|present|current))/gi,
-    /([A-Za-z\s]+),?\s+([A-Za-z\s&.]+)\s*[|•·–-]\s*((?:\w+\s+)?\d{4})\s*(?:to|–|-)\s*((?:\w+\s+)?\d{4}|present|current)/gi,
-  ];
-
-  // Detect leadership keywords
-  const leadershipKeywords = ['led', 'managed', 'mentored', 'architected', 'designed', 'built', 'created', 'developed', 'implemented'];
-  const hasLeadershipIndicators = leadershipKeywords.some(kw => text.toLowerCase().includes(kw));
-
-  // Extract bullet points
-  const bulletMatches = text.match(/[•\-–>▸◆]\s*([^\n•\-–>▸◆]+)/g) || [];
-  const bullets = bulletMatches.map(b => b.replace(/^[•\-–>▸◆]\s*/, '').trim()).filter(b => b.length > 10);
-
-  // Create a basic experience entry if we can't parse structured data
-  if (bullets.length > 0) {
-    const keywords = bullets.flatMap(b => 
-      [...COMMON_SKILLS.technical, ...COMMON_SKILLS.soft]
-        .filter(skill => b.toLowerCase().includes(skill.toLowerCase()))
-    );
-
-    experiences.push({
-      title: 'Professional Experience',
-      normalizedTitle: 'Professional Experience',
-      company: '',
-      startDate: '',
-      endDate: 'Present',
-      duration: 0,
-      isCurrent: true,
-      bullets: bullets.slice(0, 10),
-      keywords: [...new Set(keywords)],
-    });
-  }
-
-  return experiences;
-};
-
-// Extract education
-const extractEducation = (text: string): ParsedEducation[] => {
-  const education: ParsedEducation[] = [];
-  
-  // Common degree patterns
-  const degreePatterns = [
-    /\b(bachelor'?s?|master'?s?|ph\.?d\.?|m\.?s\.?|b\.?s\.?|b\.?a\.?|m\.?a\.?|m\.?b\.?a\.?)\b.*?((?:of|in)\s+[\w\s]+)?/gi,
-    /\b(computer science|engineering|business|mathematics|physics|chemistry|biology)\b/gi,
-  ];
-
-  const institutionPatterns = [
-    /\b(university|college|institute|school)\s+(?:of\s+)?[\w\s]+/gi,
-    /\b([\w\s]+)\s+(university|college|institute)/gi,
-  ];
-
-  const degreeMatch = text.match(degreePatterns[0]);
-  const institutionMatch = text.match(institutionPatterns[0]) || text.match(institutionPatterns[1]);
-  const yearMatch = text.match(/\b(19|20)\d{2}\b/g);
-
-  if (degreeMatch || institutionMatch) {
-    education.push({
-      degree: degreeMatch?.[0]?.trim() || '',
-      field: '',
-      institution: institutionMatch?.[0]?.trim() || '',
-      startYear: yearMatch?.[0] || '',
-      endYear: yearMatch?.[1] || yearMatch?.[0] || '',
-    });
-  }
-
-  return education;
-};
-
-// Extract certifications
-const extractCertifications = (text: string): string[] => {
-  const certs: string[] = [];
-  const certPatterns = [
-    /\b(aws certified|google cloud|azure certified|pmp|scrum master|cissp|ceh|comptia)/gi,
-  ];
-
-  certPatterns.forEach(pattern => {
-    const matches = text.match(pattern);
-    if (matches) {
-      certs.push(...matches);
-    }
-  });
-
-  return [...new Set(certs)];
-};
-
-// Determine seniority level
-const determineSeniority = (
-  totalYears: number, 
-  experience: ParsedExperience[]
-): ParsedResume['seniorityLevel'] => {
-  const titles = experience.map(e => e.title.toLowerCase()).join(' ');
-  
-  if (titles.includes('chief') || titles.includes('vp') || titles.includes('director')) {
-    return 'executive';
-  }
-  if (titles.includes('lead') || titles.includes('principal') || titles.includes('staff')) {
-    return 'lead';
-  }
-  if (titles.includes('senior') || titles.includes('sr') || totalYears >= 5) {
-    return 'senior';
-  }
-  if (totalYears >= 2) {
-    return 'mid';
-  }
-  return 'entry';
-};
-
-// Calculate parsing confidence
-const calculateParsingConfidence = (
-  contact: ParsedContact,
-  skills: ParsedSkill[],
-  experience: ParsedExperience[],
-  education: ParsedEducation[],
-  sections: string[]
-): number => {
-  let score = 0;
-  
-  // Contact completeness (25 points)
-  if (contact.name) score += 5;
-  if (contact.email) score += 10;
-  if (contact.phone) score += 5;
-  if (contact.linkedin || contact.github) score += 5;
-  
-  // Skills detection (25 points)
-  if (skills.length > 0) score += 10;
-  if (skills.length > 5) score += 10;
-  if (skills.some(s => s.isExplicit)) score += 5;
-  
-  // Experience detection (25 points)
-  if (experience.length > 0) score += 15;
-  if (experience.some(e => e.bullets.length > 2)) score += 10;
-  
-  // Education detection (10 points)
-  if (education.length > 0) score += 10;
-  
-  // Section detection (15 points)
-  score += Math.min(15, sections.length * 3);
-  
-  return Math.min(100, score);
-};
-
 const ResumeParser: React.FC<ResumeParserProps> = ({ rawText, onParsingComplete }) => {
-  const parsed = useMemo(() => {
-    const result = parseResumeText(rawText);
-    onParsingComplete?.(result);
-    return result;
+  const [parsed, setParsed] = useState<ParsedResume | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const parseWithAI = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const { data, error: fnError } = await supabase.functions.invoke('parse-resume-ai', {
+          body: { resumeText: rawText },
+        });
+
+        if (fnError) {
+          throw new Error(fnError.message || 'Failed to parse resume');
+        }
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        // Ensure all required fields have defaults
+        const result: ParsedResume = {
+          contact: {
+            name: data.contact?.name || '',
+            email: data.contact?.email || '',
+            phone: data.contact?.phone || '',
+            location: data.contact?.location || '',
+            linkedin: data.contact?.linkedin || '',
+            github: data.contact?.github || '',
+            portfolio: data.contact?.portfolio || '',
+          },
+          summary: data.summary || '',
+          skills: (data.skills || []).map((s: any) => ({
+            name: s.name || '',
+            normalizedName: s.normalizedName || s.name || '',
+            category: s.category || 'technical',
+            confidence: s.confidence || 50,
+            isExplicit: s.isExplicit ?? true,
+          })),
+          experience: (data.experience || []).map((e: any) => ({
+            title: e.title || '',
+            normalizedTitle: e.normalizedTitle || e.title || '',
+            company: e.company || '',
+            startDate: e.startDate || '',
+            endDate: e.endDate || '',
+            duration: e.duration || 0,
+            isCurrent: e.isCurrent ?? false,
+            bullets: e.bullets || [],
+            keywords: e.keywords || [],
+          })),
+          education: (data.education || []).map((ed: any) => ({
+            degree: ed.degree || '',
+            field: ed.field || '',
+            institution: ed.institution || '',
+            startYear: ed.startYear || '',
+            endYear: ed.endYear || '',
+            gpa: ed.gpa,
+          })),
+          certifications: data.certifications || [],
+          projects: (data.projects || []).map((p: any) => ({
+            title: p.title || '',
+            description: p.description || '',
+            technologies: p.technologies || [],
+          })),
+          totalYearsExperience: data.totalYearsExperience || 0,
+          seniorityLevel: data.seniorityLevel || 'entry',
+          detectedSections: data.detectedSections || [],
+          parsingConfidence: data.parsingConfidence || 0,
+        };
+
+        setParsed(result);
+        onParsingComplete?.(result);
+
+        toast({
+          title: "Resume parsed successfully",
+          description: `Detected ${result.skills.length} skills and ${result.experience.length} work experiences`,
+        });
+
+      } catch (err: any) {
+        console.error('Resume parsing error:', err);
+        setError(err.message || 'Failed to parse resume');
+        toast({
+          title: "Parsing failed",
+          description: err.message || 'Could not parse resume. Please try again.',
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (rawText?.trim()) {
+      parseWithAI();
+    }
   }, [rawText, onParsingComplete]);
 
   const SectionStatus = ({ 
@@ -449,6 +189,54 @@ const ResumeParser: React.FC<ResumeParserProps> = ({ rawText, onParsingComplete 
     </div>
   );
 
+  if (isLoading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="command-card p-8"
+      >
+        <div className="flex flex-col items-center justify-center gap-4">
+          <div className="relative">
+            <Loader2 className="w-12 h-12 text-primary animate-spin" />
+            <Sparkles className="w-5 h-5 text-primary absolute -top-1 -right-1 animate-pulse" />
+          </div>
+          <div className="text-center">
+            <h3 className="font-semibold text-foreground">AI Parsing in Progress</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              Analyzing your resume with advanced AI...
+            </p>
+          </div>
+          <div className="w-full max-w-xs">
+            <Progress value={45} className="h-2 animate-pulse" />
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  if (error) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="command-card p-6"
+      >
+        <div className="flex flex-col items-center justify-center gap-4 text-center">
+          <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
+            <X className="w-6 h-6 text-red-500" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-foreground">Parsing Failed</h3>
+            <p className="text-sm text-muted-foreground mt-1">{error}</p>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  if (!parsed) return null;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -457,8 +245,11 @@ const ResumeParser: React.FC<ResumeParserProps> = ({ rawText, onParsingComplete 
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <FileSearch className="w-5 h-5 text-primary" />
-          <h3 className="font-semibold text-foreground">Parsing Results</h3>
+          <div className="relative">
+            <FileSearch className="w-5 h-5 text-primary" />
+            <Sparkles className="w-3 h-3 text-primary absolute -top-1 -right-1" />
+          </div>
+          <h3 className="font-semibold text-foreground">AI Parsing Results</h3>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">Confidence</span>
@@ -498,39 +289,41 @@ const ResumeParser: React.FC<ResumeParserProps> = ({ rawText, onParsingComplete 
               }`}
             >
               {value ? (
-                <Check className="w-3 h-3 text-emerald-500 shrink-0" />
+                <Check className="w-3 h-3 text-emerald-500 flex-shrink-0" />
               ) : (
-                <X className="w-3 h-3 text-red-500 shrink-0" />
+                <X className="w-3 h-3 text-red-400 flex-shrink-0" />
               )}
-              <span className="text-xs text-muted-foreground capitalize w-16">{key}:</span>
-              <span className="text-xs truncate font-mono">{value || 'Not found'}</span>
+              <span className="text-muted-foreground capitalize">{key}:</span>
+              <span className="truncate text-foreground">{value || 'Not found'}</span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Skills Preview */}
+      {/* Skills Summary */}
       {parsed.skills.length > 0 && (
         <div>
           <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
-            Extracted Skills ({parsed.skills.length})
+            Top Skills ({parsed.skills.length} detected)
           </p>
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-2">
             {parsed.skills.slice(0, 15).map((skill, i) => (
-              <span
+              <span 
                 key={i}
-                className={`px-2 py-1 rounded text-xs ${
-                  skill.isExplicit
-                    ? 'bg-primary/20 text-primary'
+                className={`px-2 py-1 text-xs rounded-full ${
+                  skill.category === 'technical' 
+                    ? 'bg-blue-500/20 text-blue-600 dark:text-blue-400'
+                    : skill.category === 'soft'
+                    ? 'bg-purple-500/20 text-purple-600 dark:text-purple-400'
                     : 'bg-muted text-muted-foreground'
                 }`}
-                title={`${skill.confidence}% confidence`}
               >
                 {skill.normalizedName}
+                {skill.confidence >= 80 && <span className="ml-1 opacity-60">✓</span>}
               </span>
             ))}
             {parsed.skills.length > 15 && (
-              <span className="px-2 py-1 text-xs text-muted-foreground">
+              <span className="px-2 py-1 text-xs bg-muted rounded-full text-muted-foreground">
                 +{parsed.skills.length - 15} more
               </span>
             )}
@@ -538,24 +331,47 @@ const ResumeParser: React.FC<ResumeParserProps> = ({ rawText, onParsingComplete 
         </div>
       )}
 
-      {/* Summary Stats */}
-      <div className="grid grid-cols-3 gap-3 p-3 bg-muted/30 rounded-lg">
-        <div className="text-center">
-          <p className="text-2xl font-bold text-foreground">{parsed.totalYearsExperience}</p>
-          <p className="text-xs text-muted-foreground">Years Exp.</p>
+      {/* Experience Summary */}
+      {parsed.experience.length > 0 && (
+        <div>
+          <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
+            Work Experience ({parsed.totalYearsExperience.toFixed(1)} years)
+          </p>
+          <div className="space-y-2">
+            {parsed.experience.slice(0, 3).map((exp, i) => (
+              <div key={i} className="p-3 bg-muted/30 rounded-lg">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="font-medium text-sm text-foreground">{exp.normalizedTitle}</p>
+                    <p className="text-xs text-muted-foreground">{exp.company}</p>
+                  </div>
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    {exp.startDate} - {exp.endDate}
+                  </span>
+                </div>
+                {exp.bullets.length > 0 && (
+                  <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
+                    • {exp.bullets[0]}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="text-center">
-          <p className="text-2xl font-bold text-foreground capitalize">{parsed.seniorityLevel}</p>
-          <p className="text-xs text-muted-foreground">Level</p>
+      )}
+
+      {/* Seniority Level */}
+      <div className="flex items-center justify-between p-3 bg-primary/10 rounded-lg">
+        <div className="flex items-center gap-2">
+          <User className="w-4 h-4 text-primary" />
+          <span className="text-sm text-foreground">Detected Seniority Level</span>
         </div>
-        <div className="text-center">
-          <p className="text-2xl font-bold text-foreground">{parsed.skills.length}</p>
-          <p className="text-xs text-muted-foreground">Skills</p>
-        </div>
+        <span className="text-sm font-semibold text-primary capitalize">
+          {parsed.seniorityLevel}
+        </span>
       </div>
     </motion.div>
   );
 };
 
-export { parseResumeText };
 export default ResumeParser;
