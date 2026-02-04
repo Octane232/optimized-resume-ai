@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { JSZip } from "https://deno.land/x/jszip@0.11.0/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -88,42 +89,81 @@ function extractTextFromPDF(uint8Array: Uint8Array): string {
   return result;
 }
 
-// Extract text from DOCX (which is a ZIP containing XML)
+// Extract text from DOCX using JSZip to properly decompress
 async function extractTextFromDOCX(uint8Array: Uint8Array): Promise<string> {
-  // DOCX files are ZIP archives - we need to find the document.xml content
-  const textDecoder = new TextDecoder('utf-8', { fatal: false });
-  let rawContent = textDecoder.decode(uint8Array);
-  
-  // Try to find XML content patterns typical in DOCX
-  const textParts: string[] = [];
-  
-  // Look for <w:t> tags which contain the actual text
-  const wtRegex = /<w:t[^>]*>([^<]*)<\/w:t>/g;
-  let match;
-  while ((match = wtRegex.exec(rawContent)) !== null) {
-    if (match[1].trim()) {
-      textParts.push(match[1]);
+  try {
+    const zip = new JSZip();
+    await zip.loadAsync(uint8Array);
+    
+    // DOCX stores content in word/document.xml
+    const documentXml = zip.file("word/document.xml");
+    if (!documentXml) {
+      console.log("No document.xml found in DOCX");
+      return "";
     }
-  }
-  
-  // If we found XML text content
-  if (textParts.length > 0) {
+    
+    const xmlContent = await documentXml.async("string");
+    console.log(`Extracted document.xml: ${xmlContent.length} chars`);
+    
+    // Extract text from <w:t> tags (Word text elements)
+    const textParts: string[] = [];
+    const wtRegex = /<w:t[^>]*>([^<]*)<\/w:t>/g;
+    let match;
+    
+    while ((match = wtRegex.exec(xmlContent)) !== null) {
+      if (match[1].trim()) {
+        textParts.push(match[1]);
+      }
+    }
+    
+    // Also check for <w:p> paragraph breaks to add newlines
+    let result = "";
+    const paragraphRegex = /<w:p[^>]*>([\s\S]*?)<\/w:p>/g;
+    let paragraphMatch;
+    
+    while ((paragraphMatch = paragraphRegex.exec(xmlContent)) !== null) {
+      const paragraphContent = paragraphMatch[1];
+      const paragraphTexts: string[] = [];
+      
+      const textInParagraph = /<w:t[^>]*>([^<]*)<\/w:t>/g;
+      let textMatch;
+      while ((textMatch = textInParagraph.exec(paragraphContent)) !== null) {
+        if (textMatch[1]) {
+          paragraphTexts.push(textMatch[1]);
+        }
+      }
+      
+      if (paragraphTexts.length > 0) {
+        result += paragraphTexts.join("") + "\n";
+      }
+    }
+    
+    // If paragraph parsing didn't work, fall back to simple extraction
+    if (result.trim().length < 50 && textParts.length > 0) {
+      result = textParts.join(" ");
+    }
+    
+    console.log(`Parsed DOCX text: ${result.length} chars, preview: ${result.substring(0, 200)}`);
+    return result.trim();
+    
+  } catch (error) {
+    console.error("DOCX parsing error:", error);
+    
+    // Fallback: Try raw text extraction
+    const textDecoder = new TextDecoder('utf-8', { fatal: false });
+    const rawContent = textDecoder.decode(uint8Array);
+    
+    const textParts: string[] = [];
+    const wtRegex = /<w:t[^>]*>([^<]*)<\/w:t>/g;
+    let match;
+    while ((match = wtRegex.exec(rawContent)) !== null) {
+      if (match[1].trim()) {
+        textParts.push(match[1]);
+      }
+    }
+    
     return textParts.join(' ').replace(/\s+/g, ' ').trim();
   }
-  
-  // Fallback: try to extract any readable text
-  const cleanText = rawContent
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/[^\x20-\x7E\n\r\t]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-  
-  // Filter to meaningful words
-  const words = cleanText.split(' ').filter(w => 
-    w.length > 1 && /[a-zA-Z]/.test(w) && !/^[0-9]+$/.test(w)
-  );
-  
-  return words.join(' ');
 }
 
 serve(async (req) => {
@@ -160,6 +200,7 @@ serve(async (req) => {
       try {
         extractedText = extractTextFromPDF(uint8Array);
         console.log(`PDF extraction result: ${extractedText.length} chars`);
+        console.log(`PDF preview: ${extractedText.substring(0, 300)}`);
         
         if (extractedText.length < 50) {
           return new Response(
@@ -185,6 +226,7 @@ serve(async (req) => {
       try {
         extractedText = await extractTextFromDOCX(uint8Array);
         console.log(`DOCX extraction result: ${extractedText.length} chars`);
+        console.log(`DOCX preview: ${extractedText.substring(0, 300)}`);
         
         if (extractedText.length < 50) {
           return new Response(
@@ -217,7 +259,6 @@ serve(async (req) => {
       .replace(/\r\n/g, '\n')
       .replace(/\r/g, '\n')
       .replace(/\n{3,}/g, '\n\n')
-      .replace(/\s+/g, ' ')
       .trim();
 
     if (!extractedText || extractedText.length < 20) {
@@ -230,7 +271,8 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Successfully extracted ${extractedText.length} characters`);
+    console.log(`Final extracted text: ${extractedText.length} characters`);
+    console.log(`Text preview: ${extractedText.substring(0, 500)}`);
 
     return new Response(
       JSON.stringify({ text: extractedText }),
