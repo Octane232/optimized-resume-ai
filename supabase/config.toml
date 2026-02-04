@@ -65,3 +65,6 @@ verify_jwt = false
 
 [functions.vaylance-chat]
 verify_jwt = false
+
+[functions.parse-resume-ai]
+verify_jwt = false

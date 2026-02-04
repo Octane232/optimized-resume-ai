@@ -7,7 +7,7 @@ import { useSubscription } from '@/contexts/SubscriptionContext';
 
 // New modular components
 import ResumeIngestion, { type IngestionResult } from './resume-engine/ResumeIngestion';
-import ResumeParser, { type ParsedResume, parseResumeText } from './resume-engine/ResumeParser';
+import ResumeParser, { type ParsedResume } from './resume-engine/ResumeParser';
 import MatchingEngine from './resume-engine/MatchingEngine';
 import EnhancementSuggestions from './resume-engine/EnhancementSuggestions';
 import ExportPanel from './resume-engine/ExportPanel';
@@ -21,7 +21,7 @@ type EngineStep = 'ingest' | 'parse' | 'match' | 'enhance' | 'export';
 
 const STEPS: { id: EngineStep; label: string; description: string }[] = [
   { id: 'ingest', label: 'Upload', description: 'Import your resume' },
-  { id: 'parse', label: 'Parse', description: 'Extract structured data' },
+  { id: 'parse', label: 'Parse', description: 'AI extraction' },
   { id: 'match', label: 'Match', description: 'Compare with job' },
   { id: 'enhance', label: 'Enhance', description: 'Get suggestions' },
   { id: 'export', label: 'Export', description: 'Download & share' },
@@ -39,31 +39,16 @@ const ResumeEngine: React.FC<ResumeEngineProps> = ({ setActiveTab }) => {
   const [missingKeywords, setMissingKeywords] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Handle resume ingestion complete
+  // Handle resume ingestion complete - now transitions to AI parsing step
   const handleIngestionComplete = useCallback((result: IngestionResult) => {
     setIngestionResult(result);
     setRawText(result.rawText);
+    setCurrentStep('parse'); // Move to parse step where AI parsing happens
     
-    // Auto-parse the resume
-    setIsProcessing(true);
-    try {
-      const parsed = parseResumeText(result.rawText);
-      setParsedResume(parsed);
-      setCurrentStep('parse');
-      
-      toast({
-        title: "Resume Processed",
-        description: `Extracted ${parsed.skills.length} skills, ${parsed.detectedSections.length} sections`,
-      });
-    } catch (error) {
-      toast({
-        title: "Parsing Error",
-        description: "Could not parse the resume. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessing(false);
-    }
+    toast({
+      title: "Resume Uploaded",
+      description: "Starting AI-powered analysis...",
+    });
   }, []);
 
   // Handle parsing complete (from parser component)
@@ -121,7 +106,7 @@ const ResumeEngine: React.FC<ResumeEngineProps> = ({ setActiveTab }) => {
               Resume Engine
             </h1>
             <p className="text-sm text-muted-foreground">
-              Parse, analyze, match, and optimize your resume
+              AI-powered resume parsing, analysis, and optimization
             </p>
           </div>
           {rawText && (
@@ -309,7 +294,7 @@ const ResumeEngine: React.FC<ResumeEngineProps> = ({ setActiveTab }) => {
             </h3>
             <p className="text-sm text-muted-foreground max-w-md mx-auto">
               Upload a PDF, DOCX, or TXT file, paste your resume text, or import from LinkedIn 
-              to begin the analysis process.
+              to begin the AI-powered analysis process.
             </p>
           </motion.div>
         )}
