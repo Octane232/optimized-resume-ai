@@ -34,6 +34,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({ data, scale = 1 }) 
               <p>{data.contact.phone}</p>
               <p>{data.contact.location}</p>
               {data.contact.linkedin && <p>{data.contact.linkedin}</p>}
+              {data.contact.github && <p>{data.contact.github}</p>}
             </div>
           </section>
 
@@ -50,7 +51,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({ data, scale = 1 }) 
           </section>
 
           {/* Education */}
-          <section>
+          <section className="mb-6">
             <h3 className="text-lg font-bold mb-3 border-b border-purple-300 pb-1">Education</h3>
             {data.education.map((edu, index) => (
               <div key={index} className="mb-3 text-sm">
@@ -60,6 +61,21 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({ data, scale = 1 }) 
               </div>
             ))}
           </section>
+
+          {/* Certifications */}
+          {data.certifications && data.certifications.length > 0 && (
+            <section>
+              <h3 className="text-lg font-bold mb-3 border-b border-purple-300 pb-1">Certifications</h3>
+              <div className="space-y-2">
+                {data.certifications.map((cert, index) => (
+                  <div key={index} className="text-sm">
+                    <p className="font-semibold">{cert.name}</p>
+                    <p className="text-purple-200 text-xs">{cert.issuer}{cert.date && ` • ${cert.date}`}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
 
         {/* Right Content */}
