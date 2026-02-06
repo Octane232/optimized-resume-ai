@@ -21,7 +21,6 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, scale = 1 }) =>
           <p>{data.contact.email} | {data.contact.phone}</p>
           <p>{data.contact.location}</p>
           {data.contact.linkedin && <p>{data.contact.linkedin}</p>}
-          {data.contact.github && <p>{data.contact.github}</p>}
         </div>
       </div>
 

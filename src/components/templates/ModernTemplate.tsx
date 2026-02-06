@@ -24,8 +24,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, scale = 1 }) => {
           </div>
           <div>
             <p className="mb-1">{data.contact.location}</p>
-            {data.contact.linkedin && <p className="mb-1">{data.contact.linkedin}</p>}
-            {data.contact.github && <p>{data.contact.github}</p>}
+            {data.contact.linkedin && <p>{data.contact.linkedin}</p>}
           </div>
         </div>
       </div>
