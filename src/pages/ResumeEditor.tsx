@@ -109,13 +109,14 @@ const ResumeEditor: React.FC = () => {
 
   const [newSkill, setNewSkill] = useState("");
 
-  // Load templates and resume data
+  // Load templates first, then load resume
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
         const templateId = searchParams.get("template");
 
+        // Load only classic templates
         const { data: templatesData, error } = await supabase
           .from("resume_templates")
           .select("*")
@@ -130,6 +131,7 @@ const ResumeEditor: React.FC = () => {
           const usable = templatesData.filter((t: any) => t.json_content);
           const getFallbackTemplate = () => usable[0] || templatesData[0];
 
+          // Set initial template
           let initialTemplate = getFallbackTemplate();
           if (templateId) {
             const urlTemplate = templatesData.find(
@@ -140,6 +142,7 @@ const ResumeEditor: React.FC = () => {
             }
           }
 
+          // Load existing resume if not new
           if (resumeId && resumeId !== "new") {
             const { data: resumeData, error: resumeError } = await supabase
               .from("resumes")
@@ -160,6 +163,7 @@ const ResumeEditor: React.FC = () => {
               setResumeTitle(resumeData.title || "My Resume");
             }
           } else {
+            // New resume - use template
             setSelectedTemplate(initialTemplate.id);
             setResumeTitle(initialTemplate.name);
           }
@@ -179,7 +183,6 @@ const ResumeEditor: React.FC = () => {
     loadData();
   }, [resumeId, searchParams, toast]);
 
-  // Helper functions for updating resume data
   const updateContact = (field: string, value: string) => {
     setResumeData((prev) => ({
       ...prev,
@@ -351,6 +354,7 @@ const ResumeEditor: React.FC = () => {
       template_name: selectedTemplate,
     };
 
+    // Keep UI in sync
     setResumeTitle(computedTitle);
     if (resumeId && resumeId !== "new") {
       const { error } = await supabase.from("resumes").update(resumeRecord).eq("id", resumeId);
@@ -375,9 +379,6 @@ const ResumeEditor: React.FC = () => {
     setSaving(false);
   };
 
-  // =============================
-  // ATS-OPTIMIZED DOCX EXPORT
-  // =============================
   const exportDOCX = async () => {
     if (!canDownloadPDF()) {
       toast({
@@ -391,19 +392,18 @@ const ResumeEditor: React.FC = () => {
     try {
       const sections: Paragraph[] = [];
 
-      // ===== CONTACT INFORMATION =====
-      // Name - Large and bold (ATS recognizes this as candidate name)
+      // Name - ATS optimized
       sections.push(
         new Paragraph({
           children: [
             new TextRun({
               text: resumeData.contact.name,
               bold: true,
-              size: 32, // Larger for name recognition
+              size: 28,
             }),
           ],
           alignment: AlignmentType.LEFT,
-          spacing: { after: 100 },
+          spacing: { after: 80 },
         }),
       );
 
@@ -414,22 +414,26 @@ const ResumeEditor: React.FC = () => {
             children: [
               new TextRun({
                 text: resumeData.contact.title,
-                size: 24,
-                color: "444444", // Dark gray, not black for slight styling
+                size: 22,
               }),
             ],
             alignment: AlignmentType.LEFT,
-            spacing: { after: 150 },
+            spacing: { after: 120 },
           }),
         );
       }
 
-      // Contact Info - SEPARATE LINES for ATS parsing (not pipes!)
-      const contactInfo = [resumeData.contact.email, resumeData.contact.phone, resumeData.contact.location].filter(
-        Boolean,
-      );
+      // Contact Info - LINE BREAKS for ATS (not pipes)
+      const contactInfo = [
+        resumeData.contact.email,
+        resumeData.contact.phone,
+        resumeData.contact.location,
+        resumeData.contact.linkedin ? `LinkedIn: ${resumeData.contact.linkedin}` : "",
+        resumeData.contact.github ? `GitHub: ${resumeData.contact.github}` : "",
+        resumeData.contact.portfolio ? `Portfolio: ${resumeData.contact.portfolio}` : "",
+      ].filter(Boolean);
 
-      contactInfo.forEach((info) => {
+      contactInfo.forEach((info, index) => {
         sections.push(
           new Paragraph({
             children: [
@@ -439,347 +443,156 @@ const ResumeEditor: React.FC = () => {
               }),
             ],
             alignment: AlignmentType.LEFT,
-            spacing: { after: 40 },
+            spacing: { after: index === contactInfo.length - 1 ? 200 : 40 },
           }),
         );
       });
 
-      // Additional links on separate lines
-      const additionalLinks = [
-        resumeData.contact.linkedin ? `LinkedIn: ${resumeData.contact.linkedin}` : "",
-        resumeData.contact.github ? `GitHub: ${resumeData.contact.github}` : "",
-        resumeData.contact.portfolio ? `Portfolio: ${resumeData.contact.portfolio}` : "",
-      ].filter(Boolean);
-
-      additionalLinks.forEach((link, index) => {
-        sections.push(
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: link,
-                size: 20,
-              }),
-            ],
-            alignment: AlignmentType.LEFT,
-            spacing: { after: index === additionalLinks.length - 1 ? 200 : 40 },
-          }),
-        );
-      });
-
-      // ===== PROFESSIONAL SUMMARY =====
+      // Summary
       if (resumeData.summary) {
         sections.push(
           new Paragraph({
-            children: [
-              new TextRun({
-                text: "PROFESSIONAL SUMMARY",
-                bold: true,
-                size: 24,
-                allCaps: true,
-              }),
-            ],
-            alignment: AlignmentType.LEFT,
-            border: {
-              bottom: {
-                style: BorderStyle.SINGLE,
-                size: 3,
-                color: "000000",
-              },
-            },
-            spacing: { after: 120 },
+            children: [new TextRun({ text: "PROFESSIONAL SUMMARY", bold: true, size: 22, allCaps: true })],
+            border: { bottom: { style: BorderStyle.SINGLE, size: 2, color: "000000" } },
+            spacing: { before: 0, after: 120 },
           }),
         );
-
         sections.push(
           new Paragraph({
-            children: [
-              new TextRun({
-                text: resumeData.summary,
-                size: 22,
-              }),
-            ],
-            alignment: AlignmentType.LEFT,
-            spacing: { after: 200 },
+            children: [new TextRun({ text: resumeData.summary, size: 20 })],
+            spacing: { after: 160 },
           }),
         );
       }
 
-      // ===== SKILLS SECTION =====
-      // Skills should be comma-separated for ATS keyword extraction
+      // Skills - comma separated for ATS
       if (resumeData.skills && resumeData.skills.length > 0) {
         sections.push(
           new Paragraph({
-            children: [
-              new TextRun({
-                text: "SKILLS",
-                bold: true,
-                size: 24,
-                allCaps: true,
-              }),
-            ],
-            alignment: AlignmentType.LEFT,
-            border: {
-              bottom: {
-                style: BorderStyle.SINGLE,
-                size: 3,
-                color: "000000",
-              },
-            },
-            spacing: { after: 120 },
+            children: [new TextRun({ text: "SKILLS", bold: true, size: 22, allCaps: true })],
+            border: { bottom: { style: BorderStyle.SINGLE, size: 2, color: "000000" } },
+            spacing: { before: 0, after: 120 },
           }),
         );
-
-        // Join skills with commas - ATS parses this best
-        const skillsText = resumeData.skills.join(", ");
         sections.push(
           new Paragraph({
-            children: [
-              new TextRun({
-                text: skillsText,
-                size: 22,
-              }),
-            ],
-            alignment: AlignmentType.LEFT,
-            spacing: { after: 200 },
+            children: [new TextRun({ text: resumeData.skills.join(", "), size: 20 })],
+            spacing: { after: 160 },
           }),
         );
       }
 
-      // ===== EXPERIENCE SECTION =====
+      // Experience
       if (resumeData.experience && resumeData.experience.length > 0) {
         sections.push(
           new Paragraph({
-            children: [
-              new TextRun({
-                text: "PROFESSIONAL EXPERIENCE",
-                bold: true,
-                size: 24,
-                allCaps: true,
-              }),
-            ],
-            alignment: AlignmentType.LEFT,
-            border: {
-              bottom: {
-                style: BorderStyle.SINGLE,
-                size: 3,
-                color: "000000",
-              },
-            },
-            spacing: { after: 120 },
+            children: [new TextRun({ text: "PROFESSIONAL EXPERIENCE", bold: true, size: 22, allCaps: true })],
+            border: { bottom: { style: BorderStyle.SINGLE, size: 2, color: "000000" } },
+            spacing: { before: 0, after: 120 },
           }),
         );
 
-        resumeData.experience.forEach((exp, expIndex) => {
-          // Job title and company on same line, comma separated
+        resumeData.experience.forEach((exp) => {
+          // Job title and company
           sections.push(
             new Paragraph({
               children: [
-                new TextRun({
-                  text: exp.title,
-                  bold: true,
-                  size: 22,
-                }),
-                new TextRun({
-                  text: `, ${exp.company}`,
-                  size: 22,
-                }),
+                new TextRun({ text: exp.title, bold: true, size: 20 }),
+                new TextRun({ text: `, ${exp.company}`, size: 20 }),
               ],
-              alignment: AlignmentType.LEFT,
-              spacing: { before: expIndex === 0 ? 0 : 120, after: 60 },
+              spacing: { before: 120 },
             }),
           );
 
-          // Dates in italics
+          // Dates
           if (exp.startDate || exp.endDate) {
             sections.push(
               new Paragraph({
                 children: [
                   new TextRun({
                     text: `${exp.startDate || ""} - ${exp.endDate || ""}`,
-                    size: 20,
+                    size: 18,
                     italics: true,
                     color: "666666",
                   }),
                 ],
-                alignment: AlignmentType.LEFT,
                 spacing: { after: 80 },
               }),
             );
           }
 
-          // Responsibilities as bullet points (standard bullets for ATS)
-          if (exp.responsibilities && exp.responsibilities.length > 0) {
-            exp.responsibilities.forEach((resp) => {
-              sections.push(
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: `• ${resp}`,
-                      size: 22,
-                    }),
-                  ],
-                  alignment: AlignmentType.LEFT,
-                  indent: { left: 400 }, // Indent for bullets
-                  spacing: { before: 40, after: 40 },
-                }),
-              );
-            });
-          }
+          // Responsibilities
+          exp.responsibilities?.forEach((resp) => {
+            sections.push(
+              new Paragraph({
+                children: [new TextRun({ text: `• ${resp}`, size: 20 })],
+                indent: { left: 360 },
+                spacing: { before: 40 },
+              }),
+            );
+          });
         });
       }
 
-      // ===== EDUCATION SECTION =====
+      // Education
       if (resumeData.education && resumeData.education.length > 0) {
         sections.push(
           new Paragraph({
-            children: [
-              new TextRun({
-                text: "EDUCATION",
-                bold: true,
-                size: 24,
-                allCaps: true,
-              }),
-            ],
-            alignment: AlignmentType.LEFT,
-            border: {
-              bottom: {
-                style: BorderStyle.SINGLE,
-                size: 3,
-                color: "000000",
-              },
-            },
+            children: [new TextRun({ text: "EDUCATION", bold: true, size: 22, allCaps: true })],
+            border: { bottom: { style: BorderStyle.SINGLE, size: 2, color: "000000" } },
             spacing: { before: 240, after: 120 },
           }),
         );
 
-        resumeData.education.forEach((edu, eduIndex) => {
-          // Degree
+        resumeData.education.forEach((edu) => {
+          sections.push(
+            new Paragraph({
+              children: [new TextRun({ text: edu.degree, bold: true, size: 20 })],
+              spacing: { before: 120 },
+            }),
+          );
           sections.push(
             new Paragraph({
               children: [
-                new TextRun({
-                  text: edu.degree,
-                  bold: true,
-                  size: 22,
-                }),
+                new TextRun({ text: edu.institution, size: 20 }),
+                new TextRun({ text: `, ${edu.startYear} - ${edu.endYear}`, size: 18, color: "666666" }),
               ],
-              alignment: AlignmentType.LEFT,
-              spacing: { before: eduIndex === 0 ? 0 : 120 },
+              spacing: { after: 80 },
             }),
           );
-
-          // Institution and dates
-          const institutionLine = [
-            edu.institution,
-            edu.startYear || edu.endYear
-              ? `(${edu.startYear || ""}${edu.startYear && edu.endYear ? " - " : ""}${edu.endYear || ""})`
-              : "",
-          ]
-            .filter(Boolean)
-            .join(" ");
-
-          if (institutionLine) {
-            sections.push(
-              new Paragraph({
-                children: [
-                  new TextRun({
-                    text: institutionLine,
-                    size: 22,
-                  }),
-                ],
-                alignment: AlignmentType.LEFT,
-                spacing: { after: 80 },
-              }),
-            );
-          }
-
-          // GPA if provided
-          if (edu.gpa) {
-            sections.push(
-              new Paragraph({
-                children: [
-                  new TextRun({
-                    text: `GPA: ${edu.gpa}`,
-                    size: 20,
-                    italics: true,
-                  }),
-                ],
-                alignment: AlignmentType.LEFT,
-                spacing: { after: 80 },
-              }),
-            );
-          }
         });
       }
 
-      // ===== PROJECTS SECTION =====
+      // Projects
       if (resumeData.projects && resumeData.projects.length > 0) {
         sections.push(
           new Paragraph({
-            children: [
-              new TextRun({
-                text: "PROJECTS",
-                bold: true,
-                size: 24,
-                allCaps: true,
-              }),
-            ],
-            alignment: AlignmentType.LEFT,
-            border: {
-              bottom: {
-                style: BorderStyle.SINGLE,
-                size: 3,
-                color: "000000",
-              },
-            },
+            children: [new TextRun({ text: "PROJECTS", bold: true, size: 22, allCaps: true })],
+            border: { bottom: { style: BorderStyle.SINGLE, size: 2, color: "000000" } },
             spacing: { before: 240, after: 120 },
           }),
         );
 
-        resumeData.projects.forEach((proj, projIndex) => {
-          // Project title
+        resumeData.projects.forEach((proj) => {
           sections.push(
             new Paragraph({
-              children: [
-                new TextRun({
-                  text: proj.title,
-                  bold: true,
-                  size: 22,
-                }),
-              ],
-              alignment: AlignmentType.LEFT,
-              spacing: { before: projIndex === 0 ? 0 : 120 },
+              children: [new TextRun({ text: proj.title, bold: true, size: 20 })],
+              spacing: { before: 120 },
             }),
           );
-
-          // Description
           if (proj.description) {
             sections.push(
               new Paragraph({
-                children: [
-                  new TextRun({
-                    text: proj.description,
-                    size: 22,
-                  }),
-                ],
-                alignment: AlignmentType.LEFT,
-                spacing: { after: 40 },
+                children: [new TextRun({ text: proj.description, size: 20 })],
               }),
             );
           }
-
-          // Technologies
           if (proj.technologies && proj.technologies.length > 0) {
             sections.push(
               new Paragraph({
                 children: [
-                  new TextRun({
-                    text: `Technologies: ${proj.technologies.join(", ")}`,
-                    size: 20,
-                    italics: true,
-                  }),
+                  new TextRun({ text: `Technologies: ${proj.technologies.join(", ")}`, size: 18, italics: true }),
                 ],
-                alignment: AlignmentType.LEFT,
                 spacing: { after: 80 },
               }),
             );
@@ -787,26 +600,12 @@ const ResumeEditor: React.FC = () => {
         });
       }
 
-      // ===== CERTIFICATIONS SECTION =====
+      // Certifications
       if (resumeData.certifications && resumeData.certifications.length > 0) {
         sections.push(
           new Paragraph({
-            children: [
-              new TextRun({
-                text: "CERTIFICATIONS",
-                bold: true,
-                size: 24,
-                allCaps: true,
-              }),
-            ],
-            alignment: AlignmentType.LEFT,
-            border: {
-              bottom: {
-                style: BorderStyle.SINGLE,
-                size: 3,
-                color: "000000",
-              },
-            },
+            children: [new TextRun({ text: "CERTIFICATIONS", bold: true, size: 22, allCaps: true })],
+            border: { bottom: { style: BorderStyle.SINGLE, size: 2, color: "000000" } },
             spacing: { before: 240, after: 120 },
           }),
         );
@@ -815,41 +614,23 @@ const ResumeEditor: React.FC = () => {
           sections.push(
             new Paragraph({
               children: [
-                new TextRun({
-                  text: `• ${cert.name}`,
-                  size: 22,
-                }),
+                new TextRun({ text: `• ${cert.name}`, size: 20 }),
                 cert.issuer
-                  ? new TextRun({
-                      text: ` - ${cert.issuer}`,
-                      size: 20,
-                      color: "666666",
-                    })
-                  : new TextRun({ text: "" }),
-                cert.date
-                  ? new TextRun({
-                      text: ` (${cert.date})`,
-                      size: 20,
-                      color: "666666",
-                      italics: true,
-                    })
+                  ? new TextRun({ text: ` - ${cert.issuer}`, size: 18, color: "666666" })
                   : new TextRun({ text: "" }),
               ],
-              alignment: AlignmentType.LEFT,
-              spacing: { before: 40 },
             }),
           );
         });
       }
 
-      // ===== CREATE DOCUMENT =====
       const doc = new Document({
         sections: [
           {
             properties: {
               page: {
                 margin: {
-                  top: 720, // 0.5 inch
+                  top: 720,
                   right: 720,
                   bottom: 720,
                   left: 720,
@@ -862,8 +643,7 @@ const ResumeEditor: React.FC = () => {
       });
 
       const blob = await Packer.toBlob(doc);
-      const fileName = `${(resumeTitle || "resume").replace(/[^a-z0-9]/gi, "_")}.docx`;
-      saveAs(blob, fileName);
+      saveAs(blob, `${resumeTitle.replace(/[^a-z0-9]/gi, "_") || "resume"}.docx`);
 
       await incrementUsage("download");
 
@@ -881,9 +661,7 @@ const ResumeEditor: React.FC = () => {
     }
   };
 
-  // =============================
-  // HTML GENERATION (FOR PREVIEW/PRINT)
-  // =============================
+  // Helper to format date for exports
   const formatDateExport = (date: string): string => {
     if (!date) return "";
     if (/^\d{4}$/.test(date)) return date;
@@ -894,6 +672,7 @@ const ResumeEditor: React.FC = () => {
     }
   };
 
+  // Generate styled HTML that matches the preview exactly
   const generateStyledHTML = (): string => {
     const selectedTemplateObj = templates.find((t: any) => t.id === selectedTemplate);
     const templateContent = selectedTemplateObj?.json_content;
@@ -906,7 +685,7 @@ const ResumeEditor: React.FC = () => {
     const markdownTemplate = templateContent.markdown_template || "";
     const templateCSS = templateContent.css || "";
 
-    // Prepare template data
+    // Prepare template data for Mustache
     const templateData = {
       contact: {
         name: resumeData.contact.name || "Your Name",
@@ -952,176 +731,179 @@ const ResumeEditor: React.FC = () => {
       hasCertifications: (resumeData.certifications || []).length > 0,
     };
 
-    // Render markdown
+    // Render markdown with Mustache
     let renderedMarkdown = "";
     try {
       renderedMarkdown = Mustache.render(markdownTemplate, templateData);
     } catch (error) {
       console.error("Mustache render error:", error);
-      renderedMarkdown = "# Resume\n\nError rendering template. Please try a different template.";
+      renderedMarkdown = "# Error rendering template";
     }
 
-    // Convert markdown to HTML with proper structure
-    const htmlContent = renderedMarkdown
+    // Convert markdown to proper HTML
+    let htmlContent = renderedMarkdown
       .replace(/^### (.+)$/gm, "<h3>$1</h3>")
       .replace(/^## (.+)$/gm, "<h2>$1</h2>")
       .replace(/^# (.+)$/gm, "<h1>$1</h1>")
       .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
       .replace(/\*(.+?)\*/g, "<em>$1</em>")
-      .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank">$1</a>')
+      .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>')
       .replace(/^---$/gm, "<hr>")
       .split("\n")
       .map((line) => {
-        line = line.trim();
-        if (line.startsWith("- ") || line.startsWith("* ")) {
-          return `<li>${line.substring(2)}</li>`;
-        }
-        if (line.startsWith("• ")) {
-          return `<li>${line.substring(2)}</li>`;
+        if (line.trim().startsWith("- ")) {
+          return `<li>${line.trim().substring(2)}</li>`;
         }
         return line;
       })
       .join("\n")
-      .replace(/(<li>[\s\S]*?<\/li>\n?)+/g, (match) => {
-        // Wrap consecutive li elements in ul
-        if (match.includes("</li>")) {
-          return `<ul>${match}</ul>`;
-        }
-        return match;
-      })
+      .replace(/(<li>[\s\S]*?<\/li>\n?)+/g, "<ul>$&</ul>")
       .replace(/\n\n+/g, "</p><p>")
       .replace(/\n/g, "<br>");
 
-    // Wrap content if needed
-    const finalContent = htmlContent.startsWith("<") ? htmlContent : `<p>${htmlContent}</p>`;
+    if (!htmlContent.startsWith("<")) {
+      htmlContent = "<p>" + htmlContent + "</p>";
+    }
 
     // Replace #SCOPE with #resume in template CSS
     const scopedCSS = templateCSS.replace(/#SCOPE/g, "#resume");
 
+    // Build the complete HTML with EXACT template styling
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${resumeTitle || "Resume"} - ${resumeData.contact.name}</title>
+  <title>${resumeTitle || "Resume"}</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Playfair+Display:wght@400;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     
     body {
       background: #f5f5f5;
       min-height: 100vh;
       display: flex;
       justify-content: center;
-      align-items: center;
       padding: 20px;
-      font-family: ${theme.fontFamily || "Inter, sans-serif"};
     }
     
     #resume {
-      background: white;
-      width: 8.5in;
-      min-height: 11in;
-      padding: 0.75in;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      font-family: ${theme.fontFamily || "Inter, sans-serif"};
       color: ${theme.primaryColor || "#1a1a1a"};
       line-height: 1.6;
+      padding: 40px 50px;
+      background: white;
+      max-width: 850px;
+      width: 100%;
+      min-height: 1100px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
     
-    #resume h1 { 
+    #resume h1 {
       font-family: ${theme.headingFont || theme.fontFamily || "Inter, sans-serif"};
-      margin-bottom: 0.5rem;
-      color: ${theme.primaryColor || "#1a1a1a"};
+      margin-bottom: 0.25rem;
     }
     
-    #resume h2 { 
+    #resume h2 {
       font-family: ${theme.headingFont || theme.fontFamily || "Inter, sans-serif"};
       margin-top: 1.5rem;
       margin-bottom: 0.75rem;
-      color: ${theme.primaryColor || "#1a1a1a"};
     }
     
-    #resume h3 { 
+    #resume h3 {
       font-family: ${theme.headingFont || theme.fontFamily || "Inter, sans-serif"};
       margin-top: 1rem;
-      margin-bottom: 0.5rem;
-      color: ${theme.primaryColor || "#1a1a1a"};
+      margin-bottom: 0.25rem;
     }
     
-    #resume p { margin-bottom: 0.75rem; }
-    #resume ul { margin-left: 1.5rem; margin-bottom: 0.75rem; }
-    #resume li { margin-bottom: 0.5rem; }
-    #resume strong { font-weight: 600; }
-    #resume a { 
+    #resume p {
+      margin-bottom: 0.5rem;
+    }
+    
+    #resume ul {
+      margin-left: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    #resume li {
+      margin-bottom: 0.25rem;
+    }
+    
+    #resume hr {
+      border: none;
+      margin: 1rem 0;
+    }
+    
+    #resume strong {
+      font-weight: 600;
+    }
+    
+    #resume a {
       color: ${theme.accentColor || "#3b82f6"};
       text-decoration: none;
     }
-    #resume hr { 
-      border: none;
-      border-top: 2px solid ${theme.accentColor || "#3b82f6"};
-      margin: 1.5rem 0;
-    }
     
-    /* Template-specific styles */
+    /* Template-specific styles from database */
     ${scopedCSS}
     
-    /* Print styles */
     @media print {
       body {
-        background: white !important;
-        padding: 0 !important;
+        background: white;
+        padding: 0;
       }
       
       #resume {
-        width: 100% !important;
-        min-height: auto !important;
-        padding: 0.5in !important;
-        box-shadow: none !important;
-        margin: 0 !important;
+        box-shadow: none;
+        max-width: none;
+        min-height: auto;
+        padding: 0.5in;
       }
       
       @page {
-        margin: 0.5in;
+        margin: 0;
         size: letter;
       }
       
-      * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
   </style>
 </head>
 <body>
   <div id="resume">
-    ${finalContent}
+    ${htmlContent}
   </div>
 </body>
 </html>`;
   };
 
+  // Fallback generic HTML for non-markdown templates
   const generateGenericHTML = (): string => {
     return `<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>${resumeTitle || "Resume"}</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0.5in; max-width: 8.5in; }
-    h1 { text-align: center; margin-bottom: 0.5rem; }
-    h2 { border-bottom: 2px solid #333; padding-bottom: 0.25rem; margin-top: 1.5rem; }
-    .contact { text-align: center; color: #666; margin-bottom: 1rem; }
-    ul { margin-left: 1.5rem; }
-    li { margin-bottom: 0.25rem; }
-    @media print { @page { margin: 0.5in; } }
+    body { font-family: Arial, sans-serif; max-width: 850px; margin: 0 auto; padding: 40px; }
+    h1 { text-align: center; margin-bottom: 8px; }
+    h2 { border-bottom: 2px solid #333; padding-bottom: 4px; margin-top: 24px; }
+    .contact { text-align: center; color: #666; margin-bottom: 20px; }
+    ul { margin-left: 20px; }
+    li { margin-bottom: 4px; }
   </style>
 </head>
 <body>
   <h1>${resumeData.contact.name}</h1>
-  <p class="contact">${[resumeData.contact.title, resumeData.contact.email, resumeData.contact.phone, resumeData.contact.location].filter(Boolean).join(" • ")}</p>
+  <p style="text-align: center; color: #666;">${resumeData.contact.title}</p>
+  <p class="contact">${[resumeData.contact.email, resumeData.contact.phone, resumeData.contact.location].filter(Boolean).join(" • ")}</p>
   
   ${resumeData.summary ? `<h2>Summary</h2><p>${resumeData.summary}</p>` : ""}
-  ${resumeData.skills.length > 0 ? `<h2>Skills</h2><p>${resumeData.skills.join(", ")}</p>` : ""}
+  
   ${
     resumeData.experience.length > 0
       ? `
@@ -1130,20 +912,44 @@ const ResumeEditor: React.FC = () => {
     .map(
       (exp) => `
     <p><strong>${exp.title}</strong> - ${exp.company}</p>
-    <p><em>${exp.startDate} - ${exp.endDate}</em></p>
+    <p style="color: #666; font-size: 12px;">${exp.startDate} - ${exp.endDate}</p>
     <ul>${exp.responsibilities.map((r) => `<li>${r}</li>`).join("")}</ul>
   `,
     )
     .join("")}`
       : ""
   }
+  
+  ${
+    resumeData.education.length > 0
+      ? `
+  <h2>Education</h2>
+  ${resumeData.education
+    .map(
+      (edu) => `
+    <p><strong>${edu.degree}</strong></p>
+    <p>${edu.institution} (${edu.startYear} - ${edu.endYear})</p>
+  `,
+    )
+    .join("")}`
+      : ""
+  }
+  
+  ${resumeData.skills.length > 0 ? `<h2>Skills</h2><p>${resumeData.skills.join(", ")}</p>` : ""}
+  
+  ${
+    (resumeData.certifications || []).length > 0
+      ? `
+  <h2>Certifications</h2>
+  <ul>${resumeData.certifications?.map((c) => `<li><strong>${c.name}</strong> - ${c.issuer}${c.date ? ` (${c.date})` : ""}</li>`).join("")}</ul>
+  `
+      : ""
+  }
 </body>
 </html>`;
   };
 
-  // =============================
-  // EXPORT FUNCTIONS
-  // =============================
+  // Export as HTML file
   const exportHTML = async () => {
     if (!canDownloadPDF()) {
       toast({
@@ -1157,14 +963,13 @@ const ResumeEditor: React.FC = () => {
     try {
       const htmlContent = generateStyledHTML();
       const blob = new Blob([htmlContent], { type: "text/html" });
-      const fileName = `${(resumeTitle || "resume").replace(/[^a-z0-9]/gi, "_")}.html`;
-      saveAs(blob, fileName);
+      saveAs(blob, `${resumeTitle || "resume"}.html`);
 
       await incrementUsage("download");
 
       toast({
         title: "Success",
-        description: "HTML resume downloaded. Open in browser and use 'Print' > 'Save as PDF' for best quality.",
+        description: "HTML resume downloaded. Open in browser and use 'Print to PDF' for best results.",
       });
     } catch (error) {
       console.error("HTML export error:", error);
@@ -1176,39 +981,38 @@ const ResumeEditor: React.FC = () => {
     }
   };
 
+  // Print to PDF using browser print dialog (RECOMMENDED for PDFs)
   const printToPDF = () => {
     const htmlContent = generateStyledHTML();
     const printWindow = window.open("", "_blank");
 
-    if (!printWindow) {
+    if (printWindow) {
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+
+      // Wait for fonts to load then print
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.print();
+        }, 500);
+      };
+
+      toast({
+        title: "Print Dialog Opened",
+        description: "Select 'Save as PDF' in your browser's print dialog",
+      });
+    } else {
       toast({
         title: "Popup Blocked",
-        description: "Please allow popups to generate PDF",
+        description: "Please allow popups to use Print to PDF",
         variant: "destructive",
       });
-      return;
     }
-
-    printWindow.document.write(htmlContent);
-    printWindow.document.close();
-
-    // Auto-print after a delay
-    setTimeout(() => {
-      printWindow.focus();
-      printWindow.print();
-    }, 500);
-
-    toast({
-      title: "Opening Print Dialog",
-      description: "Select 'Save as PDF' to download your styled resume",
-    });
   };
 
-  // =============================
-  // FORM CONTENT
-  // =============================
   const formContent = (
     <div className="space-y-6 p-6">
+      {/* Resume Title */}
       <Card>
         <CardHeader>
           <CardTitle>Resume Title</CardTitle>
@@ -1217,12 +1021,13 @@ const ResumeEditor: React.FC = () => {
           <Input
             value={resumeTitle}
             onChange={(e) => setResumeTitle(e.target.value)}
-            placeholder="e.g., Software Engineer Resume"
+            placeholder="e.g., Software Engineer Resume, Marketing Manager CV"
             className="text-lg font-semibold"
           />
         </CardContent>
       </Card>
 
+      {/* Personal Info */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -1279,7 +1084,7 @@ const ResumeEditor: React.FC = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="linkedin">LinkedIn URL</Label>
+              <Label htmlFor="linkedin">LinkedIn</Label>
               <Input
                 id="linkedin"
                 value={resumeData.contact.linkedin}
@@ -1291,6 +1096,7 @@ const ResumeEditor: React.FC = () => {
         </CardContent>
       </Card>
 
+      {/* Summary */}
       <Card>
         <CardHeader>
           <CardTitle>Professional Summary</CardTitle>
@@ -1299,12 +1105,13 @@ const ResumeEditor: React.FC = () => {
           <Textarea
             value={resumeData.summary}
             onChange={(e) => setResumeData((prev) => ({ ...prev, summary: e.target.value }))}
-            placeholder="Briefly describe your professional background, skills, and career objectives..."
+            placeholder="Write a brief summary of your professional background and career objectives..."
             rows={4}
           />
         </CardContent>
       </Card>
 
+      {/* Experience */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
@@ -1335,18 +1142,18 @@ const ResumeEditor: React.FC = () => {
                   onChange={(e) => updateExperience(index, "company", e.target.value)}
                 />
                 <Input
-                  placeholder="Start Date (e.g., 2020)"
+                  placeholder="Start Date"
                   value={exp.startDate}
                   onChange={(e) => updateExperience(index, "startDate", e.target.value)}
                 />
                 <Input
-                  placeholder="End Date or 'Present'"
+                  placeholder="End Date (or Present)"
                   value={exp.endDate}
                   onChange={(e) => updateExperience(index, "endDate", e.target.value)}
                 />
               </div>
               <Textarea
-                placeholder="Describe your responsibilities and achievements (one per line)..."
+                placeholder="Describe your responsibilities and achievements..."
                 value={exp.responsibilities.join("\n")}
                 onChange={(e) => updateExperience(index, "responsibilities", e.target.value.split("\n"))}
                 rows={3}
@@ -1356,6 +1163,7 @@ const ResumeEditor: React.FC = () => {
         </CardContent>
       </Card>
 
+      {/* Education */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
@@ -1401,6 +1209,75 @@ const ResumeEditor: React.FC = () => {
         </CardContent>
       </Card>
 
+      {/* Projects */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <span>Projects</span>
+            <Button onClick={addProject} size="sm" variant="outline">
+              <Plus className="w-4 h-4 mr-1" />
+              Add Project
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {resumeData.projects.map((project, index) => (
+            <div key={index} className="p-4 border rounded-lg space-y-3">
+              <div className="flex justify-end">
+                <Button onClick={() => removeProject(index)} size="sm" variant="ghost">
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label>Project Title</Label>
+                  <Input
+                    placeholder="Project Title"
+                    value={project.title}
+                    onChange={(e) => updateProject(index, "title", e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Technologies (comma-separated)</Label>
+                  <Input
+                    placeholder="React, TypeScript, Node.js"
+                    value={project.technologies.join(", ")}
+                    onChange={(e) =>
+                      updateProject(
+                        index,
+                        "technologies",
+                        e.target.value
+                          .split(",")
+                          .map((t) => t.trim())
+                          .filter((t) => t),
+                      )
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Project Link</Label>
+                  <Input
+                    placeholder="https://github.com/username/project"
+                    value={project.link}
+                    onChange={(e) => updateProject(index, "link", e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Project Description</Label>
+                <Textarea
+                  placeholder="Describe the project, your role, and key achievements..."
+                  value={project.description}
+                  onChange={(e) => updateProject(index, "description", e.target.value)}
+                  rows={3}
+                />
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      {/* Skills */}
       <Card>
         <CardHeader>
           <CardTitle>Skills</CardTitle>
@@ -1408,7 +1285,7 @@ const ResumeEditor: React.FC = () => {
         <CardContent className="space-y-4">
           <div className="flex gap-2">
             <Input
-              placeholder="Add a skill (e.g., JavaScript, AWS, React)"
+              placeholder="Add a skill..."
               value={newSkill}
               onChange={(e) => setNewSkill(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && addSkill()}
@@ -1433,6 +1310,7 @@ const ResumeEditor: React.FC = () => {
         </CardContent>
       </Card>
 
+      {/* Certifications */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
@@ -1448,7 +1326,9 @@ const ResumeEditor: React.FC = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           {(resumeData.certifications || []).length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">No certifications added yet</p>
+            <p className="text-sm text-muted-foreground text-center py-4">
+              No certifications added yet. Click "Add Certification" to get started.
+            </p>
           ) : (
             (resumeData.certifications || []).map((cert, index) => (
               <div key={index} className="p-4 border rounded-lg space-y-3">
@@ -1459,17 +1339,17 @@ const ResumeEditor: React.FC = () => {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <Input
-                    placeholder="Certification Name"
+                    placeholder="Certification Name (e.g., AWS Solutions Architect)"
                     value={cert.name}
                     onChange={(e) => updateCertification(index, "name", e.target.value)}
                   />
                   <Input
-                    placeholder="Issuer"
+                    placeholder="Issuer (e.g., Amazon Web Services)"
                     value={cert.issuer}
                     onChange={(e) => updateCertification(index, "issuer", e.target.value)}
                   />
                   <Input
-                    placeholder="Date"
+                    placeholder="Date (e.g., 2024)"
                     value={cert.date || ""}
                     onChange={(e) => updateCertification(index, "date", e.target.value)}
                   />
@@ -1482,6 +1362,7 @@ const ResumeEditor: React.FC = () => {
     </div>
   );
 
+  // Show loading state while templates are being loaded
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -1493,6 +1374,7 @@ const ResumeEditor: React.FC = () => {
     );
   }
 
+  // Show error if no templates available
   if (templates.length === 0) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -1506,6 +1388,7 @@ const ResumeEditor: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Toolbar */}
       <div className="border-b bg-card">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
@@ -1532,6 +1415,7 @@ const ResumeEditor: React.FC = () => {
                 {saving ? "Saving..." : "Save"}
               </Button>
 
+              {/* Export Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline">
@@ -1556,7 +1440,7 @@ const ResumeEditor: React.FC = () => {
                     <FileCode className="w-4 h-4 mr-2" />
                     <div>
                       <p className="font-medium">Download HTML</p>
-                      <p className="text-xs text-muted-foreground">Styled template for web/email</p>
+                      <p className="text-xs text-muted-foreground">Styled version for web/email</p>
                     </div>
                   </DropdownMenuItem>
 
@@ -1566,7 +1450,7 @@ const ResumeEditor: React.FC = () => {
                     <FileText className="w-4 h-4 mr-2" />
                     <div>
                       <p className="font-medium">Download DOCX</p>
-                      <p className="text-xs text-muted-foreground">ATS-optimized for job applications</p>
+                      <p className="text-xs text-muted-foreground">For job applications (ATS)</p>
                     </div>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -1581,8 +1465,12 @@ const ResumeEditor: React.FC = () => {
         </div>
       </div>
 
+      {/* Desktop Layout */}
       <div className="hidden lg:grid lg:grid-cols-2 h-[calc(100vh-65px)]">
+        {/* Left Panel - Form */}
         <div className="overflow-y-auto border-r">{formContent}</div>
+
+        {/* Right Panel - Preview */}
         <div className="overflow-y-auto bg-muted/20 p-6 flex items-start justify-center">
           <div className="w-full" style={{ maxWidth: "850px" }}>
             <ResumeTemplatePreview resumeData={resumeData} templateId={selectedTemplate} templates={templates} />
@@ -1590,6 +1478,7 @@ const ResumeEditor: React.FC = () => {
         </div>
       </div>
 
+      {/* Mobile Layout */}
       <div className="lg:hidden">
         <Tabs defaultValue="edit" className="w-full">
           <TabsList className="grid w-full grid-cols-2 sticky top-0 z-10 bg-background">
