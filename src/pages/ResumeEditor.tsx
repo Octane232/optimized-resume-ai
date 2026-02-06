@@ -7,7 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Save, Download, Share2, Plus, X, FileText, Palette, Award } from 'lucide-react';
+import { Save, Download, Share2, Plus, X, FileText, Palette, Award, FileCode, Printer, ChevronDown } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
+import Mustache from 'mustache';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ResumeData } from '@/types/resume';
@@ -895,6 +897,314 @@ const ResumeEditor: React.FC = () => {
     }
   };
 
+  // Helper to format date for exports
+  const formatDateExport = (date: string): string => {
+    if (!date) return '';
+    if (/^\d{4}$/.test(date)) return date;
+    try {
+      return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+    } catch {
+      return date;
+    }
+  };
+
+  // Generate styled HTML that matches the preview exactly
+  const generateStyledHTML = (): string => {
+    const selectedTemplateObj = templates.find((t: any) => t.id === selectedTemplate);
+    const templateContent = selectedTemplateObj?.json_content;
+    
+    if (!templateContent || templateContent.type !== 'markdown') {
+      // Fallback generic HTML
+      return generateGenericHTML();
+    }
+
+    const theme = templateContent.theme || {};
+    const markdownTemplate = templateContent.markdown_template || '';
+    const customCSS = templateContent.css || '';
+
+    // Prepare template data for Mustache
+    const templateData = {
+      contact: {
+        name: resumeData.contact.name || 'Your Name',
+        title: resumeData.contact.title || 'Professional Title',
+        email: resumeData.contact.email || '',
+        phone: resumeData.contact.phone || '',
+        location: resumeData.contact.location || '',
+        linkedin: resumeData.contact.linkedin || '',
+        portfolio: resumeData.contact.portfolio || '',
+        github: resumeData.contact.github || ''
+      },
+      summary: resumeData.summary || '',
+      experience: resumeData.experience.map(exp => ({
+        title: exp.title || 'Job Title',
+        company: exp.company || 'Company Name',
+        startDate: formatDateExport(exp.startDate) || 'Start',
+        endDate: exp.endDate === 'Present' ? 'Present' : formatDateExport(exp.endDate) || 'Present',
+        responsibilities: Array.isArray(exp.responsibilities) ? exp.responsibilities : []
+      })),
+      education: resumeData.education.map(edu => ({
+        degree: edu.degree || 'Degree',
+        institution: edu.institution || 'Institution',
+        startYear: edu.startYear || '',
+        endYear: edu.endYear || '',
+        gpa: edu.gpa || ''
+      })),
+      skills: resumeData.skills || [],
+      projects: (resumeData.projects || []).map(proj => ({
+        title: proj.title || 'Project',
+        description: proj.description || '',
+        technologies: Array.isArray(proj.technologies) ? proj.technologies : [],
+        link: proj.link || ''
+      })),
+      certifications: (resumeData.certifications || []).map(cert => ({
+        name: cert.name || 'Certification',
+        issuer: cert.issuer || '',
+        date: cert.date || ''
+      })),
+      hasExperience: resumeData.experience.length > 0,
+      hasEducation: resumeData.education.length > 0,
+      hasSkills: resumeData.skills.length > 0,
+      hasProjects: (resumeData.projects || []).length > 0,
+      hasCertifications: (resumeData.certifications || []).length > 0
+    };
+
+    // Render markdown with Mustache
+    let renderedMarkdown = '';
+    try {
+      renderedMarkdown = Mustache.render(markdownTemplate, templateData);
+    } catch (error) {
+      console.error('Mustache render error:', error);
+      renderedMarkdown = '# Error rendering template';
+    }
+
+    // Convert markdown to HTML (simple conversion)
+    let htmlContent = renderedMarkdown
+      .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      .replace(/^### (.+)$/gm, '<h3>$3</h3>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/^- (.+)$/gm, '<li>$1</li>')
+      .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
+      .replace(/^---$/gm, '<hr>')
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/\n/g, '<br>');
+
+    // Wrap in proper HTML document with styles
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${resumeTitle || 'Resume'}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Playfair+Display:wght@400;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: ${theme.fontFamily || 'Inter, sans-serif'};
+      color: ${theme.primaryColor || '#1a1a1a'};
+      line-height: 1.5;
+      background: white;
+      padding: 40px;
+      max-width: 850px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      font-family: ${theme.headingFont || theme.fontFamily || 'Inter, sans-serif'};
+      color: ${theme.primaryColor || '#1a1a1a'};
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    
+    h2 {
+      font-family: ${theme.headingFont || theme.fontFamily || 'Inter, sans-serif'};
+      color: ${theme.primaryColor || '#1a1a1a'};
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 24px;
+      margin-bottom: 12px;
+      padding-bottom: 4px;
+      border-bottom: 2px solid ${theme.accentColor || '#3b82f6'};
+    }
+    
+    h3 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 12px;
+      margin-bottom: 4px;
+    }
+    
+    p {
+      margin-bottom: 8px;
+      font-size: 11px;
+    }
+    
+    ul {
+      margin-left: 20px;
+      margin-bottom: 8px;
+    }
+    
+    li {
+      font-size: 11px;
+      margin-bottom: 4px;
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid ${theme.accentColor || '#e5e7eb'}40;
+      margin: 16px 0;
+    }
+    
+    strong {
+      font-weight: 600;
+    }
+    
+    .contact-info {
+      text-align: center;
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 16px;
+    }
+    
+    @media print {
+      body {
+        padding: 0;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      
+      @page {
+        margin: 0.5in;
+        size: letter;
+      }
+    }
+    
+    ${customCSS}
+  </style>
+</head>
+<body>
+  ${htmlContent}
+</body>
+</html>`;
+  };
+
+  // Fallback generic HTML for non-markdown templates
+  const generateGenericHTML = (): string => {
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>${resumeTitle || 'Resume'}</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 850px; margin: 0 auto; padding: 40px; }
+    h1 { text-align: center; margin-bottom: 8px; }
+    h2 { border-bottom: 2px solid #333; padding-bottom: 4px; margin-top: 24px; }
+    .contact { text-align: center; color: #666; margin-bottom: 20px; }
+    ul { margin-left: 20px; }
+    li { margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+  <h1>${resumeData.contact.name}</h1>
+  <p style="text-align: center; color: #666;">${resumeData.contact.title}</p>
+  <p class="contact">${[resumeData.contact.email, resumeData.contact.phone, resumeData.contact.location].filter(Boolean).join(' • ')}</p>
+  
+  ${resumeData.summary ? `<h2>Summary</h2><p>${resumeData.summary}</p>` : ''}
+  
+  ${resumeData.experience.length > 0 ? `
+  <h2>Experience</h2>
+  ${resumeData.experience.map(exp => `
+    <p><strong>${exp.title}</strong> - ${exp.company}</p>
+    <p style="color: #666; font-size: 12px;">${exp.startDate} - ${exp.endDate}</p>
+    <ul>${exp.responsibilities.map(r => `<li>${r}</li>`).join('')}</ul>
+  `).join('')}` : ''}
+  
+  ${resumeData.education.length > 0 ? `
+  <h2>Education</h2>
+  ${resumeData.education.map(edu => `
+    <p><strong>${edu.degree}</strong></p>
+    <p>${edu.institution} (${edu.startYear} - ${edu.endYear})</p>
+  `).join('')}` : ''}
+  
+  ${resumeData.skills.length > 0 ? `<h2>Skills</h2><p>${resumeData.skills.join(', ')}</p>` : ''}
+  
+  ${(resumeData.certifications || []).length > 0 ? `
+  <h2>Certifications</h2>
+  <ul>${resumeData.certifications?.map(c => `<li><strong>${c.name}</strong> - ${c.issuer}${c.date ? ` (${c.date})` : ''}</li>`).join('')}</ul>
+  ` : ''}
+</body>
+</html>`;
+  };
+
+  // Export as HTML file
+  const exportHTML = async () => {
+    if (!canDownloadPDF()) {
+      toast({
+        title: "Download limit reached",
+        description: "Please upgrade your plan to download more resumes.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const htmlContent = generateStyledHTML();
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      saveAs(blob, `${resumeTitle || 'resume'}.html`);
+      
+      await incrementUsage('download');
+      
+      toast({
+        title: "Success",
+        description: "Resume downloaded as HTML with full styling",
+      });
+    } catch (error) {
+      console.error('HTML export error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to export HTML",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Print to PDF using browser print dialog
+  const printToPDF = () => {
+    const htmlContent = generateStyledHTML();
+    const printWindow = window.open('', '_blank');
+    
+    if (printWindow) {
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      
+      // Wait for fonts to load then print
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.print();
+        }, 500);
+      };
+      
+      toast({
+        title: "Print Dialog Opened",
+        description: "Save as PDF from your browser's print dialog",
+      });
+    } else {
+      toast({
+        title: "Popup Blocked",
+        description: "Please allow popups to use Print to PDF",
+        variant: "destructive",
+      });
+    }
+  };
+
   const formContent = (
     <div className="space-y-6 p-6">
       {/* Resume Title */}
@@ -1311,10 +1621,48 @@ const ResumeEditor: React.FC = () => {
                 <Save className="w-4 h-4 mr-2" />
                 {saving ? 'Saving...' : 'Save'}
               </Button>
-              <Button onClick={exportDOCX} variant="outline">
-                <Download className="w-4 h-4 mr-2" />
-                Export DOCX
-              </Button>
+              
+              {/* Export Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline">
+                    <Download className="w-4 h-4 mr-2" />
+                    Export
+                    <ChevronDown className="w-4 h-4 ml-2" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>Export Options</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  
+                  <DropdownMenuItem onClick={printToPDF} className="cursor-pointer">
+                    <Printer className="w-4 h-4 mr-2" />
+                    <div>
+                      <p className="font-medium">Print / Save as PDF</p>
+                      <p className="text-xs text-muted-foreground">Exact styling via browser</p>
+                    </div>
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuItem onClick={exportHTML} className="cursor-pointer">
+                    <FileCode className="w-4 h-4 mr-2" />
+                    <div>
+                      <p className="font-medium">Download HTML</p>
+                      <p className="text-xs text-muted-foreground">Full styled template</p>
+                    </div>
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuSeparator />
+                  
+                  <DropdownMenuItem onClick={exportDOCX} className="cursor-pointer">
+                    <FileText className="w-4 h-4 mr-2" />
+                    <div>
+                      <p className="font-medium">Download DOCX</p>
+                      <p className="text-xs text-muted-foreground">ATS-optimized Word file</p>
+                    </div>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              
               <Button variant="outline">
                 <Share2 className="w-4 h-4 mr-2" />
                 Share
