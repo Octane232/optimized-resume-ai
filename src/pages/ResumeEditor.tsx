@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Save, Download, Share2, Plus, X, FileText, Palette } from 'lucide-react';
+import { Save, Download, Share2, Plus, X, FileText, Palette, Award } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ResumeData } from '@/types/resume';
@@ -275,6 +275,32 @@ const ResumeEditor: React.FC = () => {
     setResumeData(prev => ({
       ...prev,
       skills: prev.skills.filter((_, i) => i !== index)
+    }));
+  };
+
+  const addCertification = () => {
+    setResumeData(prev => ({
+      ...prev,
+      certifications: [...(prev.certifications || []), {
+        name: '',
+        issuer: '',
+        date: ''
+      }]
+    }));
+  };
+
+  const updateCertification = (index: number, field: string, value: string) => {
+    setResumeData(prev => {
+      const newCerts = [...(prev.certifications || [])];
+      newCerts[index] = { ...newCerts[index], [field]: value };
+      return { ...prev, certifications: newCerts };
+    });
+  };
+
+  const removeCertification = (index: number) => {
+    setResumeData(prev => ({
+      ...prev,
+      certifications: (prev.certifications || []).filter((_, i) => i !== index)
     }));
   };
 
@@ -903,6 +929,60 @@ const ResumeEditor: React.FC = () => {
               </div>
             ))}
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Certifications */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <Award className="w-5 h-5" />
+              Certifications
+            </span>
+            <Button onClick={addCertification} size="sm" variant="outline">
+              <Plus className="w-4 h-4 mr-1" />
+              Add Certification
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {(resumeData.certifications || []).length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              No certifications added yet. Click "Add Certification" to get started.
+            </p>
+          ) : (
+            (resumeData.certifications || []).map((cert, index) => (
+              <div key={index} className="p-4 border rounded-lg space-y-3">
+                <div className="flex justify-end">
+                  <Button
+                    onClick={() => removeCertification(index)}
+                    size="sm"
+                    variant="ghost"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <Input
+                    placeholder="Certification Name (e.g., AWS Solutions Architect)"
+                    value={cert.name}
+                    onChange={(e) => updateCertification(index, 'name', e.target.value)}
+                  />
+                  <Input
+                    placeholder="Issuer (e.g., Amazon Web Services)"
+                    value={cert.issuer}
+                    onChange={(e) => updateCertification(index, 'issuer', e.target.value)}
+                  />
+                  <Input
+                    placeholder="Date (e.g., 2024)"
+                    value={cert.date || ''}
+                    onChange={(e) => updateCertification(index, 'date', e.target.value)}
+                  />
+                </div>
+              </div>
+            ))
+          )}
         </CardContent>
       </Card>
     </div>
