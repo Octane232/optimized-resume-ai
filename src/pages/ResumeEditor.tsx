@@ -16,6 +16,7 @@ import { ResumeData } from '@/types/resume';
 import ResumeTemplatePreview from '@/components/dashboard/ResumeTemplatePreview';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle } from 'docx';
 import { saveAs } from 'file-saver';
+import html2pdf from 'html2pdf.js';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 
 const ResumeEditor: React.FC = () => {
@@ -1205,7 +1206,87 @@ const ResumeEditor: React.FC = () => {
     }
   };
 
-  // Print to PDF using browser print dialog
+  // Direct PDF download with exact styling
+  const exportPDF = async () => {
+    if (!canDownloadPDF()) {
+      toast({
+        title: "Download limit reached",
+        description: "Please upgrade your plan to download more resumes.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      toast({
+        title: "Generating PDF...",
+        description: "Please wait while we create your styled resume",
+      });
+
+      // Create a temporary container with the styled HTML
+      const htmlContent = generateStyledHTML();
+      const container = document.createElement('div');
+      container.innerHTML = htmlContent;
+      
+      // Extract just the resume div and styles
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = `
+        <style>
+          ${container.querySelector('style')?.innerHTML || ''}
+        </style>
+        ${container.querySelector('#resume')?.outerHTML || container.querySelector('body')?.innerHTML || ''}
+      `;
+      
+      // Temporarily add to document for rendering
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.top = '0';
+      tempDiv.style.width = '850px';
+      document.body.appendChild(tempDiv);
+
+      // Wait for fonts to load
+      await document.fonts.ready;
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      const options = {
+        margin: 0,
+        filename: `${resumeTitle || 'resume'}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 2,
+          useCORS: true,
+          letterRendering: true,
+          logging: false,
+        },
+        jsPDF: { 
+          unit: 'in', 
+          format: 'letter', 
+          orientation: 'portrait' 
+        }
+      };
+
+      await html2pdf().set(options).from(tempDiv).save();
+      
+      // Cleanup
+      document.body.removeChild(tempDiv);
+
+      await incrementUsage('download');
+
+      toast({
+        title: "Success!",
+        description: "Your styled resume PDF has been downloaded",
+      });
+    } catch (error) {
+      console.error('PDF export error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate PDF. Try using Print to PDF instead.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Print to PDF using browser print dialog (backup option)
   const printToPDF = () => {
     const htmlContent = generateStyledHTML();
     const printWindow = window.open('', '_blank');
@@ -1664,11 +1745,11 @@ const ResumeEditor: React.FC = () => {
                   <DropdownMenuLabel>Export Options</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   
-                  <DropdownMenuItem onClick={printToPDF} className="cursor-pointer">
-                    <Printer className="w-4 h-4 mr-2" />
+                  <DropdownMenuItem onClick={exportPDF} className="cursor-pointer">
+                    <Download className="w-4 h-4 mr-2" />
                     <div>
-                      <p className="font-medium">Print / Save as PDF</p>
-                      <p className="text-xs text-muted-foreground">Exact styling via browser</p>
+                      <p className="font-medium">Download PDF</p>
+                      <p className="text-xs text-muted-foreground">Styled resume (recommended)</p>
                     </div>
                   </DropdownMenuItem>
                   
@@ -1687,6 +1768,16 @@ const ResumeEditor: React.FC = () => {
                     <div>
                       <p className="font-medium">Download DOCX</p>
                       <p className="text-xs text-muted-foreground">ATS-optimized Word file</p>
+                    </div>
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuSeparator />
+                  
+                  <DropdownMenuItem onClick={printToPDF} className="cursor-pointer">
+                    <Printer className="w-4 h-4 mr-2" />
+                    <div>
+                      <p className="font-medium">Print Preview</p>
+                      <p className="text-xs text-muted-foreground">Browser print dialog</p>
                     </div>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
