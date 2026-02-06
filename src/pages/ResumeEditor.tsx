@@ -914,15 +914,14 @@ const ResumeEditor: React.FC = () => {
     const templateContent = selectedTemplateObj?.json_content;
     
     if (!templateContent || templateContent.type !== 'markdown') {
-      // Fallback generic HTML
       return generateGenericHTML();
     }
 
     const theme = templateContent.theme || {};
     const markdownTemplate = templateContent.markdown_template || '';
-    const customCSS = templateContent.css || '';
+    const templateCSS = templateContent.css || '';
 
-    // Prepare template data for Mustache
+    // Prepare template data for Mustache (same as MarkdownResumeRenderer)
     const templateData = {
       contact: {
         name: resumeData.contact.name || 'Your Name',
@@ -977,20 +976,43 @@ const ResumeEditor: React.FC = () => {
       renderedMarkdown = '# Error rendering template';
     }
 
-    // Convert markdown to HTML (simple conversion)
+    // Convert markdown to proper HTML
     let htmlContent = renderedMarkdown
-      .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+      // Headers
+      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
       .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-      .replace(/^### (.+)$/gm, '<h3>$3</h3>')
+      .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+      // Bold and italic
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      .replace(/^- (.+)$/gm, '<li>$1</li>')
-      .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
+      // Links
+      .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>')
+      // Horizontal rule
       .replace(/^---$/gm, '<hr>')
-      .replace(/\n\n/g, '</p><p>')
+      // Lists - process line by line
+      .split('\n')
+      .map(line => {
+        if (line.trim().startsWith('- ')) {
+          return `<li>${line.trim().substring(2)}</li>`;
+        }
+        return line;
+      })
+      .join('\n')
+      // Wrap consecutive li elements in ul
+      .replace(/(<li>[\s\S]*?<\/li>\n?)+/g, '<ul>$&</ul>')
+      // Paragraphs for remaining text
+      .replace(/\n\n+/g, '</p><p>')
       .replace(/\n/g, '<br>');
 
-    // Wrap in proper HTML document with styles
+    // Wrap content in paragraph if needed
+    if (!htmlContent.startsWith('<')) {
+      htmlContent = '<p>' + htmlContent + '</p>';
+    }
+
+    // Replace #SCOPE with #resume in template CSS
+    const scopedCSS = templateCSS.replace(/#SCOPE/g, '#resume');
+
+    // Build the complete HTML with EXACT template styling
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1006,92 +1028,99 @@ const ResumeEditor: React.FC = () => {
     }
     
     body {
+      background: #f5f5f5;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    #resume {
       font-family: ${theme.fontFamily || 'Inter, sans-serif'};
       color: ${theme.primaryColor || '#1a1a1a'};
-      line-height: 1.5;
+      line-height: 1.6;
+      padding: 40px 50px;
       background: white;
-      padding: 40px;
       max-width: 850px;
-      margin: 0 auto;
+      width: 100%;
+      min-height: 1100px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
     
-    h1 {
+    #resume h1 {
       font-family: ${theme.headingFont || theme.fontFamily || 'Inter, sans-serif'};
-      color: ${theme.primaryColor || '#1a1a1a'};
-      font-size: 28px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      text-align: center;
+      margin-bottom: 0.25rem;
     }
     
-    h2 {
+    #resume h2 {
       font-family: ${theme.headingFont || theme.fontFamily || 'Inter, sans-serif'};
-      color: ${theme.primaryColor || '#1a1a1a'};
-      font-size: 16px;
-      font-weight: 600;
-      margin-top: 24px;
-      margin-bottom: 12px;
-      padding-bottom: 4px;
-      border-bottom: 2px solid ${theme.accentColor || '#3b82f6'};
+      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
     }
     
-    h3 {
-      font-size: 14px;
-      font-weight: 600;
-      margin-top: 12px;
-      margin-bottom: 4px;
+    #resume h3 {
+      font-family: ${theme.headingFont || theme.fontFamily || 'Inter, sans-serif'};
+      margin-top: 1rem;
+      margin-bottom: 0.25rem;
     }
     
-    p {
-      margin-bottom: 8px;
-      font-size: 11px;
+    #resume p {
+      margin-bottom: 0.5rem;
     }
     
-    ul {
-      margin-left: 20px;
-      margin-bottom: 8px;
+    #resume ul {
+      margin-left: 1.5rem;
+      margin-bottom: 0.5rem;
     }
     
-    li {
-      font-size: 11px;
-      margin-bottom: 4px;
+    #resume li {
+      margin-bottom: 0.25rem;
     }
     
-    hr {
+    #resume hr {
       border: none;
-      border-top: 1px solid ${theme.accentColor || '#e5e7eb'}40;
-      margin: 16px 0;
+      margin: 1rem 0;
     }
     
-    strong {
+    #resume strong {
       font-weight: 600;
     }
     
-    .contact-info {
-      text-align: center;
-      font-size: 11px;
-      color: #666;
-      margin-bottom: 16px;
+    #resume a {
+      color: ${theme.accentColor || '#3b82f6'};
+      text-decoration: none;
     }
+    
+    /* Template-specific styles from database */
+    ${scopedCSS}
     
     @media print {
       body {
+        background: white;
         padding: 0;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
+      }
+      
+      #resume {
+        box-shadow: none;
+        max-width: none;
+        min-height: auto;
+        padding: 0.5in;
       }
       
       @page {
-        margin: 0.5in;
+        margin: 0;
         size: letter;
       }
+      
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
-    
-    ${customCSS}
   </style>
 </head>
 <body>
-  ${htmlContent}
+  <div id="resume">
+    ${htmlContent}
+  </div>
 </body>
 </html>`;
   };
