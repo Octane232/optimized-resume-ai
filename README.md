@@ -170,16 +170,27 @@ Create new resumes from scratch:
 
 *Purpose: Create optimized resumes quickly.*
 
-#### **Resume Engine**
-Advanced resume management and optimization:
-- **My Resumes**: List all created resumes
-- **Resume Parser**: Import and analyze existing resumes
-- **ATS Analysis**: Detailed compatibility scoring
-- **Enhancement Suggestions**: AI-powered improvement tips
-- **Matching Engine**: Compare resume to job descriptions
-- **Export Options**: PDF, DOCX, HTML formats
+#### **Resume Engine (ATS Resume Analyzer)**
+The core of Vaylance's job matching capability. This powerful tool tells users honestly whether they're a good fit for a specific role:
 
-*Purpose: Optimize existing resumes for maximum impact.*
+**5-Stage Workflow:**
+1. **Ingestion**: Upload resume (PDF, DOCX, TXT) or paste text
+2. **Parsing**: AI extracts and normalizes skills, experience, seniority
+3. **Matching**: Compare resume against job description with detailed scoring
+4. **Enhancement**: Get specific, actionable fixes with examples
+5. **Export**: Download optimized resume in multiple formats
+
+**ATS Analyzer Features:**
+- **Honest Fit Assessment**: Clear verdict - "You ARE/ARE NOT a good fit" with explanation
+- **Match Score**: 0-100 score reflecting real interview chances
+- **Strengths Identified**: What's working well in your resume
+- **Gaps Analysis**: Critical, moderate, and minor gaps with severity levels
+- **Actionable Fixes**: Specific recommendations with priority ranking
+- **Example Text**: Copy-ready improved bullet points and sections
+- **Keyword Analysis**: Missing keywords with context on where to add them
+- **ATS Warnings**: Formatting issues that could cause automatic rejection
+
+*Purpose: Give users honest, actionable feedback on their job application chances.*
 
 #### **Resume Editor (`/resume-editor/:id`)**
 Full-featured resume editing interface:
