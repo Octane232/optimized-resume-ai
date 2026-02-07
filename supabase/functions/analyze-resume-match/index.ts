@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 serve(async (req) => {
@@ -13,65 +13,50 @@ serve(async (req) => {
   try {
     const { resumeText, jobDescription, jobTitle, company } = await req.json();
 
+    console.log("Analyzing resume match...");
+    console.log("Resume text length:", resumeText?.length || 0);
+    console.log("Job description length:", jobDescription?.length || 0);
+
+    if (!resumeText || !jobDescription) {
+      return new Response(
+        JSON.stringify({ error: "Both resume and job description are required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const systemPrompt = `You are an expert ATS (Applicant Tracking System) and resume optimization specialist with 15+ years of recruiting experience. You analyze resumes against specific job descriptions to provide actionable, specific feedback that helps candidates get past ATS filters and impress hiring managers.
+    const systemPrompt = `You are an expert ATS (Applicant Tracking System) and hiring specialist with 20+ years of recruiting experience at top companies. Your job is to honestly assess whether a candidate is a good fit for a role and provide specific, actionable advice to improve their chances.
 
-IMPORTANT: The resume data you receive may include enriched "Vault" data:
-- "allSkills": Combined skills from the resume AND manually added skills the candidate has
-- "certifications": Professional certifications the candidate holds
-- "projects": Side projects or portfolio work with technologies used
-
-When analyzing, consider ALL this data - not just the core resume content. A candidate may have relevant skills or certifications in their Vault that should boost their match score even if not yet in their resume. Point out opportunities to add these to the resume.
+Be direct and honest:
+- If they're not qualified, tell them clearly but constructively
+- If they're overqualified, mention it
+- If they're a great fit, celebrate their strengths
+- Focus on what ACTUALLY matters for this specific role
 
 Your analysis should be:
-- Specific and actionable (not generic advice)
-- Focused on what will actually improve their chances
-- Honest about gaps while being encouraging
-- Prioritized by impact
-- Consider certifications and projects when evaluating qualifications`;
+- Brutally honest but encouraging
+- Specific to THIS job description (not generic advice)
+- Actionable with concrete examples
+- Prioritized by impact on their chances`;
 
     const jobContext = jobTitle || company 
       ? `\n\nTarget Position: ${jobTitle || 'Not specified'}${company ? ` at ${company}` : ''}`
       : '';
 
-    // Parse the resume to check for vault data
-    let parsedResume;
-    try {
-      parsedResume = typeof resumeText === 'string' ? JSON.parse(resumeText) : resumeText;
-    } catch {
-      parsedResume = { rawText: resumeText };
-    }
-
-    const hasVaultData = parsedResume?.vaultEnriched === true;
-    const vaultContext = hasVaultData ? `
-
-ADDITIONAL VAULT DATA (candidate's enriched profile):
-- All Skills (resume + manually added): ${parsedResume.allSkills?.join(', ') || 'None'}
-- Certifications: ${parsedResume.certifications?.map((c: any) => c.name + (c.issuer ? ` (${c.issuer})` : '')).join(', ') || 'None'}
-- Projects: ${parsedResume.projects?.map((p: any) => p.name + (p.technologies ? `: ${p.technologies}` : '')).join('; ') || 'None'}
-
-Consider these Vault items when scoring and providing recommendations. If they have relevant certifications or projects, suggest adding them to the resume.` : '';
-
-    const userPrompt = `Analyze this resume for the following job opportunity:
+    const userPrompt = `Analyze this resume against this specific job and tell me: Will this candidate get an interview?
 ${jobContext}
 
-JOB DESCRIPTION:
+=== JOB DESCRIPTION ===
 ${jobDescription}
 
-RESUME CONTENT:
+=== CANDIDATE'S RESUME ===
 ${resumeText}
-${vaultContext}
 
-Provide a comprehensive match analysis with specific, actionable recommendations. Consider:
-1. How well does the candidate's experience align with the role requirements?
-2. What specific keywords from the job posting are missing from the resume?
-3. If they have relevant certifications or projects in their Vault, recommend adding them
-4. What concrete changes would improve their match score?
-5. Are there any red flags an ATS might catch?`;
+Be honest and specific. What are their real chances, and what EXACTLY should they change?`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -89,65 +74,65 @@ Provide a comprehensive match analysis with specific, actionable recommendations
           type: "function",
           function: {
             name: "provide_match_analysis",
-            description: "Provide detailed resume-job match analysis with specific actionable recommendations",
+            description: "Provide honest resume-job match analysis with specific actionable recommendations",
             parameters: {
               type: "object",
               properties: {
                 match_score: { 
                   type: "number", 
-                  description: "Overall match score (0-100) based on skills, experience, and keyword alignment" 
+                  description: "Overall match score (0-100). Be honest: 0-40 = Poor fit, 40-60 = Possible with significant changes, 60-80 = Good fit with minor improvements, 80-100 = Excellent fit" 
                 },
                 is_good_fit: {
                   type: "boolean",
-                  description: "Whether the resume is a good fit for the job (score >= 70)"
+                  description: "True if the candidate has a realistic chance of getting an interview (score >= 65)"
                 },
                 fit_summary: {
                   type: "string",
-                  description: "A 1-2 sentence summary of overall fit and main recommendation"
+                  description: "A direct 2-3 sentence verdict. Start with 'You ARE/ARE NOT a good fit for this role because...' Be specific about why."
                 },
                 strengths: {
                   type: "array",
                   items: { 
                     type: "object",
                     properties: {
-                      point: { type: "string", description: "The strength" },
-                      impact: { type: "string", enum: ["high", "medium"], description: "How much this helps their candidacy" }
+                      point: { type: "string", description: "A specific strength that matches this job's requirements" },
+                      impact: { type: "string", enum: ["high", "medium"], description: "How much this strength helps their candidacy" }
                     },
                     required: ["point", "impact"]
                   },
-                  description: "Key strengths that align with the job (max 5)"
+                  description: "3-5 specific strengths that align with THIS job (not generic compliments)"
                 },
                 gaps: {
                   type: "array",
                   items: { 
                     type: "object",
                     properties: {
-                      gap: { type: "string", description: "The missing skill or experience" },
-                      severity: { type: "string", enum: ["critical", "moderate", "minor"], description: "How important this gap is" },
-                      suggestion: { type: "string", description: "How to address this gap in the resume" }
+                      gap: { type: "string", description: "The specific missing skill, experience, or qualification" },
+                      severity: { type: "string", enum: ["critical", "moderate", "minor"], description: "Critical = dealbreaker, Moderate = hurts chances, Minor = nice-to-have" },
+                      suggestion: { type: "string", description: "EXACTLY how to address this gap in the resume (specific wording or approach)" }
                     },
                     required: ["gap", "severity", "suggestion"]
                   },
-                  description: "Missing skills or experience gaps (max 5)"
+                  description: "Up to 5 gaps, ordered by severity. Be specific about what's missing."
                 },
                 recommendations: {
                   type: "array",
                   items: { 
                     type: "object",
                     properties: {
-                      action: { type: "string", description: "Specific action to take" },
+                      action: { type: "string", description: "The specific action to take (e.g., 'Rewrite your summary to emphasize...')" },
                       section: { type: "string", enum: ["summary", "experience", "skills", "education", "other"], description: "Which resume section to modify" },
-                      priority: { type: "string", enum: ["high", "medium", "low"], description: "Priority level" },
-                      example: { type: "string", description: "Optional: example text or rewording" }
+                      priority: { type: "string", enum: ["high", "medium", "low"], description: "High = do this first, it will make the biggest difference" },
+                      example: { type: "string", description: "A concrete example of improved text they can use. Be specific!" }
                     },
                     required: ["action", "section", "priority"]
                   },
-                  description: "Specific, actionable recommendations to improve match (max 6)"
+                  description: "5-7 specific, prioritized recommendations. Include EXAMPLES of improved bullet points or sections."
                 },
                 keyword_matches: {
                   type: "array",
                   items: { type: "string" },
-                  description: "Important keywords from the job that are present in the resume"
+                  description: "Important keywords/skills from the job that ARE in the resume"
                 },
                 missing_keywords: {
                   type: "array",
@@ -156,16 +141,16 @@ Provide a comprehensive match analysis with specific, actionable recommendations
                     properties: {
                       keyword: { type: "string" },
                       importance: { type: "string", enum: ["must-have", "nice-to-have"] },
-                      context: { type: "string", description: "Where/how to add this keyword" }
+                      context: { type: "string", description: "Where/how to add this keyword naturally" }
                     },
                     required: ["keyword", "importance"]
                   },
-                  description: "Important keywords missing from the resume"
+                  description: "Important keywords/skills from the job that are MISSING from the resume"
                 },
                 ats_warnings: {
                   type: "array",
                   items: { type: "string" },
-                  description: "Any formatting or content issues that might cause ATS problems"
+                  description: "Any formatting or content issues that might cause ATS rejection (e.g., missing contact info, unusual formatting)"
                 }
               },
               required: ["match_score", "is_good_fit", "fit_summary", "strengths", "gaps", "recommendations", "keyword_matches", "missing_keywords"],
@@ -180,29 +165,33 @@ Provide a comprehensive match analysis with specific, actionable recommendations
     if (!response.ok) {
       if (response.status === 429) {
         return new Response(
-          JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
+          JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
       if (response.status === 402) {
         return new Response(
-          JSON.stringify({ error: "Payment required. Please add credits to your Lovable AI workspace." }),
+          JSON.stringify({ error: "AI credits depleted. Please add funds to continue." }),
           { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
       const errorText = await response.text();
       console.error("AI Gateway error:", response.status, errorText);
-      throw new Error("AI gateway error");
+      throw new Error("AI analysis failed. Please try again.");
     }
 
     const data = await response.json();
-    const toolCall = data.choices[0].message.tool_calls?.[0];
+    console.log("AI response received");
+    
+    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
     
     if (!toolCall) {
-      throw new Error("No tool call in AI response");
+      console.error("No tool call in AI response:", JSON.stringify(data));
+      throw new Error("AI did not return structured analysis");
     }
 
     const analysisResult = JSON.parse(toolCall.function.arguments);
+    console.log("Analysis complete. Match score:", analysisResult.match_score);
 
     return new Response(
       JSON.stringify(analysisResult),
@@ -212,7 +201,7 @@ Provide a comprehensive match analysis with specific, actionable recommendations
   } catch (error) {
     console.error("Error in analyze-resume-match:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error.message || "Analysis failed. Please try again." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
