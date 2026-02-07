@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -108,6 +108,29 @@ const ResumeEditor: React.FC = () => {
   });
 
   const [newSkill, setNewSkill] = useState("");
+  
+  // Debounced resume data for preview - prevents excessive re-renders
+  const [debouncedResumeData, setDebouncedResumeData] = useState<ResumeData>(resumeData);
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Debounce resume data updates for preview
+  useEffect(() => {
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+    debounceTimeoutRef.current = setTimeout(() => {
+      setDebouncedResumeData(resumeData);
+    }, 300);
+    
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, [resumeData]);
+  
+  // Memoize templates for the preview
+  const memoizedTemplates = useMemo(() => templates, [templates]);
 
   // Load templates and resume data
   useEffect(() => {
@@ -884,7 +907,7 @@ const ResumeEditor: React.FC = () => {
   // =============================
   // HTML GENERATION (FOR PREVIEW/PRINT)
   // =============================
-  const formatDateExport = (date: string): string => {
+  const formatDateExport = useCallback((date: string): string => {
     if (!date) return "";
     if (/^\d{4}$/.test(date)) return date;
     try {
@@ -892,9 +915,51 @@ const ResumeEditor: React.FC = () => {
     } catch {
       return date;
     }
-  };
+  }, []);
 
-  const generateStyledHTML = (): string => {
+  // Generic HTML must be defined BEFORE generateStyledHTML since it's used as a fallback
+  const generateGenericHTML = useCallback((): string => {
+    return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>${resumeTitle || "Resume"}</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0.5in; max-width: 8.5in; }
+    h1 { text-align: center; margin-bottom: 0.5rem; }
+    h2 { border-bottom: 2px solid #333; padding-bottom: 0.25rem; margin-top: 1.5rem; }
+    .contact { text-align: center; color: #666; margin-bottom: 1rem; }
+    ul { margin-left: 1.5rem; }
+    li { margin-bottom: 0.25rem; }
+    @media print { @page { margin: 0.5in; } }
+  </style>
+</head>
+<body>
+  <h1>${resumeData.contact.name}</h1>
+  <p class="contact">${[resumeData.contact.title, resumeData.contact.email, resumeData.contact.phone, resumeData.contact.location].filter(Boolean).join(" • ")}</p>
+  
+  ${resumeData.summary ? `<h2>Summary</h2><p>${resumeData.summary}</p>` : ""}
+  ${resumeData.skills.length > 0 ? `<h2>Skills</h2><p>${resumeData.skills.join(", ")}</p>` : ""}
+  ${
+    resumeData.experience.length > 0
+      ? `
+  <h2>Experience</h2>
+  ${resumeData.experience
+    .map(
+      (exp) => `
+    <p><strong>${exp.title}</strong> - ${exp.company}</p>
+    <p><em>${exp.startDate} - ${exp.endDate}</em></p>
+    <ul>${exp.responsibilities.map((r) => `<li>${r}</li>`).join("")}</ul>
+  `,
+    )
+    .join("")}`
+      : ""
+  }
+</body>
+</html>`;
+  }, [resumeTitle, resumeData]);
+
+  const generateStyledHTML = useCallback((): string => {
     const selectedTemplateObj = templates.find((t: any) => t.id === selectedTemplate);
     const templateContent = selectedTemplateObj?.json_content;
 
@@ -1098,48 +1163,7 @@ const ResumeEditor: React.FC = () => {
   </div>
 </body>
 </html>`;
-  };
-
-  const generateGenericHTML = (): string => {
-    return `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>${resumeTitle || "Resume"}</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0.5in; max-width: 8.5in; }
-    h1 { text-align: center; margin-bottom: 0.5rem; }
-    h2 { border-bottom: 2px solid #333; padding-bottom: 0.25rem; margin-top: 1.5rem; }
-    .contact { text-align: center; color: #666; margin-bottom: 1rem; }
-    ul { margin-left: 1.5rem; }
-    li { margin-bottom: 0.25rem; }
-    @media print { @page { margin: 0.5in; } }
-  </style>
-</head>
-<body>
-  <h1>${resumeData.contact.name}</h1>
-  <p class="contact">${[resumeData.contact.title, resumeData.contact.email, resumeData.contact.phone, resumeData.contact.location].filter(Boolean).join(" • ")}</p>
-  
-  ${resumeData.summary ? `<h2>Summary</h2><p>${resumeData.summary}</p>` : ""}
-  ${resumeData.skills.length > 0 ? `<h2>Skills</h2><p>${resumeData.skills.join(", ")}</p>` : ""}
-  ${
-    resumeData.experience.length > 0
-      ? `
-  <h2>Experience</h2>
-  ${resumeData.experience
-    .map(
-      (exp) => `
-    <p><strong>${exp.title}</strong> - ${exp.company}</p>
-    <p><em>${exp.startDate} - ${exp.endDate}</em></p>
-    <ul>${exp.responsibilities.map((r) => `<li>${r}</li>`).join("")}</ul>
-  `,
-    )
-    .join("")}`
-      : ""
-  }
-</body>
-</html>`;
-  };
+  }, [templates, selectedTemplate, resumeData, resumeTitle, formatDateExport, generateGenericHTML]);
 
   // =============================
   // EXPORT FUNCTIONS
@@ -1176,7 +1200,7 @@ const ResumeEditor: React.FC = () => {
     }
   };
 
-  const printToPDF = () => {
+  const printToPDF = useCallback(() => {
     const htmlContent = generateStyledHTML();
     const printWindow = window.open("", "_blank");
 
@@ -1192,17 +1216,21 @@ const ResumeEditor: React.FC = () => {
     printWindow.document.write(htmlContent);
     printWindow.document.close();
 
-    // Auto-print after a delay
+    // Auto-print after a delay, then close window to prevent memory leak
     setTimeout(() => {
       printWindow.focus();
       printWindow.print();
+      // Close the window after printing to free memory
+      printWindow.onafterprint = () => {
+        printWindow.close();
+      };
     }, 500);
 
     toast({
       title: "Opening Print Dialog",
       description: "Select 'Save as PDF' to download your styled resume",
     });
-  };
+  }, [generateStyledHTML, toast]);
 
   // =============================
   // FORM CONTENT
@@ -1585,7 +1613,7 @@ const ResumeEditor: React.FC = () => {
         <div className="overflow-y-auto border-r">{formContent}</div>
         <div className="overflow-y-auto bg-muted/20 p-6 flex items-start justify-center">
           <div className="w-full" style={{ maxWidth: "850px" }}>
-            <ResumeTemplatePreview resumeData={resumeData} templateId={selectedTemplate} templates={templates} />
+            <ResumeTemplatePreview resumeData={debouncedResumeData} templateId={selectedTemplate} templates={memoizedTemplates} />
           </div>
         </div>
       </div>
@@ -1601,7 +1629,7 @@ const ResumeEditor: React.FC = () => {
           </TabsContent>
           <TabsContent value="preview" className="mt-0 p-4 overflow-x-auto">
             <div className="min-w-[320px]">
-              <ResumeTemplatePreview resumeData={resumeData} templateId={selectedTemplate} templates={templates} />
+              <ResumeTemplatePreview resumeData={debouncedResumeData} templateId={selectedTemplate} templates={memoizedTemplates} />
             </div>
           </TabsContent>
         </Tabs>
