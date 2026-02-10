@@ -496,10 +496,11 @@ Edge function secrets (set in Supabase Dashboard):
 
 ## 🚀 Deployment
 
-### Lovable (Recommended)
-1. Open project in Lovable
-2. Click **Publish** button
-3. App is live instantly
+### Vercel / Netlify (Recommended)
+1. Connect your GitHub repository
+2. Configure build command: `npm run build`
+3. Set output directory: `dist`
+4. Deploy automatically on push
 
 ### Custom Domain
 1. Go to Project → Settings → Domains
