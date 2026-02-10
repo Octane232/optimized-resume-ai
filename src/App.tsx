@@ -43,7 +43,7 @@ const App = () => (
           <BrowserRouter>
           <ScrollToTop />
           <ScrollToSection />
-          <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+          <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div></div>}>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/features" element={<Index />} />

@@ -17,6 +17,7 @@ import { SkillGapAnalyzer } from '@/components/dashboard/SkillGapAnalyzer';
 import LinkedInOptimizer from '@/components/dashboard/LinkedInOptimizer';
 import WalkthroughGuide from '@/components/dashboard/WalkthroughGuide';
 import CreateResume from '@/components/dashboard/CreateResume';
+import TheVault from '@/components/dashboard/TheVault';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState(() => {
@@ -136,6 +137,8 @@ const Dashboard = () => {
         return <SkillGapAnalyzer />;
       case 'linkedin':
         return <LinkedInOptimizer />;
+      case 'vault':
+        return <TheVault setActiveTab={setActiveTab} />;
       case 'mission-control':
         return <MissionControl />;
       case 'billing':

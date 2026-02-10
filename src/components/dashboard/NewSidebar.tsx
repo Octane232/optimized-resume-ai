@@ -54,6 +54,7 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
     { id: 'cover-letter', label: 'Cover Letters', icon: FileText },
     { id: 'interview-prep', label: 'Interview Prep', icon: Mic },
     { id: 'skill-gap', label: 'Skill Gap', icon: TrendingUp },
+    { id: 'linkedin', label: 'LinkedIn', icon: Sparkles },
     { id: 'mission-control', label: 'Mission Control', icon: Crosshair },
   ];
 

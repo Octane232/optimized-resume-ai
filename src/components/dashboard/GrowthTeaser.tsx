@@ -146,7 +146,7 @@ const GrowthTeaser: React.FC<GrowthTeaserProps> = ({ setMode }) => {
       {/* Bottom Badge */}
       <div className="mt-12">
         <Badge variant="outline" className="text-muted-foreground">
-          Expected Launch: Q2 2025
+          Expected Launch: Q3 2026
         </Badge>
       </div>
     </div>

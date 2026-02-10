@@ -61,9 +61,9 @@ const Footer = () => {
             </p>
             <div className="flex gap-2 sm:gap-3">
               {[
-                { Icon: Linkedin, href: '#' },
-                { Icon: Twitter, href: '#' },
-                { Icon: Github, href: '#' },
+                { Icon: Linkedin, href: 'https://linkedin.com/company/vaylance' },
+                { Icon: Twitter, href: 'https://x.com/vaylance' },
+                { Icon: Github, href: 'https://github.com/vaylance' },
                 { Icon: Mail, href: 'mailto:contact@vaylance.com' }
               ].map(({ Icon, href }, i) => (
                 <a 
