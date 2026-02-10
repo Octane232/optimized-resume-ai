@@ -38,6 +38,7 @@ const MobileNav: React.FC<MobileNavProps> = ({ activeTab, setActiveTab, mode }) 
     { id: 'cover-letter', label: 'Cover Letters' },
     { id: 'interview-prep', label: 'Interview Prep' },
     { id: 'skill-gap', label: 'Skill Gap' },
+    { id: 'linkedin', label: 'LinkedIn' },
     { id: 'mission-control', label: 'Mission Control' },
     { id: 'billing', label: 'Billing' },
     { id: 'settings', label: 'Settings' },

@@ -210,7 +210,7 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-sm">Scout Report</h3>
-                    <p className="text-xs text-muted-foreground">3 high-match roles</p>
+                    <p className="text-xs text-muted-foreground">{scoutJobs.length > 0 ? `${scoutJobs.length} high-match roles` : 'No matches yet'}</p>
                   </div>
                 </div>
                 <Badge className="bg-primary/10 text-primary border-0 text-xs">New</Badge>
