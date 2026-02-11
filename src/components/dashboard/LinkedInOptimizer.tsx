@@ -80,27 +80,36 @@ const LinkedInOptimizer: React.FC = () => {
   const profileScore = calculateProfileScore();
 
   const handleOptimize = async () => {
+    const currentContent = activeTab === 'headline' ? currentHeadline : currentSummary;
+    
+    if (!currentContent.trim() && !targetRole.trim()) {
+      toast({
+        title: "Input needed",
+        description: "Please enter your current content or a target role.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsOptimizing(true);
     
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // Generate optimized content
-      let newOptimizedContent = '';
-      
-      if (activeTab === 'headline') {
-        newOptimizedContent = `${targetRole || 'Software Engineer'} | Helping companies build scalable solutions | Ex-${currentHeadline.split(' ')[0] || 'Tech'} | Open to opportunities`;
-      } else {
-        newOptimizedContent = 
-          `🚀 Passionate ${targetRole || 'professional'} with a track record of delivering results.\n\n` +
-          `I specialize in:\n` +
-          `✅ Building high-impact solutions\n` +
-          `✅ Leading cross-functional teams\n` +
-          `✅ Driving measurable business outcomes\n\n` +
-          `${currentSummary ? `Previously: ${currentSummary.slice(0, 100)}...` : ''}\n\n` +
-          `Let's connect! Always happy to chat about ${targetRole || 'opportunities'}.`;
-      }
+      // Call AI edge function
+      const { data: aiResult, error: aiError } = await supabase.functions.invoke('optimize-linkedin', {
+        body: {
+          type: activeTab,
+          currentContent: currentContent.trim(),
+          targetRole: targetRole.trim(),
+        }
+      });
+
+      if (aiError) throw aiError;
+      if (aiResult?.error) throw new Error(aiResult.error);
+
+      const newOptimizedContent = aiResult.optimizedContent;
 
       // Save to database
       const { data: newOptimization, error } = await supabase
@@ -108,7 +117,7 @@ const LinkedInOptimizer: React.FC = () => {
         .insert({
           user_id: user.id,
           type: activeTab,
-          original_content: activeTab === 'headline' ? currentHeadline : currentSummary,
+          original_content: currentContent,
           optimized_content: newOptimizedContent,
           target_role: targetRole
         })
@@ -445,13 +454,13 @@ const LinkedInOptimizer: React.FC = () => {
           <Card className="border-0 shadow-sm mt-4">
             <CardContent className="p-4 space-y-3">
               <h4 className="font-medium text-sm">Profile Checklist</h4>
-              {[
-                { label: 'Professional Photo', done: true },
-                { label: 'Optimized Headline', done: recentOptimizations.some(o => o.type === 'headline') },
-                { label: 'Compelling Summary', done: recentOptimizations.some(o => o.type === 'summary') },
-                { label: 'Skills Added (10+)', done: true },
-                { label: 'Experience Detailed', done: true },
-              ].map((item, i) => (
+                {[
+                  { label: 'Optimized Headline', done: recentOptimizations.some(o => o.type === 'headline') },
+                  { label: 'Compelling Summary', done: recentOptimizations.some(o => o.type === 'summary') },
+                  { label: 'Professional Photo', done: false },
+                  { label: 'Skills Added (10+)', done: false },
+                  { label: 'Experience Detailed', done: false },
+                ].map((item, i) => (
                 <div key={i} className="flex items-center justify-between text-sm">
                   <span className={item.done ? 'text-foreground' : 'text-muted-foreground'}>
                     {item.label}
