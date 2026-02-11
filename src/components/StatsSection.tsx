@@ -5,25 +5,25 @@ const StatsSection = () => {
   const stats = [
     {
       icon: Users,
-      value: '10,000+',
+      value: '1,200+',
       label: 'Active Users',
       color: 'from-primary to-blue-400'
     },
     {
       icon: FileText,
-      value: '50,000+',
-      label: 'Resumes Built',
+      value: '3,400+',
+      label: 'Resumes Created',
       color: 'from-emerald-500 to-teal-400'
     },
     {
       icon: TrendingUp,
-      value: '85%',
-      label: 'Success Rate',
+      value: '73%',
+      label: 'Interview Rate',
       color: 'from-purple-500 to-pink-400'
     },
     {
       icon: Star,
-      value: '4.9/5',
+      value: '4.6/5',
       label: 'User Rating',
       color: 'from-amber-500 to-orange-400'
     }
