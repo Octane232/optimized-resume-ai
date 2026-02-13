@@ -8,8 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Target, TrendingUp, BookOpen, Clock } from "lucide-react";
-import { useSubscription } from "@/contexts/SubscriptionContext";
+import { Target, TrendingUp, BookOpen, Clock, Coins, Lock } from "lucide-react";
+import { useCredits } from "@/contexts/CreditsContext";
 
 export const SkillGapAnalyzer = () => {
   const [loading, setLoading] = useState(false);
@@ -20,7 +20,8 @@ export const SkillGapAnalyzer = () => {
     userSkills: ""
   });
   const { toast } = useToast();
-  const { incrementUsage } = useSubscription();
+  const { balance, spendCredit } = useCredits();
+  const [showDetailedAdvice, setShowDetailedAdvice] = useState(false);
 
   const handleAnalyze = async () => {
     if (!formData.jobTitle || !formData.userSkills) {
@@ -61,8 +62,8 @@ export const SkillGapAnalyzer = () => {
         });
       }
 
-      // Track AI usage
-      await incrementUsage('ai');
+      // Analysis is FREE - no credit charge
+      setShowDetailedAdvice(false);
 
       setAnalysis(data);
       toast({
@@ -178,41 +179,81 @@ export const SkillGapAnalyzer = () => {
 
             {analysis.recommendations?.length > 0 && (
               <div>
-                <h4 className="font-semibold mb-3 flex items-center gap-2">
-                  <BookOpen className="w-4 h-4 text-primary" />
-                  Learning Recommendations
-                </h4>
-                <div className="space-y-4">
-                  {analysis.recommendations.map((rec: any, i: number) => (
-                    <Card key={i} className="p-4">
-                      <div className="flex items-start justify-between mb-2">
-                        <h5 className="font-semibold">{rec.skill}</h5>
-                        {getPriorityBadge(rec.priority)}
-                      </div>
-                      
-                      {rec.estimated_time && (
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                          <Clock className="w-4 h-4" />
-                          <span>Estimated time: {rec.estimated_time}</span>
-                        </div>
-                      )}
-
-                      {rec.learning_resources?.length > 0 && (
-                        <div className="mt-2">
-                          <p className="text-sm font-medium mb-1">Learning Resources:</p>
-                          <ul className="space-y-1">
-                            {rec.learning_resources.map((resource: string, j: number) => (
-                              <li key={j} className="text-sm text-muted-foreground flex items-start gap-2">
-                                <span>•</span>
-                                <span>{resource}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </Card>
-                  ))}
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-semibold flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-primary" />
+                    Learning Recommendations
+                  </h4>
+                  {!showDetailedAdvice && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={balance <= 0}
+                      onClick={async () => {
+                        const credited = await spendCredit('skill_gap_advice', `Detailed advice for ${formData.jobTitle}`);
+                        if (credited) {
+                          setShowDetailedAdvice(true);
+                        }
+                      }}
+                      className="gap-1.5"
+                    >
+                      <Lock className="w-3 h-3" />
+                      Unlock Details
+                      <span className="inline-flex items-center gap-0.5 text-xs opacity-80">
+                        <Coins className="w-3 h-3" />1
+                      </span>
+                    </Button>
+                  )}
                 </div>
+
+                {showDetailedAdvice ? (
+                  <div className="space-y-4">
+                    {analysis.recommendations.map((rec: any, i: number) => (
+                      <Card key={i} className="p-4">
+                        <div className="flex items-start justify-between mb-2">
+                          <h5 className="font-semibold">{rec.skill}</h5>
+                          {getPriorityBadge(rec.priority)}
+                        </div>
+                        
+                        {rec.estimated_time && (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                            <Clock className="w-4 h-4" />
+                            <span>Estimated time: {rec.estimated_time}</span>
+                          </div>
+                        )}
+
+                        {rec.learning_resources?.length > 0 && (
+                          <div className="mt-2">
+                            <p className="text-sm font-medium mb-1">Learning Resources:</p>
+                            <ul className="space-y-1">
+                              {rec.learning_resources.map((resource: string, j: number) => (
+                                <li key={j} className="text-sm text-muted-foreground flex items-start gap-2">
+                                  <span>•</span>
+                                  <span>{resource}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {analysis.recommendations.map((rec: any, i: number) => (
+                      <div key={i} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-sm">{rec.skill}</span>
+                          {getPriorityBadge(rec.priority)}
+                        </div>
+                        <Lock className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                    ))}
+                    <p className="text-xs text-muted-foreground text-center mt-2">
+                      Unlock detailed learning paths, time estimates, and resources
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </div>

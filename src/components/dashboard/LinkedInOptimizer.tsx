@@ -11,7 +11,8 @@ import {
   Eye,
   RefreshCw,
   History,
-  Trash2
+  Trash2,
+  Coins
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { motion } from 'framer-motion';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useCredits } from '@/contexts/CreditsContext';
 
 interface LinkedInOptimization {
   id: string;
@@ -34,6 +36,7 @@ interface LinkedInOptimization {
 }
 
 const LinkedInOptimizer: React.FC = () => {
+  const { balance, spendCredit } = useCredits();
   const [activeTab, setActiveTab] = useState('headline');
   const [currentHeadline, setCurrentHeadline] = useState('');
   const [currentSummary, setCurrentSummary] = useState('');
@@ -96,6 +99,18 @@ const LinkedInOptimizer: React.FC = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
+
+      // Spend 1 credit
+      const credited = await spendCredit('linkedin_optimize', `LinkedIn ${activeTab} optimization`);
+      if (!credited) {
+        toast({
+          title: "No credits remaining",
+          description: "You need 1 credit to optimize your LinkedIn profile.",
+          variant: "destructive"
+        });
+        setIsOptimizing(false);
+        return;
+      }
 
       // Call AI edge function
       const { data: aiResult, error: aiError } = await supabase.functions.invoke('optimize-linkedin', {
@@ -330,7 +345,7 @@ const LinkedInOptimizer: React.FC = () => {
               <Button 
                 className="w-full gap-2 bg-[#0A66C2] hover:bg-[#004182]"
                 onClick={handleOptimize}
-                disabled={isOptimizing}
+                disabled={isOptimizing || balance <= 0}
               >
                 {isOptimizing ? (
                   <>
@@ -341,6 +356,9 @@ const LinkedInOptimizer: React.FC = () => {
                   <>
                     <Sparkles className="w-4 h-4" />
                     Optimize with AI
+                    <span className="ml-1 inline-flex items-center gap-1 text-xs opacity-80">
+                      <Coins className="w-3 h-3" />1
+                    </span>
                   </>
                 )}
               </Button>
