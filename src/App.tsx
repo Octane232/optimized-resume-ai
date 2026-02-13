@@ -8,6 +8,7 @@ import { lazy, Suspense } from "react";
 import ScrollToTop from "./components/ScrollToTop";
 import ScrollToSection from "./components/ScrollToSection";
 import { SubscriptionProvider } from "./contexts/SubscriptionContext";
+import { CreditsProvider } from "./contexts/CreditsContext";
 
 // Lazy load pages for better performance
 const Index = lazy(() => import("./pages/Index"));
@@ -38,6 +39,7 @@ const App = () => (
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
       <TooltipProvider>
         <SubscriptionProvider>
+        <CreditsProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -75,6 +77,7 @@ const App = () => (
             </Routes>
           </Suspense>
         </BrowserRouter>
+        </CreditsProvider>
         </SubscriptionProvider>
       </TooltipProvider>
     </ThemeProvider>

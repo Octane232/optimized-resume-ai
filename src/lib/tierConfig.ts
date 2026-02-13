@@ -6,6 +6,7 @@ export const STRIPE_PRICE_TIERS = {
     price_id_yearly: 'price_1SaQDUCcyAnmb029YBXFwjjH',
     monthlyPrice: 12,
     yearlyPrice: 120,
+    monthlyCredits: 30,
   },
   premium: {
     name: 'Premium',
@@ -13,6 +14,7 @@ export const STRIPE_PRICE_TIERS = {
     price_id_yearly: 'price_1SaQE7CcyAnmb029QOzfgiQG',
     monthlyPrice: 24,
     yearlyPrice: 240,
+    monthlyCredits: -1, // unlimited
   },
 } as const;
 
@@ -20,59 +22,59 @@ export const TIER_FEATURES = {
   free: {
     name: 'Free',
     price: 0,
-    description: 'Perfect for getting started',
-    features: [
-      '1 resume/month',
-      '1 PDF download/month',
-      'Basic templates only',
-      'Community support',
+    credits: 5,
+    description: 'Get started with AI career tools',
+    freeFeatures: [
+      'Resume Engine scoring (unlimited)',
+      'Skill Gap Analysis (what\'s missing)',
+      'Job Scout (browse & discover)',
+      'Application Tracker (Kanban board)',
+      '5 AI credits/month',
     ],
-    lockedFeatures: [
-      'AI Resume Generator',
-      'Cover Letter Generator',
-      'ATS Scoring',
-      'Interview Prep',
-      'Skill Gap Analyzer',
+    paidFeatures: [
+      'Cover Letter Generator (1 credit)',
+      'Interview Mock Sessions (1 credit)',
+      'LinkedIn Optimizer (1 credit)',
+      'Detailed Skill Gap Advice (1 credit)',
+      'AI Bullet Rewriter (1 credit)',
     ],
   },
   pro: {
     name: 'Pro',
     price: 12,
+    credits: 30,
     description: 'For serious job seekers',
-    features: [
-      '5 resumes',
-      '10 PDF downloads/month',
-      '5 AI generations/month',
+    freeFeatures: [
+      'Everything in Free',
+      '30 AI credits/month',
       'All premium templates',
-      'AI Resume Generator',
-      'Cover Letter Generator',
-      'ATS Scoring',
       'Email support',
     ],
-    lockedFeatures: [
-      'Interview Prep',
-      'Skill Gap Analyzer',
-    ],
+    paidFeatures: [],
   },
   premium: {
     name: 'Premium',
     price: 24,
-    description: 'Everything you need to land your dream job',
-    features: [
-      'Unlimited resumes',
-      'Unlimited PDF downloads',
-      'Unlimited AI generations',
-      'All premium templates',
-      'AI Resume Generator',
-      'Cover Letter Generator',
-      'Full ATS Analysis',
-      'Interview Prep with AI feedback',
-      'Skill Gap Analyzer',
-      'Smart Job Matching',
+    credits: -1,
+    description: 'Unlimited AI career assistant',
+    freeFeatures: [
+      'Everything in Pro',
+      'Unlimited AI credits',
       'Priority Support',
+      'Smart Job Matching',
     ],
-    lockedFeatures: [],
+    paidFeatures: [],
   },
 } as const;
 
 export type TierName = keyof typeof TIER_FEATURES;
+
+// Credit costs per action
+export const CREDIT_COSTS = {
+  cover_letter: 1,
+  interview_prep: 1,
+  linkedin_optimize: 1,
+  skill_gap_advice: 1,
+  bullet_rewrite: 1,
+  ai_resume_rewrite: 1,
+} as const;

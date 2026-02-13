@@ -5,14 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Brain, MessageCircle, Clock, Target, CheckCircle, Sparkles, Star, Award, Users, RotateCcw, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
+import { Brain, MessageCircle, Clock, Target, CheckCircle, Sparkles, Star, Award, Users, RotateCcw, ArrowRight, Loader2, CheckCircle2, Coins } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
-import { useSubscription } from '@/contexts/SubscriptionContext';
+import { useCredits } from '@/contexts/CreditsContext';
 
 const InterviewPrep = () => {
   const { toast } = useToast();
-  const { incrementUsage } = useSubscription();
+  const { balance, spendCredit } = useCredits();
   const [selectedCategory, setSelectedCategory] = useState('ai-interview');
   const [desiredPosition, setDesiredPosition] = useState('');
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -120,7 +120,17 @@ const InterviewPrep = () => {
   const [interviewQuestions, setInterviewQuestions] = useState([]);
   const [answers, setAnswers] = useState<any[]>([]);
 
-  const startInterview = () => {
+  const startInterview = async () => {
+    // Spend 1 credit for a mock interview session
+    const credited = await spendCredit('interview_prep', `Mock interview for ${desiredPosition}`);
+    if (!credited) {
+      toast({
+        title: "No credits remaining",
+        description: "You need 1 credit to start a mock interview session.",
+        variant: "destructive"
+      });
+      return;
+    }
     const questions = generateQuestions(desiredPosition);
     setInterviewQuestions(questions);
     setCurrentQuestion(0);
@@ -144,9 +154,6 @@ const InterviewPrep = () => {
       });
 
       if (error) throw error;
-
-      // Track AI usage
-      await incrementUsage('ai');
 
       const feedbackData = {
         question: interviewQuestions[currentQuestion],
@@ -346,11 +353,14 @@ const InterviewPrep = () => {
                     
                     <Button 
                       onClick={startInterview}
-                      disabled={!desiredPosition.trim()}
+                      disabled={!desiredPosition.trim() || balance <= 0}
                       className="w-full h-12 text-base font-semibold saas-button"
                     >
                       <Brain className="w-5 h-5 mr-3" />
-                      Generate AI Interview Questions
+                      Start Mock Interview
+                      <span className="ml-2 inline-flex items-center gap-1 text-xs opacity-80">
+                        <Coins className="w-3 h-3" />1
+                      </span>
                       <ArrowRight className="w-5 h-5 ml-3" />
                     </Button>
                   </div>
