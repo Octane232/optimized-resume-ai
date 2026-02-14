@@ -7,7 +7,7 @@ serve(async (req) => {
   }
 
   try {
-    const { name, email, phone, targetRole, experience, education, skills } = await req.json();
+    const { name, email, phone, targetRole, experience, education, skills, jobDescription } = await req.json();
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -16,13 +16,46 @@ serve(async (req) => {
 
     const systemPrompt = `You are an expert resume writer and career coach. Generate professional, ATS-optimized resume content that highlights achievements and uses strong action verbs. Focus on quantifiable results and industry-specific keywords. Also recommend the most suitable resume template based on the role and industry.`;
 
-    const userPrompt = `Create comprehensive resume content for:
+    let userPrompt: string;
+
+    if (jobDescription) {
+      // Job-description-based generation
+      userPrompt = `Analyze the following job description and create a highly tailored, ATS-optimized resume for the candidate.
+
+JOB DESCRIPTION:
+${jobDescription}
+
+CANDIDATE INFO:
+Name: ${name || "Candidate"}
+Email: ${email || ""}
+Phone: ${phone || ""}
+Target Role: ${targetRole || "As described in job posting"}
+
+Generate:
+1. A compelling professional summary (2-3 sentences) that directly addresses the key requirements in the job description
+2. 3-4 work experience entries that demonstrate relevant experience for this specific role, with:
+   - Job title, company name
+   - Start and end dates (use realistic recent dates)
+   - 3-4 bullet points per role with quantifiable achievements that mirror the job requirements
+3. 2 education entries with degree, institution, and graduation year
+4. 3-5 relevant projects with titles, descriptions, and technologies matching the job's tech stack
+5. Recommend the best template type:
+   - "tech" for software/IT roles
+   - "creative" for design/marketing roles
+   - "executive" for senior management/C-level positions
+   - "modern" for contemporary corporate roles
+   - "classic" for traditional industries (law, finance, academia)
+
+IMPORTANT: Extract keywords from the job description and weave them naturally into the resume content. Optimize for ATS keyword matching.`;
+    } else {
+      // Original flow
+      userPrompt = `Create comprehensive resume content for:
 
 Name: ${name}
 Target Role: ${targetRole}
 Experience Level: ${experience}
 Education: ${education}
-Skills: ${skills.join(', ')}
+Skills: ${skills?.join(', ') || ''}
 
 Generate:
 1. A compelling professional summary (2-3 sentences) that highlights key strengths
@@ -40,6 +73,7 @@ Generate:
    - "classic" for traditional industries (law, finance, academia)
 
 Make it specific to ${targetRole} and optimize for ATS systems.`;
+    }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -113,9 +147,14 @@ Make it specific to ${targetRole} and optimize for ATS systems.`;
                     },
                     required: ["title", "description", "technologies"]
                   }
+                },
+                skills: {
+                  type: "array",
+                  items: { type: "string" },
+                  description: "Relevant skills extracted from the job description"
                 }
               },
-              required: ["summary", "recommendedTemplate", "experience", "education", "projects"]
+              required: ["summary", "recommendedTemplate", "experience", "education", "projects", "skills"]
             }
           }
         }],
@@ -151,17 +190,17 @@ Make it specific to ${targetRole} and optimize for ATS systems.`;
     // Combine with user input
     const fullResumeData = {
       contact: {
-        name,
-        email,
-        phone,
-        title: targetRole,
+        name: name || "Your Name",
+        email: email || "",
+        phone: phone || "",
+        title: targetRole || resumeContent.experience?.[0]?.title || "",
         location: '',
         linkedin: '',
         portfolio: '',
         github: ''
       },
       summary: resumeContent.summary,
-      skills: skills,
+      skills: resumeContent.skills || skills || [],
       experience: resumeContent.experience,
       education: resumeContent.education,
       projects: resumeContent.projects,

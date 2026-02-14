@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, Download, Share2, Plus, X, FileText, FileCode, Printer, ChevronDown, Award } from "lucide-react";
+import { Save, Download, Share2, Plus, X, FileText, FileCode, Printer, ChevronDown, Award, Sparkles } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +24,7 @@ import ResumeTemplatePreview from "@/components/dashboard/ResumeTemplatePreview"
 import { Document, Packer, Paragraph, TextRun, AlignmentType, BorderStyle } from "docx";
 import { saveAs } from "file-saver";
 import { useSubscription } from "@/contexts/SubscriptionContext";
+import AIResumeGeneratorDialog from "@/components/dashboard/AIResumeGeneratorDialog";
 
 const ResumeEditor: React.FC = () => {
   const { resumeId } = useParams();
@@ -108,6 +109,7 @@ const ResumeEditor: React.FC = () => {
   });
 
   const [newSkill, setNewSkill] = useState("");
+  const [showAIGenerator, setShowAIGenerator] = useState(false);
   
   // Debounced resume data for preview - prevents excessive re-renders
   const [debouncedResumeData, setDebouncedResumeData] = useState<ResumeData>(resumeData);
@@ -1555,6 +1557,10 @@ const ResumeEditor: React.FC = () => {
               </Select>
             </div>
             <div className="flex items-center gap-2">
+              <Button onClick={() => setShowAIGenerator(true)} variant="outline" className="gap-2 border-primary/30 text-primary hover:bg-primary/10">
+                <Sparkles className="w-4 h-4" />
+                AI Generate
+              </Button>
               <Button onClick={saveResume} disabled={saving} variant="default">
                 <Save className="w-4 h-4 mr-2" />
                 {saving ? "Saving..." : "Save"}
@@ -1634,6 +1640,16 @@ const ResumeEditor: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* AI Resume Generator Dialog */}
+      <AIResumeGeneratorDialog
+        open={showAIGenerator}
+        onOpenChange={setShowAIGenerator}
+        onGenerated={(data) => setResumeData(data)}
+        currentName={resumeData.contact.name}
+        currentEmail={resumeData.contact.email}
+        currentPhone={resumeData.contact.phone}
+      />
     </div>
   );
 };
