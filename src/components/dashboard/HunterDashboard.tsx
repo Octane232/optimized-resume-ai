@@ -13,10 +13,12 @@ import {
   Briefcase,
   Zap,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  Coins
 } from 'lucide-react';
 import CareerStreak from './CareerStreak';
 import UsageIndicator from './UsageIndicator';
+import { useCredits } from '@/contexts/CreditsContext';
 
 interface HunterDashboardProps {
   setActiveTab: (tab: string) => void;
@@ -24,6 +26,7 @@ interface HunterDashboardProps {
 
 const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
   const [userName, setUserName] = useState('');
+  const { balance, loading: creditsLoading } = useCredits();
   const [stats, setStats] = useState({
     applicationsThisWeek: 2,
     weeklyGoal: 5,
@@ -85,7 +88,6 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Fetch scouted jobs
       const { data } = await supabase
         .from('scouted_jobs')
         .select('*')
@@ -95,7 +97,6 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
       
       if (data && data.length > 0) {
         const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500'];
-        // Calculate match score based on skills overlap with user vault
         const { data: vaultData } = await supabase
           .from('user_vault')
           .select('skills')
@@ -114,14 +115,13 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
           return {
             company: job.company_name || 'Unknown',
             role: job.job_title || 'Position',
-            match: Math.max(matchScore, 60), // Minimum 60% for display
+            match: Math.max(matchScore, 60),
             color: colors[i % colors.length],
             url: job.job_url
           };
         }));
       }
 
-      // Fetch stale applications (applied > 5 days ago)
       const { data: applications } = await supabase
         .from('job_applications')
         .select('company_name, job_title, applied_date')
@@ -148,21 +148,48 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
   }, []);
 
   const applicationVelocity = Math.round((stats.applicationsThisWeek / stats.weeklyGoal) * 100);
+  const isLowCredits = balance <= 2;
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      {/* Header */}
+    <div className="p-4 md:p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
+      {/* Greeting + Credit Badge Row */}
       <motion.div 
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-6"
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
       >
-        <h1 className="text-2xl font-bold mb-1">
-          {getGreeting()}, {userName} 👋
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          Let's land that dream role today.
-        </p>
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+            {getGreeting()}, {userName} 👋
+          </h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            Let's land that dream role today.
+          </p>
+        </div>
+
+        {/* Credit Badge */}
+        {!creditsLoading && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.15 }}
+            onClick={() => setActiveTab('billing')}
+            className={`
+              flex items-center gap-2.5 px-4 py-2.5 rounded-xl border transition-all
+              hover:shadow-md cursor-pointer shrink-0 self-start
+              ${isLowCredits 
+                ? 'bg-destructive/5 border-destructive/20 text-destructive hover:bg-destructive/10' 
+                : 'bg-primary/5 border-primary/20 text-primary hover:bg-primary/10'
+              }
+            `}
+          >
+            <Coins className="w-4 h-4" />
+            <span className="text-sm font-semibold">{balance} credit{balance !== 1 ? 's' : ''}</span>
+            {isLowCredits && (
+              <Badge variant="destructive" className="text-[10px] px-1.5 py-0 h-4">Low</Badge>
+            )}
+          </motion.button>
+        )}
       </motion.div>
 
       {/* Stats Row */}
@@ -170,21 +197,21 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6"
+        className="grid grid-cols-2 md:grid-cols-4 gap-3"
       >
         {[
-          { label: 'Applications', value: stats.applicationsThisWeek, icon: Briefcase, color: 'text-primary' },
-          { label: 'This Week', value: `${applicationVelocity}%`, icon: Zap, color: 'text-amber-500' },
-          { label: 'Pending', value: stats.pendingReplies, icon: Clock, color: 'text-orange-500' },
-          { label: 'Interviews', value: stats.interviews, icon: CheckCircle2, color: 'text-emerald-500' },
+          { label: 'Applications', value: stats.applicationsThisWeek, icon: Briefcase, bgClass: 'bg-primary/10', textClass: 'text-primary' },
+          { label: 'Weekly Goal', value: `${applicationVelocity}%`, icon: Zap, bgClass: 'bg-amber-500/10', textClass: 'text-amber-500' },
+          { label: 'Pending', value: stats.pendingReplies, icon: Clock, bgClass: 'bg-orange-500/10', textClass: 'text-orange-500' },
+          { label: 'Interviews', value: stats.interviews, icon: CheckCircle2, bgClass: 'bg-emerald-500/10', textClass: 'text-emerald-500' },
         ].map((stat, i) => (
-          <Card key={i} className="border-0 shadow-sm bg-card/50">
+          <Card key={i} className="border border-border/50 shadow-sm hover:shadow-md transition-shadow bg-card">
             <CardContent className="p-4 flex items-center gap-3">
-              <div className={`w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center ${stat.color}`}>
-                <stat.icon className="w-4 h-4" />
+              <div className={`w-10 h-10 rounded-xl ${stat.bgClass} flex items-center justify-center`}>
+                <stat.icon className={`w-5 h-5 ${stat.textClass}`} />
               </div>
               <div>
-                <p className="text-xl font-bold">{stat.value}</p>
+                <p className="text-xl font-bold text-foreground">{stat.value}</p>
                 <p className="text-xs text-muted-foreground">{stat.label}</p>
               </div>
             </CardContent>
@@ -200,54 +227,62 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <Card className="border-0 shadow-sm overflow-hidden">
-            <div className="h-1 bg-gradient-to-r from-primary to-primary/50" />
+          <Card className="border border-border/50 shadow-sm hover:shadow-md transition-shadow overflow-hidden h-full">
+            <div className="h-1 bg-gradient-to-r from-primary to-primary/40" />
             <CardContent className="p-5">
               <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Target className="w-4 h-4 text-primary" />
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Target className="w-4.5 h-4.5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-sm">Scout Report</h3>
+                    <h3 className="font-semibold text-sm text-foreground">Scout Report</h3>
                     <p className="text-xs text-muted-foreground">{scoutJobs.length > 0 ? `${scoutJobs.length} high-match roles` : 'No matches yet'}</p>
                   </div>
                 </div>
-                <Badge className="bg-primary/10 text-primary border-0 text-xs">New</Badge>
+                {scoutJobs.length > 0 && (
+                  <Badge className="bg-primary/10 text-primary border-0 text-xs font-medium">New</Badge>
+                )}
               </div>
               
               <div className="space-y-2">
-                {scoutJobs.map((job, index) => (
+                {scoutJobs.length > 0 ? scoutJobs.map((job, index) => (
                   <motion.div 
                     key={index}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.3 + index * 0.1 }}
-                    className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer group"
+                    className="flex items-center justify-between p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer group"
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-lg ${job.color} flex items-center justify-center text-white text-xs font-bold`}>
+                      <div className={`w-9 h-9 rounded-lg ${job.color} flex items-center justify-center text-white text-xs font-bold`}>
                         {job.company[0]}
                       </div>
                       <div>
-                        <p className="font-medium text-sm">{job.company}</p>
+                        <p className="font-medium text-sm text-foreground">{job.company}</p>
                         <p className="text-xs text-muted-foreground">{job.role}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-emerald-500">{job.match}%</span>
+                      <span className="text-xs font-semibold text-emerald-500">{job.match}%</span>
                       <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
                   </motion.div>
-                ))}
+                )) : (
+                  <div className="text-center py-6">
+                    <Target className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">No scouted jobs yet</p>
+                    <p className="text-xs text-muted-foreground/70">Add jobs to Scout to see matches</p>
+                  </div>
+                )}
               </div>
 
               <Button 
                 onClick={() => setActiveTab('resume-engine')} 
-                className="w-full mt-4 bg-primary hover:bg-primary/90 gap-2"
+                className="w-full mt-4 gap-2"
                 size="sm"
               >
-                <Sparkles className="w-3 h-3" />
+                <Sparkles className="w-3.5 h-3.5" />
                 Review Matches
               </Button>
             </CardContent>
@@ -260,16 +295,16 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.25 }}
         >
-          <Card className="border-0 shadow-sm overflow-hidden">
-            <div className="h-1 bg-gradient-to-r from-amber-500 to-orange-500" />
+          <Card className="border border-border/50 shadow-sm hover:shadow-md transition-shadow overflow-hidden h-full">
+            <div className="h-1 bg-gradient-to-r from-amber-500 to-orange-400" />
             <CardContent className="p-5">
               <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                    <Mail className="w-4 h-4 text-amber-500" />
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                    <Mail className="w-4.5 h-4.5 text-amber-500" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-sm">Action Required</h3>
+                    <h3 className="font-semibold text-sm text-foreground">Action Required</h3>
                     <p className="text-xs text-muted-foreground">Follow-up needed</p>
                   </div>
                 </div>
@@ -277,14 +312,14 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
 
               {staleApplication ? (
                 <>
-                  <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/5 to-orange-500/5 border border-amber-500/10 mb-4">
+                  <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/10 mb-4">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                      <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm shrink-0">
                         {staleApplication.company.charAt(0).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm">{staleApplication.company}</p>
-                        <p className="text-xs text-muted-foreground mb-2">No reply in {staleApplication.daysSince} days</p>
+                        <p className="font-medium text-sm text-foreground">{staleApplication.company}</p>
+                        <p className="text-xs text-muted-foreground mb-1.5">No reply in {staleApplication.daysSince} days</p>
                         <p className="text-xs text-muted-foreground/80 line-clamp-2">
                           Consider sending a follow-up for your {staleApplication.jobTitle} application.
                         </p>
@@ -299,7 +334,7 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
                       className="flex-1 gap-1.5"
                       onClick={() => setActiveTab('mission-control')}
                     >
-                      <Mail className="w-3 h-3" />
+                      <Mail className="w-3.5 h-3.5" />
                       View Application
                     </Button>
                     <Button 
@@ -309,13 +344,13 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
                       className="gap-1"
                     >
                       View All
-                      <ArrowRight className="w-3 h-3" />
+                      <ArrowRight className="w-3.5 h-3.5" />
                     </Button>
                   </div>
                 </>
               ) : (
-                <div className="text-center py-4">
-                  <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
+                <div className="text-center py-6">
+                  <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto mb-2" />
                   <p className="text-sm font-medium text-foreground">All caught up!</p>
                   <p className="text-xs text-muted-foreground">No pending follow-ups needed</p>
                 </div>
@@ -330,22 +365,21 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="mt-4"
       >
-        <Card className="border-0 shadow-sm">
+        <Card className="border border-border/50 shadow-sm">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Zap className="w-4 h-4 text-amber-500" />
-                <span className="font-medium text-sm">Weekly Goal</span>
+                <span className="font-semibold text-sm text-foreground">Weekly Goal</span>
               </div>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-sm text-muted-foreground font-medium">
                 {stats.applicationsThisWeek} / {stats.weeklyGoal} applications
               </span>
             </div>
-            <div className="h-2 bg-muted/50 rounded-full overflow-hidden">
+            <div className="h-2.5 bg-muted/50 rounded-full overflow-hidden">
               <motion.div 
-                className="h-full bg-gradient-to-r from-primary to-primary/70 rounded-full"
+                className="h-full bg-gradient-to-r from-primary to-primary/60 rounded-full"
                 initial={{ width: 0 }}
                 animate={{ width: `${Math.min(applicationVelocity, 100)}%` }}
                 transition={{ duration: 1, ease: "easeOut", delay: 0.5 }}
@@ -361,7 +395,7 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
       </motion.div>
 
       {/* Career Streak & Usage */}
-      <div className="grid lg:grid-cols-2 gap-4 mt-4">
+      <div className="grid lg:grid-cols-2 gap-4">
         <CareerStreak compact />
         <UsageIndicator />
       </div>
