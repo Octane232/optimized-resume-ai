@@ -26,7 +26,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
-import CreditBadge from './CreditBadge';
+
 
 interface NewSidebarProps {
   activeTab: string;
@@ -209,11 +209,6 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
           })}
         </TooltipProvider>
       </nav>
-
-      {/* Credit Balance */}
-      <div className="px-3 pb-2">
-        <CreditBadge collapsed={collapsed} />
-      </div>
 
       {/* Bottom Actions */}
       <div className="p-3 border-t border-sidebar-border space-y-1">

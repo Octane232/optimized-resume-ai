@@ -6,6 +6,7 @@ import { Sun, Moon, Crown, Home, ChevronRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useTheme } from 'next-themes';
 import { supabase } from '@/integrations/supabase/client';
+import CreditBadge from './CreditBadge';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -151,6 +152,9 @@ const DashboardHeader = ({ activeTab, setActiveTab }: DashboardHeaderProps) => {
 
 
         <div className="flex items-center gap-4">
+          {/* Credit Balance */}
+          <CreditBadge />
+
           {/* Theme Toggle */}
           <Button
             variant="ghost"
