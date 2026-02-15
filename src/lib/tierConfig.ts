@@ -1,17 +1,13 @@
-// Stripe price IDs mapped to tiers
-export const STRIPE_PRICE_TIERS = {
+// Tier pricing config (payment integration to be added)
+export const PRICE_TIERS = {
   pro: {
     name: 'Pro',
-    price_id_monthly: 'price_1SaQC1CcyAnmb029kDR4Mof6',
-    price_id_yearly: 'price_1SaQDUCcyAnmb029YBXFwjjH',
     monthlyPrice: 12,
     yearlyPrice: 120,
     monthlyCredits: 30,
   },
   premium: {
     name: 'Premium',
-    price_id_monthly: 'price_1SaQCbCcyAnmb0297JqYygrH',
-    price_id_yearly: 'price_1SaQE7CcyAnmb029QOzfgiQG',
     monthlyPrice: 24,
     yearlyPrice: 240,
     monthlyCredits: -1, // unlimited
