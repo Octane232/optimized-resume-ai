@@ -95,19 +95,23 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      // Fetch subscription tier from edge function
-      console.log('[SubscriptionContext] Fetching subscription status...');
-      const { data: subData, error: subError } = await supabase.functions.invoke('check-subscription');
+      // Check subscription from database
+      const { data: subData, error: subError } = await supabase
+        .from('user_subscriptions')
+        .select('tier, plan_status, current_period_end')
+        .eq('user_id', session.user.id)
+        .maybeSingle();
       
       if (subError) {
         console.error('[SubscriptionContext] Error checking subscription:', subError);
         setTier('free');
-      } else if (subData) {
-        const newTier = subData.tier || 'free';
-        console.log('[SubscriptionContext] Subscription response:', subData);
+      } else if (subData && subData.plan_status === 'active' && subData.tier) {
+        const newTier = subData.tier as SubscriptionTier;
         console.log('[SubscriptionContext] Setting tier to:', newTier);
         setTier(newTier);
-        setSubscriptionEnd(subData.subscription_end);
+        setSubscriptionEnd(subData.current_period_end);
+      } else {
+        setTier('free');
       }
 
       // Fetch usage stats

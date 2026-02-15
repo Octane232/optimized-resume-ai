@@ -2,54 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, Crown, CreditCard, Download, Star, Zap, Shield, Headphones, Sparkles, TrendingUp, Users, Award, Loader2, ExternalLink, X } from 'lucide-react';
+import { Check, Crown, CreditCard, Download, Star, Zap, Shield, Headphones, Sparkles, TrendingUp, Users, Award, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { formatDistanceToNow } from 'date-fns';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
-import { STRIPE_TIERS, getPriceId } from '@/lib/stripe';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { TIER_FEATURES } from '@/lib/tierConfig';
 
 const Billing = () => {
   const [billingCycle, setBillingCycle] = useState('monthly');
-  const [currentPlan, setCurrentPlan] = useState(null);
-  const [plans, setPlans] = useState([]);
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [upgradingPlan, setUpgradingPlan] = useState<string | null>(null);
-  const { toast } = useToast();
-  const { tier, usage, limits, getNextResetDate, getRemainingResumes, getRemainingDownloads, getRemainingAIGenerations } = useSubscription();
+  const { tier, usage, limits, getNextResetDate } = useSubscription();
 
   useEffect(() => {
     fetchBillingData();
   }, []);
 
-  useEffect(() => {
-    fetchBillingData();
-  }, [billingCycle]);
-
   const fetchBillingData = async () => {
     try {
-      // Fetch subscription plans
-      const { data: plansData, error: plansError } = await supabase
-        .from('subscription_plans')
-        .select('*')
-        .order('price_monthly', { ascending: true });
-
-      if (plansError) throw plansError;
-
-      // Fetch user subscription
-      const { data: subscriptionData, error: subscriptionError } = await supabase
-        .from('user_subscriptions')
-        .select('*')
-        .single();
-
-      if (subscriptionError && subscriptionError.code !== 'PGRST116') {
-        throw subscriptionError;
-      }
-
-      // Fetch invoices
       const { data: invoicesData, error: invoicesError } = await supabase
         .from('billing_invoices')
         .select('*')
@@ -57,59 +26,6 @@ const Billing = () => {
         .limit(10);
 
       if (invoicesError) throw invoicesError;
-
-      // Process and set plans based on tier config
-      const tierPlans = [
-        {
-          id: 'free',
-          name: 'Free',
-          monthlyPrice: 0,
-          yearlyPrice: 0,
-          price: '$0',
-          period: 'forever',
-          features: [...TIER_FEATURES.free.freeFeatures],
-          lockedFeatures: [...TIER_FEATURES.free.paidFeatures],
-          icon: Shield,
-          color: 'from-slate-500 to-slate-600',
-          popular: false,
-          current: tier === 'free',
-          description: TIER_FEATURES.free.description,
-        },
-        {
-          id: 'pro',
-          name: 'Pro',
-          monthlyPrice: 12,
-          yearlyPrice: 120,
-          price: billingCycle === 'monthly' ? '$12' : '$120',
-          period: billingCycle === 'monthly' ? 'per month' : 'per year',
-          originalPrice: billingCycle === 'yearly' ? '$144' : null,
-          features: [...TIER_FEATURES.pro.freeFeatures],
-          lockedFeatures: [...TIER_FEATURES.pro.paidFeatures],
-          icon: Sparkles,
-          color: 'from-blue-500 to-cyan-500',
-          popular: true,
-          current: tier === 'pro',
-          description: TIER_FEATURES.pro.description,
-          savings: billingCycle === 'yearly' ? 'Save $24' : null,
-        },
-        {
-          id: 'premium',
-          name: 'Premium',
-          monthlyPrice: 24,
-          yearlyPrice: 240,
-          price: billingCycle === 'monthly' ? '$24' : '$240',
-          period: billingCycle === 'monthly' ? 'per month' : 'per year',
-          originalPrice: billingCycle === 'yearly' ? '$288' : null,
-          features: [...TIER_FEATURES.premium.freeFeatures],
-          lockedFeatures: [],
-          icon: Crown,
-          color: 'from-purple-500 to-pink-600',
-          popular: false,
-          current: tier === 'premium',
-          description: TIER_FEATURES.premium.description,
-          savings: billingCycle === 'yearly' ? 'Save $48' : null,
-        },
-      ];
 
       const formattedInvoices = invoicesData?.map(invoice => ({
         id: invoice.invoice_number,
@@ -120,17 +36,6 @@ const Billing = () => {
         paymentMethod: invoice.payment_method || '•••• 4242'
       })) || [];
 
-      const currentTierInfo = TIER_FEATURES[tier];
-      const currentSubscription = {
-        name: currentTierInfo.name,
-        price: tier === 'free' ? '$0/month' : `$${currentTierInfo.price}/${billingCycle}`,
-        nextBilling: tier === 'free' ? 'N/A' : getNextResetDate().toLocaleDateString(),
-        features: [...currentTierInfo.freeFeatures.slice(0, 4)],
-        status: 'active'
-      };
-
-      setPlans(tierPlans);
-      setCurrentPlan(currentSubscription);
       setInvoices(formattedInvoices);
     } catch (error) {
       console.error('Error fetching billing data:', error);
@@ -139,83 +44,59 @@ const Billing = () => {
     }
   };
 
-  const getIconForPlan = (iconName) => {
-    switch (iconName) {
-      case 'Shield': return Shield;
-      case 'Sparkles': return Sparkles;
-      case 'Crown': return Crown;
-      case 'Users': return Users;
-      default: return Shield;
-    }
-  };
+  const plans = [
+    {
+      id: 'free',
+      name: 'Free',
+      price: '$0',
+      period: 'forever',
+      features: [...TIER_FEATURES.free.freeFeatures],
+      lockedFeatures: [...TIER_FEATURES.free.paidFeatures],
+      icon: Shield,
+      color: 'from-slate-500 to-slate-600',
+      popular: false,
+      current: tier === 'free',
+      description: TIER_FEATURES.free.description,
+    },
+    {
+      id: 'pro',
+      name: 'Pro',
+      price: billingCycle === 'monthly' ? '$12' : '$120',
+      period: billingCycle === 'monthly' ? 'per month' : 'per year',
+      originalPrice: billingCycle === 'yearly' ? '$144' : null,
+      features: [...TIER_FEATURES.pro.freeFeatures],
+      lockedFeatures: [],
+      icon: Sparkles,
+      color: 'from-blue-500 to-cyan-500',
+      popular: true,
+      current: tier === 'pro',
+      description: TIER_FEATURES.pro.description,
+      savings: billingCycle === 'yearly' ? 'Save $24' : null,
+    },
+    {
+      id: 'premium',
+      name: 'Premium',
+      price: billingCycle === 'monthly' ? '$24' : '$240',
+      period: billingCycle === 'monthly' ? 'per month' : 'per year',
+      originalPrice: billingCycle === 'yearly' ? '$288' : null,
+      features: [...TIER_FEATURES.premium.freeFeatures],
+      lockedFeatures: [],
+      icon: Crown,
+      color: 'from-purple-500 to-pink-600',
+      popular: false,
+      current: tier === 'premium',
+      description: TIER_FEATURES.premium.description,
+      savings: billingCycle === 'yearly' ? 'Save $48' : null,
+    },
+  ];
 
-  const handleUpgrade = async (plan) => {
-    try {
-      setUpgradingPlan(plan.name);
-      
-      // Map plan name to Stripe tier - check if name contains 'pro' or 'premium'
-      const planNameLower = plan.name.toLowerCase();
-      let tierName: 'pro' | 'premium' | null = null;
-      
-      if (planNameLower.includes('premium')) {
-        tierName = 'premium';
-      } else if (planNameLower.includes('pro')) {
-        tierName = 'pro';
-      }
-      
-      if (!tierName) {
-        toast({
-          title: 'Plan Not Available',
-          description: 'This plan is not available for purchase.',
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      const priceId = getPriceId(tierName, billingCycle === 'yearly');
-
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { priceId },
-      });
-
-      if (error) throw error;
-
-      if (data?.url) {
-        window.open(data.url, '_blank');
-      }
-    } catch (error) {
-      console.error('Error creating checkout:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to start checkout. Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setUpgradingPlan(null);
-    }
-  };
-
-  const handleManageSubscription = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('customer-portal');
-      
-      if (error) throw error;
-
-      if (data?.url) {
-        window.open(data.url, '_blank');
-      }
-    } catch (error) {
-      console.error('Error opening customer portal:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to open subscription management. Please try again.',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const handleCancelSubscription = async () => {
-    handleManageSubscription();
+  const currentTierInfo = TIER_FEATURES[tier];
+  const currentPlan = {
+    name: currentTierInfo.name,
+    price: tier === 'free' ? '$0/month' : `$${currentTierInfo.price}/${billingCycle}`,
+    nextBilling: tier === 'free' ? 'N/A' : getNextResetDate().toLocaleDateString(),
+    features: [...currentTierInfo.freeFeatures.slice(0, 4)],
+    status: 'active'
   };
 
   if (loading) {
@@ -254,7 +135,7 @@ const Billing = () => {
           Manage Your Plan
         </h1>
         <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-          Upgrade, downgrade, or manage your subscription and billing information
+          View your current plan and usage information
         </p>
       </div>
 
@@ -266,58 +147,30 @@ const Billing = () => {
               <Crown className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold">Current Plan: {currentPlan?.name || 'Free'}</h2>
+              <h2 className="text-xl font-bold">Current Plan: {currentPlan.name}</h2>
               <p className="text-sm text-slate-500 dark:text-slate-400 font-normal">Active subscription</p>
             </div>
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-          <div className="grid lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="text-3xl font-bold text-slate-900 dark:text-white">
-                  {currentPlan?.price || '$0/month'}
+          <div className="flex items-center gap-4 mb-6">
+            <div className="text-3xl font-bold text-slate-900 dark:text-white">
+              {currentPlan.price}
+            </div>
+            <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-0">
+              {currentPlan.status}
+            </Badge>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-4">
+            {currentPlan.features.map((feature, index) => (
+              <div key={index} className="flex items-center gap-3">
+                <div className="w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center">
+                  <Check className="w-3 h-3 text-white" />
                 </div>
-                <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-0">
-                  {currentPlan?.status || 'active'}
-                </Badge>
+                <span className="text-sm text-slate-700 dark:text-slate-300">{feature}</span>
               </div>
-              
-              <p className="text-slate-600 dark:text-slate-400 mb-6">
-                Next billing date: <span className="font-semibold">{currentPlan?.nextBilling || 'N/A'}</span>
-              </p>
-              
-              <div className="grid md:grid-cols-2 gap-4">
-                {currentPlan?.features?.map((feature, index) => (
-                  <div key={index} className="flex items-center gap-3">
-                    <div className="w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center">
-                      <Check className="w-3 h-3 text-white" />
-                    </div>
-                    <span className="text-sm text-slate-700 dark:text-slate-300">{feature}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div className="flex flex-col gap-3">
-              <Button 
-                variant="outline" 
-                onClick={handleManageSubscription}
-                className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl"
-              >
-                <ExternalLink className="w-4 h-4 mr-2" />
-                Manage Subscription
-              </Button>
-              {currentPlan?.name !== 'Free' && (
-                <Button 
-                  variant="outline" 
-                  onClick={handleCancelSubscription}
-                  className="border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl"
-                >
-                  Cancel Subscription
-                </Button>
-              )}
-            </div>
+            ))}
           </div>
         </CardContent>
       </Card>
@@ -367,14 +220,6 @@ const Billing = () => {
           </CardContent>
         </Card>
       </div>
-
-      {tier !== 'premium' && (
-        <div className="text-center p-4 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-200/50 dark:border-blue-800/50">
-          <p className="text-sm text-blue-700 dark:text-blue-300">
-            Monthly limits reset on <strong>{getNextResetDate().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}</strong>
-          </p>
-        </div>
-      )}
 
       {/* Billing Toggle */}
       <div className="flex justify-center">
@@ -485,15 +330,9 @@ const Billing = () => {
                         ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
                         : `bg-gradient-to-r ${plan.color} hover:shadow-lg text-white`
                     }`}
-                    disabled={plan.current || plan.name === 'Free' || upgradingPlan !== null}
-                    onClick={() => handleUpgrade(plan)}
+                    disabled={plan.current || plan.name === 'Free'}
                   >
-                    {upgradingPlan === plan.id ? (
-                      <>
-                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        Processing...
-                      </>
-                    ) : plan.current ? (
+                    {plan.current ? (
                       <>
                         <Crown className="w-5 h-5 mr-2" />
                         Current Plan
@@ -501,7 +340,7 @@ const Billing = () => {
                     ) : (
                       <>
                         <Zap className="w-5 h-5 mr-2" />
-                        {plan.name === 'Free' ? 'Current Plan' : `Upgrade to ${plan.name}`}
+                        {plan.name === 'Free' ? 'Current Plan' : 'Coming Soon'}
                       </>
                     )}
                   </Button>
@@ -547,50 +386,15 @@ const Billing = () => {
                         </Badge>
                       </div>
                       <p className="text-sm text-slate-600 dark:text-slate-400">{invoice.description}</p>
-                      <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-500 mt-1">
-                        <span>{invoice.date}</span>
-                        <span>•</span>
-                        <span>{invoice.paymentMethod}</span>
-                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <span className="text-xl font-bold text-slate-900 dark:text-white">{invoice.amount}</span>
-                    <Button variant="outline" size="sm" className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl">
-                      <Download className="w-4 h-4 mr-2" />
-                      Download
-                    </Button>
-                  </div>
+                  <span className="text-xl font-bold text-slate-900 dark:text-white">{invoice.amount}</span>
                 </div>
               ))
             )}
           </div>
         </CardContent>
       </Card>
-
-      {/* Upgrade Loading Dialog */}
-      <Dialog open={upgradingPlan !== null} onOpenChange={() => {}}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
-              Processing Your Upgrade
-            </DialogTitle>
-            <DialogDescription>
-              Please wait while we create your secure checkout session. You'll be redirected to complete your payment in a moment.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col items-center justify-center py-8">
-            <div className="relative">
-              <div className="w-20 h-20 rounded-full border-4 border-blue-200 dark:border-blue-900"></div>
-              <div className="w-20 h-20 rounded-full border-4 border-t-blue-600 dark:border-t-blue-400 animate-spin absolute top-0 left-0"></div>
-            </div>
-            <p className="mt-6 text-sm text-slate-600 dark:text-slate-400 text-center">
-              This usually takes just a few seconds...
-            </p>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
