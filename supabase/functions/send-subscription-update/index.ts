@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { SmtpClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -16,13 +15,34 @@ interface SubscriptionUpdateRequest {
   effectiveDate?: string;
 }
 
+async function sendZeptoMail(apiKey: string, from: string, to: string, subject: string, htmlBody: string) {
+  const res = await fetch("https://api.zeptomail.com/v1.1/email", {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": apiKey,
+    },
+    body: JSON.stringify({
+      from: { address: from, name: "Vaylance" },
+      to: [{ email_address: { address: to } }],
+      subject,
+      htmlbody: htmlBody,
+    }),
+  });
+  if (!res.ok) {
+    const errBody = await res.text();
+    throw new Error(`ZeptoMail error ${res.status}: ${errBody}`);
+  }
+  return res.json();
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Verify authentication
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       return new Response(
@@ -54,11 +74,11 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    const zeptoKey = Deno.env.get("ZEPTOMAIL_API_KEY");
     const zohoEmail = Deno.env.get("ZOHO_EMAIL");
-    const zohoPassword = Deno.env.get("ZOHO_APP_PASSWORD");
 
-    if (!zohoEmail || !zohoPassword) {
-      console.error("Missing Zoho credentials");
+    if (!zeptoKey || !zohoEmail) {
+      console.error("Missing ZeptoMail credentials");
       return new Response(
         JSON.stringify({ error: "Email service not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -90,71 +110,56 @@ const handler = async (req: Request): Promise<Response> => {
 
     const updateInfo = updateMessages[updateType];
 
-    const client = new SmtpClient();
-
-    await client.connectTLS({
-      hostname: "smtp.zoho.com",
-      port: 465,
-      username: zohoEmail,
-      password: zohoPassword,
-    });
-
-    await client.send({
-      from: zohoEmail,
-      to: email,
-      subject: `${updateInfo.title} - Vaylance`,
-      content: `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <style>
-              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background: ${updateInfo.color}; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-              .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
-              .info-box { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid ${updateInfo.color}; }
-              .button { display: inline-block; background: ${updateInfo.color}; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
-              .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <div class="header">
-                <h1>${updateInfo.title}</h1>
-              </div>
-              <div class="content">
-                <p>Hi ${name || "there"},</p>
-                
-                <div class="info-box">
-                  <p>${updateInfo.message}</p>
-                  ${effectiveDate ? `<p><strong>Effective Date:</strong> ${effectiveDate}</p>` : ""}
-                </div>
-
-                ${updateType === "cancel" ? `
-                  <p>We're sorry to see you go! If you change your mind, you can reactivate your subscription anytime before ${effectiveDate || "the end of your billing period"}.</p>
-                ` : `
-                  <p>Thank you for continuing to use Vaylance to advance your career!</p>
-                `}
-
-                <p style="text-align: center;">
-                  <a href="https://vaylance.com/dashboard/billing" class="button">View Billing Details</a>
-                </p>
-
-                <p>If you have any questions, our support team is here to help.</p>
-
-                <p>Best regards,<br>The Vaylance Team</p>
-              </div>
-              <div class="footer">
-                <p>&copy; ${new Date().getFullYear()} Vaylance. All rights reserved.</p>
-              </div>
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: ${updateInfo.color}; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+            .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+            .info-box { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid ${updateInfo.color}; }
+            .button { display: inline-block; background: ${updateInfo.color}; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+            .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>${updateInfo.title}</h1>
             </div>
-          </body>
-        </html>
-      `,
-      html: true,
-    });
+            <div class="content">
+              <p>Hi ${name || "there"},</p>
+              
+              <div class="info-box">
+                <p>${updateInfo.message}</p>
+                ${effectiveDate ? `<p><strong>Effective Date:</strong> ${effectiveDate}</p>` : ""}
+              </div>
 
-    await client.close();
+              ${updateType === "cancel" ? `
+                <p>We're sorry to see you go! If you change your mind, you can reactivate your subscription anytime before ${effectiveDate || "the end of your billing period"}.</p>
+              ` : `
+                <p>Thank you for continuing to use Vaylance to advance your career!</p>
+              `}
+
+              <p style="text-align: center;">
+                <a href="https://vaylance.com/dashboard/billing" class="button">View Billing Details</a>
+              </p>
+
+              <p>If you have any questions, our support team is here to help.</p>
+
+              <p>Best regards,<br>The Vaylance Team</p>
+            </div>
+            <div class="footer">
+              <p>&copy; ${new Date().getFullYear()} Vaylance. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    await sendZeptoMail(zeptoKey, zohoEmail, email, `${updateInfo.title} - Vaylance`, htmlContent);
 
     console.log("Subscription update email sent successfully to:", email);
 

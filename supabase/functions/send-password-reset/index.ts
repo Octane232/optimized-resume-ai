@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { SmtpClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -12,13 +11,34 @@ interface PasswordResetRequest {
   resetLink: string;
 }
 
+async function sendZeptoMail(apiKey: string, from: string, to: string, subject: string, htmlBody: string) {
+  const res = await fetch("https://api.zeptomail.com/v1.1/email", {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": apiKey,
+    },
+    body: JSON.stringify({
+      from: { address: from, name: "Vaylance" },
+      to: [{ email_address: { address: to } }],
+      subject,
+      htmlbody: htmlBody,
+    }),
+  });
+  if (!res.ok) {
+    const errBody = await res.text();
+    throw new Error(`ZeptoMail error ${res.status}: ${errBody}`);
+  }
+  return res.json();
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Verify authentication (must be authenticated to trigger password reset emails)
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       return new Response(
@@ -50,78 +70,63 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    const zeptoKey = Deno.env.get("ZEPTOMAIL_API_KEY");
     const zohoEmail = Deno.env.get("ZOHO_EMAIL");
-    const zohoPassword = Deno.env.get("ZOHO_APP_PASSWORD");
 
-    if (!zohoEmail || !zohoPassword) {
-      console.error("Missing Zoho credentials");
+    if (!zeptoKey || !zohoEmail) {
+      console.error("Missing ZeptoMail credentials");
       return new Response(
         JSON.stringify({ error: "Email service not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const client = new SmtpClient();
-
-    await client.connectTLS({
-      hostname: "smtp.zoho.com",
-      port: 465,
-      username: zohoEmail,
-      password: zohoPassword,
-    });
-
-    await client.send({
-      from: zohoEmail,
-      to: email,
-      subject: "Reset Your Password - Vaylance",
-      content: `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <style>
-              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background: linear-gradient(135deg, #3b82f6, #f97316); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-              .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
-              .button { display: inline-block; background: linear-gradient(135deg, #3b82f6, #f97316); color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
-              .warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; }
-              .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <div class="header">
-                <h1>Password Reset Request</h1>
-              </div>
-              <div class="content">
-                <p>Hello,</p>
-                <p>We received a request to reset your password for your Vaylance account.</p>
-                <p style="text-align: center;">
-                  <a href="${resetLink}" class="button">Reset Password</a>
-                </p>
-                <div class="warning">
-                  <strong>⚠️ Security Notice:</strong>
-                  <ul>
-                    <li>This link will expire in 1 hour</li>
-                    <li>If you didn't request this reset, please ignore this email</li>
-                    <li>Never share this link with anyone</li>
-                  </ul>
-                </div>
-                <p>If the button doesn't work, copy and paste this link into your browser:</p>
-                <p style="word-break: break-all; color: #3b82f6;">${resetLink}</p>
-                <p>Best regards,<br>The Vaylance Team</p>
-              </div>
-              <div class="footer">
-                <p>&copy; ${new Date().getFullYear()} Vaylance. All rights reserved.</p>
-              </div>
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #3b82f6, #f97316); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+            .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+            .button { display: inline-block; background: linear-gradient(135deg, #3b82f6, #f97316); color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+            .warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; }
+            .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Password Reset Request</h1>
             </div>
-          </body>
-        </html>
-      `,
-      html: true,
-    });
+            <div class="content">
+              <p>Hello,</p>
+              <p>We received a request to reset your password for your Vaylance account.</p>
+              <p style="text-align: center;">
+                <a href="${resetLink}" class="button">Reset Password</a>
+              </p>
+              <div class="warning">
+                <strong>⚠️ Security Notice:</strong>
+                <ul>
+                  <li>This link will expire in 1 hour</li>
+                  <li>If you didn't request this reset, please ignore this email</li>
+                  <li>Never share this link with anyone</li>
+                </ul>
+              </div>
+              <p>If the button doesn't work, copy and paste this link into your browser:</p>
+              <p style="word-break: break-all; color: #3b82f6;">${resetLink}</p>
+              <p>Best regards,<br>The Vaylance Team</p>
+            </div>
+            <div class="footer">
+              <p>&copy; ${new Date().getFullYear()} Vaylance. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
 
-    await client.close();
+    await sendZeptoMail(zeptoKey, zohoEmail, email, "Reset Your Password - Vaylance", htmlContent);
 
     console.log("Password reset email sent successfully to:", email);
 
