@@ -79,6 +79,32 @@ const Auth = () => {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!formData.email) {
+      toast({
+        title: "Email Required",
+        description: "Please enter your email address first.",
+        variant: "destructive"
+      });
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
+        redirectTo: `${window.location.origin}/reset-password`
+      });
+      if (error) {
+        toast({ title: "Reset Failed", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "Check your email", description: "We've sent a password reset link to your email." });
+      }
+    } catch {
+      toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -323,6 +349,16 @@ const Auth = () => {
                       >
                         {isLoading ? 'Signing in...' : 'Sign In'}
                       </Button>
+
+                      <div className="text-center">
+                        <button
+                          type="button"
+                          onClick={handleForgotPassword}
+                          className="text-sm text-primary hover:underline"
+                        >
+                          Forgot your password?
+                        </button>
+                      </div>
                     </form>
                   </TabsContent>
 
