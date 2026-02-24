@@ -90,8 +90,9 @@ const Auth = () => {
     }
     setIsLoading(true);
     try {
+      const siteUrl = import.meta.env.PROD ? 'https://vaylance.com' : window.location.origin;
       const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
-        redirectTo: `${window.location.origin}/reset-password`
+        redirectTo: `${siteUrl}/reset-password`
       });
       if (error) {
         toast({ title: "Reset Failed", description: error.message, variant: "destructive" });
