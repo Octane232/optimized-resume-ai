@@ -71,10 +71,9 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const zeptoKey = Deno.env.get("ZEPTOMAIL_API_KEY");
-    const zohoEmail = Deno.env.get("ZOHO_EMAIL");
 
-    if (!zeptoKey || !zohoEmail) {
-      console.error("Missing ZeptoMail credentials");
+    if (!zeptoKey) {
+      console.error("Missing ZeptoMail API key");
       return new Response(
         JSON.stringify({ error: "Email service not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -126,7 +125,7 @@ const handler = async (req: Request): Promise<Response> => {
       </html>
     `;
 
-    await sendZeptoMail(zeptoKey, zohoEmail, email, "Reset Your Password - Vaylance", htmlContent);
+    await sendZeptoMail(zeptoKey, "noreply@vaylance.com", email, "Reset Your Password - Vaylance", htmlContent);
 
     console.log("Password reset email sent successfully to:", email);
 

@@ -49,10 +49,9 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Processing contact form submission:", { firstName, lastName, email });
 
     const zeptoKey = Deno.env.get("ZEPTOMAIL_API_KEY");
-    const zohoEmail = Deno.env.get("ZOHO_EMAIL");
 
-    if (!zeptoKey || !zohoEmail) {
-      console.error("ZeptoMail credentials not configured");
+    if (!zeptoKey) {
+      console.error("ZeptoMail API key not configured");
       return new Response(
         JSON.stringify({ error: "Email service not configured" }),
         { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
@@ -100,7 +99,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     await sendZeptoMail(
       zeptoKey,
-      zohoEmail,
+      "noreply@vaylance.com",
       "contact@vaylance.com",
       `New Contact Form Submission from ${firstName} ${lastName}`,
       htmlContent
