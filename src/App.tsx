@@ -26,6 +26,7 @@ const AboutUs = lazy(() => import("./pages/AboutUs"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Auth = lazy(() => import("./pages/Auth"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const ResumeEditor = lazy(() => import("./pages/ResumeEditor"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
@@ -53,6 +54,7 @@ const App = () => (
               <Route path="/enterprise" element={<Index />} />
               <Route path="/resources" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/resume-builder" element={<ResumeBuilder />} />
               <Route path="/job-search" element={<JobSearch />} />
