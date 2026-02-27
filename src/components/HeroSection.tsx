@@ -1,55 +1,59 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Sparkles, Briefcase, FileText, Target, Users, TrendingUp, Award } from 'lucide-react';
+import { ArrowRight, CheckCircle, XCircle, Clock, FileQuestion, Ghost, TrendingDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import VayaChatPreview from './VayaChatPreview';
 
 const HeroSection = () => {
+  const painPoints = [
+    { icon: Ghost, text: "Sending resumes into the void" },
+    { icon: XCircle, text: "Getting rejected by ATS filters" },
+    { icon: FileQuestion, text: "Not knowing what recruiters want" },
+    { icon: TrendingDown, text: "Low interview callback rates" },
+  ];
+
   return (
-    <section className="relative min-h-screen overflow-hidden bg-background">
-      {/* Subtle gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background"></div>
-      
-      {/* Floating orb */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-gradient-to-br from-primary/15 via-purple-500/10 to-transparent rounded-full blur-3xl pointer-events-none opacity-50"></div>
-      
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative pt-20 sm:pt-24 lg:pt-28 pb-12 sm:pb-16">
-        {/* Centered Introduction */}
-        <div className="max-w-4xl mx-auto text-center space-y-4 sm:space-y-6">
-          
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/15 to-purple-500/15 rounded-full px-4 py-2 animate-fade-in border border-primary/20">
-            <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-foreground">AI-Powered Career Assistant</span>
+    <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-background">
+      {/* Layered background */}
+      <div className="absolute inset-0 bg-[var(--gradient-mesh)] opacity-60"></div>
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-gradient-to-bl from-primary/10 via-transparent to-transparent rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-primary/8 via-transparent to-transparent rounded-full blur-3xl pointer-events-none"></div>
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative py-20 sm:py-24 lg:py-32">
+        <div className="max-w-5xl mx-auto">
+          {/* Top badge */}
+          <div className="flex justify-center mb-6 sm:mb-8 animate-fade-in">
+            <div className="inline-flex items-center gap-2 glass-card rounded-full px-4 py-2 text-sm font-medium text-foreground border border-border">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+              Trusted by 1,200+ job seekers
+            </div>
           </div>
 
           {/* Main headline */}
-          <div className="space-y-3 sm:space-y-4 animate-fade-in stagger-1">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight">
-              <span className="text-foreground">Your AI Career Coach</span>
+          <div className="text-center space-y-4 sm:space-y-6 animate-fade-in stagger-1">
+            <h1 className="heading-xl text-balance">
+              <span className="text-foreground">Stop guessing.</span>
               <br />
-              <span className="gradient-text">That Gets You Hired</span>
+              <span className="gradient-text">Start getting hired.</span>
             </h1>
+
+            <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto text-balance leading-relaxed px-4">
+              Vaylance is the AI career platform that writes your resume, matches you to jobs, 
+              and coaches you through interviews — so you land offers faster.
+            </p>
           </div>
 
-          {/* Subtitle */}
-          <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in stagger-2 px-2">
-            Vaylance AI writes your resume, finds matching jobs, tracks applications, 
-            and coaches you through interviews — like having a career expert by your side 24/7.
-          </p>
-
           {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center animate-fade-in stagger-3 px-4 sm:px-0">
-            <Button asChild size="lg" className="saas-button h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg font-bold w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mt-8 sm:mt-10 animate-fade-in stagger-2 px-4 sm:px-0">
+            <Button asChild size="lg" className="saas-button h-13 sm:h-14 px-8 sm:px-10 text-base sm:text-lg font-bold w-full sm:w-auto">
               <Link to="/auth" className="flex items-center justify-center gap-2">
                 Get Started Free
-                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                <ArrowRight className="w-5 h-5" />
               </Link>
             </Button>
-            <Button 
-              variant="outline" 
-              size="lg" 
-              className="h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg font-semibold w-full sm:w-auto"
+            <Button
+              variant="outline"
+              size="lg"
+              className="h-13 sm:h-14 px-8 sm:px-10 text-base sm:text-lg font-semibold w-full sm:w-auto border-border hover:border-primary/50"
               onClick={() => {
                 const element = document.getElementById('how-it-works');
                 if (element) element.scrollIntoView({ behavior: 'smooth' });
@@ -60,99 +64,40 @@ const HeroSection = () => {
           </div>
 
           {/* Free badge */}
-          <div className="inline-flex items-center gap-2 text-sm text-muted-foreground animate-fade-in stagger-4">
-            <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-            <span>Free plan available • No credit card needed</span>
+          <div className="flex justify-center mt-4 animate-fade-in stagger-3">
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <CheckCircle className="w-4 h-4 text-emerald-500" />
+                Free plan available
+              </span>
+              <span className="flex items-center gap-1.5">
+                <CheckCircle className="w-4 h-4 text-emerald-500" />
+                No credit card
+              </span>
+            </div>
           </div>
-        </div>
 
-        {/* Features Grid + Chat Preview */}
-        <div className="mt-12 sm:mt-16 lg:mt-20 max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-10 items-start">
-            
-            {/* Left - Core Features */}
-            <div className="space-y-4 animate-fade-in order-2 lg:order-1" style={{ animationDelay: '0.5s' }}>
-              <h2 className="text-base sm:text-lg font-semibold text-foreground mb-4 text-center lg:text-left">
-                Everything you need to succeed
-              </h2>
-              
-              <div className="grid gap-2 sm:gap-3">
-                {[
-                  { 
-                    icon: FileText,
-                    title: "Resume Builder", 
-                    desc: "Professional templates with real-time ATS scoring",
-                    badge: null
-                  },
-                  { 
-                    icon: Target,
-                    title: "Job Scout", 
-                    desc: "Discover jobs matched to your skills and experience",
-                    badge: null
-                  },
-                  { 
-                    icon: TrendingUp,
-                    title: "Application Tracker", 
-                    desc: "Keep track of every application in one dashboard",
-                    badge: null
-                  },
-                  { 
-                    icon: Sparkles,
-                    title: "AI Resume Optimizer", 
-                    desc: "Get instant suggestions to improve your match rate",
-                    badge: "AI"
-                  },
-                  { 
-                    icon: Users,
-                    title: "Interview Coach", 
-                    desc: "Practice with AI feedback on your answers",
-                    badge: "AI"
-                  },
-                  { 
-                    icon: Award,
-                    title: "Skill Gap Analysis", 
-                    desc: "See what skills you need for your target role",
-                    badge: "AI"
-                  }
-                ].map((item, index) => (
-                  <div 
-                    key={index}
-                    className="command-card p-3 sm:p-4 flex items-start gap-3 sm:gap-4 group hover:border-primary/30 transition-colors"
-                  >
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-                      <item.icon className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-foreground text-sm sm:text-base">
-                          {item.title}
-                        </h3>
-                        {item.badge && (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-gradient-to-r from-primary to-purple-500 text-white">
-                            {item.badge}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground">{item.desc}</p>
-                    </div>
+          {/* Pain Points Banner */}
+          <div className="mt-14 sm:mt-20 animate-fade-in stagger-4">
+            <p className="text-center text-sm font-medium text-muted-foreground uppercase tracking-wider mb-6">
+              Sound familiar?
+            </p>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              {painPoints.map((point, index) => (
+                <div
+                  key={index}
+                  className="command-card p-4 sm:p-5 flex items-start gap-3 group"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-destructive/10 flex items-center justify-center shrink-0 group-hover:bg-destructive/15 transition-colors">
+                    <point.icon className="w-4 h-4 text-destructive" />
                   </div>
-                ))}
-              </div>
+                  <p className="text-sm font-medium text-foreground leading-snug">{point.text}</p>
+                </div>
+              ))}
             </div>
-
-            {/* Right - AI Assistant Preview */}
-            <div className="animate-fade-in order-1 lg:order-2" style={{ animationDelay: '0.7s' }}>
-              <div className="flex items-center justify-center lg:justify-start gap-2 mb-4">
-                <Sparkles className="w-4 h-4 text-primary" />
-                <h2 className="text-base sm:text-lg font-semibold text-foreground">
-                  Meet Vaylance AI, your career assistant
-                </h2>
-              </div>
-              <VayaChatPreview />
-              <p className="text-xs sm:text-sm text-muted-foreground mt-3 text-center">
-                Get instant help optimizing resumes, writing cover letters, and preparing for interviews
-              </p>
-            </div>
+            <p className="text-center mt-6 text-base sm:text-lg text-foreground font-semibold">
+              Vaylance fixes all of this. <span className="gradient-text">Automatically.</span>
+            </p>
           </div>
         </div>
       </div>
