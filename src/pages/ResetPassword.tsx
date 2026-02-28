@@ -66,7 +66,7 @@ const ResetPassword = () => {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      <div className="absolute inset-0 mesh-gradient"></div>
+      <div className="absolute inset-0 mesh-gradient pointer-events-none"></div>
 
       <header className="relative z-10 p-4 sm:p-6">
         <div className="container mx-auto">
