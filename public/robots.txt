@@ -12,5 +12,8 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /dashboard
+Disallow: /auth
+Disallow: /reset-password
 
-Sitemap: https://pitchsora.com/sitemap.xml
+Sitemap: https://vaylance.com/sitemap.xml
