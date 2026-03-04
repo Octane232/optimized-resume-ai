@@ -1,6 +1,7 @@
 import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import SEOHead from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { BarChart3, TrendingUp, Eye, Target } from 'lucide-react';
@@ -9,6 +10,12 @@ import { Link } from 'react-router-dom';
 const Analytics = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Career Analytics & Job Search Insights | Vaylance"
+        description="Track your resume performance, application success rates, and job search progress with Vaylance's AI-powered career analytics dashboard."
+        keywords="career analytics, resume analytics, job application tracker, job search insights, resume performance tracking"
+        canonical="https://vaylance.com/analytics"
+      />
       <Header />
       <main className="pt-24">
         {/* Hero Section */}
@@ -16,7 +23,7 @@ const Analytics = () => {
           <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
             <div className="text-center max-w-4xl mx-auto">
               <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
-                Career Analytics
+                Career Analytics & Job Search Insights
               </h1>
               <p className="text-xl text-muted-foreground mb-8">
                 Track your job search progress with detailed analytics and insights. 

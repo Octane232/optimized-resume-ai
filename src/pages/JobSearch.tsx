@@ -1,6 +1,7 @@
 import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import SEOHead from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Search, Target, Zap, TrendingUp } from 'lucide-react';
@@ -32,6 +33,12 @@ const JobSearch = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="AI Job Search & Auto Apply Tool – Find Jobs Faster | Vaylance"
+        description="Let Vaylance AI find and auto-apply to jobs that match your skills. Smart job matching, personalized filters, and application tracking in one platform."
+        keywords="AI job search, auto apply jobs, job matching tool, job finder AI, smart job search, application tracker"
+        canonical="https://vaylance.com/job-search"
+      />
       <Header />
       <main className="pt-24">
         {/* Hero Section */}
@@ -39,7 +46,7 @@ const JobSearch = () => {
           <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
             <div className="text-center max-w-4xl mx-auto">
               <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
-                AI Job Search
+                AI-Powered Job Search & Auto Apply
               </h1>
               <p className="text-xl text-muted-foreground mb-8">
                 Let our AI find and apply to jobs for you. Get matched with opportunities 

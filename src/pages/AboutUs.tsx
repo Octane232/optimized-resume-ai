@@ -1,6 +1,7 @@
 import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import SEOHead from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Target, Zap, Users, TrendingUp, Award, CheckCircle } from 'lucide-react';
@@ -10,6 +11,12 @@ import logoIcon from '@/assets/logo-icon.png';
 const AboutUs = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="About Vaylance – AI-Powered Career Platform | Our Mission"
+        description="Vaylance is on a mission to make career success accessible to everyone through AI. Learn about our team, values, and the technology behind our career tools."
+        keywords="about Vaylance, AI career platform, career technology company, resume builder company"
+        canonical="https://vaylance.com/about-us"
+      />
       <Header />
       <main className="pt-24">
         <section className="py-20 bg-gradient-to-br from-primary/5 to-background">

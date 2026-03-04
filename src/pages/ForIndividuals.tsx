@@ -1,6 +1,7 @@
 import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import SEOHead from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { User, Briefcase, TrendingUp, FileText, Search, BarChart3, Zap, Target, CheckCircle } from 'lucide-react';
@@ -9,13 +10,19 @@ import { Link } from 'react-router-dom';
 const ForIndividuals = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="AI Career Tools for Job Seekers & Professionals | Vaylance"
+        description="Vaylance helps individual professionals land jobs faster with AI resume building, smart job matching, interview coaching, and career analytics. Start free."
+        keywords="career tools for professionals, job seeker AI, resume help, career advancement, job search help, professional development"
+        canonical="https://vaylance.com/for-individuals"
+      />
       <Header />
       <main className="pt-24">
         <section className="py-20 bg-gradient-to-br from-primary/5 to-background">
           <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
             <div className="text-center max-w-4xl mx-auto">
               <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
-                For Individuals
+                Career Tools for Job Seekers
               </h1>
               <p className="text-xl text-muted-foreground mb-8">
                 Take control of your career with our comprehensive suite of tools designed for individual job seekers.

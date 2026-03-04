@@ -1,6 +1,7 @@
 import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import SEOHead from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { GraduationCap, FileText, Users, Briefcase, DollarSign, BookOpen, CheckCircle, Award } from 'lucide-react';
@@ -9,6 +10,12 @@ import { Link } from 'react-router-dom';
 const ForStudents = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Free AI Resume Builder for Students & Graduates | Vaylance"
+        description="Build your first professional resume with Vaylance's free AI tools designed for students and recent graduates. Stand out to employers with ATS-optimized resumes."
+        keywords="student resume builder, resume for graduates, first job resume, college student resume template, entry-level resume, internship resume"
+        canonical="https://vaylance.com/for-students"
+      />
       <Header />
       <main className="pt-24">
         <section className="py-20 bg-gradient-to-br from-emerald-500/10 to-background">
@@ -16,7 +23,7 @@ const ForStudents = () => {
             <div className="text-center max-w-4xl mx-auto">
               <GraduationCap className="w-16 h-16 text-emerald-500 mx-auto mb-6" />
               <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
-                For Students
+                Resume Builder for Students & Graduates
               </h1>
               <p className="text-xl text-muted-foreground mb-8">
                 Launch your career with confidence. Get student-friendly resume templates and entry-level job opportunities.

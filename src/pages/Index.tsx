@@ -13,6 +13,7 @@ import PricingSection from '@/components/PricingSection';
 import FAQSection from '@/components/FAQSection';
 import ResourcesSection from '@/components/ResourcesSection';
 import Footer from '@/components/Footer';
+import SEOHead from '@/components/SEOHead';
 
 const Index = () => {
   const location = useLocation();
@@ -30,6 +31,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
+      <SEOHead
+        title="Vaylance – AI Resume Builder & Career Coach | Get Hired Faster"
+        description="Vaylance is the AI career platform that writes ATS-optimized resumes, matches you to jobs, and coaches you through interviews. Start free today."
+        keywords="AI resume builder, ATS resume checker, career coach AI, job search tool, resume templates, interview prep, cover letter generator"
+        canonical="https://vaylance.com/"
+      />
       <Header />
       <HeroSection />
       <StatsSection />
