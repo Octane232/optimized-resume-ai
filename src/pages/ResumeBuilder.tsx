@@ -1,6 +1,7 @@
 import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import SEOHead from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { CheckCircle, Zap, FileText, Download } from 'lucide-react';
@@ -27,6 +28,12 @@ const ResumeBuilder = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Free AI Resume Builder – Create ATS-Optimized Resumes | Vaylance"
+        description="Build professional, ATS-friendly resumes in minutes with Vaylance's free AI resume builder. Choose from expert templates and let AI write compelling content."
+        keywords="free resume builder, AI resume writer, ATS-optimized resume, professional resume templates, resume maker online"
+        canonical="https://vaylance.com/resume-builder"
+      />
       <Header />
       <main className="pt-24">
         {/* Hero Section */}
@@ -34,7 +41,7 @@ const ResumeBuilder = () => {
           <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
             <div className="text-center max-w-4xl mx-auto">
               <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
-                AI Resume Builder
+                Free AI Resume Builder
               </h1>
               <p className="text-xl text-muted-foreground mb-8">
                 Create professional, ATS-optimized resumes in minutes with our intelligent resume builder. 

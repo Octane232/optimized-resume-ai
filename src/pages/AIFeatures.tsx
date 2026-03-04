@@ -1,6 +1,7 @@
 import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import SEOHead from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Brain, FileText, Target, BarChart3, Zap, CheckCircle } from 'lucide-react';
@@ -36,6 +37,12 @@ const AIFeatures = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="AI Career Tools – Resume Writer, Job Matcher & Interview Coach | Vaylance"
+        description="Explore Vaylance's AI-powered career tools: smart resume writing, job matching algorithms, auto-apply technology, and performance analytics to accelerate your career."
+        keywords="AI career tools, AI resume writer, job matching AI, auto apply technology, career analytics, interview preparation AI"
+        canonical="https://vaylance.com/ai-features"
+      />
       <Header />
       <main className="pt-24">
         {/* Hero Section */}
