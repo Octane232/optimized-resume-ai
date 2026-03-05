@@ -3,33 +3,27 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import NewSidebar from '@/components/dashboard/NewSidebar';
 import MobileNav from '@/components/dashboard/MobileNav';
-import SoraSidecar from '@/components/dashboard/SoraSidecar';
-import HunterDashboard from '@/components/dashboard/HunterDashboard';
-import GrowthTeaser from '@/components/dashboard/GrowthTeaser';
+import TopBar from '@/components/dashboard/TopBar';
+import DailyHunt from '@/components/dashboard/DailyHunt';
 import MissionControl from '@/components/dashboard/MissionControl';
+import ApplyToolkit from '@/components/dashboard/ApplyToolkit';
+import ReferralNetwork from '@/components/dashboard/ReferralNetwork';
+import CareerDashboard from '@/components/dashboard/CareerDashboard';
+import BrandAutopilot from '@/components/dashboard/BrandAutopilot';
+import SkillStrategist from '@/components/dashboard/SkillStrategist';
+import TheVault from '@/components/dashboard/TheVault';
 import Settings from '@/components/dashboard/Settings';
 import Billing from '@/components/dashboard/Billing';
-import ResumeEngine from '@/components/dashboard/ResumeEngine';
-import Scout from '@/components/dashboard/Scout';
-import CoverLetterGenerator from '@/components/dashboard/CoverLetterGenerator';
-import InterviewPrep from '@/components/dashboard/InterviewPrep';
-import { SkillGapAnalyzer } from '@/components/dashboard/SkillGapAnalyzer';
-import LinkedInOptimizer from '@/components/dashboard/LinkedInOptimizer';
-import WalkthroughGuide from '@/components/dashboard/WalkthroughGuide';
-import CreateResume from '@/components/dashboard/CreateResume';
-import TheVault from '@/components/dashboard/TheVault';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState(() => {
-    return localStorage.getItem('dashboard-active-tab') || 'briefing';
+    return localStorage.getItem('dashboard-active-tab') || 'daily-hunt';
   });
   const [mode, setMode] = useState<'hunter' | 'growth'>(() => {
     return (localStorage.getItem('dashboard-mode') as 'hunter' | 'growth') || 'hunter';
   });
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [hasResume, setHasResume] = useState(false);
-  const [showWalkthrough, setShowWalkthrough] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -52,31 +46,15 @@ const Dashboard = () => {
         return;
       }
 
-      // Check if user has a resume
-      const { data: resumes } = await supabase
-        .from('resumes')
-        .select('id')
-        .eq('user_id', user.id)
-        .limit(1);
-
-      setHasResume(resumes && resumes.length > 0);
-
-      // Check for saved mode preference and walkthrough status
       const { data: preferences } = await supabase
         .from('career_preferences')
-        .select('work_style, walkthrough_completed')
+        .select('work_style')
         .eq('user_id', user.id)
         .maybeSingle();
 
       if (preferences?.work_style) {
         setMode(preferences.work_style as 'hunter' | 'growth');
       }
-
-      // Show walkthrough if not completed
-      if (!preferences?.walkthrough_completed) {
-        setShowWalkthrough(true);
-      }
-
     } catch (error) {
       console.error('Auth check error:', error);
       navigate('/auth');
@@ -85,79 +63,50 @@ const Dashboard = () => {
     }
   };
 
-  const handleWalkthroughComplete = async () => {
-    setShowWalkthrough(false);
-    
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      await supabase
-        .from('career_preferences')
-        .upsert({
-          user_id: user.id,
-          walkthrough_completed: true
-        }, { onConflict: 'user_id' });
-    } catch (error) {
-      console.error('Error saving walkthrough status:', error);
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-muted-foreground text-sm">Loading your command center...</p>
+          <p className="text-muted-foreground text-sm">Loading...</p>
         </div>
       </div>
     );
   }
 
   const renderContent = () => {
-    // If in growth mode, always show teaser
-    if (mode === 'growth') {
-      return <GrowthTeaser setMode={setMode} />;
-    }
-
     switch (activeTab) {
-      case 'briefing':
-        return <HunterDashboard setActiveTab={setActiveTab} />;
-      case 'scout':
-        return <Scout />;
-      case 'resume-builder':
-        return <CreateResume />;
-      case 'resume-engine':
-        return <ResumeEngine setActiveTab={setActiveTab} hasResume={hasResume} />;
-      case 'cover-letter':
-        return <CoverLetterGenerator />;
-      case 'interview-prep':
-        return <InterviewPrep />;
-      case 'skill-gap':
-        return <SkillGapAnalyzer />;
-      case 'linkedin':
-        return <LinkedInOptimizer />;
-      case 'vault':
-        return <TheVault setActiveTab={setActiveTab} />;
+      // Hunter Mode
+      case 'daily-hunt':
+        return <DailyHunt />;
       case 'mission-control':
         return <MissionControl />;
-      case 'billing':
-        return <Billing />;
+      case 'apply-toolkit':
+        return <ApplyToolkit />;
+      case 'referral-network':
+        return <ReferralNetwork />;
+      // Growth Mode
+      case 'career-dashboard':
+        return <CareerDashboard />;
+      case 'brand-autopilot':
+        return <BrandAutopilot />;
+      case 'skill-strategist':
+        return <SkillStrategist />;
+      // Avatar dropdown pages
+      case 'vault':
+        return <TheVault setActiveTab={setActiveTab} />;
       case 'settings':
         return <Settings />;
+      case 'billing':
+        return <Billing />;
       default:
-        return <HunterDashboard setActiveTab={setActiveTab} />;
+        return mode === 'hunter' ? <DailyHunt /> : <CareerDashboard />;
     }
   };
 
   return (
     <div className="h-screen flex w-full bg-background overflow-hidden">
-      {/* Walkthrough Guide for first-time users */}
-      {showWalkthrough && (
-        <WalkthroughGuide onComplete={handleWalkthroughComplete} />
-      )}
-
-      {/* Zone A: Left Sidebar - Hidden on mobile */}
+      {/* Left Sidebar */}
       <div className="hidden md:flex">
         <NewSidebar 
           activeTab={activeTab} 
@@ -169,19 +118,15 @@ const Dashboard = () => {
         />
       </div>
       
-      {/* Zone B: Main Content - Single scroll container */}
-      <main className="flex-1 h-screen overflow-y-auto pb-16 md:pb-0">
-        {renderContent()}
-      </main>
+      {/* Main Area */}
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+        <TopBar activeTab={activeTab} setActiveTab={setActiveTab} />
+        <main className="flex-1 overflow-y-auto pb-16 md:pb-0">
+          {renderContent()}
+        </main>
+      </div>
 
-      {/* Zone C: Vaya Sidecar (only on briefing) */}
-      {activeTab === 'briefing' && mode === 'hunter' && (
-        <div className="w-80 hidden lg:block h-screen overflow-y-auto border-l border-border">
-          <SoraSidecar mode={mode} />
-        </div>
-      )}
-
-      {/* Mobile Bottom Navigation */}
+      {/* Mobile Bottom Nav */}
       <MobileNav 
         activeTab={activeTab}
         setActiveTab={setActiveTab}
