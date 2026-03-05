@@ -87,7 +87,7 @@ Deno.serve(async (req) => {
         lemon_squeezy_variant_id: null
       },
       {
-        name: 'Pitchsora Pro',
+        name: 'Vaylance Pro',
         description: 'Best for professionals',
         price_monthly: 9,
         price_yearly: null,
@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
         lemon_squeezy_variant_id: '1065978'
       },
       {
-        name: 'Pitchsora Pro Yearly',
+        name: 'Vaylance Pro Yearly',
         description: 'Best for professionals - Save 17%',
         price_monthly: null,
         price_yearly: 90,
@@ -109,7 +109,7 @@ Deno.serve(async (req) => {
         lemon_squeezy_variant_id: '1065979'
       },
       {
-        name: 'Pitchsora Premium',
+        name: 'Vaylance Premium',
         description: 'For power users',
         price_monthly: 19.99,
         price_yearly: null,
@@ -120,7 +120,7 @@ Deno.serve(async (req) => {
         lemon_squeezy_variant_id: '1065981'
       },
       {
-        name: 'Pitchsora Premium Yearly',
+        name: 'Vaylance Premium Yearly',
         description: 'For power users - Save 20%',
         price_monthly: null,
         price_yearly: 199.99,
