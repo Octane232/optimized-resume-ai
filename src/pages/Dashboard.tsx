@@ -209,6 +209,7 @@ const Dashboard = () => {
           setMode={setMode}
           collapsed={sidebarCollapsed}
           setCollapsed={setSidebarCollapsed}
+          // Note: Settings and billing are removed from sidebar - now only in navbar dropdown
         />
       </div>
       
@@ -253,7 +254,7 @@ const Dashboard = () => {
                 <HelpCircle className="h-5 w-5" />
               </Button>
 
-              {/* Profile Dropdown */}
+              {/* Profile Dropdown - NOW INCLUDES SETTINGS, BILLING, AND SIGN OUT */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center gap-2 px-2">
@@ -274,7 +275,13 @@ const Dashboard = () => {
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   
-                  {/* Settings */}
+                  {/* Profile Option */}
+                  <DropdownMenuItem className="cursor-pointer">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </DropdownMenuItem>
+                  
+                  {/* Settings - MOVED FROM SIDEBAR TO HERE */}
                   <DropdownMenuItem 
                     onClick={() => setActiveTab('settings')}
                     className="cursor-pointer"
@@ -283,7 +290,7 @@ const Dashboard = () => {
                     <span>Settings</span>
                   </DropdownMenuItem>
                   
-                  {/* Billing */}
+                  {/* Billing - MOVED FROM SIDEBAR TO HERE */}
                   <DropdownMenuItem 
                     onClick={() => setActiveTab('billing')}
                     className="cursor-pointer"
@@ -292,15 +299,9 @@ const Dashboard = () => {
                     <span>Billing</span>
                   </DropdownMenuItem>
                   
-                  {/* Profile */}
-                  <DropdownMenuItem className="cursor-pointer">
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </DropdownMenuItem>
-                  
                   <DropdownMenuSeparator />
                   
-                  {/* Sign Out */}
+                  {/* Sign Out - NOW ONLY HERE */}
                   <DropdownMenuItem 
                     onClick={handleSignOut}
                     className="cursor-pointer text-destructive focus:text-destructive"
