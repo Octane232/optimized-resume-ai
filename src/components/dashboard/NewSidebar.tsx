@@ -3,13 +3,9 @@ import {
   Home, 
   Target, 
   Crosshair,
-  Settings,
-  CreditCard,
-  LogOut,
   ChevronLeft,
   ChevronRight,
   Stethoscope,
-  Lock,
   Sparkles,
   Telescope,
   FileText,
@@ -23,10 +19,6 @@ import {
   TooltipProvider,
   TooltipTrigger 
 } from '@/components/ui/tooltip';
-import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
-import { toast } from '@/hooks/use-toast';
-
 
 interface NewSidebarProps {
   activeTab: string;
@@ -45,8 +37,8 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
   collapsed,
   setCollapsed
 }) => {
-  const navigate = useNavigate();
-
+  // Navigation items - ONLY CORE FEATURES
+  // NO Settings, NO Billing, NO Sign Out
   const navItems = [
     { id: 'briefing', label: 'Briefing', icon: Home },
     { id: 'scout', label: 'Scout', icon: Telescope },
@@ -58,20 +50,6 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
     { id: 'linkedin', label: 'LinkedIn', icon: Sparkles },
     { id: 'mission-control', label: 'Mission Control', icon: Crosshair },
   ];
-
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      toast({ title: "Signed out successfully" });
-      navigate('/auth');
-    } catch (error) {
-      console.error('Logout error:', error);
-      toast({
-        title: "Error signing out",
-        variant: "destructive"
-      });
-    }
-  };
 
   const modeColor = mode === 'hunter' 
     ? 'hsl(217, 100%, 50%)' 
@@ -168,7 +146,7 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
         </div>
       </div>
 
-      {/* Navigation */}
+      {/* Navigation - ONLY CORE FEATURES */}
       <nav className="flex-1 p-3 space-y-1 overflow-hidden">
         <TooltipProvider delayDuration={0}>
           {navItems.map((item) => {
@@ -210,70 +188,10 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
         </TooltipProvider>
       </nav>
 
-      {/* Bottom Actions */}
-      <div className="p-3 border-t border-sidebar-border space-y-1">
-        <TooltipProvider delayDuration={0}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => setActiveTab('billing')}
-                className={`
-                  w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
-                  transition-all duration-200 text-left
-                  ${activeTab === 'billing'
-                    ? 'bg-sidebar-accent text-sidebar-foreground' 
-                    : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
-                  }
-                `}
-              >
-                <CreditCard className="w-5 h-5 shrink-0" />
-                {!collapsed && <span className="font-medium text-sm">Billing</span>}
-              </button>
-            </TooltipTrigger>
-            {collapsed && (
-              <TooltipContent side="right">Billing</TooltipContent>
-            )}
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => setActiveTab('settings')}
-                className={`
-                  w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
-                  transition-all duration-200 text-left
-                  ${activeTab === 'settings'
-                    ? 'bg-sidebar-accent text-sidebar-foreground' 
-                    : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
-                  }
-                `}
-              >
-                <Settings className="w-5 h-5 shrink-0" />
-                {!collapsed && <span className="font-medium text-sm">Settings</span>}
-              </button>
-            </TooltipTrigger>
-            {collapsed && (
-              <TooltipContent side="right">Settings</TooltipContent>
-            )}
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
-                  text-sidebar-foreground/70 hover:bg-destructive/10 hover:text-destructive
-                  transition-all duration-200 text-left"
-              >
-                <LogOut className="w-5 h-5 shrink-0" />
-                {!collapsed && <span className="font-medium text-sm">Sign Out</span>}
-              </button>
-            </TooltipTrigger>
-            {collapsed && (
-              <TooltipContent side="right">Sign Out</TooltipContent>
-            )}
-          </Tooltip>
-        </TooltipProvider>
+      {/* Bottom Actions - EMPTY NOW since Billing, Settings, Sign Out are in navbar dropdown */}
+      <div className="p-3 border-t border-sidebar-border">
+        {/* This space is intentionally left empty */}
+        {/* All account management moved to navbar dropdown */}
       </div>
     </div>
   );
