@@ -27,7 +27,7 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import logo from "@/assets/pitchsora-logo.png";
+
 
 interface AppSidebarProps {
   activeTab: string;
@@ -88,7 +88,7 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
       {/* Header with Logo */}
       <SidebarHeader className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
-          <img src={logo} alt="Pitchsora" className="h-10 w-auto" />
+          <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-orange-500 bg-clip-text text-transparent">Vaylance</span>
         </div>
 
         {/* Mode Toggle */}
