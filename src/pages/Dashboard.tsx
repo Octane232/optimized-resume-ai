@@ -146,10 +146,6 @@ const Dashboard = () => {
     }
   };
 
-  const handleNavigation = (tab: string) => {
-    setActiveTab(tab);
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -197,25 +193,6 @@ const Dashboard = () => {
     }
   };
 
-  // Get the current page title based on active tab
-  const getPageTitle = () => {
-    switch (activeTab) {
-      case 'briefing': return 'Briefing';
-      case 'scout': return 'Job Scout';
-      case 'resume-builder': return 'Resume Builder';
-      case 'resume-engine': return 'Resume Engine';
-      case 'cover-letter': return 'Cover Letter Generator';
-      case 'interview-prep': return 'Interview Prep';
-      case 'skill-gap': return 'Skill Gap Analyzer';
-      case 'linkedin': return 'LinkedIn Optimizer';
-      case 'vault': return 'The Vault';
-      case 'mission-control': return 'Mission Control';
-      case 'billing': return 'Billing';
-      case 'settings': return 'Settings';
-      default: return 'Dashboard';
-    }
-  };
-
   return (
     <div className="h-screen flex w-full bg-background overflow-hidden">
       {/* Walkthrough Guide for first-time users */}
@@ -235,15 +212,26 @@ const Dashboard = () => {
         />
       </div>
       
-      {/* Zone B: Main Content with Navbar */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        {/* Navbar */}
-        <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      {/* Zone B: Main Content - Single scroll container */}
+      <main className="flex-1 h-screen overflow-y-auto pb-16 md:pb-0">
+        {/* Navbar inside the main content area */}
+        <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="flex h-14 items-center px-4 md:px-6">
             {/* Left side - Title based on active tab */}
             <div className="flex items-center gap-2">
               <h1 className="text-lg font-semibold capitalize">
-                {getPageTitle()}
+                {activeTab === 'briefing' && 'Briefing'}
+                {activeTab === 'scout' && 'Job Scout'}
+                {activeTab === 'resume-builder' && 'Resume Builder'}
+                {activeTab === 'resume-engine' && 'Resume Engine'}
+                {activeTab === 'cover-letter' && 'Cover Letter Generator'}
+                {activeTab === 'interview-prep' && 'Interview Prep'}
+                {activeTab === 'skill-gap' && 'Skill Gap Analyzer'}
+                {activeTab === 'linkedin' && 'LinkedIn Optimizer'}
+                {activeTab === 'vault' && 'The Vault'}
+                {activeTab === 'mission-control' && 'Mission Control'}
+                {activeTab === 'billing' && 'Billing'}
+                {activeTab === 'settings' && 'Settings'}
               </h1>
               <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                 {mode === 'hunter' ? 'Hunter Mode' : 'Growth Mode'}
@@ -288,7 +276,7 @@ const Dashboard = () => {
                   
                   {/* Settings */}
                   <DropdownMenuItem 
-                    onClick={() => handleNavigation('settings')}
+                    onClick={() => setActiveTab('settings')}
                     className="cursor-pointer"
                   >
                     <SettingsIcon className="mr-2 h-4 w-4" />
@@ -297,7 +285,7 @@ const Dashboard = () => {
                   
                   {/* Billing */}
                   <DropdownMenuItem 
-                    onClick={() => handleNavigation('billing')}
+                    onClick={() => setActiveTab('billing')}
                     className="cursor-pointer"
                   >
                     <CreditCard className="mr-2 h-4 w-4" />
@@ -326,11 +314,11 @@ const Dashboard = () => {
           </div>
         </header>
 
-        {/* Scrollable content area */}
-        <main className="flex-1 overflow-y-auto pb-16 md:pb-0">
+        {/* Content goes here, below the navbar */}
+        <div className="p-4 md:p-6">
           {renderContent()}
-        </main>
-      </div>
+        </div>
+      </main>
 
       {/* Zone C: Vaya Sidecar (only on briefing) */}
       {activeTab === 'briefing' && mode === 'hunter' && (
