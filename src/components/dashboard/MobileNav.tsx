@@ -2,9 +2,8 @@ import React from 'react';
 import { 
   Home, 
   Telescope, 
-  FolderLock, 
-  Crosshair,
   Stethoscope,
+  Crosshair,
   MoreHorizontal
 } from 'lucide-react';
 import {
@@ -28,18 +27,15 @@ const MobileNav: React.FC<MobileNavProps> = ({ activeTab, setActiveTab, mode }) 
 
   const primaryItems = [
     { id: 'briefing', label: 'Home', icon: Home },
-    { id: 'scout', label: 'Scout', icon: Telescope },
-    { id: 'resume-engine', label: 'Engine', icon: Stethoscope },
-    { id: 'vault', label: 'Vault', icon: FolderLock },
+    { id: 'scout', label: 'Radar', icon: Telescope },
+    { id: 'resume-engine', label: 'Resume', icon: Stethoscope },
+    { id: 'mission-control', label: 'Tracker', icon: Crosshair },
   ];
 
   const moreItems = [
-    { id: 'resume-builder', label: 'Templates' },
-    { id: 'cover-letter', label: 'Cover Letters' },
-    { id: 'interview-prep', label: 'Interview Prep' },
+    { id: 'interview-prep', label: 'Interview Coach' },
     { id: 'skill-gap', label: 'Skill Gap' },
     { id: 'linkedin', label: 'LinkedIn' },
-    { id: 'mission-control', label: 'Mission Control' },
     { id: 'billing', label: 'Billing' },
     { id: 'settings', label: 'Settings' },
   ];
@@ -67,7 +63,6 @@ const MobileNav: React.FC<MobileNavProps> = ({ activeTab, setActiveTab, mode }) 
           );
         })}
         
-        {/* More menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="mobile-nav-item flex-1 min-w-0">

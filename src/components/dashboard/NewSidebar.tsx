@@ -10,7 +10,11 @@ import {
   Telescope,
   FileText,
   Mic,
-  TrendingUp
+  TrendingUp,
+  Lock,
+  Radar,
+  DollarSign,
+  Globe
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -37,23 +41,68 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
   collapsed,
   setCollapsed
 }) => {
-  // Navigation items - ONLY CORE FEATURES
-  // NO Settings, NO Billing, NO Sign Out
-  const navItems = [
-    { id: 'briefing', label: 'Briefing', icon: Home },
-    { id: 'scout', label: 'Scout', icon: Telescope },
-    { id: 'resume-builder', label: 'Resume Templates', icon: FileText },
-    { id: 'resume-engine', label: 'Resume Engine', icon: Stethoscope },
-    { id: 'cover-letter', label: 'Cover Letters', icon: FileText },
-    { id: 'interview-prep', label: 'Interview Prep', icon: Mic },
-    { id: 'skill-gap', label: 'Skill Gap', icon: TrendingUp },
+  // Navigation structure per document spec
+  const intelligenceItems = [
+    { id: 'scout', label: 'Job Radar 🔭', icon: Telescope },
+    { id: 'salary-intel', label: 'Salary Intel 💰', icon: DollarSign, comingSoon: true },
+    { id: 'network', label: 'Network 🌐', icon: Globe, comingSoon: true },
+  ];
+
+  const toolsItems = [
+    { id: 'resume-engine', label: 'Resume + ATS 📄', icon: Stethoscope },
+    { id: 'interview-prep', label: 'Interview Coach 🎤', icon: Mic },
+    { id: 'mission-control', label: 'App Tracker 📋', icon: Crosshair },
     { id: 'linkedin', label: 'LinkedIn', icon: Sparkles },
-    { id: 'mission-control', label: 'Mission Control', icon: Crosshair },
+    { id: 'skill-gap', label: 'Skill Gap', icon: TrendingUp },
   ];
 
   const modeColor = mode === 'hunter' 
     ? 'hsl(217, 100%, 50%)' 
     : 'hsl(262, 83%, 58%)';
+
+  const renderNavItem = (item: { id: string; label: string; icon: any; comingSoon?: boolean }) => {
+    const Icon = item.icon;
+    const isActive = activeTab === item.id;
+
+    return (
+      <Tooltip key={item.id}>
+        <TooltipTrigger asChild>
+          <button
+            onClick={() => !item.comingSoon && setActiveTab(item.id)}
+            className={`
+              w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
+              transition-all duration-200 text-left
+              ${item.comingSoon 
+                ? 'text-sidebar-foreground/40 cursor-not-allowed' 
+                : isActive 
+                  ? 'bg-sidebar-accent text-sidebar-foreground' 
+                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
+              }
+            `}
+            style={isActive && !item.comingSoon ? { borderLeft: `3px solid ${modeColor}` } : {}}
+          >
+            <Icon 
+              className="w-5 h-5 shrink-0" 
+              style={isActive && !item.comingSoon ? { color: modeColor } : {}}
+            />
+            {!collapsed && (
+              <span className="font-medium text-sm flex items-center gap-2">
+                {item.label}
+                {item.comingSoon && (
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">Soon</span>
+                )}
+              </span>
+            )}
+          </button>
+        </TooltipTrigger>
+        {collapsed && (
+          <TooltipContent side="right">
+            {item.label}{item.comingSoon ? ' (Coming Soon)' : ''}
+          </TooltipContent>
+        )}
+      </Tooltip>
+    );
+  };
 
   return (
     <div 
@@ -146,52 +195,54 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
         </div>
       </div>
 
-      {/* Navigation - ONLY CORE FEATURES */}
+      {/* Navigation with sections */}
       <nav className="flex-1 p-3 space-y-1 overflow-hidden">
         <TooltipProvider delayDuration={0}>
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.id;
-            
-            return (
-              <Tooltip key={item.id}>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => setActiveTab(item.id)}
-                    className={`
-                      w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
-                      transition-all duration-200 text-left
-                      ${isActive 
-                        ? 'bg-sidebar-accent text-sidebar-foreground' 
-                        : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
-                      }
-                    `}
-                    style={isActive ? { borderLeft: `3px solid ${modeColor}` } : {}}
-                  >
-                    <Icon 
-                      className="w-5 h-5 shrink-0" 
-                      style={isActive ? { color: modeColor } : {}}
-                    />
-                    {!collapsed && (
-                      <span className="font-medium text-sm">{item.label}</span>
-                    )}
-                  </button>
-                </TooltipTrigger>
-                {collapsed && (
-                  <TooltipContent side="right">
-                    {item.label}
-                  </TooltipContent>
-                )}
-              </Tooltip>
-            );
-          })}
+          {/* Briefing */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => setActiveTab('briefing')}
+                className={`
+                  w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
+                  transition-all duration-200 text-left
+                  ${activeTab === 'briefing' 
+                    ? 'bg-sidebar-accent text-sidebar-foreground' 
+                    : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
+                  }
+                `}
+                style={activeTab === 'briefing' ? { borderLeft: `3px solid ${modeColor}` } : {}}
+              >
+                <Home className="w-5 h-5 shrink-0" style={activeTab === 'briefing' ? { color: modeColor } : {}} />
+                {!collapsed && <span className="font-medium text-sm">Dashboard</span>}
+              </button>
+            </TooltipTrigger>
+            {collapsed && <TooltipContent side="right">Dashboard</TooltipContent>}
+          </Tooltip>
+
+          {/* INTELLIGENCE section */}
+          {!collapsed && (
+            <div className="pt-4 pb-1 px-3">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/40">Intelligence</span>
+            </div>
+          )}
+          {collapsed && <div className="my-2 border-t border-sidebar-border" />}
+          {intelligenceItems.map(renderNavItem)}
+
+          {/* TOOLS section */}
+          {!collapsed && (
+            <div className="pt-4 pb-1 px-3">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/40">Tools</span>
+            </div>
+          )}
+          {collapsed && <div className="my-2 border-t border-sidebar-border" />}
+          {toolsItems.map(renderNavItem)}
         </TooltipProvider>
       </nav>
 
-      {/* Bottom Actions - EMPTY NOW since Billing, Settings, Sign Out are in navbar dropdown */}
+      {/* Bottom */}
       <div className="p-3 border-t border-sidebar-border">
-        {/* This space is intentionally left empty */}
-        {/* All account management moved to navbar dropdown */}
+        {/* Account management in navbar dropdown */}
       </div>
     </div>
   );

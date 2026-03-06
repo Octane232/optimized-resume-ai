@@ -14,8 +14,6 @@ import { CreditsProvider } from "./contexts/CreditsContext";
 const Index = lazy(() => import("./pages/Index"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const ResumeBuilder = lazy(() => import("./pages/ResumeBuilder"));
-const JobSearch = lazy(() => import("./pages/JobSearch"));
-const Templates = lazy(() => import("./pages/Templates"));
 const AIFeatures = lazy(() => import("./pages/AIFeatures"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const AffiliateProgram = lazy(() => import("./pages/AffiliateProgram"));
@@ -32,6 +30,7 @@ const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
 const Documentation = lazy(() => import("./pages/Documentation"));
+const Roadmap = lazy(() => import("./pages/Roadmap"));
 
 const queryClient = new QueryClient();
 
@@ -57,8 +56,6 @@ const App = () => (
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/resume-builder" element={<ResumeBuilder />} />
-              <Route path="/job-search" element={<JobSearch />} />
-              <Route path="/templates" element={<Templates />} />
               <Route path="/ai-features" element={<AIFeatures />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/for-individuals" element={<ForIndividuals />} />
@@ -72,6 +69,7 @@ const App = () => (
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/cookie-policy" element={<CookiePolicy />} />
               <Route path="/documentation" element={<Documentation />} />
+              <Route path="/roadmap" element={<Roadmap />} />
               <Route path="/affiliate-program" element={<AffiliateProgram />} />
               <Route path="/affiliate-dashboard" element={<AffiliateDashboard />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

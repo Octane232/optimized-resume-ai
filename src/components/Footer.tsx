@@ -8,9 +8,8 @@ const Footer = () => {
       title: 'Product',
       links: [
         { label: 'Resume Builder', href: '/resume-builder' },
-        { label: 'Job Search', href: '/job-search' },
-        { label: 'Templates', href: '/templates' },
         { label: 'AI Features', href: '/ai-features' },
+        { label: 'Roadmap', href: '/roadmap' },
         { label: 'Analytics', href: '/analytics' }
       ]
     },
@@ -26,7 +25,8 @@ const Footer = () => {
       links: [
         { label: 'About Us', href: '/about-us' },
         { label: 'Contact', href: '/contact' },
-        { label: 'Affiliate Program', href: '/affiliate-program' }
+        { label: 'Affiliate Program', href: '/affiliate-program' },
+        { label: 'Documentation', href: '/documentation' }
       ]
     }
   ];
