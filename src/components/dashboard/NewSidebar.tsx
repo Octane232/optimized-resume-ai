@@ -10,7 +10,8 @@ import {
   Telescope,
   FileText,
   Mic,
-  TrendingUp
+  TrendingUp,
+  Lock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
