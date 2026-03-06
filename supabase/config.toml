@@ -68,3 +68,9 @@ verify_jwt = false
 
 [functions.parse-resume-ai]
 verify_jwt = false
+
+[functions.apply-bundle]
+verify_jwt = false
+
+[functions.optimize-linkedin]
+verify_jwt = false
