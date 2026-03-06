@@ -11,13 +11,10 @@ import Settings from '@/components/dashboard/Settings';
 import Billing from '@/components/dashboard/Billing';
 import ResumeEngine from '@/components/dashboard/ResumeEngine';
 import Scout from '@/components/dashboard/Scout';
-import CoverLetterGenerator from '@/components/dashboard/CoverLetterGenerator';
 import InterviewPrep from '@/components/dashboard/InterviewPrep';
 import { SkillGapAnalyzer } from '@/components/dashboard/SkillGapAnalyzer';
 import LinkedInOptimizer from '@/components/dashboard/LinkedInOptimizer';
 import WalkthroughGuide from '@/components/dashboard/WalkthroughGuide';
-import CreateResume from '@/components/dashboard/CreateResume';
-import TheVault from '@/components/dashboard/TheVault';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -73,7 +70,6 @@ const Dashboard = () => {
         return;
       }
 
-      // Set user info for navbar
       setUserEmail(user.email || '');
       if (user.email) {
         const initials = user.email
@@ -86,7 +82,6 @@ const Dashboard = () => {
         setUserInitials(initials);
       }
 
-      // Check if user has a resume
       const { data: resumes } = await supabase
         .from('resumes')
         .select('id')
@@ -95,7 +90,6 @@ const Dashboard = () => {
 
       setHasResume(resumes && resumes.length > 0);
 
-      // Check for saved mode preference and walkthrough status
       const { data: preferences } = await supabase
         .from('career_preferences')
         .select('work_style, walkthrough_completed')
@@ -106,7 +100,6 @@ const Dashboard = () => {
         setMode(preferences.work_style as 'hunter' | 'growth');
       }
 
-      // Show walkthrough if not completed
       if (!preferences?.walkthrough_completed) {
         setShowWalkthrough(true);
       }
@@ -158,7 +151,6 @@ const Dashboard = () => {
   }
 
   const renderContent = () => {
-    // If in growth mode, always show teaser
     if (mode === 'growth') {
       return <GrowthTeaser setMode={setMode} />;
     }
@@ -168,20 +160,14 @@ const Dashboard = () => {
         return <HunterDashboard setActiveTab={setActiveTab} />;
       case 'scout':
         return <Scout />;
-      case 'resume-builder':
-        return <CreateResume />;
       case 'resume-engine':
         return <ResumeEngine setActiveTab={setActiveTab} hasResume={hasResume} />;
-      case 'cover-letter':
-        return <CoverLetterGenerator />;
       case 'interview-prep':
         return <InterviewPrep />;
       case 'skill-gap':
         return <SkillGapAnalyzer />;
       case 'linkedin':
         return <LinkedInOptimizer />;
-      case 'vault':
-        return <TheVault setActiveTab={setActiveTab} />;
       case 'mission-control':
         return <MissionControl />;
       case 'billing':
@@ -193,14 +179,27 @@ const Dashboard = () => {
     }
   };
 
+  const getTabTitle = () => {
+    const titles: Record<string, string> = {
+      'briefing': 'Dashboard',
+      'scout': 'Job Radar',
+      'resume-engine': 'Resume + ATS',
+      'interview-prep': 'Interview Coach',
+      'skill-gap': 'Skill Gap Analyzer',
+      'linkedin': 'LinkedIn Optimizer',
+      'mission-control': 'Application Tracker',
+      'billing': 'Billing',
+      'settings': 'Settings',
+    };
+    return titles[activeTab] || 'Dashboard';
+  };
+
   return (
     <div className="h-screen flex w-full bg-background overflow-hidden">
-      {/* Walkthrough Guide for first-time users */}
       {showWalkthrough && (
         <WalkthroughGuide onComplete={handleWalkthroughComplete} />
       )}
 
-      {/* Zone A: Left Sidebar - Hidden on mobile */}
       <div className="hidden md:flex">
         <NewSidebar 
           activeTab={activeTab} 
@@ -212,35 +211,17 @@ const Dashboard = () => {
         />
       </div>
       
-      {/* Zone B: Main Content - Single scroll container */}
       <main className="flex-1 h-screen overflow-y-auto pb-16 md:pb-0">
-        {/* Navbar inside the main content area */}
         <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="flex h-14 items-center px-4 md:px-6">
-            {/* Left side - Title based on active tab */}
             <div className="flex items-center gap-2">
-              <h1 className="text-lg font-semibold capitalize">
-                {activeTab === 'briefing' && 'Briefing'}
-                {activeTab === 'scout' && 'Job Scout'}
-                {activeTab === 'resume-builder' && 'Resume Builder'}
-                {activeTab === 'resume-engine' && 'Resume Engine'}
-                {activeTab === 'cover-letter' && 'Cover Letter Generator'}
-                {activeTab === 'interview-prep' && 'Interview Prep'}
-                {activeTab === 'skill-gap' && 'Skill Gap Analyzer'}
-                {activeTab === 'linkedin' && 'LinkedIn Optimizer'}
-                {activeTab === 'vault' && 'The Vault'}
-                {activeTab === 'mission-control' && 'Mission Control'}
-                {activeTab === 'billing' && 'Billing'}
-                {activeTab === 'settings' && 'Settings'}
-              </h1>
+              <h1 className="text-lg font-semibold">{getTabTitle()}</h1>
               <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                 {mode === 'hunter' ? 'Hunter Mode' : 'Growth Mode'}
               </span>
             </div>
 
-            {/* Right side - Actions and Profile */}
             <div className="ml-auto flex items-center gap-4">
-              {/* Notification Bell */}
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5" />
                 <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] font-medium text-destructive-foreground flex items-center justify-center">
@@ -248,12 +229,10 @@ const Dashboard = () => {
                 </span>
               </Button>
 
-              {/* Help/Support */}
               <Button variant="ghost" size="icon">
                 <HelpCircle className="h-5 w-5" />
               </Button>
 
-              {/* Profile Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center gap-2 px-2">
@@ -273,38 +252,20 @@ const Dashboard = () => {
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  
-                  {/* Settings */}
-                  <DropdownMenuItem 
-                    onClick={() => setActiveTab('settings')}
-                    className="cursor-pointer"
-                  >
+                  <DropdownMenuItem onClick={() => setActiveTab('settings')} className="cursor-pointer">
                     <SettingsIcon className="mr-2 h-4 w-4" />
                     <span>Settings</span>
                   </DropdownMenuItem>
-                  
-                  {/* Billing */}
-                  <DropdownMenuItem 
-                    onClick={() => setActiveTab('billing')}
-                    className="cursor-pointer"
-                  >
+                  <DropdownMenuItem onClick={() => setActiveTab('billing')} className="cursor-pointer">
                     <CreditCard className="mr-2 h-4 w-4" />
                     <span>Billing</span>
                   </DropdownMenuItem>
-                  
-                  {/* Profile */}
                   <DropdownMenuItem className="cursor-pointer">
                     <User className="mr-2 h-4 w-4" />
                     <span>Profile</span>
                   </DropdownMenuItem>
-                  
                   <DropdownMenuSeparator />
-                  
-                  {/* Sign Out */}
-                  <DropdownMenuItem 
-                    onClick={handleSignOut}
-                    className="cursor-pointer text-destructive focus:text-destructive"
-                  >
+                  <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive focus:text-destructive">
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Sign out</span>
                   </DropdownMenuItem>
@@ -314,20 +275,17 @@ const Dashboard = () => {
           </div>
         </header>
 
-        {/* Content goes here, below the navbar */}
         <div className="p-4 md:p-6">
           {renderContent()}
         </div>
       </main>
 
-      {/* Zone C: Vaya Sidecar (only on briefing) */}
       {activeTab === 'briefing' && mode === 'hunter' && (
         <div className="w-80 hidden lg:block h-screen overflow-y-auto border-l border-border">
           <SoraSidecar mode={mode} />
         </div>
       )}
 
-      {/* Mobile Bottom Navigation */}
       <MobileNav 
         activeTab={activeTab}
         setActiveTab={setActiveTab}
