@@ -74,3 +74,6 @@ verify_jwt = false
 
 [functions.optimize-linkedin]
 verify_jwt = false
+
+[functions.radar-scan]
+verify_jwt = false
