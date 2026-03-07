@@ -678,6 +678,89 @@ export type Database = {
         }
         Relationships: []
       }
+      radar_alerts: {
+        Row: {
+          created_at: string | null
+          id: string
+          insight: string | null
+          is_read: boolean | null
+          match_reasons: string[] | null
+          match_score: number
+          signal_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          insight?: string | null
+          is_read?: boolean | null
+          match_reasons?: string[] | null
+          match_score: number
+          signal_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          insight?: string | null
+          is_read?: boolean | null
+          match_reasons?: string[] | null
+          match_score?: number
+          signal_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "radar_alerts_signal_id_fkey"
+            columns: ["signal_id"]
+            isOneToOne: false
+            referencedRelation: "radar_signals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      radar_signals: {
+        Row: {
+          amount: string | null
+          company_name: string
+          created_at: string | null
+          description: string | null
+          funding_stage: string | null
+          hiring_window: string | null
+          id: string
+          industry: string | null
+          likely_roles: string[] | null
+          published_at: string | null
+          source_url: string
+        }
+        Insert: {
+          amount?: string | null
+          company_name: string
+          created_at?: string | null
+          description?: string | null
+          funding_stage?: string | null
+          hiring_window?: string | null
+          id?: string
+          industry?: string | null
+          likely_roles?: string[] | null
+          published_at?: string | null
+          source_url: string
+        }
+        Update: {
+          amount?: string | null
+          company_name?: string
+          created_at?: string | null
+          description?: string | null
+          funding_stage?: string | null
+          hiring_window?: string | null
+          id?: string
+          industry?: string | null
+          likely_roles?: string[] | null
+          published_at?: string | null
+          source_url?: string
+        }
+        Relationships: []
+      }
       referrals: {
         Row: {
           affiliate_id: string
