@@ -1,304 +1,376 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Settings2, Sparkles, FileText, Telescope, RefreshCw, ChevronRight } from 'lucide-react';
+import { FileText, Sparkles, Clipboard, Download, RefreshCw, CheckCircle2, AlertTriangle, TrendingUp, Copy, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { toast } from '@/hooks/use-toast';
-import { useSubscription } from '@/contexts/SubscriptionContext';
-
-// New modular components
-import ResumeIngestion, { type IngestionResult } from './resume-engine/ResumeIngestion';
-import ResumeParser, { type ParsedResume } from './resume-engine/ResumeParser';
-import MatchingEngine from './resume-engine/MatchingEngine';
-import EnhancementSuggestions from './resume-engine/EnhancementSuggestions';
-import ExportPanel from './resume-engine/ExportPanel';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useCredits } from '@/contexts/CreditsContext';
 
 interface ResumeEngineProps {
   setActiveTab?: (tab: string) => void;
   hasResume?: boolean;
 }
 
-type EngineStep = 'ingest' | 'parse' | 'match' | 'enhance' | 'export';
-
-const STEPS: { id: EngineStep; label: string; description: string }[] = [
-  { id: 'ingest', label: 'Upload', description: 'Import your resume' },
-  { id: 'parse', label: 'Parse', description: 'AI extraction' },
-  { id: 'match', label: 'Match', description: 'Compare with job' },
-  { id: 'enhance', label: 'Enhance', description: 'Get suggestions' },
-  { id: 'export', label: 'Export', description: 'Download & share' },
-];
-
-const ResumeEngine: React.FC<ResumeEngineProps> = ({ setActiveTab }) => {
-  const { tier } = useSubscription();
-  
-  // Engine state
-  const [currentStep, setCurrentStep] = useState<EngineStep>('ingest');
-  const [rawText, setRawText] = useState<string>('');
-  const [ingestionResult, setIngestionResult] = useState<IngestionResult | null>(null);
-  const [parsedResume, setParsedResume] = useState<ParsedResume | null>(null);
-  const [matchScore, setMatchScore] = useState<number | null>(null);
-  const [missingKeywords, setMissingKeywords] = useState<string[]>([]);
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  // Handle resume ingestion complete - now transitions to AI parsing step
-  const handleIngestionComplete = useCallback((result: IngestionResult) => {
-    setIngestionResult(result);
-    setRawText(result.rawText);
-    setCurrentStep('parse'); // Move to parse step where AI parsing happens
-    
-    toast({
-      title: "Resume Uploaded",
-      description: "Starting AI-powered analysis...",
-    });
-  }, []);
-
-  // Handle parsing complete (from parser component)
-  const handleParsingComplete = useCallback((parsed: ParsedResume) => {
-    setParsedResume(parsed);
-  }, []);
-
-  // Handle match complete
-  const handleMatchComplete = useCallback((result: any) => {
-    setMatchScore(result.overallScore);
-    setMissingKeywords(result.missingKeywords || []);
-    setCurrentStep('enhance');
-  }, []);
-
-  // Reset engine
-  const handleReset = () => {
-    setCurrentStep('ingest');
-    setRawText('');
-    setIngestionResult(null);
-    setParsedResume(null);
-    setMatchScore(null);
-    setMissingKeywords([]);
+interface BundleResult {
+  tailoredResume: string;
+  coverLetter: string;
+  atsData: {
+    beforeScore: number;
+    afterScore: number;
+    missingKeywords: string[];
+    improvements: string[];
   };
+}
 
-  // Navigate to Scout
-  const handleNavigateToScout = () => setActiveTab?.('scout');
+const ResumeEngine: React.FC<ResumeEngineProps> = () => {
+  const { toast } = useToast();
+  const { balance, spendCredit } = useCredits();
+  
+  const [resumeText, setResumeText] = useState('');
+  const [jobDescription, setJobDescription] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [result, setResult] = useState<BundleResult | null>(null);
+  const [activeResultTab, setActiveResultTab] = useState('resume');
 
-  // Step navigation
-  const canNavigateToStep = (step: EngineStep): boolean => {
-    const stepIndex = STEPS.findIndex(s => s.id === step);
-    const currentIndex = STEPS.findIndex(s => s.id === currentStep);
-    
-    // Can always go back
-    if (stepIndex < currentIndex) return true;
-    
-    // Can only go forward if prerequisites are met
-    switch (step) {
-      case 'ingest': return true;
-      case 'parse': return !!rawText;
-      case 'match': return !!parsedResume;
-      case 'enhance': return !!parsedResume;
-      case 'export': return !!parsedResume;
-      default: return false;
+  const handleGenerate = async () => {
+    if (!resumeText.trim() || !jobDescription.trim()) {
+      toast({ title: "Missing Input", description: "Paste both your resume and the job description.", variant: "destructive" });
+      return;
+    }
+
+    if (balance <= 0) {
+      toast({ title: "No Credits", description: "You need credits to use this feature.", variant: "destructive" });
+      return;
+    }
+
+    setIsProcessing(true);
+    setResult(null);
+
+    try {
+      // Spend a credit
+      const spent = await spendCredit('apply-bundle', 'Resume + Cover Letter + ATS Score');
+      if (!spent) {
+        toast({ title: "No Credits", description: "Could not spend credit.", variant: "destructive" });
+        setIsProcessing(false);
+        return;
+      }
+
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('user_id', user?.id || '')
+        .maybeSingle();
+
+      const { data, error } = await supabase.functions.invoke('apply-bundle', {
+        body: {
+          jobDescription: jobDescription.trim(),
+          userResume: resumeText.trim(),
+          userName: profile?.full_name || '',
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      setResult(data);
+      setActiveResultTab('ats');
+      toast({ title: "Done!", description: "Your tailored resume, cover letter, and ATS score are ready." });
+    } catch (error: any) {
+      console.error('Apply bundle error:', error);
+      toast({ title: "Error", description: error.message || "Something went wrong.", variant: "destructive" });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
-  return (
-    <div className="min-h-full bg-background">
-      {/* Header */}
-      <div className="sticky top-0 z-10 border-b border-border px-6 py-4 bg-background/95 backdrop-blur">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
-              <Settings2 className="w-5 h-5 text-primary" />
-              Resume Engine
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              AI-powered resume parsing, analysis, and optimization
-            </p>
-          </div>
-          {rawText && (
-            <Button variant="outline" size="sm" onClick={handleReset} className="gap-2">
+  const handleCopy = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast({ title: "Copied!", description: `${label} copied to clipboard.` });
+  };
+
+  const handleReset = () => {
+    setResult(null);
+    setResumeText('');
+    setJobDescription('');
+  };
+
+  const scoreColor = (score: number) => {
+    if (score >= 80) return 'text-emerald-500';
+    if (score >= 60) return 'text-amber-500';
+    return 'text-red-500';
+  };
+
+  const progressColor = (score: number) => {
+    if (score >= 80) return 'bg-emerald-500';
+    if (score >= 60) return 'bg-amber-500';
+    return 'bg-red-500';
+  };
+
+  // Results View
+  if (result) {
+    return (
+      <div className="p-6 space-y-6 max-w-5xl mx-auto">
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">Results Ready</h1>
+                <p className="text-sm text-muted-foreground">Tailored resume, cover letter, and ATS score — all from one paste.</p>
+              </div>
+            </div>
+            <Button variant="outline" onClick={handleReset} className="gap-2">
               <RefreshCw className="w-4 h-4" />
               Start Over
             </Button>
-          )}
-        </div>
+          </div>
+        </motion.div>
 
-        {/* Step Progress */}
-        <div className="flex items-center gap-2 mt-4 overflow-x-auto pb-2">
-          {STEPS.map((step, index) => {
-            const isActive = step.id === currentStep;
-            const isPast = STEPS.findIndex(s => s.id === currentStep) > index;
-            const canNav = canNavigateToStep(step.id);
-
-            return (
-              <div key={step.id} className="flex items-center gap-2">
-                <button
-                  onClick={() => canNav && setCurrentStep(step.id)}
-                  disabled={!canNav}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all whitespace-nowrap ${
-                    isActive 
-                      ? 'bg-primary text-primary-foreground' 
-                      : isPast 
-                        ? 'bg-primary/20 text-primary hover:bg-primary/30' 
-                        : canNav
-                          ? 'bg-muted text-muted-foreground hover:bg-muted/80'
-                          : 'bg-muted/50 text-muted-foreground/50 cursor-not-allowed'
-                  }`}
-                >
-                  <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
-                    isActive ? 'bg-primary-foreground text-primary' : 
-                    isPast ? 'bg-primary text-primary-foreground' : 'bg-muted-foreground/20'
-                  }`}>
-                    {isPast ? '✓' : index + 1}
-                  </span>
-                  <div className="text-left hidden sm:block">
-                    <p className="text-xs font-medium">{step.label}</p>
-                    <p className="text-[10px] opacity-70">{step.description}</p>
-                  </div>
-                </button>
-                {index < STEPS.length - 1 && (
-                  <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="p-6 pb-12 max-w-5xl mx-auto space-y-6">
-        {/* Scout Tip */}
-        {currentStep === 'ingest' && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-4 rounded-xl bg-muted/30 border border-border"
-          >
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                  <Telescope className="w-5 h-5 text-emerald-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">Looking for job matches?</p>
-                  <p className="text-xs text-muted-foreground">
-                    Use Scout to discover jobs that match your profile
+        {/* ATS Score Summary */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          <Card className="border-0 shadow-lg overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-red-500 via-amber-500 to-emerald-500" />
+            <CardContent className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Before Score */}
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground mb-2">Before</p>
+                  <p className={`text-5xl font-black ${scoreColor(result.atsData.beforeScore)}`}>
+                    {result.atsData.beforeScore}%
                   </p>
+                  <p className="text-xs text-muted-foreground mt-1">Original ATS Score</p>
+                </div>
+
+                {/* Arrow */}
+                <div className="flex items-center justify-center">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="w-8 h-8 text-emerald-500" />
+                    <span className="text-2xl font-bold text-emerald-500">
+                      +{result.atsData.afterScore - result.atsData.beforeScore}
+                    </span>
+                  </div>
+                </div>
+
+                {/* After Score */}
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground mb-2">After</p>
+                  <p className={`text-5xl font-black ${scoreColor(result.atsData.afterScore)}`}>
+                    {result.atsData.afterScore}%
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Optimized ATS Score</p>
                 </div>
               </div>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handleNavigateToScout}
-                className="gap-2"
-              >
-                Go to Scout
-              </Button>
-            </div>
-          </motion.div>
-        )}
 
-        {/* Step Content */}
-        {currentStep === 'ingest' && (
-          <ResumeIngestion 
-            onIngestionComplete={handleIngestionComplete}
-            isProcessing={isProcessing}
-          />
-        )}
-
-        {currentStep === 'parse' && rawText && (
-          <div className="space-y-6">
-            <ResumeParser 
-              rawText={rawText} 
-              onParsingComplete={handleParsingComplete}
-            />
-            
-            {parsedResume && (
-              <div className="flex justify-end gap-3">
-                <Button variant="outline" onClick={() => setCurrentStep('ingest')}>
-                  Upload Different Resume
-                </Button>
-                <Button onClick={() => setCurrentStep('match')} className="gap-2">
-                  <Sparkles className="w-4 h-4" />
-                  Match with Job
-                </Button>
+              {/* Progress Bar */}
+              <div className="mt-6 space-y-2">
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>ATS Compatibility</span>
+                  <span>{result.atsData.afterScore}%</span>
+                </div>
+                <div className="h-3 bg-muted rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${result.atsData.afterScore}%` }}
+                    transition={{ duration: 1, delay: 0.5 }}
+                    className={`h-full rounded-full ${progressColor(result.atsData.afterScore)}`}
+                  />
+                </div>
               </div>
-            )}
-          </div>
-        )}
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        {currentStep === 'match' && (
-          <MatchingEngine 
-            parsedResume={parsedResume}
-            rawText={rawText}
-            onMatchComplete={handleMatchComplete}
-          />
-        )}
+        {/* Tabs: Resume / Cover Letter / Details */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+          <Tabs value={activeResultTab} onValueChange={setActiveResultTab}>
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="resume" className="gap-2">
+                <FileText className="w-4 h-4" />
+                Tailored Resume
+              </TabsTrigger>
+              <TabsTrigger value="cover" className="gap-2">
+                <Clipboard className="w-4 h-4" />
+                Cover Letter
+              </TabsTrigger>
+              <TabsTrigger value="ats" className="gap-2">
+                <Sparkles className="w-4 h-4" />
+                ATS Details
+              </TabsTrigger>
+            </TabsList>
 
-        {currentStep === 'enhance' && (
-          <div className="grid lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <EnhancementSuggestions
-                parsedResume={parsedResume}
-                missingKeywords={missingKeywords}
-              />
-            </div>
-            <div>
-              <ExportPanel
-                parsedResume={parsedResume}
-                rawText={rawText}
-                matchScore={matchScore || undefined}
-                missingKeywords={missingKeywords}
-              />
-            </div>
-          </div>
-        )}
+            <TabsContent value="resume">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="text-lg">Tailored Resume</CardTitle>
+                  <Button variant="outline" size="sm" onClick={() => handleCopy(result.tailoredResume, 'Resume')} className="gap-2">
+                    <Copy className="w-4 h-4" /> Copy
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-muted/30 rounded-xl p-6 whitespace-pre-wrap text-sm leading-relaxed font-mono max-h-[600px] overflow-y-auto">
+                    {result.tailoredResume}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-        {currentStep === 'export' && (
-          <div className="max-w-md mx-auto">
-            <ExportPanel
-              parsedResume={parsedResume}
-              rawText={rawText}
-              matchScore={matchScore || undefined}
-              missingKeywords={missingKeywords}
-            />
-          </div>
-        )}
+            <TabsContent value="cover">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="text-lg">Cover Letter</CardTitle>
+                  <Button variant="outline" size="sm" onClick={() => handleCopy(result.coverLetter, 'Cover Letter')} className="gap-2">
+                    <Copy className="w-4 h-4" /> Copy
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-muted/30 rounded-xl p-6 whitespace-pre-wrap text-sm leading-relaxed max-h-[600px] overflow-y-auto">
+                    {result.coverLetter}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-        {/* Quick Navigation */}
-        {parsedResume && currentStep !== 'ingest' && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex flex-wrap gap-2 pt-4 border-t border-border"
-          >
-            <span className="text-xs text-muted-foreground py-2">Quick access:</span>
-            {STEPS.slice(1).map(step => (
-              <Button
-                key={step.id}
-                variant={currentStep === step.id ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setCurrentStep(step.id)}
-                className="text-xs"
-              >
-                {step.label}
-              </Button>
-            ))}
-          </motion.div>
-        )}
+            <TabsContent value="ats">
+              <Card>
+                <CardContent className="p-6 space-y-6">
+                  {/* Missing Keywords */}
+                  {result.atsData.missingKeywords?.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4 text-amber-500" />
+                        Missing Keywords (Added in Tailored Version)
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {result.atsData.missingKeywords.map((kw, i) => (
+                          <Badge key={i} variant="outline" className="bg-amber-500/5 text-amber-600 border-amber-500/20">
+                            {kw}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
-        {/* Empty State */}
-        {!rawText && currentStep === 'ingest' && (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center py-12"
-          >
-            <FileText className="w-16 h-16 mx-auto text-muted-foreground/30 mb-4" />
-            <h3 className="text-lg font-medium text-foreground mb-2">
-              Start by uploading your resume
-            </h3>
-            <p className="text-sm text-muted-foreground max-w-md mx-auto">
-              Upload a PDF, DOCX, or TXT file, paste your resume text, or import from LinkedIn 
-              to begin the AI-powered analysis process.
-            </p>
-          </motion.div>
-        )}
+                  {/* Improvements */}
+                  {result.atsData.improvements?.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                        Improvements Made
+                      </h4>
+                      <ul className="space-y-2">
+                        {result.atsData.improvements.map((imp, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+                            {imp}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </motion.div>
       </div>
+    );
+  }
+
+  // Input View
+  return (
+    <div className="p-6 space-y-6 max-w-4xl mx-auto">
+      {/* Header */}
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground">
+            <FileText className="w-6 h-6" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Resume + ATS</h1>
+            <p className="text-sm text-muted-foreground">
+              Paste your resume and a job description. Get a tailored resume, cover letter, and ATS score in 60 seconds.
+            </p>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* How it works */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+        <div className="grid grid-cols-3 gap-4">
+          {[
+            { icon: '📄', label: 'Paste resume + job', desc: 'One input, three outputs' },
+            { icon: '🤖', label: 'AI tailors everything', desc: 'Resume, cover letter, ATS score' },
+            { icon: '📊', label: 'See your score jump', desc: 'From 34% to 91% in seconds' },
+          ].map((step, i) => (
+            <Card key={i} className="border-0 shadow-sm">
+              <CardContent className="p-4 text-center">
+                <span className="text-2xl">{step.icon}</span>
+                <p className="text-sm font-medium mt-2">{step.label}</p>
+                <p className="text-xs text-muted-foreground mt-1">{step.desc}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Input Fields */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="space-y-4">
+        <div>
+          <label className="text-sm font-medium text-foreground mb-2 block">Your Resume</label>
+          <Textarea 
+            placeholder="Paste your full resume text here..."
+            value={resumeText}
+            onChange={(e) => setResumeText(e.target.value)}
+            className="min-h-[200px] bg-muted/30 resize-y"
+          />
+          <p className="text-xs text-muted-foreground mt-1">{resumeText.length > 0 ? `${resumeText.split(/\s+/).filter(Boolean).length} words` : 'Copy from your resume document'}</p>
+        </div>
+
+        <div>
+          <label className="text-sm font-medium text-foreground mb-2 block">Job Description</label>
+          <Textarea 
+            placeholder="Paste the full job posting here..."
+            value={jobDescription}
+            onChange={(e) => setJobDescription(e.target.value)}
+            className="min-h-[200px] bg-muted/30 resize-y"
+          />
+          <p className="text-xs text-muted-foreground mt-1">{jobDescription.length > 0 ? `${jobDescription.split(/\s+/).filter(Boolean).length} words` : 'Copy the entire posting from LinkedIn, Indeed, etc.'}</p>
+        </div>
+      </motion.div>
+
+      {/* Generate Button */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+        <Button 
+          onClick={handleGenerate} 
+          disabled={isProcessing || !resumeText.trim() || !jobDescription.trim()}
+          size="lg"
+          className="w-full h-14 text-lg font-semibold gap-3 rounded-2xl"
+        >
+          {isProcessing ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Generating... (takes ~30 seconds)
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-5 h-5" />
+              Generate Tailored Resume + Cover Letter + ATS Score
+              <Badge variant="secondary" className="ml-2 text-xs">1 credit</Badge>
+            </>
+          )}
+        </Button>
+        <p className="text-xs text-center text-muted-foreground mt-2">
+          Credits remaining: {balance}
+        </p>
+      </motion.div>
     </div>
   );
 };
