@@ -55,32 +55,14 @@ const Scout: React.FC = () => {
 
   const fetchData = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      // Fetch user's matched alerts with signal data
-      if (user) {
-        const { data: alertsData } = await supabase
-          .from('radar_alerts')
-          .select('*, radar_signals(*)')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(20);
-
-        if (alertsData) {
-          setAlerts(alertsData as unknown as RadarAlert[]);
-        }
-      }
-
-      // Fetch all recent signals
-      const { data: signalsData } = await supabase
-        .from('radar_signals')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(30);
-
-      if (signalsData) {
-        setSignals(signalsData);
-      }
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const { data, error } = await supabase.functions.invoke('radar-alerts', {
+        headers: { Authorization: `Bearer ${session.access_token}` }
+      });
+      if (error) throw error;
+      setAlerts(data.alerts || []);
+      setSignals(data.alerts?.map((a: any) => a.radar_signals) || []);
     } catch (error) {
       console.error('Error fetching radar data:', error);
     } finally {
