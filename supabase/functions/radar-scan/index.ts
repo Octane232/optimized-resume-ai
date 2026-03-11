@@ -10,166 +10,146 @@ serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
-
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const NEWS_API_KEY = Deno.env.get("NEWS_API_KEY");
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    if (!NEWS_API_KEY) throw new Error("NEWS_API_KEY not configured");
+    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY not configured");
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) throw new Error("Supabase not configured");
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    const allArticles: any[] = [];
+    const seenUrls = new Set<string>();
 
-    // Generate realistic funding signals using AI
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [{
-          role: "user",
-          content: `Generate 5 realistic but fictional funding announcements for tech companies. 
-Each should include: company_name, amount (e.g. "$12M"), funding_stage (Seed/Series A/Series B/Series C), 
-industry (e.g. "fintech", "healthtech", "AI/ML", "cybersecurity", "edtech"), 
-description (1-2 sentences about the company), 
-likely_roles (array of 3-5 job titles they'll hire for),
-hiring_window (e.g. "Next 30 days", "Next 60 days").
-Return as JSON array.`
-        }],
-        tools: [{
-          type: "function",
-          function: {
-            name: "funding_signals",
-            description: "Return funding signal data",
-            parameters: {
-              type: "object",
-              properties: {
-                signals: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      company_name: { type: "string" },
-                      amount: { type: "string" },
-                      funding_stage: { type: "string" },
-                      industry: { type: "string" },
-                      description: { type: "string" },
-                      likely_roles: { type: "array", items: { type: "string" } },
-                      hiring_window: { type: "string" }
-                    },
-                    required: ["company_name", "amount", "funding_stage", "industry", "description", "likely_roles", "hiring_window"],
-                    additionalProperties: false
-                  }
-                }
-              },
-              required: ["signals"],
-              additionalProperties: false
+    // SOURCE 1: NewsAPI
+    try {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const from = yesterday.toISOString().split("T")[0];
+      const queries = ['"Series A" "raised" "million"', '"Series B" "raised" "million"', '"seed round" "raised"', '"announces funding" "hiring"'];
+      const newsResults = await Promise.allSettled(queries.map((q) => fetch(`https://newsapi.org/v2/everything?q=${encodeURIComponent(q)}&from=${from}&language=en&sortBy=publishedAt&pageSize=15&apiKey=${NEWS_API_KEY}`).then((r) => r.json())));
+      for (const result of newsResults) {
+        if (result.status === "fulfilled" && result.value.articles) {
+          for (const a of result.value.articles) {
+            if (a.url && !seenUrls.has(a.url)) {
+              seenUrls.add(a.url);
+              allArticles.push({ title: a.title || "", description: a.description || "", content: a.content || "", url: a.url, publishedAt: a.publishedAt || new Date().toISOString() });
             }
           }
-        }],
-        tool_choice: { type: "function", function: { name: "funding_signals" } }
-      }),
-    });
+        }
+      }
+      console.log(`NewsAPI: ${allArticles.length} articles`);
+    } catch (e) { console.error("NewsAPI failed:", e); }
 
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+    // SOURCE 2: TechCrunch RSS
+    try {
+      const tcRes = await fetch("https://techcrunch.com/category/venture/feed/", { headers: { "User-Agent": "Vaylance/1.0" } });
+      const tcXml = await tcRes.text();
+      const tcItems = tcXml.match(/<item>([\s\S]*?)<\/item>/g) || [];
+      let tcCount = 0;
+      for (const item of tcItems) {
+        const url = item.match(/<link>(.*?)<\/link>/)?.[1]?.trim() || "";
+        const title = item.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/)?.[1] || item.match(/<title>(.*?)<\/title>/)?.[1] || "";
+        const description = item.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/)?.[1] || item.match(/<description>(.*?)<\/description>/)?.[1] || "";
+        const pubDate = item.match(/<pubDate>(.*?)<\/pubDate>/)?.[1] || "";
+        const text = (title + description).toLowerCase();
+        const isFunding = text.includes("raises") || text.includes("raised") || text.includes("funding") || text.includes("series") || text.includes("seed") || text.includes("million") || text.includes("billion");
+        if (url && !seenUrls.has(url) && isFunding) {
+          seenUrls.add(url);
+          allArticles.push({ title, description: description.replace(/<[^>]*>/g, "").slice(0, 300), content: "", url, publishedAt: pubDate ? new Date(pubDate).toISOString() : new Date().toISOString() });
+          tcCount++;
+        }
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+      console.log(`TechCrunch RSS: ${tcCount} articles`);
+    } catch (e) { console.error("TechCrunch RSS failed:", e); }
+
+    // SOURCE 3: VentureBeat RSS
+    try {
+      const vbRes = await fetch("https://venturebeat.com/feed/", { headers: { "User-Agent": "Vaylance/1.0" } });
+      const vbXml = await vbRes.text();
+      const vbItems = vbXml.match(/<item>([\s\S]*?)<\/item>/g) || [];
+      let vbCount = 0;
+      for (const item of vbItems) {
+        const url = item.match(/<link>(.*?)<\/link>/)?.[1]?.trim() || "";
+        const title = item.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/)?.[1] || item.match(/<title>(.*?)<\/title>/)?.[1] || "";
+        const description = item.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/)?.[1] || item.match(/<description>(.*?)<\/description>/)?.[1] || "";
+        const pubDate = item.match(/<pubDate>(.*?)<\/pubDate>/)?.[1] || "";
+        const text = (title + description).toLowerCase();
+        const isFunding = text.includes("raises") || text.includes("raised") || text.includes("funding") || text.includes("series") || text.includes("seed") || text.includes("million") || text.includes("billion");
+        if (url && !seenUrls.has(url) && isFunding) {
+          seenUrls.add(url);
+          allArticles.push({ title, description: description.replace(/<[^>]*>/g, "").slice(0, 300), content: "", url, publishedAt: pubDate ? new Date(pubDate).toISOString() : new Date().toISOString() });
+          vbCount++;
+        }
       }
-      throw new Error(`AI gateway error: ${response.status}`);
+      console.log(`VentureBeat RSS: ${vbCount} articles`);
+    } catch (e) { console.error("VentureBeat RSS failed:", e); }
+
+    console.log(`Total unique articles: ${allArticles.length}`);
+
+    // STEP 2: Extract signals using OpenAI
+    const signals: any[] = [];
+    for (let i = 0; i < allArticles.length; i += 8) {
+      const batch = allArticles.slice(i, i + 8);
+      const results = await Promise.allSettled(batch.map(async (article) => {
+        try {
+          const res = await fetch("https://api.openai.com/v1/chat/completions", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ model: "gpt-4o-mini", response_format: { type: "json_object" }, messages: [{ role: "user", content: `Analyse this article. Return JSON only: { "is_funding": true or false, "company_name": "string", "amount": "e.g. $50M", "funding_stage": "Seed/Series A/Series B/Series C", "industry": "one word e.g. Fintech/AI/SaaS/Healthcare", "description": "one sentence", "likely_roles": ["3-5 job titles"], "hiring_window": "e.g. 30-60 days" }. Set is_funding false if not a real funding announcement.\n\nTitle: ${article.title}\nDescription: ${article.description}` }] }),
+          });
+          const data = await res.json();
+          const parsed = JSON.parse(data.choices?.[0]?.message?.content || "{}");
+          if (!parsed.is_funding || !parsed.company_name) return null;
+          return { ...parsed, source_url: article.url, published_at: article.publishedAt };
+        } catch { return null; }
+      }));
+      for (const r of results) { if (r.status === "fulfilled" && r.value) signals.push(r.value); }
+      if (i + 8 < allArticles.length) await new Promise((r) => setTimeout(r, 400));
     }
+    console.log(`Extracted ${signals.length} valid signals`);
 
-    const data = await response.json();
-    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-    if (!toolCall) throw new Error("No tool call in response");
-
-    const { signals } = JSON.parse(toolCall.function.arguments);
-
-    // Store signals in database
-    const insertedSignals = [];
+    // STEP 3: Store new signals
+    const storedSignals: { id: string; signal: any }[] = [];
     for (const signal of signals) {
-      const sourceUrl = `https://techcrunch.com/funding/${signal.company_name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`;
-      
-      const { data: inserted, error } = await supabase
-        .from('radar_signals')
-        .upsert({
-          company_name: signal.company_name,
-          amount: signal.amount,
-          funding_stage: signal.funding_stage,
-          industry: signal.industry,
-          description: signal.description,
-          source_url: sourceUrl,
-          likely_roles: signal.likely_roles,
-          hiring_window: signal.hiring_window,
-          published_at: new Date().toISOString(),
-        }, { onConflict: 'source_url' })
-        .select()
-        .single();
-
-      if (!error && inserted) {
-        insertedSignals.push(inserted);
-      }
+      const { data: existing } = await supabase.from("radar_signals").select("id").eq("source_url", signal.source_url).single();
+      if (existing) continue;
+      const { data: inserted, error } = await supabase.from("radar_signals").insert({ company_name: signal.company_name, amount: signal.amount, funding_stage: signal.funding_stage, industry: signal.industry, description: signal.description, source_url: signal.source_url, published_at: signal.published_at, likely_roles: signal.likely_roles, hiring_window: signal.hiring_window }).select("id").single();
+      if (!error && inserted) storedSignals.push({ id: inserted.id, signal });
     }
+    console.log(`Stored ${storedSignals.length} new signals`);
 
-    // Match signals against all users with career preferences
-    const { data: users } = await supabase
-      .from('career_preferences')
-      .select('user_id, target_role, target_industry, experience_level');
-
-    if (users) {
-      for (const user of users) {
-        for (const signal of insertedSignals) {
-          // Simple matching: industry match + role match
-          const matchReasons: string[] = [];
-          let score = 50; // Base score
-
-          if (user.target_industry && signal.industry?.toLowerCase().includes(user.target_industry.toLowerCase())) {
-            score += 25;
-            matchReasons.push(`Industry match: ${signal.industry}`);
-          }
-
-          if (user.target_role && signal.likely_roles?.some((r: string) => 
-            r.toLowerCase().includes(user.target_role!.toLowerCase()) || 
-            user.target_role!.toLowerCase().includes(r.toLowerCase())
-          )) {
-            score += 25;
-            matchReasons.push(`Role match: ${user.target_role}`);
-          }
-
-          if (score >= 50) {
-            await supabase.from('radar_alerts').insert({
-              user_id: user.user_id,
-              signal_id: signal.id,
-              match_score: Math.min(score, 100),
-              match_reasons: matchReasons.length > 0 ? matchReasons : ['General industry relevance'],
-              insight: `${signal.company_name} just raised ${signal.amount} in ${signal.funding_stage}. They're likely hiring in the next ${signal.hiring_window?.replace('Next ', '') || '30-60 days'}.`,
-            });
-          }
+    // STEP 4: Match signals against users
+    const { data: users } = await supabase.from("career_preferences").select("user_id, target_role, target_industry");
+    let alertsCreated = 0;
+    if (users && users.length > 0) {
+      for (const { id: signalId, signal } of storedSignals) {
+        for (const user of users) {
+          let score = 40;
+          const reasons: string[] = [];
+          if (user.target_industry && signal.industry?.toLowerCase().includes(user.target_industry.toLowerCase())) { score += 30; reasons.push(`Industry match: ${signal.industry}`); }
+          if (user.target_role && signal.likely_roles?.some((r: string) => r.toLowerCase().includes(user.target_role.toLowerCase()) || user.target_role.toLowerCase().includes(r.toLowerCase()))) { score += 30; reasons.push(`Role match: ${user.target_role}`); }
+          if (score < 60) continue;
+          const { data: existing } = await supabase.from("radar_alerts").select("id").eq("user_id", user.user_id).eq("signal_id", signalId).single();
+          if (existing) continue;
+          let insight = `${signal.company_name} just raised ${signal.amount} and will hire ${user.target_role || "for your target roles"} in the next ${signal.hiring_window}. Apply before this goes public.`;
+          try {
+            const insightRes = await fetch("https://api.openai.com/v1/chat/completions", { method: "POST", headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ model: "gpt-4o-mini", messages: [{ role: "user", content: `Write exactly 2 sentences for a job seeker alert. Company: ${signal.company_name}. Funding: ${signal.amount} ${signal.funding_stage}. User target role: ${user.target_role || "not specified"}. Hiring window: ${signal.hiring_window}. Sentence 1: what this funding means for hiring. Sentence 2: what they should do right now. Second person, direct, no fluff.` }] }) });
+            const insightData = await insightRes.json();
+            insight = insightData.choices?.[0]?.message?.content || insight;
+          } catch { /* use fallback */ }
+          const { error } = await supabase.from("radar_alerts").insert({ user_id: user.user_id, signal_id: signalId, match_score: Math.min(score, 100), match_reasons: reasons.length > 0 ? reasons : ["General relevance"], insight, is_read: false });
+          if (!error) alertsCreated++;
         }
       }
     }
 
-    return new Response(JSON.stringify({ 
-      success: true, 
-      signalsCreated: insertedSignals.length 
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-
+    return new Response(JSON.stringify({ success: true, articlesFound: allArticles.length, signalsExtracted: signals.length, signalsStored: storedSignals.length, alertsCreated }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {
     console.error("Radar scan error:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });
