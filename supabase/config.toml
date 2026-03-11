@@ -77,3 +77,12 @@ verify_jwt = false
 
 [functions.radar-scan]
 verify_jwt = false
+
+[functions.radar-alerts]
+verify_jwt = false
+
+[functions.radar-mark-read]
+verify_jwt = false
+
+[functions.salary-intel]
+verify_jwt = false

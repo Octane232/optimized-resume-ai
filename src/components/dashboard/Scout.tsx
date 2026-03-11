@@ -75,20 +75,13 @@ const Scout: React.FC = () => {
     try {
       const { data, error } = await supabase.functions.invoke('radar-scan');
       if (error) throw error;
-      
       toast({
         title: "Radar Scan Complete",
-        description: `Found ${data?.signalsCreated || 0} new funding signals.`,
+        description: `Found ${data?.signalsStored || 0} new signals. ${data?.alertsCreated || 0} matched your profile.`,
       });
-      
       await fetchData();
     } catch (error: any) {
-      console.error('Scan error:', error);
-      toast({
-        title: "Scan Failed",
-        description: error.message || "Could not complete radar scan.",
-        variant: "destructive",
-      });
+      toast({ title: "Scan Failed", description: error.message || "Could not complete scan.", variant: "destructive" });
     } finally {
       setScanning(false);
     }
