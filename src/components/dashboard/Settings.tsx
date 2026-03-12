@@ -144,6 +144,24 @@ const Settings = () => {
     }
   };
 
+  const saveCareerPrefs = async () => {
+    setSavingPrefs(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await supabase.from('career_preferences').upsert({
+        user_id: user.id,
+        target_role: careerPrefs.targetRole,
+        target_industry: careerPrefs.targetIndustry,
+      }, { onConflict: 'user_id' });
+      toast({ title: 'Saved!', description: 'Your job preferences have been updated. The radar will use these on the next scan.' });
+    } catch (err) {
+      toast({ title: 'Error', description: 'Could not save preferences.', variant: 'destructive' });
+    } finally {
+      setSavingPrefs(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-8">
