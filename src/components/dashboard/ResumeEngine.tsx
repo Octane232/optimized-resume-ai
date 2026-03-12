@@ -273,6 +273,7 @@ const ResumeEngine: React.FC<ResumeEngineProps> = () => {
                           </Badge>
                         ))}
                       </div>
+                    </div>
                   )}
 
                   {/* Improvements */}
