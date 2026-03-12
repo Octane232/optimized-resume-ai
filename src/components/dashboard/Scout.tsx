@@ -135,14 +135,32 @@ const Scout: React.FC = () => {
           </div>
         </div>
         
-        <Button 
-          onClick={handleScan} 
-          disabled={scanning}
-          className="gap-2"
-        >
-          <RefreshCw className={`w-4 h-4 ${scanning ? 'animate-spin' : ''}`} />
-          {scanning ? 'Scanning...' : 'Scan Now'}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={async () => {
+              const { data: { session } } = await supabase.auth.getSession();
+              if (!session) return;
+              await supabase.functions.invoke('radar-mark-read', {
+                body: { markAllRead: true },
+                headers: { Authorization: `Bearer ${session.access_token}` }
+              });
+              await fetchData();
+              toast({ title: "All caught up", description: "All alerts marked as read." });
+            }}
+          >
+            Mark All Read
+          </Button>
+          <Button 
+            onClick={handleScan} 
+            disabled={scanning}
+            className="gap-2"
+          >
+            <RefreshCw className={`w-4 h-4 ${scanning ? 'animate-spin' : ''}`} />
+            {scanning ? 'Scanning...' : 'Scan Now'}
+          </Button>
+        </div>
       </motion.div>
 
       {/* Explainer Banner */}
@@ -341,6 +359,19 @@ const Scout: React.FC = () => {
                             ))}
                           </div>
                         )}
+
+                        {/* View Article Button */}
+                        <div className="mt-3">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-2"
+                            onClick={() => window.open(s.source_url, '_blank')}
+                          >
+                            <ArrowUpRight className="w-3.5 h-3.5" />
+                            View Article
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </CardContent>

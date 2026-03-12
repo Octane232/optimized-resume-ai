@@ -22,6 +22,7 @@ interface BundleResult {
   atsData: {
     beforeScore: number;
     afterScore: number;
+    foundKeywords: string[];
     missingKeywords: string[];
     improvements: string[];
   };
@@ -252,6 +253,23 @@ const ResumeEngine: React.FC<ResumeEngineProps> = () => {
                         {result.atsData.missingKeywords.map((kw, i) => (
                           <Badge key={i} variant="outline" className="bg-amber-500/5 text-amber-600 border-amber-500/20">
                             {kw}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Found Keywords */}
+                  {result.atsData.foundKeywords?.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                        Keywords Already Present
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {result.atsData.foundKeywords.map((kw: string, i: number) => (
+                          <Badge key={i} variant="outline" className="bg-emerald-500/5 text-emerald-600 border-emerald-500/20">
+                            ✓ {kw}
                           </Badge>
                         ))}
                       </div>

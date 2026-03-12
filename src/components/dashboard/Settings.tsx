@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { User, Lock, Bell, Shield, Trash2, Settings as SettingsIcon, Target } from 'lucide-react';
+import { User, Lock, Bell, Shield, Trash2, Settings as SettingsIcon, Target, Telescope } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -26,6 +26,8 @@ const Settings = () => {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [careerPrefs, setCareerPrefs] = useState({ targetRole: '', targetIndustry: '' });
+  const [savingPrefs, setSavingPrefs] = useState(false);
 
   useEffect(() => {
     fetchSettingsData();
@@ -61,6 +63,11 @@ const Settings = () => {
           ...prev,
           email: user.email || ''
         }));
+      }
+
+      const { data: prefs } = await supabase.from('career_preferences').select('target_role, target_industry').eq('user_id', user.id).maybeSingle();
+      if (prefs) {
+        setCareerPrefs({ targetRole: prefs.target_role || '', targetIndustry: prefs.target_industry || '' });
       }
     } catch (error) {
       console.error('Error fetching settings data:', error);
@@ -134,6 +141,24 @@ const Settings = () => {
       });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const saveCareerPrefs = async () => {
+    setSavingPrefs(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await supabase.from('career_preferences').upsert({
+        user_id: user.id,
+        target_role: careerPrefs.targetRole,
+        target_industry: careerPrefs.targetIndustry,
+      }, { onConflict: 'user_id' });
+      toast({ title: 'Saved!', description: 'Your job preferences have been updated. The radar will use these on the next scan.' });
+    } catch (err) {
+      toast({ title: 'Error', description: 'Could not save preferences.', variant: 'destructive' });
+    } finally {
+      setSavingPrefs(false);
     }
   };
 
@@ -320,6 +345,48 @@ const Settings = () => {
                 className="rounded-xl"
               >
                 Cancel
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Job Preferences */}
+        <Card className="glass-morphism border border-border/50 shadow-xl rounded-2xl">
+          <CardHeader className="border-b border-border/60">
+            <CardTitle className="flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-xl">
+                <Telescope className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-foreground">Job Preferences</h2>
+                <p className="text-sm text-muted-foreground font-normal">Set these so the Job Radar can match you with relevant funding signals.</p>
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-2">Target Role</label>
+                <Input
+                  placeholder="e.g. Product Manager"
+                  value={careerPrefs.targetRole}
+                  onChange={(e) => setCareerPrefs(prev => ({ ...prev, targetRole: e.target.value }))}
+                  className="bg-muted/30"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-2">Target Industry</label>
+                <Input
+                  placeholder="e.g. Fintech"
+                  value={careerPrefs.targetIndustry}
+                  onChange={(e) => setCareerPrefs(prev => ({ ...prev, targetIndustry: e.target.value }))}
+                  className="bg-muted/30"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <Button onClick={saveCareerPrefs} disabled={savingPrefs} className="bg-primary hover:bg-primary/90 font-semibold rounded-xl">
+                {savingPrefs ? 'Saving...' : 'Save Preferences'}
               </Button>
             </div>
           </CardContent>
