@@ -350,6 +350,48 @@ const Settings = () => {
           </CardContent>
         </Card>
 
+        {/* Job Preferences */}
+        <Card className="glass-morphism border border-border/50 shadow-xl rounded-2xl">
+          <CardHeader className="border-b border-border/60">
+            <CardTitle className="flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-xl">
+                <Telescope className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-foreground">Job Preferences</h2>
+                <p className="text-sm text-muted-foreground font-normal">Set these so the Job Radar can match you with relevant funding signals.</p>
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-2">Target Role</label>
+                <Input
+                  placeholder="e.g. Product Manager"
+                  value={careerPrefs.targetRole}
+                  onChange={(e) => setCareerPrefs(prev => ({ ...prev, targetRole: e.target.value }))}
+                  className="bg-muted/30"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-2">Target Industry</label>
+                <Input
+                  placeholder="e.g. Fintech"
+                  value={careerPrefs.targetIndustry}
+                  onChange={(e) => setCareerPrefs(prev => ({ ...prev, targetIndustry: e.target.value }))}
+                  className="bg-muted/30"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <Button onClick={saveCareerPrefs} disabled={savingPrefs} className="bg-primary hover:bg-primary/90 font-semibold rounded-xl">
+                {savingPrefs ? 'Saving...' : 'Save Preferences'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Notifications */}
         <Card className="glass-morphism border border-border/50 shadow-xl rounded-2xl">
           <CardHeader className="border-b border-border/60">

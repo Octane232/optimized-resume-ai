@@ -359,6 +359,19 @@ const Scout: React.FC = () => {
                             ))}
                           </div>
                         )}
+
+                        {/* View Article Button */}
+                        <div className="mt-3">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-2"
+                            onClick={() => window.open(s.source_url, '_blank')}
+                          >
+                            <ArrowUpRight className="w-3.5 h-3.5" />
+                            View Article
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
