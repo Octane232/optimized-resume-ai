@@ -44,7 +44,7 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
   // Navigation structure per document spec
   const intelligenceItems = [
     { id: 'scout', label: 'Job Radar 🔭', icon: Telescope },
-    { id: 'salary-intel', label: 'Salary Intel 💰', icon: DollarSign, comingSoon: true },
+    { id: 'salary-intel', label: 'Salary Intel 💰', icon: DollarSign },
     { id: 'network', label: 'Network 🌐', icon: Globe, comingSoon: true },
   ];
 

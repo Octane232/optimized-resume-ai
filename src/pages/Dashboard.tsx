@@ -161,6 +161,8 @@ const Dashboard = () => {
         return <HunterDashboard setActiveTab={setActiveTab} />;
       case 'scout':
         return <Scout />;
+      case 'salary-intel':
+        return <SalaryIntel />;
       case 'resume-engine':
         return <ResumeEngine setActiveTab={setActiveTab} hasResume={hasResume} />;
       case 'interview-prep':
