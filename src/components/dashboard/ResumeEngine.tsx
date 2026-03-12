@@ -22,6 +22,7 @@ interface BundleResult {
   atsData: {
     beforeScore: number;
     afterScore: number;
+    foundKeywords: string[];
     missingKeywords: string[];
     improvements: string[];
   };
