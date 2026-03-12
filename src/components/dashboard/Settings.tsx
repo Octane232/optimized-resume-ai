@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { User, Lock, Bell, Shield, Trash2, Settings as SettingsIcon, Target } from 'lucide-react';
+import { User, Lock, Bell, Shield, Trash2, Settings as SettingsIcon, Target, Telescope } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 
