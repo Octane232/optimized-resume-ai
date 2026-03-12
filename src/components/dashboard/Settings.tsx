@@ -26,6 +26,8 @@ const Settings = () => {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [careerPrefs, setCareerPrefs] = useState({ targetRole: '', targetIndustry: '' });
+  const [savingPrefs, setSavingPrefs] = useState(false);
 
   useEffect(() => {
     fetchSettingsData();
