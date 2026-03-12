@@ -64,6 +64,11 @@ const Settings = () => {
           email: user.email || ''
         }));
       }
+
+      const { data: prefs } = await supabase.from('career_preferences').select('target_role, target_industry').eq('user_id', user.id).maybeSingle();
+      if (prefs) {
+        setCareerPrefs({ targetRole: prefs.target_role || '', targetIndustry: prefs.target_industry || '' });
+      }
     } catch (error) {
       console.error('Error fetching settings data:', error);
       toast({
