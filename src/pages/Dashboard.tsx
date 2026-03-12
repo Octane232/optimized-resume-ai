@@ -14,6 +14,7 @@ import Scout from '@/components/dashboard/Scout';
 import InterviewPrep from '@/components/dashboard/InterviewPrep';
 import { SkillGapAnalyzer } from '@/components/dashboard/SkillGapAnalyzer';
 import LinkedInOptimizer from '@/components/dashboard/LinkedInOptimizer';
+import SalaryIntel from '@/components/dashboard/SalaryIntel';
 import WalkthroughGuide from '@/components/dashboard/WalkthroughGuide';
 import {
   DropdownMenu,
