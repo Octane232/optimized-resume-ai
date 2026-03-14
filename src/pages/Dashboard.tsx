@@ -129,9 +129,7 @@ navigate('/auth');
 } finally {
 setLoading(false);
 }
-```
 
-};
 
 const handleWalkthroughComplete = async () => {
 setShowWalkthrough(false);
