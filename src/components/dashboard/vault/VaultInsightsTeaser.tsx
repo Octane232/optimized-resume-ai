@@ -28,22 +28,16 @@ const VaultInsightsTeaser = () => {
 
       const userSkills = vault?.skills || [];
 
-      // Fetch trending job skills from scouted_jobs
-      const { data: jobs } = await supabase
-        .from('scouted_jobs')
-        .select('skills')
-        .eq('is_active', true)
-        .limit(20);
+      // Fetch skill gaps from the user's analyses
+      const { data: skillGaps } = await supabase
+        .from('skill_gaps')
+        .select('missing_skills')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
-      // Calculate skills gap
-      const allJobSkills = new Set<string>();
-      jobs?.forEach(job => {
-        (job.skills || []).forEach((skill: string) => allJobSkills.add(skill.toLowerCase()));
-      });
-      
-      const userSkillsLower = userSkills.map((s: string) => s.toLowerCase());
-      const missingSkills = [...allJobSkills].filter(skill => !userSkillsLower.includes(skill));
-      const skillsGap = Math.min(missingSkills.length, 10);
+      const missingSkillsCount = skillGaps?.missing_skills?.length || 0;
 
       // Calculate market value based on skills count and certifications
       const { data: certData } = await supabase
@@ -74,11 +68,10 @@ const VaultInsightsTeaser = () => {
       else if (userSkills.length > 0) completenessScore += 10;
       if (certCount > 0) completenessScore += 20;
       
-      // Convert to percentile rank (higher completeness = better rank)
       const profileRank = Math.max(5, 100 - Math.round(completenessScore * 0.8));
 
       setInsights({
-        skillsGap,
+        skillsGap: missingSkillsCount,
         marketValue,
         profileRank
       });
