@@ -166,7 +166,7 @@ const Dashboard = () => {
       case 'resume-engine':
         return <ResumeEngine setActiveTab={setActiveTab} hasResume={hasResume} />;
       case 'interview-prep':
-        return <InterviewPrep />;
+        return <InterviewPrep setActiveTab={setActiveTab} />;
       case 'skill-gap':
         return <SkillGapAnalyzer />;
       case 'linkedin':
