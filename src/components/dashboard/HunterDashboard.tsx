@@ -88,38 +88,24 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data } = await supabase
-        .from('scouted_jobs')
-        .select('*')
-        .eq('is_active', true)
-        .limit(3)
-        .order('created_at', { ascending: false });
-      
-      if (data && data.length > 0) {
+      // Fetch from radar_alerts instead of scouted_jobs
+      const { data: alerts } = await supabase
+        .from('radar_alerts')
+        .select('match_score, radar_signals(company_name, likely_roles, source_url)')
+        .eq('user_id', user.id)
+        .eq('is_read', false)
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+      if (alerts && alerts.length > 0) {
         const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500'];
-        const { data: vaultData } = await supabase
-          .from('user_vault')
-          .select('skills')
-          .eq('user_id', user.id)
-          .maybeSingle();
-        
-        const userSkills = (vaultData?.skills || []).map((s: string) => s.toLowerCase());
-        
-        setScoutJobs(data.map((job, i) => {
-          const jobSkills = (job.skills || []).map((s: string) => s.toLowerCase());
-          const matchingSkills = jobSkills.filter((s: string) => userSkills.includes(s));
-          const matchScore = jobSkills.length > 0 
-            ? Math.round((matchingSkills.length / jobSkills.length) * 100)
-            : 75;
-          
-          return {
-            company: job.company_name || 'Unknown',
-            role: job.job_title || 'Position',
-            match: Math.max(matchScore, 60),
-            color: colors[i % colors.length],
-            url: job.job_url
-          };
-        }));
+        setScoutJobs(alerts.map((alert: any, i: number) => ({
+          company: alert.radar_signals?.company_name || 'Unknown',
+          role: alert.radar_signals?.likely_roles?.[0] || 'Position',
+          match: alert.match_score || 75,
+          color: colors[i % colors.length],
+          url: alert.radar_signals?.source_url
+        })));
       }
 
       const { data: applications } = await supabase
