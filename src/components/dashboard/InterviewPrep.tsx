@@ -51,7 +51,6 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
   const { toast } = useToast();
   const { balance, spendCredit } = useCredits();
   const { tier } = useSubscription();
-  const isPro = tier === 'pro' || tier === 'premium';
 
   const [tab, setTab] = useState<Tab>('practice');
   const [stage, setStage] = useState<Stage>('setup');
@@ -326,9 +325,9 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
   const scoreGrad = (s: number) => s >= 8 ? 'from-emerald-500 to-teal-500' : s >= 6 ? 'from-amber-500 to-orange-400' : 'from-red-500 to-rose-500';
   const scoreLabel = (s: number) => s >= 8 ? 'Excellent' : s >= 6 ? 'Good' : s >= 4 ? 'Needs Work' : 'Keep Practicing';
 
-  const TABS: { id: Tab; label: string; icon: React.FC<any>; pro?: boolean }[] = [
+  const TABS: { id: Tab; label: string; icon: React.FC<any> }[] = [
     { id: 'practice', label: 'Practice', icon: Brain },
-    { id: 'live', label: 'Live Mode', icon: Radio, pro: true },
+    { id: 'live', label: 'Live Mode', icon: Radio },
     { id: 'tips', label: 'Tips', icon: BookOpen },
     { id: 'history', label: 'History', icon: BarChart3 },
   ];
@@ -371,7 +370,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
 
       {/* Tab Bar */}
       <div className="inline-flex gap-0.5 p-1 rounded-xl bg-muted/60 border border-border/50">
-        {TABS.map(({ id, label, icon: Icon, pro }) => (
+        {TABS.map(({ id, label, icon: Icon }) => (
           <button 
             key={id} 
             onClick={() => setTab(id)}
@@ -380,7 +379,6 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
           >
             <Icon className="w-3.5 h-3.5 shrink-0" />
             <span>{label}</span>
-            {pro && <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-amber-500/15 text-amber-600 border border-amber-500/20 leading-none">PRO</span>}
             {id === 'history' && sessions.length > 0 && (
               <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-primary text-[8px] font-bold text-primary-foreground flex items-center justify-center">
                 {sessions.length > 9 ? '9+' : sessions.length}
@@ -687,31 +685,10 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
           </motion.div>
         )}
 
-        {/* LIVE MODE */}
+        {/* LIVE MODE - Now available to all users */}
         {tab === 'live' && (
           <motion.div key="live" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}>
-            {!isPro ? (
-              <Card className="border border-amber-500/20 overflow-hidden">
-                <div className="h-px bg-gradient-to-r from-amber-500 to-orange-500" />
-                <CardContent className="p-8 text-center">
-                  <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto mb-4">
-                    <Lock className="w-6 h-6 text-amber-500" />
-                  </div>
-                  <p className="text-[10px] font-bold text-amber-600 uppercase tracking-widest mb-2">Pro Feature</p>
-                  <h2 className="text-2xl font-bold text-foreground mb-2">Live Interview Copilot</h2>
-                  <p className="text-sm text-muted-foreground max-w-sm mx-auto mb-2 leading-relaxed">
-                    Open this during your actual video call. Type each question as the interviewer asks it. Get instant answer guidance in under 3 seconds.
-                  </p>
-                  <p className="text-xs text-muted-foreground/50 mb-6">Competitors charge $96–299/month just for this feature.</p>
-                  <Button 
-                    onClick={() => setActiveTab?.('billing')}
-                    className="gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white border-0"
-                  >
-                    <Zap className="w-4 h-4" />Upgrade to Pro — $29/month
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : !liveActive ? (
+            {!liveActive ? (
               <div className="grid md:grid-cols-5 gap-4">
                 <div className="md:col-span-3">
                   <Card className="border border-border/60 shadow-sm overflow-hidden">
