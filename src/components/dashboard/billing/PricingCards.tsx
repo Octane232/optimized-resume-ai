@@ -1,77 +1,76 @@
-import { Check, X, Star, Shield, Sparkles, Crown, Zap, Loader2 } from ‘lucide-react’;
-import { Button } from ‘@/components/ui/button’;
-import { Badge } from ‘@/components/ui/badge’;
-import { useSubscription } from ‘@/contexts/SubscriptionContext’;
-import { supabase } from ‘@/integrations/supabase/client’;
-import { useToast } from ‘@/hooks/use-toast’;
-import { useState } from ‘react’;
+import { Check, X, Star, Shield, Sparkles, Crown, Zap, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { useSubscription } from '@/contexts/SubscriptionContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
 
 const PricingCards = () => {
 const { tier } = useSubscription();
 const { toast } = useToast();
-const [billingCycle, setBillingCycle] = useState<‘monthly’ | ‘yearly’>(‘monthly’);
+const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
 const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
 const plans = [
 {
-id: ‘starter’ as const,
-label: ‘Starter’,
-monthlyPrice: ‘$12’,
-yearlyPrice: ‘$115’,
-period: billingCycle === ‘monthly’ ? ‘/month’ : ‘/year’,
-description: ‘Everything you need to get hired.’,
+id: 'starter' as const,
+label: 'Starter',
+monthlyPrice: '$12',
+yearlyPrice: '$115',
+period: billingCycle === 'monthly' ? '/month' : '/year',
+description: 'Everything you need to get hired.',
 icon: Sparkles,
 popular: false,
 features: [
-‘ATS Resume Scanner & Rewriter’,
-‘Cover Letter Generator’,
-‘Interview Coach — Practice Mode’,
-‘Job Radar (20 alerts/month)’,
-‘Application Tracker’,
-‘LinkedIn Optimizer’,
-‘Skill Gap Analyzer’,
-‘50 AI credits/month’,
-‘Email support’,
+'ATS Resume Scanner & Rewriter',
+'Cover Letter Generator',
+'Interview Coach — Practice Mode',
+'Job Radar (20 alerts/month)',
+'Application Tracker',
+'LinkedIn Optimizer',
+'Skill Gap Analyzer',
+'50 AI credits/month',
+'Email support',
 ],
 locked: [],
 },
 {
-id: ‘pro’ as const,
-label: ‘Pro’,
-monthlyPrice: ‘$29’,
-yearlyPrice: ‘$278’,
-period: billingCycle === ‘monthly’ ? ‘/month’ : ‘/year’,
-description: ‘Everything in Starter plus premium features.’,
+id: 'pro' as const,
+label: 'Pro',
+monthlyPrice: '$29',
+yearlyPrice: '$278',
+period: billingCycle === 'monthly' ? '/month' : '/year',
+description: 'Everything in Starter plus premium features.',
 icon: Crown,
 popular: true,
 features: [
-‘Everything in Starter’,
-‘Live Interview Copilot’,
-‘Unlimited radar alerts’,
-‘Salary Intelligence’,
-‘Priority AI processing’,
-‘100 AI credits/month’,
-‘Early access to new features’,
-‘Priority support’,
+'Everything in Starter',
+'Live Interview Copilot',
+'Unlimited radar alerts',
+'Salary Intelligence',
+'Priority AI processing',
+'100 AI credits/month',
+'Early access to new features',
+'Priority support',
 ],
 locked: [],
 },
 ];
 
-const handleUpgrade = async (planId: ‘starter’ | ‘pro’) => {
+const handleUpgrade = async (planId: 'starter' | 'pro') => {
 setLoadingPlan(planId);
 try {
 const { data: { session } } = await supabase.auth.getSession();
 if (!session) {
 toast({
-title: ‘Sign in required’,
-description: ‘Please sign in to upgrade your plan.’,
-variant: ‘destructive’,
+title: 'Sign in required',
+description: 'Please sign in to upgrade your plan.',
+variant: 'destructive',
 });
 return;
 }
 
-```
 const { data, error } = await supabase.functions.invoke('stripe-checkout', {
 body: { plan: planId, billing: billingCycle },
 });
@@ -92,17 +91,15 @@ variant: 'destructive',
 } finally {
 setLoadingPlan(null);
 }
-```
-
 };
 
 const getPrice = (plan: typeof plans[0]) =>
-billingCycle === ‘monthly’ ? plan.monthlyPrice : plan.yearlyPrice;
+billingCycle === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice;
 
 const getSavings = (plan: typeof plans[0]) => {
-if (billingCycle !== ‘yearly’) return null;
-const monthly = parseInt(plan.monthlyPrice.replace(’$’, ‘’));
-const yearly = parseInt(plan.yearlyPrice.replace(’$’, ‘’));
+if (billingCycle !== 'yearly') return null;
+const monthly = parseInt(plan.monthlyPrice.replace('$', ''));
+const yearly = parseInt(plan.yearlyPrice.replace('$', ''));
 const saved = (monthly * 12) - yearly;
 return `Save $${saved}`;
 };
@@ -113,13 +110,13 @@ return (
 <div className="flex justify-center">
 <div className="bg-muted/50 rounded-full p-1 border border-border/60 flex gap-1">
 <button
-onClick={() => setBillingCycle(‘monthly’)}
+onClick={() => setBillingCycle('monthly')}
 className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${ billingCycle === 'monthly' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground' }`}
 >
 Monthly
 </button>
 <button
-onClick={() => setBillingCycle(‘yearly’)}
+onClick={() => setBillingCycle('yearly')}
 className={`px-5 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${ billingCycle === 'yearly' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground' }`}
 >
 Yearly
@@ -130,7 +127,6 @@ Save 20%
 </div>
 </div>
 
-```
 {/* Cards */}
 <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
 {plans.map((plan) => {
@@ -225,8 +221,6 @@ onClick={() => !isCurrent && handleUpgrade(plan.id)}
 14-day free trial. Cancel anytime. No questions asked.
 </p>
 </div>
-```
-
 );
 };
 
