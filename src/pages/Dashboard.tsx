@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import NewSidebar from '@/components/dashboard/NewSidebar';
 import MobileNav from '@/components/dashboard/MobileNav';
 import SoraSidecar from '@/components/dashboard/SoraSidecar';
@@ -37,6 +39,9 @@ import {
 } from 'lucide-react';
 
 const Dashboard = () => {
+  const { toast } = useToast();
+  const { refresh: refreshSubscription } = useSubscription();
+
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem('dashboard-active-tab') || 'briefing';
   });
@@ -51,6 +56,34 @@ const Dashboard = () => {
   const [userInitials, setUserInitials] = useState<string>('U');
   const [unreadAlerts, setUnreadAlerts] = useState(0);
   const navigate = useNavigate();
+
+  // Handle Stripe redirect back to dashboard
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const upgradeStatus = params.get('upgrade');
+
+    if (upgradeStatus === 'success') {
+      toast({
+        title: '🎉 Payment successful!',
+        description: 'Your account is being upgraded. This may take a few seconds.',
+      });
+
+      // Clean URL
+      window.history.replaceState({}, '', '/dashboard');
+
+      // Refresh subscription after webhook processes — try multiple times
+      setTimeout(() => refreshSubscription(), 2000);
+      setTimeout(() => refreshSubscription(), 5000);
+      setTimeout(() => refreshSubscription(), 10000);
+
+    } else if (upgradeStatus === 'cancelled') {
+      toast({
+        title: 'Checkout cancelled',
+        description: 'No charge was made. You can upgrade anytime from Billing.',
+      });
+      window.history.replaceState({}, '', '/dashboard');
+    }
+  }, []);
 
   useEffect(() => {
     checkAuth();
@@ -155,7 +188,7 @@ const Dashboard = () => {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-muted-foreground text-sm">Loading your command center...</p>
+          <p className="text-muted-foreground text-sm">Loading your command center…</p>
         </div>
       </div>
     );
