@@ -10,8 +10,9 @@ import ScrollToTop from "./components/ScrollToTop";
 import ScrollToSection from "./components/ScrollToSection";
 import { SubscriptionProvider } from "./contexts/SubscriptionContext";
 import { UsageLimitProvider } from "./contexts/UsageLimitContext";
+import { CreditsProvider } from "./contexts/CreditsContext";
 
-// Lazy-loaded pages
+// ===== Lazy-loaded Pages =====
 const Index = lazy(() => import("./pages/Index"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const ResumeBuilder = lazy(() => import("./pages/ResumeBuilder"));
@@ -33,82 +34,85 @@ const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
 const Documentation = lazy(() => import("./pages/Documentation"));
 const Roadmap = lazy(() => import("./pages/Roadmap"));
 
-// Loading fallback component
+// ===== Loading Fallback =====
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen">
     <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
   </div>
 );
 
-// Query Client
+// ===== Query Client =====
 const queryClient = new QueryClient();
 
+// ===== Main App Component =====
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
       <TooltipProvider>
         <SubscriptionProvider>
           <UsageLimitProvider>
-            {/* Toast Notifications */}
-            <Toaster />
-            <Sonner />
+            <CreditsProvider>
+              {/* Toast Notifications */}
+              <Toaster />
+              <Sonner />
 
-            {/* Router */}
-            <BrowserRouter>
-              <ScrollToTop />
-              <ScrollToSection />
+              {/* Router */}
+              <BrowserRouter>
+                <ScrollToTop />
+                <ScrollToSection />
 
-              {/* Lazy Loading Boundary */}
-              <Suspense fallback={<LoadingFallback />}>
-                <Routes>
-                  {/* Marketing Pages */}
-                  <Route path="/" element={<Index />} />
-                  <Route path="/features" element={<Index />} />
-                  <Route path="/pricing" element={<Index />} />
-                  <Route path="/enterprise" element={<Index />} />
-                  <Route path="/resources" element={<Index />} />
+                {/* Lazy Loading Boundary */}
+                <Suspense fallback={<LoadingFallback />}>
+                  <Routes>
+                    {/* Marketing Pages */}
+                    <Route path="/" element={<Index />} />
+                    <Route path="/features" element={<Index />} />
+                    <Route path="/pricing" element={<Index />} />
+                    <Route path="/enterprise" element={<Index />} />
+                    <Route path="/resources" element={<Index />} />
 
-                  {/* Authentication */}
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/reset-password" element={<ResetPassword />} />
+                    {/* Authentication */}
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
 
-                  {/* Dashboard & Core Features */}
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/resume-builder" element={<ResumeBuilder />} />
-                  <Route path="/ai-features" element={<AIFeatures />} />
-                  <Route path="/analytics" element={<Analytics />} />
+                    {/* Dashboard & Core Features */}
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/resume-builder" element={<ResumeBuilder />} />
+                    <Route path="/ai-features" element={<AIFeatures />} />
+                    <Route path="/analytics" element={<Analytics />} />
 
-                  {/* Resume Editor Routes */}
-                  <Route path="/editor/new" element={<ResumeEditor />} />
-                  <Route path="/editor/:resumeId" element={<ResumeEditor />} />
-                  <Route path="/resume-editor" element={<ResumeEditor />} />
+                    {/* Resume Editor Routes */}
+                    <Route path="/editor/new" element={<ResumeEditor />} />
+                    <Route path="/editor/:resumeId" element={<ResumeEditor />} />
+                    <Route path="/resume-editor" element={<ResumeEditor />} />
 
-                  {/* Audience Pages */}
-                  <Route path="/for-individuals" element={<ForIndividuals />} />
-                  <Route path="/for-students" element={<ForStudents />} />
+                    {/* Audience Pages */}
+                    <Route path="/for-individuals" element={<ForIndividuals />} />
+                    <Route path="/for-students" element={<ForStudents />} />
 
-                  {/* Company Pages */}
-                  <Route path="/about-us" element={<AboutUs />} />
-                  <Route path="/contact" element={<Contact />} />
+                    {/* Company Pages */}
+                    <Route path="/about-us" element={<AboutUs />} />
+                    <Route path="/contact" element={<Contact />} />
 
-                  {/* Legal Pages */}
-                  <Route path="/terms" element={<TermsOfService />} />
-                  <Route path="/privacy" element={<PrivacyPolicy />} />
-                  <Route path="/cookie-policy" element={<CookiePolicy />} />
+                    {/* Legal Pages */}
+                    <Route path="/terms" element={<TermsOfService />} />
+                    <Route path="/privacy" element={<PrivacyPolicy />} />
+                    <Route path="/cookie-policy" element={<CookiePolicy />} />
 
-                  {/* Resources */}
-                  <Route path="/documentation" element={<Documentation />} />
-                  <Route path="/roadmap" element={<Roadmap />} />
+                    {/* Resources */}
+                    <Route path="/documentation" element={<Documentation />} />
+                    <Route path="/roadmap" element={<Roadmap />} />
 
-                  {/* Affiliate Program */}
-                  <Route path="/affiliate-program" element={<AffiliateProgram />} />
-                  <Route path="/affiliate-dashboard" element={<AffiliateDashboard />} />
+                    {/* Affiliate Program */}
+                    <Route path="/affiliate-program" element={<AffiliateProgram />} />
+                    <Route path="/affiliate-dashboard" element={<AffiliateDashboard />} />
 
-                  {/* 404 - Catch All */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-            </BrowserRouter>
+                    {/* 404 - Catch All */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
+              </BrowserRouter>
+            </CreditsProvider>
           </UsageLimitProvider>
         </SubscriptionProvider>
       </TooltipProvider>
