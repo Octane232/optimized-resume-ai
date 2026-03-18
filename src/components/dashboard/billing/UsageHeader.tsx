@@ -1,45 +1,76 @@
-import { Zap } from 'lucide-react';
+import { Zap, ArrowRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { useCredits } from '@/contexts/CreditsContext';
+import { Button } from '@/components/ui/button';
 import { useSubscription } from '@/contexts/SubscriptionContext';
-import { TIER_FEATURES } from '@/lib/tierConfig';
-
-const UsageHeader = () => {
-  const { balance } = useCredits();
+import { useUsageLimit, UsageAction, ACTION_LABELS } from '@/contexts/UsageLimitContext';
+const TRACKED_ACTIONS: UsageAction[] = ['resume_ats', 'interview_prep', 'salary_intel', 'linkedin', 'skill_gap'];
+const UsageHeader = ({ setActiveTab }: { setActiveTab?: (tab: string) => void }) => {
   const { tier } = useSubscription();
-  const tierInfo = TIER_FEATURES[tier];
-  const maxCredits = tierInfo.credits === -1 ? '∞' : tierInfo.credits;
-  const isLow = tierInfo.credits !== -1 && balance <= 2;
-  const isEmpty = balance === 0 && tierInfo.credits !== -1;
-
-  const tierLabel = tier === 'free' ? 'Explorer' : tier === 'pro' ? 'Career Pro' : 'Career Elite';
-
+  const { getLimit, getRemaining } = useUsageLimit();
+  const tierLabel = tier === 'free' ? 'Free' : tier === 'starter' ? 'Starter' : 'Pro';
+  const tierColor = tier === 'free'
+    ? 'bg-muted text-muted-foreground border-border'
+    : tier === 'starter'
+    ? 'bg-primary/10 text-primary border-primary/20'
+    : 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20';
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 rounded-xl bg-card border border-border/60">
-      <div className="flex items-center gap-3">
-        <div className="p-2.5 rounded-xl bg-primary/10">
-          <Zap className="w-5 h-5 text-primary" />
+    <div className="rounded-xl border border-border/60 bg-card p-6 space-y-5">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-primary/10">
+            <Zap className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mb-0.5">Current Plan</p>
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-bold text-foreground">{tierLabel}</h3>
+              <Badge className={`text-xs border ${tierColor}`}>{tierLabel}</Badge>
+            </div>
+          </div>
         </div>
-        <div>
-          <p className="text-sm text-muted-foreground">Current Plan</p>
-          <h3 className="text-lg font-bold text-foreground">{tierLabel} {tier === 'free' && <span className="text-muted-foreground font-normal">(Free)</span>}</h3>
-        </div>
+        {tier === 'free' && setActiveTab && (
+          <Button size="sm" className="gap-1.5 font-semibold" onClick={() => setActiveTab('billing')}>
+            Upgrade <ArrowRight className="w-3.5 h-3.5" />
+          </Button>
+        )}
       </div>
-      <div className="flex items-center gap-2">
-        <Zap className={`w-4 h-4 ${isEmpty ? 'text-destructive' : isLow ? 'text-amber-500' : 'text-primary'}`} />
-        <span className={`text-lg font-bold ${isEmpty ? 'text-destructive' : isLow ? 'text-amber-500' : 'text-foreground'}`}>
-          {balance}/{maxCredits}
-        </span>
-        <span className="text-sm text-muted-foreground">AI Credits</span>
-        {isEmpty && (
-          <Badge variant="destructive" className="ml-2 text-xs">Empty</Badge>
-        )}
-        {isLow && !isEmpty && (
-          <Badge className="ml-2 text-xs bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-0">Low</Badge>
-        )}
+      <div className="space-y-3">
+        <p className="text-xs font-semibold text-foreground uppercase tracking-wide">
+          {tier === 'free' ? 'Lifetime Usage' : 'This Month'}
+        </p>
+        <div className="grid sm:grid-cols-2 gap-3">
+          {TRACKED_ACTIONS.map((action) => {
+            const limit = getLimit(action);
+            const remaining = getRemaining(action);
+            const used = limit - remaining;
+            const pct = limit > 0 ? Math.min((used / limit) * 100, 100) : 0;
+            const isEmpty = remaining === 0 && limit > 0;
+            const isLow = pct >= 70 && !isEmpty;
+            const isLocked = limit === 0;
+            return (
+              <div key={action} className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">{ACTION_LABELS[action]}</span>
+                  <span className={`text-xs font-semibold ${isEmpty ? 'text-destructive' : isLow ? 'text-amber-500' : 'text-foreground'}`}>
+                    {isLocked ? 'Locked' : `${used}/${limit}`}
+                  </span>
+                </div>
+                <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all ${
+                      isLocked ? 'bg-muted-foreground/20' :
+                      isEmpty ? 'bg-destructive' :
+                      isLow ? 'bg-amber-500' : 'bg-primary'
+                    }`}
+                    style={{ width: isLocked ? '0%' : `${pct}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
 };
-
 export default UsageHeader;
