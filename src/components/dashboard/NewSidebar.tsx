@@ -43,15 +43,15 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
 }) => {
   // Navigation structure per document spec
   const intelligenceItems = [
-    { id: 'scout', label: 'Job Radar 🔭', icon: Telescope },
-    { id: 'salary-intel', label: 'Salary Intel 💰', icon: DollarSign },
-    { id: 'network', label: 'Network 🌐', icon: Globe, comingSoon: true },
+    { id: 'scout', label: 'Job Radar ', icon: Telescope },
+    { id: 'salary-intel', label: 'Salary Intel ', icon: DollarSign },
+    { id: 'network', label: 'Network ', icon: Globe, comingSoon: true },
   ];
 
   const toolsItems = [
-    { id: 'resume-engine', label: 'Resume + ATS 📄', icon: Stethoscope },
-    { id: 'interview-prep', label: 'Interview Coach 🎤', icon: Mic },
-    { id: 'mission-control', label: 'App Tracker 📋', icon: Crosshair },
+    { id: 'resume-engine', label: 'Resume + ATS ', icon: Stethoscope },
+    { id: 'interview-prep', label: 'Interview Coach ', icon: Mic },
+    { id: 'mission-control', label: 'App Tracker ', icon: Crosshair },
     { id: 'linkedin', label: 'LinkedIn', icon: Sparkles },
     { id: 'skill-gap', label: 'Skill Gap', icon: TrendingUp },
   ];
