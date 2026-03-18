@@ -1,102 +1,124 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Menu, X, Sun, Moon, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useTheme } from 'next-themes';
+import { Menu, X } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
 
 const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const {
-    theme,
-    setTheme
-  } = useTheme();
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
-  };
-  const navItems = [{
-    label: 'How It Works',
-    href: '#how-it-works'
-  }, {
-    label: 'Features',
-    href: '#features'
-  }, {
-    label: 'Pricing',
-    href: '#pricing'
-  }];
-  const scrollToSection = (href: string) => {
-    if (href.startsWith('#')) {
-      const element = document.querySelector(href);
-      if (element) {
-        element.scrollIntoView({
-          behavior: 'smooth'
-        });
-      }
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // Handle scroll effect for header background
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+
+    window.addEventListener('scroll', onScroll);
+    
+    // Cleanup event listener on unmount
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // Smooth scroll to section and close mobile menu
+  const scrollTo = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
     }
-    setIsMenuOpen(false);
+    setMenuOpen(false);
   };
-  return <header className="fixed top-0 left-0 right-0 header-glass z-50 transition-all duration-300">
-      <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
-        <div className="flex items-center justify-between h-14">
+
+  // Navigation items
+  const navItems = [
+    { label: 'Features', id: 'features' },
+    { label: 'Pricing', id: 'pricing' },
+  ];
+
+  return (
+    <header
+      className={`
+        fixed top-0 left-0 right-0 z-50 transition-all duration-300
+        ${
+          scrolled
+            ? 'bg-background/95 backdrop-blur border-b border-border shadow-sm'
+            : 'bg-transparent'
+        }
+      `}
+    >
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-1.5">
-            
-            <span className="font-bold bg-gradient-to-r from-blue-500 to-orange-500 bg-clip-text text-transparent text-left text-3xl">
-              Vaylance
-            </span>
+          <Link to="/" className="font-bold text-xl text-foreground tracking-tight">
+            Vaylance
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            {navItems.map(item => <button key={item.label} onClick={() => scrollToSection(item.href)} className="text-foreground/70 hover:text-foreground transition-colors duration-200 font-semibold text-sm relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-primary after:transition-all">
+          <nav className="hidden md:flex items-center gap-8">
+            {navItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => scrollTo(item.id)}
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
                 {item.label}
-              </button>)}
+              </button>
+            ))}
           </nav>
 
           {/* Desktop Actions */}
-          <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" size="sm" onClick={toggleTheme} className="text-foreground/70 hover:text-foreground">
-              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          <div className="hidden md:flex items-center gap-3">
+            <Button asChild variant="ghost" size="sm" className="font-medium">
+              <Link to="/auth">Sign in</Link>
             </Button>
-            <Button asChild variant="ghost" size="sm" className="text-foreground/70 hover:text-foreground font-semibold">
-              <Link to="/auth">Sign In</Link>
-            </Button>
-            <Button asChild size="sm" className="saas-button font-bold">
-              <Link to="/auth" className="flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4" />
-                Get Started
-              </Link>
+            <Button asChild size="sm" className="font-semibold">
+              <Link to="/auth">Get started free</Link>
             </Button>
           </div>
 
-          <button className="md:hidden p-2 text-foreground hover:text-primary transition-colors" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle menu">
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          {/* Mobile Menu Button */}
+          <button
+            className="md:hidden p-2 text-foreground"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          >
+            {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
 
-        {/* Mobile Navigation */}
-        {isMenuOpen && <div className="md:hidden py-4 border-t border-border glass-card-strong">
-            <nav className="flex flex-col space-y-3">
-              {navItems.map(item => <button key={item.label} onClick={() => scrollToSection(item.href)} className="text-foreground/70 hover:text-foreground transition-colors duration-200 font-semibold text-sm py-2 text-left px-4">
-                  {item.label}
-                </button>)}
-              <div className="flex flex-col space-y-2 pt-4 border-t border-border px-4">
-                <Button variant="ghost" size="sm" onClick={toggleTheme} className="justify-start text-foreground/70 font-semibold">
-                  {theme === 'dark' ? <Sun size={18} className="mr-2" /> : <Moon size={18} className="mr-2" />}
-                  {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+        {/* Mobile Menu */}
+        {menuOpen && (
+          <div className="md:hidden py-4 border-t border-border bg-background">
+            <div className="flex flex-col gap-3 px-2">
+              {/* Mobile Navigation Items */}
+              <button
+                onClick={() => scrollTo('features')}
+                className="text-sm font-medium text-muted-foreground hover:text-foreground py-2 text-left"
+              >
+                Features
+              </button>
+              <button
+                onClick={() => scrollTo('pricing')}
+                className="text-sm font-medium text-muted-foreground hover:text-foreground py-2 text-left"
+              >
+                Pricing
+              </button>
+
+              {/* Mobile Actions */}
+              <div className="flex flex-col gap-2 pt-2 border-t border-border">
+                <Button asChild variant="outline" size="sm">
+                  <Link to="/auth">Sign in</Link>
                 </Button>
-                <Button asChild variant="ghost" size="sm" className="justify-start font-semibold">
-                  <Link to="/auth">Sign In</Link>
-                </Button>
-                <Button asChild size="sm" className="saas-button font-bold">
-                  <Link to="/auth" className="flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4" />
-                    Get Started
-                  </Link>
+                <Button asChild size="sm">
+                  <Link to="/auth">Get started free</Link>
                 </Button>
               </div>
-            </nav>
-          </div>}
+            </div>
+          </div>
+        )}
       </div>
-    </header>;
+    </header>
+  );
 };
+
 export default Header;
