@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Linkedin, 
-  Sparkles, 
-  Copy, 
-  Check, 
+import {
+  Linkedin,
+  Sparkles,
+  Copy,
+  Check,
   User,
   FileText,
   Target,
@@ -14,6 +14,7 @@ import {
   Trash2,
   Coins
 } from 'lucide-react';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -24,8 +25,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { motion } from 'framer-motion';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { useCredits } from '@/contexts/CreditsContext';
+import { useUsageLimit } from '@/contexts/UsageLimitContext';
 
+// ===== Type Definitions =====
 interface LinkedInOptimization {
   id: string;
   type: string;
@@ -35,8 +37,54 @@ interface LinkedInOptimization {
   created_at: string;
 }
 
+interface ChecklistItem {
+  label: string;
+  done: boolean;
+}
+
+// ===== Constants =====
+const OPTIMIZATION_TIPS = [
+  { 
+    icon: Target, 
+    title: 'Use Keywords', 
+    description: 'Include industry-specific terms recruiters search for' 
+  },
+  { 
+    icon: TrendingUp, 
+    title: 'Show Impact', 
+    description: 'Quantify achievements with numbers and percentages' 
+  },
+  { 
+    icon: Eye, 
+    title: 'Be Discoverable', 
+    description: 'Optimize headline for search visibility' 
+  },
+  { 
+    icon: User, 
+    title: 'Tell Your Story', 
+    description: 'Make your summary personal and engaging' 
+  },
+];
+
+// ===== Helper Functions =====
+const calculateProfileScore = (optimizations: LinkedInOptimization[]): number => {
+  let score = 50; // Base score
+  if (optimizations.some(o => o.type === 'headline')) score += 25;
+  if (optimizations.some(o => o.type === 'summary')) score += 25;
+  return Math.min(score, 100);
+};
+
+const getProfileBadge = (score: number): string => {
+  if (score >= 100) return 'All-Star';
+  if (score >= 75) return 'Expert';
+  return 'Intermediate';
+};
+
+// ===== Main Component =====
 const LinkedInOptimizer: React.FC = () => {
-  const { balance, spendCredit } = useCredits();
+  const { canUse, trackUsage } = useUsageLimit();
+
+  // ===== State =====
   const [activeTab, setActiveTab] = useState('headline');
   const [currentHeadline, setCurrentHeadline] = useState('');
   const [currentSummary, setCurrentSummary] = useState('');
@@ -47,10 +95,24 @@ const LinkedInOptimizer: React.FC = () => {
   const [recentOptimizations, setRecentOptimizations] = useState<LinkedInOptimization[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // ===== Derived Values =====
+  const profileScore = calculateProfileScore(recentOptimizations);
+  const profileBadge = getProfileBadge(profileScore);
+  
+  const checklistItems: ChecklistItem[] = [
+    { label: 'Optimized Headline', done: recentOptimizations.some(o => o.type === 'headline') },
+    { label: 'Compelling Summary', done: recentOptimizations.some(o => o.type === 'summary') },
+    { label: 'Professional Photo', done: false },
+    { label: 'Skills Added (10+)', done: false },
+    { label: 'Experience Detailed', done: false },
+  ];
+
+  // ===== Effects =====
   useEffect(() => {
     fetchRecentOptimizations();
   }, []);
 
+  // ===== Data Fetching =====
   const fetchRecentOptimizations = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -73,18 +135,11 @@ const LinkedInOptimizer: React.FC = () => {
     }
   };
 
-  const calculateProfileScore = () => {
-    let score = 50; // Base score
-    if (recentOptimizations.some(o => o.type === 'headline')) score += 25;
-    if (recentOptimizations.some(o => o.type === 'summary')) score += 25;
-    return Math.min(score, 100);
-  };
-
-  const profileScore = calculateProfileScore();
-
+  // ===== Event Handlers =====
   const handleOptimize = async () => {
     const currentContent = activeTab === 'headline' ? currentHeadline : currentSummary;
-    
+
+    // Validate input
     if (!currentContent.trim() && !targetRole.trim()) {
       toast({
         title: "Input needed",
@@ -95,13 +150,13 @@ const LinkedInOptimizer: React.FC = () => {
     }
 
     setIsOptimizing(true);
-    
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // Spend 1 credit
-      const credited = await spendCredit('linkedin_optimize', `LinkedIn ${activeTab} optimization`);
+      // Check and spend credit
+      const credited = await trackUsage('linkedin');
       if (!credited) {
         toast({
           title: "No credits remaining",
@@ -112,7 +167,7 @@ const LinkedInOptimizer: React.FC = () => {
         return;
       }
 
-      // Call AI edge function
+      // Call AI optimization function
       const { data: aiResult, error: aiError } = await supabase.functions.invoke('optimize-linkedin', {
         body: {
           type: activeTab,
@@ -141,8 +196,8 @@ const LinkedInOptimizer: React.FC = () => {
 
       if (error) throw error;
 
+      // Update state
       setOptimizedContent(newOptimizedContent);
-      
       if (newOptimization) {
         setRecentOptimizations([newOptimization, ...recentOptimizations.slice(0, 4)]);
       }
@@ -151,6 +206,7 @@ const LinkedInOptimizer: React.FC = () => {
         title: "Optimization complete!",
         description: "Your optimized content is ready to copy."
       });
+
     } catch (error) {
       console.error('Optimization error:', error);
       toast({
@@ -168,6 +224,7 @@ const LinkedInOptimizer: React.FC = () => {
       navigator.clipboard.writeText(optimizedContent);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+      
       toast({
         title: "Copied!",
         description: "Content copied to clipboard."
@@ -175,7 +232,7 @@ const LinkedInOptimizer: React.FC = () => {
     }
   };
 
-  const deleteOptimization = async (id: string) => {
+  const handleDeleteOptimization = async (id: string) => {
     try {
       const { error } = await supabase
         .from('linkedin_optimizations')
@@ -185,6 +242,7 @@ const LinkedInOptimizer: React.FC = () => {
       if (error) throw error;
 
       setRecentOptimizations(recentOptimizations.filter(o => o.id !== id));
+      
       toast({
         title: "Deleted",
         description: "Optimization removed."
@@ -194,308 +252,434 @@ const LinkedInOptimizer: React.FC = () => {
     }
   };
 
-  const useOptimization = (optimization: LinkedInOptimization) => {
+  const handleUseOptimization = (optimization: LinkedInOptimization) => {
     setOptimizedContent(optimization.optimized_content);
     setActiveTab(optimization.type);
+    
     if (optimization.target_role) {
       setTargetRole(optimization.target_role);
     }
   };
 
-  const optimizationTips = [
-    { icon: Target, title: 'Use Keywords', description: 'Include industry-specific terms recruiters search for' },
-    { icon: TrendingUp, title: 'Show Impact', description: 'Quantify achievements with numbers and percentages' },
-    { icon: Eye, title: 'Be Discoverable', description: 'Optimize headline for search visibility' },
-    { icon: User, title: 'Tell Your Story', description: 'Make your summary personal and engaging' },
-  ];
-
+  // ===== Render =====
   return (
     <div className="p-6 space-y-6 max-w-5xl mx-auto">
       {/* Header */}
-      <motion.div 
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between"
-      >
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-[#0A66C2] text-white">
-            <Linkedin className="w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">LinkedIn Optimizer</h1>
-            <p className="text-sm text-muted-foreground">AI-powered profile enhancement</p>
-          </div>
-        </div>
-      </motion.div>
+      <HeaderSection />
 
       {/* Profile Score Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-      >
-        <Card className="border-0 shadow-sm bg-gradient-to-r from-[#0A66C2]/5 to-[#0A66C2]/10">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="relative w-16 h-16">
-                  <svg className="w-16 h-16 transform -rotate-90">
-                    <circle
-                      cx="32"
-                      cy="32"
-                      r="28"
-                      stroke="currentColor"
-                      strokeWidth="6"
-                      fill="none"
-                      className="text-muted/20"
-                    />
-                    <circle
-                      cx="32"
-                      cy="32"
-                      r="28"
-                      stroke="currentColor"
-                      strokeWidth="6"
-                      fill="none"
-                      strokeDasharray={`${profileScore * 1.76} 176`}
-                      className="text-[#0A66C2]"
-                    />
-                  </svg>
-                  <span className="absolute inset-0 flex items-center justify-center text-lg font-bold">
-                    {profileScore}%
-                  </span>
-                </div>
-                <div>
-                  <h3 className="font-semibold">Profile Strength</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Optimize your headline and summary to reach 100%
-                  </p>
-                </div>
-              </div>
-              <Badge className="bg-[#0A66C2]/10 text-[#0A66C2] border-0">
-                {profileScore >= 100 ? 'All-Star' : profileScore >= 75 ? 'Expert' : 'Intermediate'}
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+      <ProfileScoreCard 
+        score={profileScore} 
+        badge={profileBadge} 
+      />
 
-      {/* Main Content */}
+      {/* Main Content Grid */}
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Optimizer Panel */}
-        <motion.div
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
-          className="lg:col-span-2"
-        >
-          <Card className="border-0 shadow-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-[#0A66C2]" />
-                AI Optimizer
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Target Role */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Target Role</label>
-                <Input 
-                  placeholder="e.g., Senior Product Manager, Full Stack Developer"
-                  value={targetRole}
-                  onChange={(e) => setTargetRole(e.target.value)}
-                />
-              </div>
+        <OptimizerPanel
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          targetRole={targetRole}
+          setTargetRole={setTargetRole}
+          currentHeadline={currentHeadline}
+          setCurrentHeadline={setCurrentHeadline}
+          currentSummary={currentSummary}
+          setCurrentSummary={setCurrentSummary}
+          isOptimizing={isOptimizing}
+          optimizedContent={optimizedContent}
+          copied={copied}
+          recentOptimizations={recentOptimizations}
+          canOptimize={canUse('linkedin')}
+          onOptimize={handleOptimize}
+          onCopy={handleCopy}
+          onUseOptimization={handleUseOptimization}
+          onDeleteOptimization={handleDeleteOptimization}
+        />
 
-              <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="w-full">
-                  <TabsTrigger value="headline" className="flex-1">Headline</TabsTrigger>
-                  <TabsTrigger value="summary" className="flex-1">Summary</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="headline" className="space-y-4 mt-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Current Headline</label>
-                    <Input 
-                      placeholder="Paste your current LinkedIn headline..."
-                      value={currentHeadline}
-                      onChange={(e) => setCurrentHeadline(e.target.value)}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Max 220 characters. Make it keyword-rich and compelling.
-                    </p>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="summary" className="space-y-4 mt-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Current Summary</label>
-                    <Textarea 
-                      placeholder="Paste your current LinkedIn summary..."
-                      value={currentSummary}
-                      onChange={(e) => setCurrentSummary(e.target.value)}
-                      rows={6}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Max 2,600 characters. Tell your professional story.
-                    </p>
-                  </div>
-                </TabsContent>
-              </Tabs>
-
-              <Button 
-                className="w-full gap-2 bg-[#0A66C2] hover:bg-[#004182]"
-                onClick={handleOptimize}
-                disabled={isOptimizing || balance <= 0}
-              >
-                {isOptimizing ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    Optimizing...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4" />
-                    Optimize with AI
-                    <span className="ml-1 inline-flex items-center gap-1 text-xs opacity-80">
-                      <Coins className="w-3 h-3" />1
-                    </span>
-                  </>
-                )}
-              </Button>
-
-              {/* Optimized Output */}
-              {optimizedContent && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="space-y-2"
-                >
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium text-[#0A66C2]">
-                      ✨ Optimized {activeTab === 'headline' ? 'Headline' : 'Summary'}
-                    </label>
-                    <Button 
-                      size="sm" 
-                      variant="ghost" 
-                      className="gap-1.5"
-                      onClick={handleCopy}
-                    >
-                      {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                      {copied ? 'Copied!' : 'Copy'}
-                    </Button>
-                  </div>
-                  <div className="p-4 rounded-xl bg-[#0A66C2]/5 border border-[#0A66C2]/20">
-                    <p className="text-sm whitespace-pre-wrap">{optimizedContent}</p>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Recent Optimizations */}
-              {recentOptimizations.length > 0 && (
-                <div className="pt-4 border-t border-border/50">
-                  <div className="flex items-center gap-2 mb-3">
-                    <History className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Recent Optimizations</span>
-                  </div>
-                  <div className="space-y-2">
-                    {recentOptimizations.map((opt) => (
-                      <div 
-                        key={opt.id} 
-                        className="flex items-center justify-between p-2 bg-muted/30 rounded-lg group"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="text-xs">
-                              {opt.type}
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(opt.created_at).toLocaleDateString()}
-                            </span>
-                          </div>
-                          <p className="text-xs text-muted-foreground truncate mt-1">
-                            {opt.optimized_content.slice(0, 60)}...
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button 
-                            size="sm" 
-                            variant="ghost" 
-                            className="h-7 px-2"
-                            onClick={() => useOptimization(opt)}
-                          >
-                            Use
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="ghost" 
-                            className="h-7 px-2 text-destructive"
-                            onClick={() => deleteOptimization(opt.id)}
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Tips Panel */}
-        <motion.div
-          initial={{ opacity: 0, x: 10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <Card className="border-0 shadow-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg">Optimization Tips</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {optimizationTips.map((tip, index) => (
-                <div key={index} className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-[#0A66C2]/10 shrink-0">
-                    <tip.icon className="w-4 h-4 text-[#0A66C2]" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-sm">{tip.title}</p>
-                    <p className="text-xs text-muted-foreground">{tip.description}</p>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          {/* Quick Stats */}
-          <Card className="border-0 shadow-sm mt-4">
-            <CardContent className="p-4 space-y-3">
-              <h4 className="font-medium text-sm">Profile Checklist</h4>
-                {[
-                  { label: 'Optimized Headline', done: recentOptimizations.some(o => o.type === 'headline') },
-                  { label: 'Compelling Summary', done: recentOptimizations.some(o => o.type === 'summary') },
-                  { label: 'Professional Photo', done: false },
-                  { label: 'Skills Added (10+)', done: false },
-                  { label: 'Experience Detailed', done: false },
-                ].map((item, i) => (
-                <div key={i} className="flex items-center justify-between text-sm">
-                  <span className={item.done ? 'text-foreground' : 'text-muted-foreground'}>
-                    {item.label}
-                  </span>
-                  {item.done ? (
-                    <Check className="w-4 h-4 text-emerald-500" />
-                  ) : (
-                    <div className="w-4 h-4 rounded-full border-2 border-muted" />
-                  )}
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </motion.div>
+        {/* Tips & Checklist Panel */}
+        <TipsPanel
+          checklistItems={checklistItems}
+        />
       </div>
     </div>
   );
 };
+
+// ===== Subcomponents =====
+
+const HeaderSection: React.FC = () => (
+  <motion.div
+    initial={{ opacity: 0, y: -10 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="flex items-center justify-between"
+  >
+    <div className="flex items-center gap-3">
+      <div className="p-2.5 rounded-xl bg-[#0A66C2] text-white">
+        <Linkedin className="w-6 h-6" />
+      </div>
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">LinkedIn Optimizer</h1>
+        <p className="text-sm text-muted-foreground">AI-powered profile enhancement</p>
+      </div>
+    </div>
+  </motion.div>
+);
+
+interface ProfileScoreCardProps {
+  score: number;
+  badge: string;
+}
+
+const ProfileScoreCard: React.FC<ProfileScoreCardProps> = ({ score, badge }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: 0.1 }}
+  >
+    <Card className="border-0 shadow-sm bg-gradient-to-r from-[#0A66C2]/5 to-[#0A66C2]/10">
+      <CardContent className="p-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            {/* Circular Progress */}
+            <div className="relative w-16 h-16">
+              <svg className="w-16 h-16 transform -rotate-90">
+                <circle
+                  cx="32"
+                  cy="32"
+                  r="28"
+                  stroke="currentColor"
+                  strokeWidth="6"
+                  fill="none"
+                  className="text-muted/20"
+                />
+                <circle
+                  cx="32"
+                  cy="32"
+                  r="28"
+                  stroke="currentColor"
+                  strokeWidth="6"
+                  fill="none"
+                  strokeDasharray={`${score * 1.76} 176`}
+                  className="text-[#0A66C2]"
+                />
+              </svg>
+              <span className="absolute inset-0 flex items-center justify-center text-lg font-bold">
+                {score}%
+              </span>
+            </div>
+
+            <div>
+              <h3 className="font-semibold">Profile Strength</h3>
+              <p className="text-sm text-muted-foreground">
+                Optimize your headline and summary to reach 100%
+              </p>
+            </div>
+          </div>
+
+          <Badge className="bg-[#0A66C2]/10 text-[#0A66C2] border-0">
+            {badge}
+          </Badge>
+        </div>
+      </CardContent>
+    </Card>
+  </motion.div>
+);
+
+interface OptimizerPanelProps {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+  targetRole: string;
+  setTargetRole: (role: string) => void;
+  currentHeadline: string;
+  setCurrentHeadline: (headline: string) => void;
+  currentSummary: string;
+  setCurrentSummary: (summary: string) => void;
+  isOptimizing: boolean;
+  optimizedContent: string | null;
+  copied: boolean;
+  recentOptimizations: LinkedInOptimization[];
+  canOptimize: boolean;
+  onOptimize: () => Promise<void>;
+  onCopy: () => void;
+  onUseOptimization: (opt: LinkedInOptimization) => void;
+  onDeleteOptimization: (id: string) => Promise<void>;
+}
+
+const OptimizerPanel: React.FC<OptimizerPanelProps> = ({
+  activeTab,
+  setActiveTab,
+  targetRole,
+  setTargetRole,
+  currentHeadline,
+  setCurrentHeadline,
+  currentSummary,
+  setCurrentSummary,
+  isOptimizing,
+  optimizedContent,
+  copied,
+  recentOptimizations,
+  canOptimize,
+  onOptimize,
+  onCopy,
+  onUseOptimization,
+  onDeleteOptimization,
+}) => (
+  <motion.div
+    initial={{ opacity: 0, x: -10 }}
+    animate={{ opacity: 1, x: 0 }}
+    transition={{ delay: 0.2 }}
+    className="lg:col-span-2"
+  >
+    <Card className="border-0 shadow-sm">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-lg flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-[#0A66C2]" />
+          AI Optimizer
+        </CardTitle>
+      </CardHeader>
+
+      <CardContent className="space-y-4">
+        {/* Target Role Input */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Target Role</label>
+          <Input
+            placeholder="e.g., Senior Product Manager, Full Stack Developer"
+            value={targetRole}
+            onChange={(e) => setTargetRole(e.target.value)}
+          />
+        </div>
+
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="w-full">
+            <TabsTrigger value="headline" className="flex-1">Headline</TabsTrigger>
+            <TabsTrigger value="summary" className="flex-1">Summary</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="headline" className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Current Headline</label>
+              <Input
+                placeholder="Paste your current LinkedIn headline..."
+                value={currentHeadline}
+                onChange={(e) => setCurrentHeadline(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Max 220 characters. Make it keyword-rich and compelling.
+              </p>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="summary" className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Current Summary</label>
+              <Textarea
+                placeholder="Paste your current LinkedIn summary..."
+                value={currentSummary}
+                onChange={(e) => setCurrentSummary(e.target.value)}
+                rows={6}
+              />
+              <p className="text-xs text-muted-foreground">
+                Max 2,600 characters. Tell your professional story.
+              </p>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Optimize Button */}
+        <Button
+          className="w-full gap-2 bg-[#0A66C2] hover:bg-[#004182]"
+          onClick={onOptimize}
+          disabled={isOptimizing || !canOptimize}
+        >
+          {isOptimizing ? (
+            <>
+              <RefreshCw className="w-4 h-4 animate-spin" />
+              Optimizing...
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-4 h-4" />
+              Optimize with AI
+              <span className="ml-1 inline-flex items-center gap-1 text-xs opacity-80">
+                <Coins className="w-3 h-3" />1
+              </span>
+            </>
+          )}
+        </Button>
+
+        {/* Optimized Output */}
+        {optimizedContent && (
+          <OptimizedOutput
+            content={optimizedContent}
+            type={activeTab}
+            copied={copied}
+            onCopy={onCopy}
+          />
+        )}
+
+        {/* Recent Optimizations */}
+        {recentOptimizations.length > 0 && (
+          <RecentOptimizationsList
+            optimizations={recentOptimizations}
+            onUse={onUseOptimization}
+            onDelete={onDeleteOptimization}
+          />
+        )}
+      </CardContent>
+    </Card>
+  </motion.div>
+);
+
+interface OptimizedOutputProps {
+  content: string;
+  type: string;
+  copied: boolean;
+  onCopy: () => void;
+}
+
+const OptimizedOutput: React.FC<OptimizedOutputProps> = ({
+  content,
+  type,
+  copied,
+  onCopy,
+}) => (
+  <motion.div
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="space-y-2"
+  >
+    <div className="flex items-center justify-between">
+      <label className="text-sm font-medium text-[#0A66C2]">
+        Optimized {type === 'headline' ? 'Headline' : 'Summary'}
+      </label>
+      <Button
+        size="sm"
+        variant="ghost"
+        className="gap-1.5"
+        onClick={onCopy}
+      >
+        {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+        {copied ? 'Copied!' : 'Copy'}
+      </Button>
+    </div>
+
+    <div className="p-4 rounded-xl bg-[#0A66C2]/5 border border-[#0A66C2]/20">
+      <p className="text-sm whitespace-pre-wrap">{content}</p>
+    </div>
+  </motion.div>
+);
+
+interface RecentOptimizationsListProps {
+  optimizations: LinkedInOptimization[];
+  onUse: (opt: LinkedInOptimization) => void;
+  onDelete: (id: string) => Promise<void>;
+}
+
+const RecentOptimizationsList: React.FC<RecentOptimizationsListProps> = ({
+  optimizations,
+  onUse,
+  onDelete,
+}) => (
+  <div className="pt-4 border-t border-border/50">
+    <div className="flex items-center gap-2 mb-3">
+      <History className="w-4 h-4 text-muted-foreground" />
+      <span className="text-sm font-medium">Recent Optimizations</span>
+    </div>
+
+    <div className="space-y-2">
+      {optimizations.map((opt) => (
+        <div
+          key={opt.id}
+          className="flex items-center justify-between p-2 bg-muted/30 rounded-lg group"
+        >
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-xs">
+                {opt.type}
+              </Badge>
+              <span className="text-xs text-muted-foreground">
+                {new Date(opt.created_at).toLocaleDateString()}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground truncate mt-1">
+              {opt.optimized_content.slice(0, 60)}...
+            </p>
+          </div>
+
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-7 px-2"
+              onClick={() => onUse(opt)}
+            >
+              Use
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-7 px-2 text-destructive"
+              onClick={() => onDelete(opt.id)}
+            >
+              <Trash2 className="w-3 h-3" />
+            </Button>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+interface TipsPanelProps {
+  checklistItems: ChecklistItem[];
+}
+
+const TipsPanel: React.FC<TipsPanelProps> = ({ checklistItems }) => (
+  <motion.div
+    initial={{ opacity: 0, x: 10 }}
+    animate={{ opacity: 1, x: 0 }}
+    transition={{ delay: 0.3 }}
+  >
+    {/* Optimization Tips */}
+    <Card className="border-0 shadow-sm">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-lg">Optimization Tips</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {OPTIMIZATION_TIPS.map((tip, index) => (
+          <div key={index} className="flex items-start gap-3">
+            <div className="p-2 rounded-lg bg-[#0A66C2]/10 shrink-0">
+              <tip.icon className="w-4 h-4 text-[#0A66C2]" />
+            </div>
+            <div>
+              <p className="font-medium text-sm">{tip.title}</p>
+              <p className="text-xs text-muted-foreground">{tip.description}</p>
+            </div>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+
+    {/* Profile Checklist */}
+    <Card className="border-0 shadow-sm mt-4">
+      <CardContent className="p-4 space-y-3">
+        <h4 className="font-medium text-sm">Profile Checklist</h4>
+        {checklistItems.map((item, index) => (
+          <div key={index} className="flex items-center justify-between text-sm">
+            <span className={item.done ? 'text-foreground' : 'text-muted-foreground'}>
+              {item.label}
+            </span>
+            {item.done ? (
+              <Check className="w-4 h-4 text-emerald-500" />
+            ) : (
+              <div className="w-4 h-4 rounded-full border-2 border-muted" />
+            )}
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  </motion.div>
+);
 
 export default LinkedInOptimizer;
