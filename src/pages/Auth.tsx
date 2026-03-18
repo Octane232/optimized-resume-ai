@@ -367,7 +367,7 @@ const Auth = () => {
                     <div className="text-center">
                       <CardTitle className="text-lg sm:text-xl">Create your account</CardTitle>
                       <CardDescription className="text-xs sm:text-sm">
-                        Join thousands of professionals taking control of their careers
+                        Start your job search today
                       </CardDescription>
                     </div>
 
