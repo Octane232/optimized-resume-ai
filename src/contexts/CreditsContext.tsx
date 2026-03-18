@@ -37,7 +37,7 @@ export const CreditsProvider = ({ children }: { children: ReactNode }) => {
         // No row yet - create one with default 5 credits
         const { data: newRow, error: insertError } = await supabase
           .from('user_credits')
-          .insert({ user_id: session.user.id, balance: 5, monthly_allowance: 5 })
+          .insert({ user_id: session.user.id, balance: 15, monthly_allowance: 5 })
           .select('balance')
           .single();
         
