@@ -1,59 +1,61 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import Header from '@/components/Header';
 import HeroSection from '@/components/HeroSection';
-import StatsSection from '@/components/StatsSection';
-import TrustedBySection from '@/components/TrustedBySection';
-import HowItWorksSection from '@/components/HowItWorksSection';
-import ProductShowcase from '@/components/ProductShowcase';
-import BenefitsSection from '@/components/BenefitsSection';
-import TestimonialsSection from '@/components/TestimonialsSection';
-import TrustBadges from '@/components/TrustBadges';
+import FeaturesSection from '@/components/FeaturesSection';
 import PricingSection from '@/components/PricingSection';
-import FAQSection from '@/components/FAQSection';
-import ResourcesSection from '@/components/ResourcesSection';
 import Footer from '@/components/Footer';
 import SEOHead from '@/components/SEOHead';
 
 const Index = () => {
   const location = useLocation();
+  const timeoutRef = useRef();
 
   useEffect(() => {
+    // Clear any existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
     if (location.hash) {
-      const element = document.querySelector(location.hash);
-      if (element) {
-        setTimeout(() => {
-          element.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
+      try {
+        // Remove the # and escape special characters
+        const id = location.hash.substring(1).replace(/[!\"#$%&'()*+,./:;<=>?@[\\\]^`{|}~]/g, '\\$&');
+        const el = document.getElementById(id);
+        
+        if (el) {
+          timeoutRef.current = setTimeout(() => {
+            el.scrollIntoView({ behavior: 'smooth' });
+          }, 100);
+        }
+      } catch (error) {
+        console.error('Error scrolling to element:', error);
       }
     }
+
+    // Cleanup timeout on unmount
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
   }, [location]);
 
   return (
     <div className="min-h-screen">
       <SEOHead
-        title="Vaylance – AI Resume Builder & Career Coach | Get Hired Faster"
-        description="Vaylance is the AI career platform that writes ATS-optimized resumes, matches you to jobs, and coaches you through interviews. Start free today."
-        keywords="AI resume builder, ATS resume checker, career coach AI, job search tool, resume templates, interview prep, cover letter generator"
+        title="Vaylance — AI Job Search Platform | Get Hired Faster"
+        description="Vaylance helps you tailor your resume to pass ATS filters, prep for interviews, and find companies hiring before they post publicly. Start free for 14 days."
+        keywords="AI resume builder, ATS resume checker, interview prep AI, job search tool, cover letter generator, salary intelligence"
         canonical="https://vaylance.com/"
       />
       <Header />
       <HeroSection />
-      <StatsSection />
-      <TrustedBySection />
-      <div id="how-it-works">
-        <HowItWorksSection />
-      </div>
       <div id="features">
-        <ProductShowcase />
+        <FeaturesSection />
       </div>
-      <BenefitsSection />
-      <TestimonialsSection />
-      <TrustBadges />
-      <PricingSection />
-      <FAQSection />
-      <div id="resources">
-        <ResourcesSection />
+      <div id="pricing">
+        <PricingSection />
       </div>
       <Footer />
     </div>
