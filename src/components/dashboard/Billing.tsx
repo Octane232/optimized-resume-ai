@@ -3,11 +3,12 @@ import UsageHeader from './billing/UsageHeader';
 import PricingCards from './billing/PricingCards';
 import BillingFAQ from './billing/BillingFAQ';
 import PaidManagement from './billing/PaidManagement';
-
-const Billing = () => {
+interface BillingProps {
+  setActiveTab?: (tab: string) => void;
+}
+const Billing = ({ setActiveTab }: BillingProps) => {
   const { tier, loading } = useSubscription();
-  const isPaid = tier === 'pro' || tier === 'premium';
-
+  const isPaid = tier === 'starter' || tier === 'pro' || tier === 'premium';
   if (loading) {
     return (
       <div className="space-y-6 max-w-5xl mx-auto">
@@ -17,32 +18,18 @@ const Billing = () => {
       </div>
     );
   }
-
   return (
     <div className="space-y-8 max-w-5xl mx-auto">
-      {/* Page heading */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Billing & Plan</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          {isPaid ? 'Manage your subscription and payment details' : 'Choose the plan that fits your career goals'}
+          {isPaid ? 'Manage your subscription and usage' : 'Choose the plan that fits your job search'}
         </p>
       </div>
-
-      {/* Usage header — always shown */}
-      <UsageHeader />
-
-      {isPaid ? (
-        /* ── State B: Paid user management view ── */
-        <PaidManagement />
-      ) : (
-        /* ── State A: Free user sales view ── */
-        <PricingCards />
-      )}
-
-      {/* FAQ — always shown */}
+      <UsageHeader setActiveTab={setActiveTab} />
+      {isPaid ? <PaidManagement /> : <PricingCards />}
       <BillingFAQ />
     </div>
   );
 };
-
 export default Billing;
