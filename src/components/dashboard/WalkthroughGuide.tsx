@@ -17,7 +17,7 @@ interface WalkthroughGuideProps {
 const steps = [
   {
     icon: Target,
-    title: 'Scout Jobs',
+    title: 'Job Radar',
     description: 'Find high-match roles curated just for you based on your skills and experience.',
     color: 'from-blue-500 to-blue-600'
   },
