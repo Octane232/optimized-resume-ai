@@ -45,7 +45,7 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
   const intelligenceItems = [
     { id: 'scout', label: 'Job Radar ', icon: Telescope },
     { id: 'salary-intel', label: 'Salary Intel ', icon: DollarSign },
-    { id: 'network', label: 'Network ', icon: Globe, comingSoon: true },
+    
   ];
 
   const toolsItems = [
