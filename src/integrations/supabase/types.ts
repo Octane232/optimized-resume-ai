@@ -417,6 +417,36 @@ export type Database = {
         }
         Relationships: []
       }
+      feature_usage: {
+        Row: {
+          action: string
+          count: number
+          created_at: string
+          id: string
+          period_start: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          count?: number
+          created_at?: string
+          id?: string
+          period_start?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          count?: number
+          created_at?: string
+          id?: string
+          period_start?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       interview_answers: {
         Row: {
           answer: string
@@ -640,6 +670,8 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          lemonsqueezy_customer_id: string | null
+          lemonsqueezy_subscription_id: string | null
           location: string | null
           phone: string | null
           plan: string | null
@@ -654,6 +686,8 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          lemonsqueezy_customer_id?: string | null
+          lemonsqueezy_subscription_id?: string | null
           location?: string | null
           phone?: string | null
           plan?: string | null
@@ -668,6 +702,8 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          lemonsqueezy_customer_id?: string | null
+          lemonsqueezy_subscription_id?: string | null
           location?: string | null
           phone?: string | null
           plan?: string | null
@@ -1392,6 +1428,10 @@ export type Database = {
     }
     Functions: {
       generate_affiliate_code: { Args: never; Returns: string }
+      increment_feature_usage: {
+        Args: { p_action: string; p_user_id: string }
+        Returns: undefined
+      }
       spend_credit: {
         Args: { p_action: string; p_description?: string; p_user_id: string }
         Returns: boolean
