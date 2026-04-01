@@ -261,7 +261,7 @@ const Dashboard = () => {
       case 'mission-control':
         return <MissionControl />;
       case 'billing':
-        return <Billing setActiveTab={setActiveTab} />;
+        return <Billing setActiveTab={handleSetActiveTab} />;
       case 'settings':
         return <Settings />;
       default:
