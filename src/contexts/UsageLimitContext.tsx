@@ -118,10 +118,10 @@ export const UsageLimitProvider = ({ children }: { children: ReactNode }) => {
       if (error) { console.error('[UsageLimit] track error:', error); return false; }
       setUsage(prev => ({ ...prev, [action]: (prev[action] || 0) + 1 }));
       return true;
-    } catch (e) {
-    }
-      console.error('[UsageLimit]', e);
+    } catch (err) {
+      console.error('[UsageLimit]', err);
       return false;
+    }
   };
   return (
     <UsageLimitContext.Provider value={{ usage, loading, canUse, getRemaining, getLimit, trackUsage, refresh: fetchUsage }}>

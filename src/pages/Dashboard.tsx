@@ -94,6 +94,7 @@ const Dashboard = () => {
     const saved = localStorage.getItem('dashboard-active-tab') as Tab | null;
     return saved || 'briefing';
   });
+  const handleSetActiveTab = (tab: string) => setActiveTab(tab as Tab);
   const [mode, setMode] = useState<Mode>(() => {
     const saved = localStorage.getItem('dashboard-mode') as Mode | null;
     return saved || 'hunter';

@@ -33,6 +33,16 @@ const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
     hasInterviewPrep: true,
     hasSkillGap: true,
   },
+  starter: {
+    pdfDownloads: Infinity,
+    aiGenerations: Infinity,
+    activeResumes: Infinity,
+    hasAIResume: true,
+    hasCoverLetter: true,
+    hasATSScoring: true,
+    hasInterviewPrep: true,
+    hasSkillGap: true,
+  },
   pro: {
     pdfDownloads: Infinity,
     aiGenerations: Infinity,
