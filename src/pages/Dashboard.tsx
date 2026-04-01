@@ -290,7 +290,7 @@ const Dashboard = () => {
       <div className="hidden md:flex">
         <NewSidebar
           activeTab={activeTab}
-          setActiveTab={setActiveTab}
+           setActiveTab={handleSetActiveTab}
           mode={mode}
           setMode={setMode}
           collapsed={sidebarCollapsed}
