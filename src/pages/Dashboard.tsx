@@ -94,6 +94,7 @@ const Dashboard = () => {
     const saved = localStorage.getItem('dashboard-active-tab') as Tab | null;
     return saved || 'briefing';
   });
+  const handleSetActiveTab = (tab: string) => setActiveTab(tab as Tab);
   const [mode, setMode] = useState<Mode>(() => {
     const saved = localStorage.getItem('dashboard-mode') as Mode | null;
     return saved || 'hunter';
@@ -244,15 +245,15 @@ const Dashboard = () => {
 
     switch (activeTab) {
       case 'briefing':
-        return <HunterDashboard setActiveTab={setActiveTab} />;
+        return <HunterDashboard setActiveTab={handleSetActiveTab} />;
       case 'scout':
         return <Scout />;
       case 'salary-intel':
         return <SalaryIntel />;
       case 'resume-engine':
-        return <ResumeEngine setActiveTab={setActiveTab} hasResume={hasResume} />;
+        return <ResumeEngine setActiveTab={handleSetActiveTab} hasResume={hasResume} />;
       case 'interview-prep':
-        return <InterviewPrep setActiveTab={setActiveTab} />;
+        return <InterviewPrep setActiveTab={handleSetActiveTab} />;
       case 'skill-gap':
         return <SkillGapAnalyzer />;
       case 'linkedin':
@@ -260,11 +261,11 @@ const Dashboard = () => {
       case 'mission-control':
         return <MissionControl />;
       case 'billing':
-        return <Billing setActiveTab={setActiveTab} />;
+        return <Billing setActiveTab={handleSetActiveTab} />;
       case 'settings':
         return <Settings />;
       default:
-        return <HunterDashboard setActiveTab={setActiveTab} />;
+        return <HunterDashboard setActiveTab={handleSetActiveTab} />;
     }
   };
 
@@ -289,7 +290,7 @@ const Dashboard = () => {
       <div className="hidden md:flex">
         <NewSidebar
           activeTab={activeTab}
-          setActiveTab={setActiveTab}
+           setActiveTab={handleSetActiveTab}
           mode={mode}
           setMode={setMode}
           collapsed={sidebarCollapsed}
@@ -305,10 +306,10 @@ const Dashboard = () => {
           unreadAlerts={unreadAlerts}
           userEmail={userEmail}
           userInitials={userInitials}
-          onAlertClick={() => setActiveTab('scout')}
-          onSettingsClick={() => setActiveTab('settings')}
+          onAlertClick={() => handleSetActiveTab('scout')}
+          onSettingsClick={() => handleSetActiveTab('settings')}
           onSignOut={handleSignOut}
-          onTabChange={setActiveTab}
+          onTabChange={handleSetActiveTab}
         />
 
         <div className="p-4 md:p-6">
@@ -324,7 +325,7 @@ const Dashboard = () => {
       {/* Mobile Navigation */}
       <MobileNav
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={handleSetActiveTab}
         mode={mode}
       />
     </div>

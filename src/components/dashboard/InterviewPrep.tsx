@@ -249,16 +249,19 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
             position: session.position,
             overallScore: Number(session.overall_score),
             date: session.completed_at,
-            answers: (answerData || []).map(a => ({
-              question: a.question,
-              answer: a.answer,
-              feedback: {
-                score: Number(a.score),
-                feedback: a.feedback?.feedback || '',
-                strengths: a.feedback?.strengths || [],
-                improvements: a.feedback?.improvements || []
-              },
-            })),
+            answers: (answerData || []).map(a => {
+              const fb = a.feedback as Record<string, unknown> | null;
+              return {
+                question: a.question,
+                answer: a.answer,
+                feedback: {
+                  score: Number(a.score),
+                  feedback: (fb?.feedback as string) || '',
+                  strengths: (fb?.strengths as string[]) || [],
+                  improvements: (fb?.improvements as string[]) || [],
+                },
+              };
+            }),
           };
         })
       );
@@ -507,63 +510,174 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
       {/* Main Content */}
       <AnimatePresence mode="wait">
         {tab === 'practice' && (
-          <PracticeMode
-            stage={stage}
-            position={position}
-            setPosition={setPosition}
-            company={company}
-            setCompany={setCompany}
-            questions={questions}
-            currentQ={currentQ}
-            userAnswer={userAnswer}
-            setUserAnswer={setUserAnswer}
-            answers={answers}
-            currentFeedback={currentFeedback}
-            loadingQuestions={loadingQuestions}
-            loadingFeedback={loadingFeedback}
-            wordCount={wordCount}
-            overallScore={overallScore}
-            canUse={canUse('interview_prep')}
-            remaining={remainingLive}
-            sessions={sessions}
-            avgScore={avgScore}
-            onGenerateQuestions={generateQuestions}
-            onSubmitAnswer={submitAnswer}
-            onNextQuestion={nextQuestion}
-            onReset={resetPractice}
-            setActiveTab={setActiveTab}
-          />
+          <motion.div key="practice" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <Card className="border-border/60">
+              <CardContent className="p-6 space-y-4">
+                {stage === 'setup' && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-foreground">Target Position</label>
+                        <Input placeholder="e.g. Software Engineer" value={position} onChange={e => setPosition(e.target.value)} />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-foreground">Company (optional)</label>
+                        <Input placeholder="e.g. Google" value={company} onChange={e => setCompany(e.target.value)} />
+                      </div>
+                    </div>
+                    <Button onClick={generateQuestions} disabled={!position.trim() || loadingQuestions || !canUse('interview_prep')} className="w-full">
+                      {loadingQuestions ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generating…</> : <><Brain className="w-4 h-4 mr-2" />Generate Questions</>}
+                    </Button>
+                    {!canUse('interview_prep') && (
+                      <p className="text-xs text-muted-foreground flex items-center gap-1"><Lock className="w-3 h-3" /> No sessions remaining this period.
+                        {setActiveTab && <button className="text-primary underline ml-1" onClick={() => setActiveTab('billing')}>Upgrade</button>}
+                      </p>
+                    )}
+                  </div>
+                )}
+                {stage === 'question' && questions.length > 0 && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <Badge variant="secondary">Question {currentQ + 1} of {questions.length}</Badge>
+                      <span className="text-xs text-muted-foreground">{wordCount} words</span>
+                    </div>
+                    <p className="text-foreground font-medium">{questions[currentQ]}</p>
+                    <Textarea placeholder="Type your answer…" value={userAnswer} onChange={e => setUserAnswer(e.target.value)} rows={6} />
+                    <Button onClick={submitAnswer} disabled={!userAnswer.trim() || loadingFeedback}>
+                      {loadingFeedback ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Analyzing…</> : <><Send className="w-4 h-4 mr-2" />Submit Answer</>}
+                    </Button>
+                  </div>
+                )}
+                {stage === 'feedback' && currentFeedback && (
+                  <div className="space-y-4">
+                    <div className={`p-4 rounded-xl border ${getScoreBackground(currentFeedback.score)}`}>
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className={`text-2xl font-bold ${getScoreColor(currentFeedback.score)}`}>{currentFeedback.score}/10</span>
+                        <Badge className={`bg-gradient-to-r ${getScoreGradient(currentFeedback.score)} text-white`}>{getScoreLabel(currentFeedback.score)}</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{currentFeedback.feedback}</p>
+                    </div>
+                    {currentFeedback.strengths.length > 0 && (
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium text-emerald-600 flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Strengths</p>
+                        {currentFeedback.strengths.map((s, i) => <p key={i} className="text-sm text-muted-foreground ml-5">• {s}</p>)}
+                      </div>
+                    )}
+                    {currentFeedback.improvements.length > 0 && (
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium text-amber-600 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5" /> Improvements</p>
+                        {currentFeedback.improvements.map((s, i) => <p key={i} className="text-sm text-muted-foreground ml-5">• {s}</p>)}
+                      </div>
+                    )}
+                    <Button onClick={nextQuestion}><ArrowRight className="w-4 h-4 mr-2" />{currentQ + 1 < questions.length ? 'Next Question' : 'See Results'}</Button>
+                  </div>
+                )}
+                {stage === 'results' && (
+                  <div className="space-y-4 text-center">
+                    <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl border ${getScoreBackground(overallScore)}`}>
+                      <span className={`text-3xl font-bold ${getScoreColor(overallScore)}`}>{overallScore.toFixed(1)}</span>
+                      <span className="text-sm text-muted-foreground">/ 10 overall</span>
+                    </div>
+                    <p className="text-muted-foreground text-sm">You answered {answers.length} question{answers.length !== 1 ? 's' : ''}.</p>
+                    <Button variant="outline" onClick={resetPractice}><RotateCcw className="w-4 h-4 mr-2" />Practice Again</Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
         )}
 
         {tab === 'live' && (
-          <LiveMode
-            liveActive={liveActive}
-            livePosition={livePosition}
-            setLivePosition={setLivePosition}
-            liveCompany={liveCompany}
-            setLiveCompany={setLiveCompany}
-            liveQuestion={liveQuestion}
-            setLiveQuestion={setLiveQuestion}
-            liveEntries={liveEntries}
-            liveLoading={liveLoading}
-            liveBottomRef={liveBottomRef}
-            onStartLive={startLive}
-            onAskLive={askLive}
-            onEndLive={endLive}
-          />
+          <motion.div key="live" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <Card className="border-border/60">
+              <CardContent className="p-6 space-y-4">
+                {!liveActive ? (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <Input placeholder="Position" value={livePosition} onChange={e => setLivePosition(e.target.value)} />
+                      <Input placeholder="Company (optional)" value={liveCompany} onChange={e => setLiveCompany(e.target.value)} />
+                    </div>
+                    <Button onClick={startLive} disabled={!livePosition.trim()} className="w-full">
+                      <Radio className="w-4 h-4 mr-2" />Start Live Session
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <Badge variant="destructive" className="animate-pulse"><Radio className="w-3 h-3 mr-1" />Live</Badge>
+                      <Button variant="ghost" size="sm" onClick={endLive}>End Session</Button>
+                    </div>
+                    <div className="space-y-3 max-h-96 overflow-y-auto">
+                      {liveEntries.map(entry => (
+                        <div key={entry.id} className="p-3 rounded-lg border border-border/60 space-y-2">
+                          <p className="text-sm font-medium text-foreground">{entry.question}</p>
+                          {entry.loading ? (
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground"><Loader2 className="w-3 h-3 animate-spin" />Thinking…</div>
+                          ) : entry.suggestion && (
+                            <p className="text-sm text-muted-foreground bg-primary/5 p-2 rounded">{entry.suggestion}</p>
+                          )}
+                        </div>
+                      ))}
+                      <div ref={liveBottomRef} />
+                    </div>
+                    <div className="flex gap-2">
+                      <Input placeholder="Type the question being asked…" value={liveQuestion} onChange={e => setLiveQuestion(e.target.value)} onKeyDown={e => e.key === 'Enter' && askLive()} />
+                      <Button onClick={askLive} disabled={!liveQuestion.trim() || liveLoading}><Send className="w-4 h-4" /></Button>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
         )}
 
         {tab === 'tips' && (
-          <TipsMode tips={tips} />
+          <motion.div key="tips" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {tips.map((tip, i) => (
+                <Card key={i} className="border-border/60">
+                  <CardContent className="p-4 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{tip.icon}</span>
+                      <span className="font-medium text-foreground text-sm">{tip.title}</span>
+                      <Badge variant="secondary" className="ml-auto text-[10px]">{tip.priority}</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{tip.desc}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </motion.div>
         )}
 
         {tab === 'history' && (
-          <HistoryMode
-            loading={loadingHistory}
-            sessions={sessions}
-            avgScore={avgScore}
-            onStartPractice={() => setTab('practice')}
-          />
+          <motion.div key="history" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            {loadingHistory ? (
+              <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
+            ) : sessions.length === 0 ? (
+              <Card className="border-border/60">
+                <CardContent className="p-8 text-center space-y-3">
+                  <BarChart3 className="w-10 h-10 text-muted-foreground mx-auto" />
+                  <p className="text-muted-foreground text-sm">No sessions yet. Complete a practice round to see your history.</p>
+                  <Button variant="outline" onClick={() => setTab('practice')}><Brain className="w-4 h-4 mr-2" />Start Practice</Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-3">
+                {sessions.map(session => (
+                  <Card key={session.id} className="border-border/60">
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-sm text-foreground">{session.position}</p>
+                        <p className="text-xs text-muted-foreground">{new Date(session.date).toLocaleDateString()} · {session.answers.length} question{session.answers.length !== 1 ? 's' : ''}</p>
+                      </div>
+                      <div className={`text-lg font-bold ${getScoreColor(session.overallScore)}`}>{session.overallScore.toFixed(1)}</div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

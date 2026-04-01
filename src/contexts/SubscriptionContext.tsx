@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-export type SubscriptionTier = 'free' | 'pro' | 'premium';
+export type SubscriptionTier = 'free' | 'starter' | 'pro' | 'premium';
 
 export interface TierLimits {
   pdfDownloads: number;
@@ -24,6 +24,16 @@ export interface UsageStats {
 // All features unlocked for restructuring
 const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
   free: {
+    pdfDownloads: Infinity,
+    aiGenerations: Infinity,
+    activeResumes: Infinity,
+    hasAIResume: true,
+    hasCoverLetter: true,
+    hasATSScoring: true,
+    hasInterviewPrep: true,
+    hasSkillGap: true,
+  },
+  starter: {
     pdfDownloads: Infinity,
     aiGenerations: Infinity,
     activeResumes: Infinity,

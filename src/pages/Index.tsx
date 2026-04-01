@@ -9,7 +9,7 @@ import SEOHead from '@/components/SEOHead';
 
 const Index = () => {
   const location = useLocation();
-  const timeoutRef = useRef();
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     // Clear any existing timeout
