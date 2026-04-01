@@ -325,7 +325,7 @@ const Dashboard = () => {
       {/* Mobile Navigation */}
       <MobileNav
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={handleSetActiveTab}
         mode={mode}
       />
     </div>
