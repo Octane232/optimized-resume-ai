@@ -170,7 +170,7 @@ const PaidManagement = () => {
 
       {/* Footer Note */}
       <p className="text-xs text-muted-foreground text-center">
-        Update payment method, download invoices, switch plans, or cancel via Stripe's secure portal.
+        Update payment method, download invoices, switch plans, or cancel via the billing portal.
       </p>
     </div>
   );

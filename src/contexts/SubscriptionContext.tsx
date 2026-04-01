@@ -192,11 +192,15 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
     
     // Check if returning from checkout (success page)
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('success') === 'true' || window.location.pathname.includes('success')) {
+    if (urlParams.get('success') === 'true' || urlParams.get('upgrade') === 'success' || window.location.pathname.includes('success')) {
       console.log('[SubscriptionContext] Detected checkout return, refreshing subscription...');
       // Give webhook time to process, then refresh
       setTimeout(fetchSubscriptionStatus, 2000);
       setTimeout(fetchSubscriptionStatus, 5000);
+      setTimeout(fetchSubscriptionStatus, 10000);
+      // Clean up URL params
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, '', cleanUrl);
     }
     
     // Refresh every minute
