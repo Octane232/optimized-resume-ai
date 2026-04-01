@@ -249,16 +249,19 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
             position: session.position,
             overallScore: Number(session.overall_score),
             date: session.completed_at,
-            answers: (answerData || []).map(a => ({
-              question: a.question,
-              answer: a.answer,
-              feedback: {
-                score: Number(a.score),
-                feedback: a.feedback?.feedback || '',
-                strengths: a.feedback?.strengths || [],
-                improvements: a.feedback?.improvements || []
-              },
-            })),
+            answers: (answerData || []).map(a => {
+              const fb = a.feedback as Record<string, unknown> | null;
+              return {
+                question: a.question,
+                answer: a.answer,
+                feedback: {
+                  score: Number(a.score),
+                  feedback: (fb?.feedback as string) || '',
+                  strengths: (fb?.strengths as string[]) || [],
+                  improvements: (fb?.improvements as string[]) || [],
+                },
+              };
+            }),
           };
         })
       );
