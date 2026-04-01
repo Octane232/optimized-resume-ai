@@ -24,25 +24,27 @@ serve(async (req) => {
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
   const body = await req.text();
 
-  // Verify webhook signature
+  // Verify webhook signature — reject if missing or invalid
   const signature = req.headers.get("x-signature");
-  if (signature) {
-    const encoder = new TextEncoder();
-    const key = await crypto.subtle.importKey(
-      "raw",
-      encoder.encode(WEBHOOK_SECRET),
-      { name: "HMAC", hash: "SHA-256" },
-      false,
-      ["sign"]
-    );
-    const sig = await crypto.subtle.sign("HMAC", key, encoder.encode(body));
-    const expectedSignature = Array.from(new Uint8Array(sig))
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
-    if (signature !== expectedSignature) {
-      console.error("Invalid webhook signature");
-      return new Response("Invalid signature", { status: 400 });
-    }
+  if (!signature) {
+    console.error("Missing webhook signature header");
+    return new Response("Missing signature", { status: 400 });
+  }
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(WEBHOOK_SECRET),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const sig = await crypto.subtle.sign("HMAC", key, encoder.encode(body));
+  const expectedSignature = Array.from(new Uint8Array(sig))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  if (signature !== expectedSignature) {
+    console.error("Invalid webhook signature");
+    return new Response("Invalid signature", { status: 400 });
   }
 
   let payload;
@@ -65,10 +67,11 @@ serve(async (req) => {
   const attributes = payload.data?.attributes || {};
 
   // Helper: resolve plan name to subscription_plans UUID
+  // Names must match what seed-subscription-plans inserted into the DB
   async function resolvePlanId(planName: string): Promise<string | null> {
     const nameMap: Record<string, string> = {
-      starter: "Starter",
-      pro: "Pro",
+      starter: "Vaylance Pro",
+      pro: "Vaylance Premium",
     };
     const displayName = nameMap[planName] || planName;
     const { data, error } = await supabase
@@ -165,7 +168,7 @@ serve(async (req) => {
         if (lsSubscriptionId) {
           await supabase.from("profiles")
             .update({ lemonsqueezy_subscription_id: lsSubscriptionId })
-            .eq("user_id", userId);
+            .eq("id", userId);
         }
 
         console.log(`User ${userId} upgraded to ${plan} (${billing}) — status: active`);
