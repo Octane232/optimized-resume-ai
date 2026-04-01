@@ -41,6 +41,27 @@ serve(async (req) => {
 
   console.log("Stripe event received:", event.type);
 
+  // Helper: resolve plan name (e.g. "starter", "pro") to subscription_plans UUID
+  async function resolvePlanId(planName: string): Promise<string | null> {
+    // Map plan names to subscription_plans.name
+    const nameMap: Record<string, string> = {
+      starter: "Starter",
+      pro: "Pro",
+    };
+    const displayName = nameMap[planName] || planName;
+    const { data, error } = await supabase
+      .from("subscription_plans")
+      .select("id")
+      .ilike("name", displayName)
+      .limit(1)
+      .maybeSingle();
+    if (error) {
+      console.error("Error resolving plan_id:", error);
+      return null;
+    }
+    return data?.id || null;
+  }
+
   try {
     switch (event.type) {
 
@@ -56,27 +77,45 @@ serve(async (req) => {
           break;
         }
 
+        // Resolve plan_id UUID from subscription_plans table
+        const planId = await resolvePlanId(plan);
+        if (!planId) {
+          console.error(`Could not find subscription_plans entry for plan: ${plan}`);
+          break;
+        }
+
         // Map plan to tier
         const tier = plan === "pro" ? "pro" : "pro"; // starter maps to pro tier for now
 
         // Calculate subscription end date
         const now = new Date();
         const endDate = billing === "yearly"
-          ? new Date(now.setFullYear(now.getFullYear() + 1))
-          : new Date(now.setMonth(now.getMonth() + 1));
+          ? new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000)
+          : new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+        // Determine price
+        const priceMap: Record<string, Record<string, number>> = {
+          starter: { monthly: 12, yearly: 115 },
+          pro: { monthly: 29, yearly: 278 },
+        };
+        const price = priceMap[plan]?.[billing || "monthly"] || 0;
 
         // Update subscription in database
-        await supabase.from("subscriptions").upsert({
+        const { error: subError } = await supabase.from("user_subscriptions").upsert({
           user_id: userId,
+          plan_id: planId,
           tier,
-          plan,
           billing_cycle: billing,
-          stripe_customer_id: session.customer as string,
-          stripe_subscription_id: session.subscription as string,
-          status: "active",
+          plan_status: "active",
+          price,
           current_period_end: endDate.toISOString(),
           updated_at: new Date().toISOString(),
         }, { onConflict: "user_id" });
+
+        if (subError) {
+          console.error("Error updating subscription:", subError);
+          break;
+        }
 
         // Add credits based on plan
         const credits = plan === "pro" ? 100 : 50;
@@ -106,9 +145,9 @@ serve(async (req) => {
         const periodEnd = new Date(subscription.current_period_end * 1000);
 
         // Renew subscription period
-        await supabase.from("subscriptions")
+        await supabase.from("user_subscriptions")
           .update({
-            status: "active",
+            plan_status: "active",
             current_period_end: periodEnd.toISOString(),
             updated_at: new Date().toISOString(),
           })
@@ -134,9 +173,9 @@ serve(async (req) => {
 
         if (!userId) break;
 
-        await supabase.from("subscriptions")
+        await supabase.from("user_subscriptions")
           .update({
-            status: "cancelled",
+            plan_status: "cancelled",
             tier: "free",
             updated_at: new Date().toISOString(),
           })
@@ -158,9 +197,9 @@ serve(async (req) => {
 
         if (!userId) break;
 
-        await supabase.from("subscriptions")
+        await supabase.from("user_subscriptions")
           .update({
-            status: "past_due",
+            plan_status: "past_due",
             updated_at: new Date().toISOString(),
           })
           .eq("user_id", userId);
