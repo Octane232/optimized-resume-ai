@@ -251,9 +251,9 @@ const Dashboard = () => {
       case 'salary-intel':
         return <SalaryIntel />;
       case 'resume-engine':
-        return <ResumeEngine setActiveTab={setActiveTab} hasResume={hasResume} />;
+        return <ResumeEngine setActiveTab={handleSetActiveTab} hasResume={hasResume} />;
       case 'interview-prep':
-        return <InterviewPrep setActiveTab={setActiveTab} />;
+        return <InterviewPrep setActiveTab={handleSetActiveTab} />;
       case 'skill-gap':
         return <SkillGapAnalyzer />;
       case 'linkedin':
