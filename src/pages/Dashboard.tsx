@@ -306,10 +306,10 @@ const Dashboard = () => {
           unreadAlerts={unreadAlerts}
           userEmail={userEmail}
           userInitials={userInitials}
-          onAlertClick={() => setActiveTab('scout')}
-          onSettingsClick={() => setActiveTab('settings')}
+          onAlertClick={() => handleSetActiveTab('scout')}
+          onSettingsClick={() => handleSetActiveTab('settings')}
           onSignOut={handleSignOut}
-          onTabChange={setActiveTab}
+          onTabChange={handleSetActiveTab}
         />
 
         <div className="p-4 md:p-6">
