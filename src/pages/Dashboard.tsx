@@ -265,7 +265,7 @@ const Dashboard = () => {
       case 'settings':
         return <Settings />;
       default:
-        return <HunterDashboard setActiveTab={setActiveTab} />;
+        return <HunterDashboard setActiveTab={handleSetActiveTab} />;
     }
   };
 
