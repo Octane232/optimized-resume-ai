@@ -245,7 +245,7 @@ const Dashboard = () => {
 
     switch (activeTab) {
       case 'briefing':
-        return <HunterDashboard setActiveTab={setActiveTab} />;
+        return <HunterDashboard setActiveTab={handleSetActiveTab} />;
       case 'scout':
         return <Scout />;
       case 'salary-intel':
