@@ -27,7 +27,18 @@ serve(async (req) => {
   // Verify webhook signature
   const signature = req.headers.get("x-signature");
   if (signature) {
-    const expectedSignature = hmac("sha256", WEBHOOK_SECRET, body, "utf8", "hex");
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(WEBHOOK_SECRET),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+    const sig = await crypto.subtle.sign("HMAC", key, encoder.encode(body));
+    const expectedSignature = Array.from(new Uint8Array(sig))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
     if (signature !== expectedSignature) {
       console.error("Invalid webhook signature");
       return new Response("Invalid signature", { status: 400 });
