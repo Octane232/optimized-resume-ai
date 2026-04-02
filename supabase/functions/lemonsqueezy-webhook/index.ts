@@ -1,7 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -52,161 +51,122 @@ serve(async (req) => {
     return new Response("Invalid JSON", { status: 400 });
   }
 
+  // Log webhook for debugging
+  await supabase.from("webhook_logs").insert({
+    event_type: payload.meta?.event_name || "unknown",
+    payload,
+  });
+
   const eventName = payload.meta?.event_name;
-  console.log(`Received Lemon Squeezy webhook event: ${eventName}`);
+  console.log(`Received LS webhook: ${eventName}`);
 
-  // Extract custom data with user ID
-  const customData = payload.meta?.custom_data || payload.data?.attributes?.first_order_item?.custom_data || {};
+  const customData = payload.meta?.custom_data || {};
   const userId = customData.supabase_user_id;
-  const plan = customData.plan; // "starter" or "pro"
-  const billing = customData.billing; // "monthly" or "yearly"
-
-  // Also try to get from urls/checkout custom data
+  const plan = customData.plan;
+  const billing = customData.billing;
   const attributes = payload.data?.attributes || {};
 
-  // Helper: resolve plan name to subscription_plans UUID
   async function resolvePlanId(planName: string): Promise<string | null> {
-    const nameMap: Record<string, string> = {
-      starter: "Starter",
-      pro: "Pro",
-    };
+    const nameMap: Record<string, string> = { starter: "Starter", pro: "Pro" };
     const displayName = nameMap[planName] || planName;
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("subscription_plans")
       .select("id")
       .ilike("name", displayName)
       .limit(1)
       .maybeSingle();
-    if (error) {
-      console.error("Error resolving plan_id:", error);
-      return null;
-    }
     return data?.id || null;
   }
 
   try {
-    switch (eventName) {
-      case "order_created":
-      case "subscription_created":
-      case "subscription_updated": {
-        if (!userId || !plan) {
-          console.error("Missing user ID or plan in webhook data", { userId, plan, customData });
-          break;
-        }
+    if (
+      eventName === "order_created" ||
+      eventName === "subscription_created" ||
+      eventName === "subscription_updated"
+    ) {
+      if (!userId || !plan) {
+        console.error("Missing userId or plan", { userId, plan, customData });
+        return new Response(JSON.stringify({ received: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
-        const status = attributes.status;
-        const isActive = status === "active" || status === "on_trial" || eventName === "order_created";
+      const status = attributes.status;
+      const isActive = status === "active" || status === "on_trial" || eventName === "order_created";
 
-        if (!isActive && eventName === "subscription_updated") {
-          console.log(`Subscription status is ${status}, not activating`);
-          // Handle cancellation/pause
-          if (status === "cancelled" || status === "expired") {
-            await supabase.from("user_subscriptions")
-              .update({
-                plan_status: "cancelled",
-                tier: "free",
-                updated_at: new Date().toISOString(),
-              })
-              .eq("user_id", userId);
-            console.log(`Subscription cancelled for user ${userId}`);
-          }
-          break;
-        }
-
-        // Resolve plan_id UUID
-        const planId = await resolvePlanId(plan);
-        if (!planId) {
-          console.error(`Could not find subscription_plans entry for plan: ${plan}`);
-          break;
-        }
-
-        // Calculate subscription end date
-        const renewsAt = attributes.renews_at;
-        const endsAt = attributes.ends_at;
-        const periodEnd = renewsAt || endsAt || null;
-
-        // Map plan to tier
-        const tier = plan === "pro" ? "pro" : "starter";
-
-        // Determine price
-        const priceMap: Record<string, Record<string, number>> = {
-          starter: { monthly: 12, yearly: 115 },
-          pro: { monthly: 29, yearly: 278 },
-        };
-        const price = priceMap[plan]?.[billing || "monthly"] || 0;
-
-        // Upsert subscription
-        const { error: subError } = await supabase.from("user_subscriptions").upsert({
-          user_id: userId,
-          plan_id: planId,
-          tier,
-          billing_cycle: billing || "monthly",
-          plan_status: "active",
-          price,
-          current_period_end: periodEnd,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: "user_id" });
-
-        if (subError) {
-          console.error("Error updating subscription:", subError);
-          break;
-        }
-
-        // Add/refresh credits
-        const credits = plan === "pro" ? 100 : 50;
-        await supabase.from("user_credits").upsert({
-          user_id: userId,
-          balance: credits,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: "user_id" });
-
-        // Store LemonSqueezy subscription ID on profile
-        const lsSubscriptionId = payload.data?.id?.toString();
-        if (lsSubscriptionId) {
-          await supabase.from("profiles")
-            .update({ lemonsqueezy_subscription_id: lsSubscriptionId })
+      if (!isActive && eventName === "subscription_updated") {
+        if (status === "cancelled" || status === "expired") {
+          await supabase.from("user_subscriptions")
+            .update({ plan_status: "cancelled", tier: "free", updated_at: new Date().toISOString() })
             .eq("user_id", userId);
+          console.log(`Subscription cancelled for ${userId}`);
         }
-
-        console.log(`User ${userId} upgraded to ${plan} (${billing}) — status: active`);
-        break;
+        return new Response(JSON.stringify({ received: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
 
-      case "subscription_cancelled":
-      case "subscription_expired": {
-        if (!userId) {
-          console.error("Missing user ID for cancellation");
-          break;
-        }
+      const planId = await resolvePlanId(plan);
+      if (!planId) {
+        console.error(`Plan not found: ${plan}`);
+        return new Response(JSON.stringify({ received: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
-        await supabase.from("user_subscriptions")
-          .update({
-            plan_status: "cancelled",
-            tier: "free",
-            updated_at: new Date().toISOString(),
-          })
+      const periodEnd = attributes.renews_at || attributes.ends_at || null;
+      const tier = plan === "pro" ? "pro" : "starter";
+      const priceMap: Record<string, Record<string, number>> = {
+        starter: { monthly: 12, yearly: 115 },
+        pro: { monthly: 29, yearly: 278 },
+      };
+      const price = priceMap[plan]?.[billing || "monthly"] || 0;
+
+      await supabase.from("user_subscriptions").upsert({
+        user_id: userId,
+        plan_id: planId,
+        tier,
+        billing_cycle: billing || "monthly",
+        plan_status: "active",
+        price,
+        current_period_end: periodEnd,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "user_id" });
+
+      const credits = plan === "pro" ? 100 : 50;
+      await supabase.from("user_credits").upsert({
+        user_id: userId,
+        balance: credits,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "user_id" });
+
+      const lsSubId = payload.data?.id?.toString();
+      if (lsSubId) {
+        await supabase.from("profiles")
+          .update({ lemonsqueezy_subscription_id: lsSubId })
           .eq("user_id", userId);
-
-        console.log(`Subscription cancelled/expired for user ${userId}`);
-        break;
       }
 
-      case "subscription_payment_failed": {
-        if (!userId) break;
+      console.log(`User ${userId} upgraded to ${plan} (${billing})`);
 
+    } else if (eventName === "subscription_cancelled" || eventName === "subscription_expired") {
+      if (userId) {
         await supabase.from("user_subscriptions")
-          .update({
-            plan_status: "past_due",
-            updated_at: new Date().toISOString(),
-          })
+          .update({ plan_status: "cancelled", tier: "free", updated_at: new Date().toISOString() })
           .eq("user_id", userId);
-
-        console.log(`Payment failed for user ${userId}`);
-        break;
+        console.log(`Subscription ended for ${userId}`);
       }
 
-      default:
-        console.log(`Unhandled event type: ${eventName}`);
+    } else if (eventName === "subscription_payment_failed") {
+      if (userId) {
+        await supabase.from("user_subscriptions")
+          .update({ plan_status: "past_due", updated_at: new Date().toISOString() })
+          .eq("user_id", userId);
+        console.log(`Payment failed for ${userId}`);
+      }
+
+    } else {
+      console.log(`Unhandled event: ${eventName}`);
     }
 
     return new Response(JSON.stringify({ received: true }), {
@@ -214,7 +174,7 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error("Webhook handler error:", error);
+    console.error("Webhook error:", error);
     return new Response(
       JSON.stringify({ error: "Webhook handler failed" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
