@@ -6,12 +6,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Lemon Squeezy variant IDs from seed data
 const VARIANT_IDS: Record<string, string> = {
-  starter_monthly: "1065978",
-  starter_yearly: "1065979",
-  pro_monthly: "1065981",
-  pro_yearly: "1065987",
+  starter_monthly: "1443782",
+  starter_yearly: "1443791",
+  pro_monthly: "1443793",
+  pro_yearly: "1443794",
 };
 
 serve(async (req) => {
@@ -29,7 +28,6 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get authenticated user
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("No authorization header");
 
@@ -45,10 +43,8 @@ serve(async (req) => {
 
     console.log(`Creating checkout for user ${user.id}, plan: ${plan}, billing: ${billing}, variant: ${variantId}`);
 
-    // Determine the app origin for redirect URLs
     const origin = req.headers.get("origin") || "https://vaylance.com";
 
-    // Create Lemon Squeezy checkout via API
     const response = await fetch("https://api.lemonsqueezy.com/v1/checkouts", {
       method: "POST",
       headers: {
