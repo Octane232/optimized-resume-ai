@@ -189,17 +189,25 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     fetchSubscriptionStatus();
-
-    // Clean up URL params after checkout redirect (no polling needed — realtime handles it)
+    
+    // Check if returning from checkout (success page)
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('success') === 'true' || urlParams.get('upgrade') === 'success' || window.location.pathname.includes('success')) {
-      console.log('[SubscriptionContext] Detected checkout return, waiting for realtime update...');
+      console.log('[SubscriptionContext] Detected checkout return, refreshing subscription...');
+      // Give webhook time to process, then refresh
+      setTimeout(fetchSubscriptionStatus, 2000);
+      setTimeout(fetchSubscriptionStatus, 5000);
+      setTimeout(fetchSubscriptionStatus, 10000);
+      // Clean up URL params
       const cleanUrl = window.location.pathname;
       window.history.replaceState({}, '', cleanUrl);
     }
-
+    
+    // Refresh every minute
+    const interval = setInterval(fetchSubscriptionStatus, 60000);
+    
     // Listen for auth state changes
-    const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       console.log('[SubscriptionContext] Auth state changed:', event);
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         fetchSubscriptionStatus();
@@ -214,31 +222,9 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
       }
     });
 
-    // Realtime: re-fetch whenever user_subscriptions row changes (e.g. after webhook fires)
-    let realtimeChannel: ReturnType<typeof supabase.channel> | null = null;
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) return;
-      realtimeChannel = supabase
-        .channel('user_subscriptions_changes')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'user_subscriptions',
-            filter: `user_id=eq.${session.user.id}`,
-          },
-          (payload) => {
-            console.log('[SubscriptionContext] Realtime subscription change detected:', payload);
-            fetchSubscriptionStatus();
-          }
-        )
-        .subscribe();
-    });
-
     return () => {
-      authSubscription.unsubscribe();
-      if (realtimeChannel) supabase.removeChannel(realtimeChannel);
+      clearInterval(interval);
+      subscription.unsubscribe();
     };
   }, [fetchSubscriptionStatus]);
 
