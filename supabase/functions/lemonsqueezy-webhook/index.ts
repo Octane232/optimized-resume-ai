@@ -152,9 +152,13 @@ serve(async (req) => {
       }, { onConflict: "user_id" });
 
       const lsSubId = payload.data?.id?.toString();
-      if (lsSubId) {
+      const lsCustomerId = attributes.customer_id?.toString();
+      const profileUpdate: Record<string, string> = {};
+      if (lsSubId) profileUpdate.lemonsqueezy_subscription_id = lsSubId;
+      if (lsCustomerId) profileUpdate.lemonsqueezy_customer_id = lsCustomerId;
+      if (Object.keys(profileUpdate).length > 0) {
         await supabase.from("profiles")
-          .update({ lemonsqueezy_subscription_id: lsSubId })
+          .update(profileUpdate)
           .eq("user_id", userId);
       }
 
