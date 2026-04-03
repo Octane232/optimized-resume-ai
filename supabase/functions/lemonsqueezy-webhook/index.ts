@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { findMatchingSubscriptionPlan } from "../_shared/subscriptionPlanResolver.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -66,16 +67,26 @@ serve(async (req) => {
   const billing = customData.billing;
   const attributes = payload.data?.attributes || {};
 
-  async function resolvePlanId(planName: string): Promise<string | null> {
-    const nameMap: Record<string, string> = { starter: "Starter", pro: "Pro" };
-    const displayName = nameMap[planName] || planName;
-    const { data } = await supabase
+  async function resolvePlanId(planName: string, billingCycle?: string | null): Promise<string | null> {
+    const { data: plans, error } = await supabase
       .from("subscription_plans")
-      .select("id")
-      .ilike("name", displayName)
-      .limit(1)
-      .maybeSingle();
-    return data?.id || null;
+      .select("id, name")
+      .limit(50);
+
+    if (error) {
+      console.error("Error resolving plan_id:", error);
+      return null;
+    }
+
+    const matchedPlan = findMatchingSubscriptionPlan(plans || [], planName, billingCycle);
+
+    if (!matchedPlan) {
+      const availablePlans = (plans || []).map((plan) => plan.name).filter(Boolean).join(", ");
+      console.error(`Plan not found for ${planName} (${billingCycle || "monthly"}). Available plans: ${availablePlans}`);
+      return null;
+    }
+
+    return matchedPlan.id;
   }
 
   try {
@@ -106,7 +117,7 @@ serve(async (req) => {
         });
       }
 
-      const planId = await resolvePlanId(plan);
+      const planId = await resolvePlanId(plan, billing);
       if (!planId) {
         console.error(`Plan not found: ${plan}`);
         return new Response(JSON.stringify({ received: true }), {
