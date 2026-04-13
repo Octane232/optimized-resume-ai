@@ -146,14 +146,14 @@ const PricingCards = () => {
         return;
       }
 
-      const { data, error } = await supabase.functions.invoke('lemonsqueezy-checkout', {
+      const { data, error } = await supabase.functions.invoke('stripe-checkout', {
         body: { plan: planId, billing },
       });
 
       if (error) throw error;
       if (!data?.url) throw new Error('No checkout URL');
 
-      // Redirect to Lemon Squeezy checkout
+      // Redirect to Stripe checkout
       window.location.href = data.url;
 
     } catch (error) {

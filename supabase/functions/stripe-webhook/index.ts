@@ -85,7 +85,7 @@ serve(async (req) => {
         }
 
         // Map plan to tier
-        const tier = plan === "pro" ? "pro" : "pro"; // starter maps to pro tier for now
+        const tier = plan === "pro" ? "pro" : "starter";
 
         // Calculate subscription end date
         const now = new Date();
