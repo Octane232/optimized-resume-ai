@@ -8,10 +8,10 @@ const corsHeaders = {
 };
 
 const PRICE_IDS = {
-  starter_monthly: "price_1TBlYCKyMF3XY1UQ9AwOS6cd",
-  starter_yearly: "price_1TBljFKyMF3XY1UQTGH4xotU",
-  pro_monthly: "price_1TBlfNKyMF3XY1UQ0onq3Dv4",
-  pro_yearly: "price_1TBlltKyMF3XY1UQIlIA6mKZ",
+  starter_monthly: "price_1TLYd5R3o3XGOyJGOpBbc7UF",
+  starter_yearly: "price_1TLYdMR3o3XGOyJGKSV1Nfgv",
+  pro_monthly: "price_1TLYdcR3o3XGOyJG0Jb5w4ed",
+  pro_yearly: "price_1TLYdqR3o3XGOyJGVnkazUUi",
 };
 
 serve(async (req) => {
