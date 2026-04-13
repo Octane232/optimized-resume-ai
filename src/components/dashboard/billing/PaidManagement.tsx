@@ -36,7 +36,7 @@ const PaidManagement = () => {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('lemonsqueezy-portal');
+      const { data, error } = await supabase.functions.invoke('stripe-customer-portal');
 
       if (error) throw error;
       if (!data?.url) throw new Error('No portal URL');

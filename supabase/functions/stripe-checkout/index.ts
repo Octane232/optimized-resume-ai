@@ -74,8 +74,8 @@ serve(async (req) => {
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
-      success_url: `https://xpmhahyvtyvrxryrqane.supabase.co/dashboard?upgrade=success`,
-      cancel_url: `https://xpmhahyvtyvrxryrqane.supabase.co/dashboard?upgrade=cancelled`,
+      success_url: `${req.headers.get("origin") || "https://vaylance.com"}/dashboard?upgrade=success`,
+      cancel_url: `${req.headers.get("origin") || "https://vaylance.com"}/dashboard?upgrade=cancelled`,
       metadata: {
         supabase_user_id: user.id,
         plan,
