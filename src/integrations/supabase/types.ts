@@ -676,6 +676,7 @@ export type Database = {
           phone: string | null
           plan: string | null
           profile_completion: number | null
+          stripe_customer_id: string | null
           updated_at: string
           user_id: string
           website: string | null
@@ -692,6 +693,7 @@ export type Database = {
           phone?: string | null
           plan?: string | null
           profile_completion?: number | null
+          stripe_customer_id?: string | null
           updated_at?: string
           user_id: string
           website?: string | null
@@ -708,6 +710,7 @@ export type Database = {
           phone?: string | null
           plan?: string | null
           profile_completion?: number | null
+          stripe_customer_id?: string | null
           updated_at?: string
           user_id?: string
           website?: string | null
