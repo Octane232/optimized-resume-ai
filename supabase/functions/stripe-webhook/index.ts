@@ -41,25 +41,44 @@ serve(async (req) => {
 
   console.log("Stripe event received:", event.type);
 
-  // Helper: resolve plan name (e.g. "starter", "pro") to subscription_plans UUID
+  // Helper: resolve plan name to subscription_plans UUID
   async function resolvePlanId(planName: string): Promise<string | null> {
-    // Map plan names to subscription_plans.name
     const nameMap: Record<string, string> = {
       starter: "Starter",
       pro: "Pro",
     };
-    const displayName = nameMap[planName] || planName;
+    const displayName = nameMap[planName.toLowerCase()] || planName;
+
+    // Try exact match first, then case-insensitive
     const { data, error } = await supabase
       .from("subscription_plans")
       .select("id")
       .ilike("name", displayName)
       .limit(1)
       .maybeSingle();
+
     if (error) {
       console.error("Error resolving plan_id:", error);
-      return null;
     }
-    return data?.id || null;
+    if (data?.id) return data.id;
+
+    // Fallback: try partial match for legacy names
+    const fallbackNames = planName === "pro"
+      ? ["Pro", "Premium", "Pitchsora Premium"]
+      : ["Starter", "Pitchsora Pro"];
+
+    for (const name of fallbackNames) {
+      const { data: fallback } = await supabase
+        .from("subscription_plans")
+        .select("id")
+        .ilike("name", `%${name}%`)
+        .limit(1)
+        .maybeSingle();
+      if (fallback?.id) return fallback.id;
+    }
+
+    console.error(`Could not find subscription_plans entry for plan: ${planName}`);
+    return null;
   }
 
   try {
@@ -73,15 +92,17 @@ serve(async (req) => {
         const billing = session.metadata?.billing; // "monthly" or "yearly"
 
         if (!userId || !plan) {
-          console.error("Missing metadata in checkout session");
+          console.error("Missing metadata in checkout session", { userId, plan });
           break;
         }
+
+        console.log(`Processing checkout for user ${userId}, plan: ${plan}, billing: ${billing}`);
 
         // Resolve plan_id UUID from subscription_plans table
         const planId = await resolvePlanId(plan);
         if (!planId) {
-          console.error(`Could not find subscription_plans entry for plan: ${plan}`);
-          break;
+          console.error(`Could not find subscription_plans entry for plan: ${plan}. Will use fallback.`);
+          // Even if we can't find the plan, still update the subscription tier
         }
 
         // Map plan to tier
@@ -100,17 +121,49 @@ serve(async (req) => {
         };
         const price = priceMap[plan]?.[billing || "monthly"] || 0;
 
-        // Update subscription in database
-        const { error: subError } = await supabase.from("user_subscriptions").upsert({
+        // Save Stripe customer ID to profile
+        if (session.customer) {
+          const { error: profileError } = await supabase
+            .from("profiles")
+            .update({
+              stripe_customer_id: session.customer as string,
+              plan: tier,
+            })
+            .eq("user_id", userId);
+          if (profileError) {
+            console.error("Error updating profile:", profileError);
+          } else {
+            console.log(`Updated profile for user ${userId}: plan=${tier}, stripe_customer_id=${session.customer}`);
+          }
+        }
+
+        // Build subscription upsert - use a free plan ID as fallback if planId is null
+        const subData: Record<string, unknown> = {
           user_id: userId,
-          plan_id: planId,
           tier,
-          billing_cycle: billing,
+          billing_cycle: billing || "monthly",
           plan_status: "active",
           price,
           current_period_end: endDate.toISOString(),
           updated_at: new Date().toISOString(),
-        }, { onConflict: "user_id" });
+        };
+
+        if (planId) {
+          subData.plan_id = planId;
+        } else {
+          // Get any plan ID as fallback
+          const { data: anyPlan } = await supabase
+            .from("subscription_plans")
+            .select("id")
+            .limit(1)
+            .maybeSingle();
+          subData.plan_id = anyPlan?.id;
+        }
+
+        const { error: subError } = await supabase.from("user_subscriptions").upsert(
+          subData,
+          { onConflict: "user_id" }
+        );
 
         if (subError) {
           console.error("Error updating subscription:", subError);
@@ -119,13 +172,18 @@ serve(async (req) => {
 
         // Add credits based on plan
         const credits = plan === "pro" ? 100 : 50;
-        await supabase.from("user_credits").upsert({
+        const { error: credError } = await supabase.from("user_credits").upsert({
           user_id: userId,
           balance: credits,
+          monthly_allowance: credits,
           updated_at: new Date().toISOString(),
         }, { onConflict: "user_id" });
 
-        console.log(`User ${userId} upgraded to ${plan} (${billing})`);
+        if (credError) {
+          console.error("Error updating credits:", credError);
+        }
+
+        console.log(`✅ User ${userId} upgraded to ${tier} (${billing}), credits: ${credits}`);
         break;
       }
 
@@ -136,15 +194,16 @@ serve(async (req) => {
 
         if (!subscriptionId) break;
 
-        // Get subscription details
         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
         const userId = subscription.metadata?.supabase_user_id;
 
-        if (!userId) break;
+        if (!userId) {
+          console.log("No supabase_user_id in subscription metadata, skipping");
+          break;
+        }
 
         const periodEnd = new Date(subscription.current_period_end * 1000);
 
-        // Renew subscription period
         await supabase.from("user_subscriptions")
           .update({
             plan_status: "active",
@@ -159,10 +218,11 @@ serve(async (req) => {
         await supabase.from("user_credits").upsert({
           user_id: userId,
           balance: credits,
+          monthly_allowance: credits,
           updated_at: new Date().toISOString(),
         }, { onConflict: "user_id" });
 
-        console.log(`Subscription renewed for user ${userId}`);
+        console.log(`✅ Subscription renewed for user ${userId}`);
         break;
       }
 
@@ -181,7 +241,12 @@ serve(async (req) => {
           })
           .eq("user_id", userId);
 
-        console.log(`Subscription cancelled for user ${userId}`);
+        // Also update profile
+        await supabase.from("profiles")
+          .update({ plan: "free" })
+          .eq("user_id", userId);
+
+        console.log(`✅ Subscription cancelled for user ${userId}`);
         break;
       }
 
@@ -204,7 +269,7 @@ serve(async (req) => {
           })
           .eq("user_id", userId);
 
-        console.log(`Payment failed for user ${userId}`);
+        console.log(`⚠️ Payment failed for user ${userId}`);
         break;
       }
 
