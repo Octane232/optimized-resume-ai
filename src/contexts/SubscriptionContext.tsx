@@ -105,23 +105,46 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      // Check subscription from database
-      const { data: subData, error: subError } = await supabase
-        .from('user_subscriptions')
-        .select('tier, plan_status, current_period_end')
-        .eq('user_id', session.user.id)
-        .maybeSingle();
-      
-      if (subError) {
-        console.error('[SubscriptionContext] Error checking subscription:', subError);
-        setTier('free');
-      } else if (subData && subData.plan_status === 'active' && subData.tier) {
-        const newTier = subData.tier as SubscriptionTier;
-        console.log('[SubscriptionContext] Setting tier to:', newTier);
-        setTier(newTier);
-        setSubscriptionEnd(subData.current_period_end);
-      } else {
-        setTier('free');
+      // Try check-subscription edge function first (queries Stripe directly + syncs DB)
+      let tierResolved = false;
+      try {
+        const { data: checkData, error: checkError } = await supabase.functions.invoke('check-subscription');
+        if (!checkError && checkData) {
+          if (checkData.subscribed && checkData.tier) {
+            const newTier = checkData.tier as SubscriptionTier;
+            console.log('[SubscriptionContext] Stripe check - tier:', newTier);
+            setTier(newTier);
+            setSubscriptionEnd(checkData.subscription_end);
+            tierResolved = true;
+          } else if (checkData.subscribed === false) {
+            console.log('[SubscriptionContext] Stripe check - no active subscription');
+            setTier('free');
+            tierResolved = true;
+          }
+        }
+      } catch (fnErr) {
+        console.warn('[SubscriptionContext] check-subscription failed, falling back to DB:', fnErr);
+      }
+
+      // Fallback: read from database directly
+      if (!tierResolved) {
+        const { data: subData, error: subError } = await supabase
+          .from('user_subscriptions')
+          .select('tier, plan_status, current_period_end')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
+        
+        if (subError) {
+          console.error('[SubscriptionContext] Error checking subscription:', subError);
+          setTier('free');
+        } else if (subData && subData.plan_status === 'active' && subData.tier) {
+          const newTier = subData.tier as SubscriptionTier;
+          console.log('[SubscriptionContext] DB fallback - tier:', newTier);
+          setTier(newTier);
+          setSubscriptionEnd(subData.current_period_end);
+        } else {
+          setTier('free');
+        }
       }
 
       // Fetch usage stats
