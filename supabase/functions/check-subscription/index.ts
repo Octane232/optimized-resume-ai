@@ -14,14 +14,22 @@ const PRICE_TO_TIER: Record<string, string> = {
   "price_1TLYdqR3o3XGOyJGVnkazUUi": "pro",
 };
 
+const logStep = (step: string, details?: any) => {
+  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+  console.log(`[CHECK-SUBSCRIPTION] ${step}${detailsStr}`);
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    logStep("Function started");
+
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
+    logStep("Stripe key verified");
 
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -31,12 +39,14 @@ serve(async (req) => {
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("No authorization header");
+    logStep("Authorization header found");
 
     const token = authHeader.replace("Bearer ", "");
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
     if (userError) throw new Error(`Auth error: ${userError.message}`);
     const user = userData.user;
     if (!user?.email) throw new Error("User not authenticated");
+    logStep("User authenticated", { userId: user.id, email: user.email });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
 
@@ -44,12 +54,14 @@ serve(async (req) => {
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
 
     if (customers.data.length === 0) {
+      logStep("No Stripe customer found, returning free tier");
       return new Response(JSON.stringify({ subscribed: false, tier: "free" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const customerId = customers.data[0].id;
+    logStep("Found Stripe customer", { customerId });
 
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
@@ -58,6 +70,9 @@ serve(async (req) => {
     });
 
     if (subscriptions.data.length === 0) {
+      logStep("No active subscription, reverting to free");
+      // Sync free status to DB
+      await supabaseClient.from("profiles").update({ plan: "free" }).eq("user_id", user.id);
       return new Response(JSON.stringify({ subscribed: false, tier: "free" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -67,8 +82,9 @@ serve(async (req) => {
     const priceId = subscription.items.data[0]?.price?.id;
     const tier = PRICE_TO_TIER[priceId] || subscription.metadata?.plan || "starter";
     const subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
+    logStep("Active subscription found", { priceId, tier, subscriptionEnd });
 
-    // Also sync to DB while we're here
+    // Sync to DB
     const planName = tier === "pro" ? "Pro" : "Starter";
     const { data: planData } = await supabaseClient
       .from("subscription_plans")
@@ -86,6 +102,7 @@ serve(async (req) => {
         current_period_end: subscriptionEnd,
         updated_at: new Date().toISOString(),
       }, { onConflict: "user_id" });
+      logStep("Synced user_subscriptions");
     }
 
     // Sync profile
@@ -93,6 +110,7 @@ serve(async (req) => {
       plan: tier,
       stripe_customer_id: customerId,
     }).eq("user_id", user.id);
+    logStep("Synced profile", { tier, customerId });
 
     return new Response(JSON.stringify({
       subscribed: true,
@@ -103,7 +121,7 @@ serve(async (req) => {
     });
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
-    console.error("[check-subscription] ERROR:", msg);
+    logStep("ERROR", { message: msg });
     return new Response(JSON.stringify({ error: msg }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
