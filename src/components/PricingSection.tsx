@@ -50,11 +50,8 @@ const PricingSection = () => {
     <section id="pricing" className="py-24 bg-background">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* Header */}
         <div className="max-w-2xl mb-16">
-          <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">
-            Pricing
-          </p>
+          <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">Pricing</p>
           <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight mb-4">
             Two plans. 14 days free.
           </h2>
@@ -73,9 +70,7 @@ const PricingSection = () => {
             className={`relative w-11 h-6 rounded-full transition-colors ${isYearly ? 'bg-primary' : 'bg-muted'}`}
             aria-label="Toggle billing period"
           >
-            <div
-              className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${isYearly ? 'translate-x-6' : 'translate-x-1'}`}
-            />
+            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${isYearly ? 'translate-x-6' : 'translate-x-1'}`} />
           </button>
           <span className={`text-sm font-medium transition-colors ${isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>
             Yearly
@@ -87,7 +82,6 @@ const PricingSection = () => {
           )}
         </div>
 
-        {/* Plans grid */}
         <div className="grid md:grid-cols-2 gap-4 max-w-3xl">
           {plans.map((plan, i) => (
             <div
@@ -114,9 +108,7 @@ const PricingSection = () => {
                   <span className="text-4xl font-black text-foreground">
                     ${isYearly ? plan.yearlyPrice : plan.monthlyPrice}
                   </span>
-                  <span className="text-muted-foreground text-sm">
-                    /{isYearly ? 'year' : 'month'}
-                  </span>
+                  <span className="text-muted-foreground text-sm">/{isYearly ? 'year' : 'month'}</span>
                 </div>
                 {isYearly && (
                   <p className="text-xs text-muted-foreground mt-1">
@@ -151,12 +143,10 @@ const PricingSection = () => {
           ))}
         </div>
 
-        {/* Footer note */}
         <p className="text-sm text-muted-foreground mt-8 flex items-center gap-2">
           <Check className="w-4 h-4 text-emerald-500 shrink-0" />
           14-day free trial on all plans. No charge until day 15. Cancel anytime.
         </p>
-
       </div>
     </section>
   );

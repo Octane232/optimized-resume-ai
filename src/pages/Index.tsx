@@ -14,33 +14,19 @@ const Index = () => {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
-    // Clear any existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
     if (location.hash) {
       try {
-        // Remove the # and escape special characters
-        const id = location.hash.substring(1).replace(/[!\"#$%&'()*+,./:;<=>?@[\\\]^`{|}~]/g, '\\$&');
+        const id = location.hash.substring(1).replace(/[!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~]/g, '\\$&');
         const el = document.getElementById(id);
-        
         if (el) {
-          timeoutRef.current = setTimeout(() => {
-            el.scrollIntoView({ behavior: 'smooth' });
-          }, 100);
+          timeoutRef.current = setTimeout(() => el.scrollIntoView({ behavior: 'smooth' }), 100);
         }
       } catch (error) {
         console.error('Error scrolling to element:', error);
       }
     }
-
-    // Cleanup timeout on unmount
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
+    return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
   }, [location]);
 
   return (
@@ -54,15 +40,9 @@ const Index = () => {
       <Header />
       <HeroSection />
       <StatsSection />
-      <div id="features">
-        <FeaturesSection />
-      </div>
-      <div id="testimonials">
-        <TestimonialsSection />
-      </div>
-      <div id="pricing">
-        <PricingSection />
-      </div>
+      <div id="features"><FeaturesSection /></div>
+      <div id="testimonials"><TestimonialsSection /></div>
+      <div id="pricing"><PricingSection /></div>
       <Footer />
     </div>
   );
