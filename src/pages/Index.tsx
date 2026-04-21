@@ -2,7 +2,9 @@ import React, { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import Header from '@/components/Header';
 import HeroSection from '@/components/HeroSection';
+import StatsSection from '@/components/StatsSection';
 import FeaturesSection from '@/components/FeaturesSection';
+import TestimonialsSection from '@/components/TestimonialsSection';
 import PricingSection from '@/components/PricingSection';
 import Footer from '@/components/Footer';
 import SEOHead from '@/components/SEOHead';
@@ -51,8 +53,12 @@ const Index = () => {
       />
       <Header />
       <HeroSection />
+      <StatsSection />
       <div id="features">
         <FeaturesSection />
+      </div>
+      <div id="testimonials">
+        <TestimonialsSection />
       </div>
       <div id="pricing">
         <PricingSection />
