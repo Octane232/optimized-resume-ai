@@ -1,158 +1,120 @@
 import React from 'react';
-import { Star, Quote, Sparkles, CheckCircle } from 'lucide-react';
+import { Star, Quote, CheckCircle } from 'lucide-react';
+
+const testimonials = [
+  {
+    name: 'Marcus T.',
+    role: 'Product Manager',
+    company: 'Tech Company',
+    content: 'After struggling with generic resume builders for months, I tried Vaylance. The AI found keyword gaps I never noticed and rewrote my bullets with real impact. Got 2 interviews in the first week.',
+    initials: 'MT',
+  },
+  {
+    name: 'Priya S.',
+    role: 'Software Engineer',
+    company: 'Fortune 500',
+    content: 'After months of silence from applications, Vaylance showed me exactly why I was getting filtered out by ATS systems. Landed 3 interviews after implementing the fixes it suggested.',
+    initials: 'PS',
+  },
+  {
+    name: 'Alex R.',
+    role: 'Marketing Specialist',
+    company: 'SaaS Startup',
+    content: 'It wrote a cover letter that actually sounded like me — not generic AI fluff. My response rate went from 5% to over 20%.',
+    initials: 'AR',
+  },
+  {
+    name: 'Jordan K.',
+    role: 'Data Analyst',
+    company: 'Finance Industry',
+    content: 'The job match scoring is surprisingly accurate. Saved me from wasting time on jobs I wouldn\'t get and helped me focus on better opportunities.',
+    initials: 'JK',
+  },
+  {
+    name: 'Sam L.',
+    role: 'UX Designer',
+    company: 'Design Agency',
+    content: 'Used Vaylance to pivot from graphic design to UX. It identified transferable skills I completely overlooked. Landed my dream role within 2 months.',
+    initials: 'SL',
+  },
+  {
+    name: 'Taylor M.',
+    role: 'Sales Manager',
+    company: 'Enterprise Tech',
+    content: 'The follow-up email suggestions are gold. It drafted the perfect follow-up message and got me to final rounds twice — something I\'d been struggling with for over a year.',
+    initials: 'TM',
+  },
+];
+
+const avatarColors = [
+  'bg-blue-100 text-blue-800',
+  'bg-purple-100 text-purple-800',
+  'bg-emerald-100 text-emerald-800',
+  'bg-orange-100 text-orange-800',
+  'bg-pink-100 text-pink-800',
+  'bg-indigo-100 text-indigo-800',
+];
 
 const TestimonialsSection = () => {
-  const testimonials = [
-    {
-      name: 'Marcus T.',
-      role: 'Product Manager', 
-      company: 'Tech Company',
-      content: "After struggling with generic resume builders for months, I tried Vaylance. The AI found keyword gaps I never noticed and rewrote my bullets with real impact. Got 2 interviews in the first week after making the changes.",
-      rating: 5,
-      initials: 'MT',
-      bgColor: 'bg-gradient-to-br from-blue-500 to-blue-600',
-      verified: true
-    },
-    {
-      name: 'Priya S.',
-      role: 'Software Engineer',
-      company: 'Fortune 500', 
-      content: "After months of silence from applications, I asked the AI to analyze my resume. It showed me exactly why I was getting filtered out by ATS systems. Landed 3 interviews after implementing the fixes it suggested.",
-      rating: 5,
-      initials: 'PS',
-      bgColor: 'bg-gradient-to-br from-purple-500 to-purple-600',
-      verified: true
-    },
-    {
-      name: 'Alex R.',
-      role: 'Marketing Specialist',
-      company: 'SaaS Startup',
-      content: "I was skeptical about AI career tools, but Vaylance genuinely understands context. It wrote a cover letter that actually sounded like me—not generic AI fluff. My response rate went from 5% to over 20%.",
-      rating: 5,
-      initials: 'AR',
-      bgColor: 'bg-gradient-to-br from-emerald-500 to-emerald-600',
-      verified: true
-    },
-    {
-      name: 'Jordan K.',
-      role: 'Data Analyst',
-      company: 'Finance Industry',
-      content: "The job match scoring is surprisingly accurate. The AI told me a role was only 62% match and explained exactly why. Saved me from wasting time on jobs I wouldn't get and helped me focus on better opportunities.",
-      rating: 5,
-      initials: 'JK',
-      bgColor: 'bg-gradient-to-br from-orange-500 to-orange-600',
-      verified: true
-    },
-    {
-      name: 'Sam L.',
-      role: 'UX Designer',
-      company: 'Design Agency',
-      content: "Used Vaylance to help me pivot from graphic design to UX. It identified transferable skills I completely overlooked and helped me reframe my entire experience. Landed my dream role within 2 months.",
-      rating: 5,
-      initials: 'SL',
-      bgColor: 'bg-gradient-to-br from-pink-500 to-pink-600',
-      verified: true
-    },
-    {
-      name: 'Taylor M.',
-      role: 'Sales Manager',
-      company: 'Enterprise Tech',
-      content: "The follow-up email suggestions are gold. Vaylance reminded me to follow up on day 5 and drafted the perfect message. It got me to final rounds twice—something I'd been struggling with for over a year.",
-      rating: 5,
-      initials: 'TM',
-      bgColor: 'bg-gradient-to-br from-indigo-500 to-indigo-600',
-      verified: true
-    }
-  ];
-
   return (
-    <section className="relative py-16 sm:py-24 lg:py-32 overflow-hidden bg-background">
-      {/* Advanced background with animated gradients */}
-      <div className="absolute inset-0 bg-[var(--gradient-mesh)] opacity-60"></div>
-      <div className="absolute top-0 left-1/4 w-48 sm:w-96 h-48 sm:h-96 bg-gradient-to-br from-blue-400/20 to-purple-500/20 dark:from-blue-500/10 dark:to-purple-600/10 rounded-full blur-3xl animate-pulse"></div>
-      <div className="absolute bottom-0 right-1/4 w-48 sm:w-96 h-48 sm:h-96 bg-gradient-to-tr from-purple-400/20 to-emerald-400/20 dark:from-purple-500/10 dark:to-emerald-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-      
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <div className="text-center mb-10 sm:mb-16">
-          <div className="inline-flex items-center gap-2 glass-card rounded-full px-4 py-2 mb-4 sm:mb-6 animate-fade-in">
-            <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-foreground">
-              Real Results
-            </span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 leading-tight animate-fade-in" style={{ animationDelay: '0.1s' }}>
-            <span className="block text-foreground">What Our Users Say</span>
-          </h2>
-          <p className="text-base sm:text-lg max-w-2xl mx-auto text-muted-foreground animate-fade-in px-4" style={{ animationDelay: '0.2s' }}>
-            Join thousands of job seekers who've accelerated their career with Vaylance
+    <section className="py-24 bg-background">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="max-w-2xl mb-16">
+          <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">
+            Real results
           </p>
-          
-          {/* Rating summary */}
-          <div className="flex items-center justify-center gap-2 mt-4 sm:mt-6 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+          <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight mb-4">
+            People are getting hired.
+          </h2>
+          <div className="flex items-center gap-2">
             <div className="flex gap-0.5">
               {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400" />
+                <Star key={i} className="w-4 h-4 text-amber-400 fill-amber-400" />
               ))}
             </div>
-            <span className="text-xs sm:text-sm font-medium text-foreground ml-2">4.8 average rating</span>
+            <span className="text-sm text-muted-foreground font-medium">4.8 average · 1,200+ users</span>
           </div>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-7xl mx-auto">
-          {testimonials.map((testimonial, index) => (
-            <div 
-              key={index} 
-              className="testimonial-card rounded-2xl sm:rounded-3xl p-5 sm:p-6 lg:p-8 group animate-fade-in relative"
-              style={{ animationDelay: `${0.3 + index * 0.1}s` }}
+        {/* Testimonials grid */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {testimonials.map((t, i) => (
+            <div
+              key={i}
+              className="group p-6 rounded-2xl border border-border bg-card hover:border-primary/30 hover:shadow-md transition-all duration-200 flex flex-col"
             >
-              {/* Decorative quote icon */}
-              <div className="absolute top-4 sm:top-6 right-4 sm:right-6 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-primary/10 to-purple-500/10 rounded-xl flex items-center justify-center rotate-6 group-hover:rotate-12 transition-transform duration-500">
-                <Quote className="w-5 h-5 sm:w-6 sm:h-6 text-primary/40" />
-              </div>
-
-              {/* Rating Stars with glow effect */}
-              <div className="flex gap-1 mb-3 sm:mb-4">
-                {[...Array(testimonial.rating)].map((_, i) => (
-                  <div key={i} className="relative">
-                    <Star className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-yellow-400 fill-yellow-400 drop-shadow-[0_0_6px_rgba(250,204,21,0.5)]" />
-                  </div>
+              {/* Stars */}
+              <div className="flex gap-0.5 mb-4">
+                {[...Array(5)].map((_, s) => (
+                  <Star key={s} className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
                 ))}
               </div>
 
-              {/* Testimonial Content */}
-              <p className="text-foreground/90 mb-6 sm:mb-8 leading-relaxed text-xs sm:text-sm font-medium relative z-10 pr-8 sm:pr-10">
-                "{testimonial.content}"
+              {/* Quote */}
+              <p className="text-sm text-muted-foreground leading-relaxed flex-1 mb-6">
+                "{t.content}"
               </p>
 
-              {/* User Info with avatar initials */}
-              <div className="flex items-center gap-3 sm:gap-4 pt-4 sm:pt-6 border-t border-border/50">
-                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full ${testimonial.bgColor} flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300`}>
-                  <span className="text-white font-bold text-xs sm:text-sm">{testimonial.initials}</span>
+              {/* User */}
+              <div className="flex items-center gap-3 pt-4 border-t border-border/60">
+                <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${avatarColors[i % avatarColors.length]}`}>
+                  {t.initials}
                 </div>
                 <div>
-                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                    <h4 className="font-bold text-foreground text-xs sm:text-sm">
-                      {testimonial.name}
-                    </h4>
-                    {testimonial.verified && (
-                      <div className="flex items-center gap-1 text-[10px] sm:text-xs text-primary font-medium bg-primary/10 px-1.5 sm:px-2 py-0.5 rounded-full">
-                        <CheckCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                        Verified
-                      </div>
-                    )}
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-semibold text-foreground">{t.name}</span>
+                    <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full">
+                      <CheckCircle className="w-2.5 h-2.5" />
+                      Verified
+                    </span>
                   </div>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground font-medium">
-                    {testimonial.role} • {testimonial.company}
-                  </p>
+                  <p className="text-xs text-muted-foreground">{t.role} · {t.company}</p>
                 </div>
               </div>
-
-              {/* Subtle gradient overlay on hover */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-purple-500/5 rounded-2xl sm:rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
             </div>
           ))}
         </div>
-
       </div>
     </section>
   );
