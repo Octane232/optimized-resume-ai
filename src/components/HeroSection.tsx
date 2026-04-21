@@ -56,10 +56,7 @@ const HeroSection = () => {
       <div
         className="absolute inset-0 opacity-[0.03]"
         style={{
-          backgroundImage: `
-            linear-gradient(hsl(var(--foreground)) 1px, transparent 1px),
-            linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)
-          `,
+          backgroundImage: `linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)`,
           backgroundSize: '64px 64px',
         }}
       />
@@ -103,6 +100,7 @@ const HeroSection = () => {
           ))}
         </div>
 
+        {/* Animated dashboard preview */}
         <div className="mt-20 max-w-4xl mx-auto" ref={previewRef}>
           <div className="relative rounded-2xl border border-border bg-card shadow-xl overflow-hidden">
             <div className="h-8 bg-muted/50 border-b border-border flex items-center gap-2 px-4">
