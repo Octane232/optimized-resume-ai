@@ -8,9 +8,7 @@ import { lazy, Suspense } from "react";
 
 import ScrollToTop from "./components/ScrollToTop";
 import ScrollToSection from "./components/ScrollToSection";
-import { SubscriptionProvider } from "./contexts/SubscriptionContext";
 import { UsageLimitProvider } from "./contexts/UsageLimitContext";
-import { CreditsProvider } from "./contexts/CreditsContext";
 
 // ===== Lazy-loaded Pages =====
 const Index = lazy(() => import("./pages/Index"));
@@ -49,72 +47,63 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
       <TooltipProvider>
-        <SubscriptionProvider>
-          <UsageLimitProvider>
-            <CreditsProvider>
-              {/* Toast Notifications */}
-              <Toaster />
-              <Sonner />
+        <UsageLimitProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <ScrollToTop />
+            <ScrollToSection />
+            <Suspense fallback={<LoadingFallback />}>
+              <Routes>
+                {/* Marketing Pages */}
+                <Route path="/" element={<Index />} />
+                <Route path="/features" element={<Index />} />
+                <Route path="/pricing" element={<Index />} />
+                <Route path="/enterprise" element={<Index />} />
+                <Route path="/resources" element={<Index />} />
 
-              {/* Router */}
-              <BrowserRouter>
-                <ScrollToTop />
-                <ScrollToSection />
+                {/* Authentication */}
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
 
-                {/* Lazy Loading Boundary */}
-                <Suspense fallback={<LoadingFallback />}>
-                  <Routes>
-                    {/* Marketing Pages */}
-                    <Route path="/" element={<Index />} />
-                    <Route path="/features" element={<Index />} />
-                    <Route path="/pricing" element={<Index />} />
-                    <Route path="/enterprise" element={<Index />} />
-                    <Route path="/resources" element={<Index />} />
+                {/* Dashboard & Core Features */}
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/resume-builder" element={<ResumeBuilder />} />
+                <Route path="/ai-features" element={<AIFeatures />} />
+                <Route path="/analytics" element={<Analytics />} />
 
-                    {/* Authentication */}
-                    <Route path="/auth" element={<Auth />} />
-                    <Route path="/reset-password" element={<ResetPassword />} />
+                {/* Resume Editor Routes */}
+                <Route path="/editor/new" element={<ResumeEditor />} />
+                <Route path="/editor/:resumeId" element={<ResumeEditor />} />
+                <Route path="/resume-editor" element={<ResumeEditor />} />
 
-                    {/* Dashboard & Core Features */}
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/resume-builder" element={<ResumeBuilder />} />
-                    <Route path="/ai-features" element={<AIFeatures />} />
-                    <Route path="/analytics" element={<Analytics />} />
+                {/* Audience Pages */}
+                <Route path="/for-individuals" element={<ForIndividuals />} />
+                <Route path="/for-students" element={<ForStudents />} />
 
-                    {/* Resume Editor Routes */}
-                    <Route path="/editor/new" element={<ResumeEditor />} />
-                    <Route path="/editor/:resumeId" element={<ResumeEditor />} />
-                    <Route path="/resume-editor" element={<ResumeEditor />} />
+                {/* Company Pages */}
+                <Route path="/about-us" element={<AboutUs />} />
+                <Route path="/contact" element={<Contact />} />
 
-                    {/* Audience Pages */}
-                    <Route path="/for-individuals" element={<ForIndividuals />} />
-                    <Route path="/for-students" element={<ForStudents />} />
+                {/* Legal Pages */}
+                <Route path="/terms" element={<TermsOfService />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/cookie-policy" element={<CookiePolicy />} />
 
-                    {/* Company Pages */}
-                    <Route path="/about-us" element={<AboutUs />} />
-                    <Route path="/contact" element={<Contact />} />
+                {/* Resources */}
+                <Route path="/documentation" element={<Documentation />} />
+                <Route path="/roadmap" element={<Roadmap />} />
 
-                    {/* Legal Pages */}
-                    <Route path="/terms" element={<TermsOfService />} />
-                    <Route path="/privacy" element={<PrivacyPolicy />} />
-                    <Route path="/cookie-policy" element={<CookiePolicy />} />
+                {/* Affiliate Program */}
+                <Route path="/affiliate-program" element={<AffiliateProgram />} />
+                <Route path="/affiliate-dashboard" element={<AffiliateDashboard />} />
 
-                    {/* Resources */}
-                    <Route path="/documentation" element={<Documentation />} />
-                    <Route path="/roadmap" element={<Roadmap />} />
-
-                    {/* Affiliate Program */}
-                    <Route path="/affiliate-program" element={<AffiliateProgram />} />
-                    <Route path="/affiliate-dashboard" element={<AffiliateDashboard />} />
-
-                    {/* 404 - Catch All */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </Suspense>
-              </BrowserRouter>
-            </CreditsProvider>
-          </UsageLimitProvider>
-        </SubscriptionProvider>
+                {/* 404 */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </BrowserRouter>
+        </UsageLimitProvider>
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>
