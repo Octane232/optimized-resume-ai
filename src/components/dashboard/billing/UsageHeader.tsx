@@ -1,18 +1,18 @@
-import { Zap, ArrowRight } from 'lucide-react';
+import { Zap, ArrowRight, ExternalLink } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useUsageLimit, UsageAction, ACTION_LABELS } from '@/contexts/UsageLimitContext';
-const TRACKED_ACTIONS: UsageAction[] = ['resume_ats', 'interview_prep', 'salary_intel', 'linkedin', 'skill_gap'];
+
+const TRACKED_ACTIONS: UsageAction[] = ['resume_ats', 'cover_letter', 'interview_prep', 'salary_intel', 'linkedin', 'skill_gap'];
+
 const UsageHeader = ({ setActiveTab }: { setActiveTab?: (tab: string) => void }) => {
-  const { tier } = useSubscription();
-  const { getLimit, getRemaining } = useUsageLimit();
-  const tierLabel = tier === 'free' ? 'Free' : tier === 'starter' ? 'Starter' : 'Pro';
-  const tierColor = tier === 'free'
-    ? 'bg-muted text-muted-foreground border-border'
-    : tier === 'starter'
-    ? 'bg-primary/10 text-primary border-primary/20'
-    : 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20';
+  const { tier, displayTier, getLimit, getRemaining } = useUsageLimit();
+
+  const tierBadgeClass =
+    tier === 'free' ? 'bg-muted text-muted-foreground border-border' :
+    tier === 'starter' ? 'bg-primary/10 text-primary border-primary/20' :
+    'bg-emerald-500/10 text-emerald-600 border-emerald-500/20';
+
   return (
     <div className="rounded-xl border border-border/60 bg-card p-6 space-y-5">
       <div className="flex items-center justify-between">
@@ -23,8 +23,8 @@ const UsageHeader = ({ setActiveTab }: { setActiveTab?: (tab: string) => void })
           <div>
             <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mb-0.5">Current Plan</p>
             <div className="flex items-center gap-2">
-              <h3 className="text-lg font-bold text-foreground">{tierLabel}</h3>
-              <Badge className={`text-xs border ${tierColor}`}>{tierLabel}</Badge>
+              <h3 className="text-lg font-bold text-foreground">{displayTier}</h3>
+              <Badge className={`text-xs border ${tierBadgeClass}`}>{displayTier}</Badge>
             </div>
           </div>
         </div>
@@ -34,6 +34,7 @@ const UsageHeader = ({ setActiveTab }: { setActiveTab?: (tab: string) => void })
           </Button>
         )}
       </div>
+
       <div className="space-y-3">
         <p className="text-xs font-semibold text-foreground uppercase tracking-wide">
           {tier === 'free' ? 'Lifetime Usage' : 'This Month'}
@@ -44,25 +45,20 @@ const UsageHeader = ({ setActiveTab }: { setActiveTab?: (tab: string) => void })
             const remaining = getRemaining(action);
             const used = limit - remaining;
             const pct = limit > 0 ? Math.min((used / limit) * 100, 100) : 0;
-            const isEmpty = remaining === 0 && limit > 0;
+            const isEmpty = remaining === 0;
             const isLow = pct >= 70 && !isEmpty;
-            const isLocked = limit === 0;
             return (
               <div key={action} className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-muted-foreground">{ACTION_LABELS[action]}</span>
                   <span className={`text-xs font-semibold ${isEmpty ? 'text-destructive' : isLow ? 'text-amber-500' : 'text-foreground'}`}>
-                    {isLocked ? 'Locked' : `${used}/${limit}`}
+                    {used} / {limit}
                   </span>
                 </div>
                 <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                   <div
-                    className={`h-full rounded-full transition-all ${
-                      isLocked ? 'bg-muted-foreground/20' :
-                      isEmpty ? 'bg-destructive' :
-                      isLow ? 'bg-amber-500' : 'bg-primary'
-                    }`}
-                    style={{ width: isLocked ? '0%' : `${pct}%` }}
+                    className={`h-full rounded-full transition-all ${isEmpty ? 'bg-destructive' : isLow ? 'bg-amber-500' : 'bg-primary'}`}
+                    style={{ width: `${pct}%` }}
                   />
                 </div>
               </div>
@@ -70,7 +66,17 @@ const UsageHeader = ({ setActiveTab }: { setActiveTab?: (tab: string) => void })
           })}
         </div>
       </div>
+
+      <div className="flex items-start gap-2 pt-2 border-t border-border/40">
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          💡 Salary figures are AI estimates. Always verify with{' '}
+          <a href="https://www.glassdoor.com/Salaries/index.htm" target="_blank" rel="noopener noreferrer" className="underline inline-flex items-center gap-0.5">Glassdoor<ExternalLink className="w-2.5 h-2.5 ml-0.5" /></a>,{' '}
+          <a href="https://www.levels.fyi" target="_blank" rel="noopener noreferrer" className="underline inline-flex items-center gap-0.5">Levels.fyi<ExternalLink className="w-2.5 h-2.5 ml-0.5" /></a>, or{' '}
+          <a href="https://www.linkedin.com/salary/" target="_blank" rel="noopener noreferrer" className="underline inline-flex items-center gap-0.5">LinkedIn Salary<ExternalLink className="w-2.5 h-2.5 ml-0.5" /></a>.
+        </p>
+      </div>
     </div>
   );
 };
+
 export default UsageHeader;
