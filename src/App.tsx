@@ -13,7 +13,7 @@ import { UsageLimitProvider } from "./contexts/UsageLimitContext";
 // ===== Lazy-loaded Pages =====
 const Index = lazy(() => import("./pages/Index"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const ResumeBuilder = lazy(() => import("./pages/ResumeBuilder"));
+
 const AIFeatures = lazy(() => import("./pages/AIFeatures"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const AffiliateProgram = lazy(() => import("./pages/AffiliateProgram"));
@@ -25,12 +25,12 @@ const Contact = lazy(() => import("./pages/Contact"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Auth = lazy(() => import("./pages/Auth"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
-const ResumeEditor = lazy(() => import("./pages/ResumeEditor"));
+
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
-const Documentation = lazy(() => import("./pages/Documentation"));
-const Roadmap = lazy(() => import("./pages/Roadmap"));
+
+
 
 // ===== Loading Fallback =====
 const LoadingFallback = () => (
@@ -68,14 +68,11 @@ const App = () => (
 
                 {/* Dashboard & Core Features */}
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/resume-builder" element={<ResumeBuilder />} />
+                
                 <Route path="/ai-features" element={<AIFeatures />} />
                 <Route path="/analytics" element={<Analytics />} />
 
-                {/* Resume Editor Routes */}
-                <Route path="/editor/new" element={<ResumeEditor />} />
-                <Route path="/editor/:resumeId" element={<ResumeEditor />} />
-                <Route path="/resume-editor" element={<ResumeEditor />} />
+                
 
                 {/* Audience Pages */}
                 <Route path="/for-individuals" element={<ForIndividuals />} />
@@ -90,9 +87,7 @@ const App = () => (
                 <Route path="/privacy" element={<PrivacyPolicy />} />
                 <Route path="/cookie-policy" element={<CookiePolicy />} />
 
-                {/* Resources */}
-                <Route path="/documentation" element={<Documentation />} />
-                <Route path="/roadmap" element={<Roadmap />} />
+                
 
                 {/* Affiliate Program */}
                 <Route path="/affiliate-program" element={<AffiliateProgram />} />
