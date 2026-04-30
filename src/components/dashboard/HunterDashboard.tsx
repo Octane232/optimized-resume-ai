@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 
-import UsageIndicator from './UsageIndicator';
+
 import { useUsageLimit } from '@/contexts/UsageLimitContext';
 
 // ===== Type Definitions =====
