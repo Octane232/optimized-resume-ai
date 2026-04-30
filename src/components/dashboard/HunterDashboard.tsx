@@ -17,7 +17,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
-import CareerStreak from './CareerStreak';
+
 import UsageIndicator from './UsageIndicator';
 import { useUsageLimit } from '@/contexts/UsageLimitContext';
 
