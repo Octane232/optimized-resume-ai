@@ -670,8 +670,6 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
-          lemonsqueezy_customer_id: string | null
-          lemonsqueezy_subscription_id: string | null
           location: string | null
           phone: string | null
           plan: string | null
@@ -687,15 +685,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
-          lemonsqueezy_customer_id?: string | null
-          lemonsqueezy_subscription_id?: string | null
           location?: string | null
-          phone?: string | null
-          plan?: string | null
-          profile_completion?: number | null
-          stripe_customer_id?: string | null
-          updated_at?: string
-          user_id: string
           website?: string | null
         }
         Update: {
@@ -704,8 +694,6 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
-          lemonsqueezy_customer_id?: string | null
-          lemonsqueezy_subscription_id?: string | null
           location?: string | null
           phone?: string | null
           plan?: string | null
