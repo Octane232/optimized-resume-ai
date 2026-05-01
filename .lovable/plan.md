@@ -1,48 +1,79 @@
+## Critical scaling bug: Unauthenticated, unmetered AI edge functions
 
+### The bug
 
-## Stripe Integration Audit Results
+Every expensive AI edge function in your project is **publicly callable by anyone on the internet, with no authentication and no usage tracking server-side**. A single attacker (or a curious user with browser devtools) can drain your OpenAI budget in minutes, and there is nothing in the code to stop them.
 
-### What's Working
-- **`check-subscription` edge function**: Working correctly (returning 200s). It queries Stripe directly and syncs to DB. When a user has no active Stripe subscription, it correctly returns `{ subscribed: false, tier: "free" }`.
-- **`stripe-checkout` function**: Properly creates checkout sessions with correct price IDs and metadata.
-- **Frontend polling**: `SubscriptionContext` calls `check-subscription` on login, on page load, and every 60 seconds. It also does aggressive retries after checkout return.
-- **One user synced correctly**: User `5c40eb05` shows `tier: starter` in DB, matching their active Stripe subscription.
+This will not just hurt you at scale — it can bankrupt the project on day one of going viral.
 
-### Issues Found
+### Evidence
 
-**1. Stripe webhook has NEVER received events**
-The `stripe-webhook` function has zero logs. This means either:
-- The webhook endpoint is not configured in Stripe Dashboard, OR
-- It's misconfigured (wrong URL or wrong events selected)
+In `supabase/config.toml`, all AI functions are set to `verify_jwt = false`:
 
-This is critical because cancellation (`customer.subscription.deleted`) and payment failure (`invoice.payment_failed`) events only arrive via webhook.
+```
+[functions.apply-bundle]        verify_jwt = false
+[functions.optimize-linkedin]   verify_jwt = false
+[functions.analyze-resume-ats]  verify_jwt = false
+[functions.generate-cover-letter] verify_jwt = false
+[functions.analyze-skill-gap]   verify_jwt = false
+[functions.salary-intel]        verify_jwt = false
+[functions.vaylance-chat]       verify_jwt = false
+[functions.parse-resume-ai]     verify_jwt = false
+[functions.rewrite-bullet]      verify_jwt = false
+[functions.generate-resume-content] verify_jwt = false
+```
 
-**2. Revert-to-free relies on polling, not webhook**
-Since webhooks aren't working, the system depends entirely on `check-subscription` polling. This function DOES correctly check Stripe for active subscriptions and returns `tier: "free"` when none exist. So if a subscription is cancelled in Stripe, the next time the user loads the dashboard (or within 60 seconds), they'll revert to free.
+And inside those functions there is **no `supabase.auth.getUser(token)` call, no usage limit check, and no credit deduction**. The only `Authorization` headers in the files are the ones being sent *out* to OpenAI. Example — `apply-bundle` (the most expensive: 3 parallel GPT calls per request):
 
-However, if the user doesn't log in, their DB record stays stale until they do.
+```ts
+serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+  const { jobDescription, userResume } = await req.json();
+  // → 3x fetch to OpenAI. No auth. No rate limit. No usage check.
+});
+```
 
-**3. Second paying user not synced**
-Customer `cus_UKrRf65Q8PiCCH` has an active Stripe subscription but no profile link in the DB. This will auto-fix when that user next logs in (via `check-subscription`).
+CORS is also `Access-Control-Allow-Origin: *`, so this can be called from any website, not just yours.
 
-**4. Legacy data in `subscription_plans` table**
-Old "Pitchsora Pro", "Pitchsora Premium", etc. rows still exist alongside the new "Starter" and "Pro" rows. This causes no functional issues but is messy.
+### Why this is the #1 scaling blocker
 
-### Plan
+- **Cost runaway**: each `apply-bundle` call = ~3 GPT-4o-mini completions. A trivial script in a loop = hundreds of dollars/hour to OpenAI on your card.
+- **No attribution**: even if you notice the bill, you cannot tell which user did it because the function doesn't know who the caller is.
+- **`TIER_LIMITS` in `UsageLimitContext.tsx` are client-side only** — they gate the UI button but do nothing server-side. Anyone calling the function directly bypasses them entirely.
+- **`spend_credit` RPC exists but is never called** by any AI function. Same for `increment_feature_usage`. The whole monetization layer is decorative.
 
-1. **Verify and fix webhook configuration in Stripe Dashboard**
-   - Confirm the webhook URL is: `https://xpmhahyvtyvrxryrqane.supabase.co/functions/v1/stripe-webhook`
-   - Confirm events: `checkout.session.completed`, `invoice.payment_succeeded`, `invoice.payment_failed`, `customer.subscription.deleted`
-   - Re-deploy the `stripe-webhook` function to ensure it's active
-   - Test by sending a test event from Stripe Dashboard
+### The fix (to implement after approval)
 
-2. **Clean up legacy subscription plans**
-   - Remove the old "Pitchsora Pro", "Pitchsora Premium", "Pitchsora Pro Yearly", "Pitchsora Premium Yearly" rows from `subscription_plans` (keeping Free, Starter, Pro)
+For every AI/expensive edge function (`apply-bundle`, `optimize-linkedin`, `analyze-resume-ats`, `analyze-resume-match`, `analyze-skill-gap`, `generate-cover-letter`, `generate-resume-content`, `rewrite-bullet`, `salary-intel`, `vaylance-chat`, `parse-resume-ai`, `parse-resume-file`, `radar-scan`, `interview-feedback`):
 
-3. **Add logging to `check-subscription`** for better debugging
-   - Add `logStep` helper similar to the reference implementation so you can trace issues in edge function logs
+1. **Require auth in code**. Read `Authorization` header, call `supabase.auth.getUser(token)` with the anon-key client, reject with 401 if missing/invalid. (Keep `verify_jwt = false` since Lovable's signing-keys system needs in-code validation.)
 
-### Summary
+2. **Enforce server-side usage limits**. Before calling OpenAI:
+   - Look up the user's tier from `user_subscriptions`.
+   - Look up current `feature_usage.count` for the action this month.
+   - Compare against the same `TIER_LIMITS` table (move it to a shared file `supabase/functions/_shared/tierLimits.ts` so client and server agree).
+   - Reject with 429 if over limit.
 
-The system **will** revert users to free when they don't pay, but only when they next use the app (via the polling `check-subscription` function). The webhook would make this instant and server-side, but it's not receiving events. The fix is primarily a Stripe Dashboard configuration issue, plus a re-deploy of the webhook function.
+3. **Record usage AFTER success only**. Call `increment_feature_usage(p_user_id, p_action)` only when the OpenAI call returned a usable result, so failed calls don't burn quota.
 
+4. **Add a per-user rate limit** (e.g. max 5 requests / 10 seconds per user per function) using a small `rate_limits` table or an in-memory token bucket keyed by `user.id`. Stops scripted abuse even within quota.
+
+5. **Tighten CORS** to your production origin(s) instead of `*` for these functions.
+
+6. **Delete the dead `CreditsContext` references**. `CreditGate.tsx` still imports and calls `useCredits().spendCredit()` from a stub that always returns `false` — meaning the "1 credit" buttons in the UI are silently broken. Either wire `CreditGate` to `useUsageLimit` or remove the component and its callers.
+
+### Out of scope for this plan
+- Migrating to Lovable AI Gateway (you're on direct OpenAI; same fix applies either way).
+- Changing pricing tiers or limits.
+- Frontend redesign.
+
+### Files that will change
+- `supabase/functions/_shared/tierLimits.ts` (new)
+- `supabase/functions/_shared/requireUser.ts` (new — auth + usage gate helper)
+- All 14 edge functions listed above (add 5–10 lines at the top of each `serve` handler)
+- `src/components/dashboard/CreditGate.tsx` (rewire to `useUsageLimit` or remove)
+- `supabase/config.toml` — no change (keep `verify_jwt = false`, validate in code)
+
+### Result
+After the fix: an unauthenticated request to any AI function returns `401` instantly with zero OpenAI cost. An authenticated user over their monthly quota returns `429`. Every successful call is attributed to a `user_id` in `feature_usage`, which means you can actually scale, bill, and debug.
