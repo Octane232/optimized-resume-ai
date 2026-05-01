@@ -1,11 +1,12 @@
 import React from 'react';
-import { Coins, Lock } from 'lucide-react';
+import { Coins } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useCredits } from '@/contexts/CreditsContext';
+import { useUsageLimit, UsageAction } from '@/contexts/UsageLimitContext';
 import { useToast } from '@/hooks/use-toast';
 
 interface CreditGateProps {
-  action: string;
+  /** Usage action to gate this button on (e.g. "resume_ats"). */
+  action: UsageAction;
   description?: string;
   onSuccess: () => void;
   children: React.ReactNode;
@@ -15,54 +16,45 @@ interface CreditGateProps {
 }
 
 /**
- * Wraps a button that costs 1 credit.
- * Shows cost indicator and handles credit deduction.
+ * Wraps an action button. Disables when the user is out of quota for `action`.
+ * Server-side enforcement still happens inside the edge function — this is UX only.
  */
 const CreditGate: React.FC<CreditGateProps> = ({
   action,
-  description,
   onSuccess,
   children,
   disabled = false,
   className = '',
   variant = 'default',
 }) => {
-  const { balance, spendCredit } = useCredits();
+  const { canUse, getRemaining } = useUsageLimit();
   const { toast } = useToast();
-  const hasCredits = balance > 0;
+  const allowed = canUse(action);
+  const remaining = getRemaining(action);
 
-  const handleClick = async () => {
-    if (!hasCredits) {
+  const handleClick = () => {
+    if (!allowed) {
       toast({
-        title: "No credits remaining",
-        description: "You've used all your credits this month. Upgrade your plan for more credits.",
-        variant: "destructive",
+        title: 'Monthly limit reached',
+        description: 'Upgrade your plan to keep using this feature.',
+        variant: 'destructive',
       });
       return;
     }
-
-    const success = await spendCredit(action, description);
-    if (success) {
-      onSuccess();
-    } else {
-      toast({
-        title: "No credits remaining",
-        description: "You've used all your credits this month. Upgrade your plan for more credits.",
-        variant: "destructive",
-      });
-    }
+    onSuccess();
   };
 
   return (
     <Button
       onClick={handleClick}
-      disabled={disabled || !hasCredits}
+      disabled={disabled || !allowed}
       className={className}
       variant={variant}
     >
       {children}
       <span className="ml-2 inline-flex items-center gap-1 text-xs opacity-80">
-        <Coins className="w-3 h-3" />1
+        <Coins className="w-3 h-3" />
+        {remaining}
       </span>
     </Button>
   );
