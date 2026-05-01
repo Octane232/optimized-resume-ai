@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { JSZip } from "https://deno.land/x/jszip@0.11.0/mod.ts";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { corsHeaders, requireUser, jsonResponse } from "../_shared/requireUser.ts";
 
 // Extract text from PDF using basic parsing (handles most text-based PDFs)
 function extractTextFromPDF(uint8Array: Uint8Array): string {
