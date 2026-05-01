@@ -1,12 +1,15 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { corsHeaders } from "../_shared/cors.ts";
+import { corsHeaders, jsonResponse, requireUser, enforceQuota, recordUsage } from "../_shared/requireUser.ts";
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    const auth = await requireUser(req);
+    if (auth instanceof Response) return auth;
+    const overQuota = await enforceQuota(auth, "resume_ats");
+    if (overQuota) return overQuota;
+
     const { name, email, phone, targetRole, experience, education, skills, jobDescription } = await req.json();
 
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
@@ -33,7 +36,7 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      if (response.status === 429) return new Response(JSON.stringify({ error: "Rate limit exceeded." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      if (response.status === 429) return jsonResponse({ error: "Rate limit exceeded." }, 429);
       throw new Error(`OpenAI error: ${response.status}`);
     }
 
@@ -50,9 +53,10 @@ serve(async (req) => {
       certifications: [], languages: [], awards: []
     };
 
-    return new Response(JSON.stringify({ data: fullResumeData, recommendedTemplate: resumeContent.recommendedTemplate }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    await recordUsage(auth, "resume_ats");
+    return jsonResponse({ data: fullResumeData, recommendedTemplate: resumeContent.recommendedTemplate });
   } catch (error) {
     console.error("Error generating resume:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return jsonResponse({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
   }
 });

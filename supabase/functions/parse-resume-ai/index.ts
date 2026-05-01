@@ -1,19 +1,17 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { corsHeaders, jsonResponse, requireUser } from "../_shared/requireUser.ts";
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
+    // Auth required. No per-action quota — parsing is part of upload, not a metered feature.
+    const auth = await requireUser(req);
+    if (auth instanceof Response) return auth;
+
     const { resumeText } = await req.json();
     if (!resumeText || typeof resumeText !== 'string') {
-      return new Response(JSON.stringify({ error: 'Resume text is required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      return jsonResponse({ error: 'Resume text is required' }, 400);
     }
 
     const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
@@ -33,16 +31,15 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      if (response.status === 429) return new Response(JSON.stringify({ error: 'Rate limit exceeded.' }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      if (response.status === 429) return jsonResponse({ error: 'Rate limit exceeded.' }, 429);
       throw new Error(`OpenAI error: ${response.status}`);
     }
 
     const result = await response.json();
     const parsedResume = JSON.parse(result.choices?.[0]?.message?.content || '{}');
-
-    return new Response(JSON.stringify(parsedResume), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    return jsonResponse(parsedResume);
   } catch (error) {
     console.error('Error in parse-resume-ai:', error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Failed to parse resume' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    return jsonResponse({ error: error instanceof Error ? error.message : 'Failed to parse resume' }, 500);
   }
 });
