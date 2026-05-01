@@ -81,9 +81,10 @@ Return exactly this JSON:
       { label: "Payscale", url: "https://www.payscale.com" },
     ];
 
-    return new Response(JSON.stringify({ success: true, benchmark, negotiation, disclaimer, verificationLinks }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    await recordUsage(auth, "salary_intel");
+    return jsonResponse({ success: true, benchmark, negotiation, disclaimer, verificationLinks });
   } catch (error) {
     console.error("salary-intel error:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return jsonResponse({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
   }
 });
