@@ -11,6 +11,16 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
   try {
+    // Cron-style endpoint — require shared secret to prevent abuse.
+    const SEED_SECRET = Deno.env.get("SEED_SECRET");
+    const provided = req.headers.get("x-cron-secret");
+    if (!SEED_SECRET || provided !== SEED_SECRET) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const NEWS_API_KEY = Deno.env.get("NEWS_API_KEY");
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
