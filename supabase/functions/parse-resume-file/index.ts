@@ -168,6 +168,9 @@ serve(async (req) => {
   }
 
   try {
+    const auth = await requireUser(req);
+    if (auth instanceof Response) return auth;
+
     const formData = await req.formData();
     const file = formData.get('file') as File;
     
