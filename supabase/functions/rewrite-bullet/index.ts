@@ -1,16 +1,14 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { corsHeaders, jsonResponse, requireUser } from "../_shared/requireUser.ts";
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
+    // Auth required (no per-action quota — bullet rewrites are part of resume editing).
+    const auth = await requireUser(req);
+    if (auth instanceof Response) return auth;
+
     const { bullet, jobContext, targetRole } = await req.json();
     if (!bullet) throw new Error("Bullet point text is required");
 
@@ -31,16 +29,15 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      if (response.status === 429) return new Response(JSON.stringify({ error: "Rate limit exceeded." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      if (response.status === 429) return jsonResponse({ error: "Rate limit exceeded." }, 429);
       throw new Error(`OpenAI error: ${response.status}`);
     }
 
     const data = await response.json();
     const result = JSON.parse(data.choices?.[0]?.message?.content || "{}");
-
-    return new Response(JSON.stringify(result), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return jsonResponse(result);
   } catch (error) {
     console.error("Error in rewrite-bullet:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return jsonResponse({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
   }
 });

@@ -1,16 +1,15 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { corsHeaders, jsonResponse, requireUser, enforceQuota, recordUsage } from "../_shared/requireUser.ts";
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
+    const auth = await requireUser(req);
+    if (auth instanceof Response) return auth;
+    const overQuota = await enforceQuota(auth, "interview_prep");
+    if (overQuota) return overQuota;
+
     const { question, answer, position } = await req.json();
     if (!question || !answer) throw new Error("question and answer are required");
 
@@ -31,7 +30,7 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      if (response.status === 429) return new Response(JSON.stringify({ error: "Rate limit exceeded." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      if (response.status === 429) return jsonResponse({ error: "Rate limit exceeded." }, 429);
       throw new Error(`OpenAI error: ${response.status}`);
     }
 
@@ -39,9 +38,10 @@ serve(async (req) => {
     const feedback = JSON.parse(data.choices?.[0]?.message?.content || "{}");
     feedback.score = Math.min(10, Math.max(1, feedback.score || 1));
 
-    return new Response(JSON.stringify(feedback), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    await recordUsage(auth, "interview_prep");
+    return jsonResponse(feedback);
   } catch (error) {
     console.error("Error:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return jsonResponse({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
   }
 });

@@ -686,6 +686,12 @@ export type Database = {
           full_name?: string | null
           id?: string
           location?: string | null
+          phone?: string | null
+          plan?: string | null
+          profile_completion?: number | null
+          stripe_customer_id?: string | null
+          updated_at?: string
+          user_id: string
           website?: string | null
         }
         Update: {
@@ -1250,6 +1256,7 @@ export type Database = {
           plan_id: string
           plan_status: string
           price: number | null
+          stripe_subscription_id: string | null
           tier: string | null
           updated_at: string
           user_id: string
@@ -1263,6 +1270,7 @@ export type Database = {
           plan_id: string
           plan_status?: string
           price?: number | null
+          stripe_subscription_id?: string | null
           tier?: string | null
           updated_at?: string
           user_id: string
@@ -1276,6 +1284,7 @@ export type Database = {
           plan_id?: string
           plan_status?: string
           price?: number | null
+          stripe_subscription_id?: string | null
           tier?: string | null
           updated_at?: string
           user_id?: string
@@ -1386,6 +1395,39 @@ export type Database = {
         }
         Relationships: []
       }
+      webhook_events: {
+        Row: {
+          error_message: string | null
+          event_type: string
+          id: string
+          processed_at: string
+          processing_time_ms: number | null
+          stripe_event_id: string
+          success: boolean
+          user_id: string | null
+        }
+        Insert: {
+          error_message?: string | null
+          event_type: string
+          id?: string
+          processed_at?: string
+          processing_time_ms?: number | null
+          stripe_event_id: string
+          success: boolean
+          user_id?: string | null
+        }
+        Update: {
+          error_message?: string | null
+          event_type?: string
+          id?: string
+          processed_at?: string
+          processing_time_ms?: number | null
+          stripe_event_id?: string
+          success?: boolean
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       webhook_logs: {
         Row: {
           created_at: string | null
@@ -1423,6 +1465,7 @@ export type Database = {
         Args: { p_action: string; p_user_id: string }
         Returns: undefined
       }
+      reset_monthly_usage: { Args: never; Returns: undefined }
       spend_credit: {
         Args: { p_action: string; p_description?: string; p_user_id: string }
         Returns: boolean

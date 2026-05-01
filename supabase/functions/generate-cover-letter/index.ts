@@ -1,16 +1,15 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { corsHeaders, jsonResponse, requireUser, enforceQuota, recordUsage } from "../_shared/requireUser.ts";
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
+    const auth = await requireUser(req);
+    if (auth instanceof Response) return auth;
+    const overQuota = await enforceQuota(auth, "cover_letter");
+    if (overQuota) return overQuota;
+
     const { jobTitle, companyName, yourName, yourExperience, keySkills, whyInterested } = await req.json();
     if (!jobTitle || !companyName || !yourName) throw new Error("jobTitle, companyName, and yourName are required");
 
@@ -36,16 +35,18 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      if (response.status === 429) return new Response(JSON.stringify({ error: "Rate limit exceeded." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      if (response.status === 429) return jsonResponse({ error: "Rate limit exceeded." }, 429);
       throw new Error(`OpenAI error: ${response.status}`);
     }
 
     const data = await response.json();
     const coverLetter = data.choices[0].message.content;
+    if (!coverLetter) throw new Error("AI returned empty response");
 
-    return new Response(JSON.stringify({ coverLetter }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    await recordUsage(auth, "cover_letter");
+    return jsonResponse({ coverLetter });
   } catch (error) {
     console.error('Error in generate-cover-letter:', error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return jsonResponse({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
   }
 });

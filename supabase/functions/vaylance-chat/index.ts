@@ -1,19 +1,23 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { corsHeaders, jsonResponse, requireUser } from "../_shared/requireUser.ts";
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    // Auth required to prevent unmetered chat abuse. No quota — chat is unlimited per session.
+    const auth = await requireUser(req);
+    if (auth instanceof Response) return auth;
+
     const { messages, mode } = await req.json();
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
     if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured");
+
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return jsonResponse({ error: "messages array is required" }, 400);
+    }
+    // Cap conversation context to prevent extremely large requests
+    const trimmedMessages = messages.slice(-20);
 
     const systemPrompt = mode === 'hunter'
       ? `You are Vaylance AI, a helpful career assistant focused on job hunting. Help with finding jobs, optimizing resumes, interview prep, tracking applications, and career strategy. Be concise, actionable, and encouraging.`
@@ -24,21 +28,20 @@ serve(async (req) => {
       headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "gpt-4o-mini",
-        messages: [{ role: "system", content: systemPrompt }, ...messages],
+        messages: [{ role: "system", content: systemPrompt }, ...trimmedMessages],
       }),
     });
 
     if (!response.ok) {
-      if (response.status === 429) return new Response(JSON.stringify({ error: "Rate limit exceeded." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      if (response.status === 429) return jsonResponse({ error: "Rate limit exceeded." }, 429);
       throw new Error(`OpenAI error: ${response.status}`);
     }
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "I couldn't generate a response. Please try again.";
-
-    return new Response(JSON.stringify({ content }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return jsonResponse({ content });
   } catch (error) {
     console.error("Vaylance chat error:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return jsonResponse({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
   }
 });
