@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
-import { useSubscription } from '@/contexts/SubscriptionContext';
+import { useUsageLimit } from '@/contexts/UsageLimitContext';
 import { motion } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 
@@ -40,7 +40,7 @@ interface RadarAlert {
 }
 
 const Scout: React.FC = () => {
-  const { tier } = useSubscription();
+  const { tier, canUse, trackUsage, loading: usageLoading } = useUsageLimit();
   const { toast } = useToast();
   const [alerts, setAlerts] = useState<RadarAlert[]>([]);
   const [signals, setSignals] = useState<RadarSignal[]>([]);
@@ -71,10 +71,23 @@ const Scout: React.FC = () => {
   };
 
   const handleScan = async () => {
+    if (!canUse('radar_alert')) {
+      toast({
+        title: 'Limit reached',
+        description: 'You have used all your radar scans this period.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     setScanning(true);
     try {
       const { data, error } = await supabase.functions.invoke('radar-scan');
       if (error) throw error;
+      
+      // Track usage after successful scan
+      await trackUsage('radar_alert');
+      
       toast({
         title: "Radar Scan Complete",
         description: `Found ${data?.signalsStored || 0} new signals. ${data?.alertsCreated || 0} matched your profile.`,
@@ -154,7 +167,7 @@ const Scout: React.FC = () => {
           </Button>
           <Button 
             onClick={handleScan} 
-            disabled={scanning}
+            disabled={scanning || usageLoading || !canUse('radar_alert')}
             className="gap-2"
           >
             <RefreshCw className={`w-4 h-4 ${scanning ? 'animate-spin' : ''}`} />
@@ -256,7 +269,7 @@ const Scout: React.FC = () => {
                 ? 'Set your target role and industry in Settings, then run a scan to get matched alerts.'
                 : 'Click "Scan Now" to discover companies that just raised funding and are about to hire.'}
             </p>
-            <Button onClick={handleScan} disabled={scanning} className="gap-2">
+            <Button onClick={handleScan} disabled={scanning || usageLoading || !canUse('radar_alert')} className="gap-2">
               <RefreshCw className={`w-4 h-4 ${scanning ? 'animate-spin' : ''}`} />
               Run First Scan
             </Button>
