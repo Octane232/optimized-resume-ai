@@ -37,23 +37,31 @@ export const UsageLimitProvider = ({ children }: { children: ReactNode }) => {
   const [subscriptionEnd, setSubscriptionEnd] = useState<string | null>(null);
   const [usage, setUsage] = useState<Record<UsageAction, number>>({ ...EMPTY_USAGE });
   const [loading, setLoading] = useState(true);
+  const [initialFetchDone, setInitialFetchDone] = useState(false);
 
   const fetchAll = useCallback(async () => {
     try {
+      setLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { setLoading(false); return; }
+      if (!session) { 
+        setTier('free');
+        setUsage({ ...EMPTY_USAGE });
+        setLoading(false);
+        setInitialFetchDone(true);
+        return; 
+      }
 
       const { data: subData } = await supabase
         .from('user_subscriptions').select('tier, plan_status, current_period_end')
         .eq('user_id', session.user.id).maybeSingle();
 
       if (subData?.plan_status === 'active' && subData?.tier) {
-        // Normalize premium → pro so it never shows in UI
         const raw = subData.tier as SubscriptionTier;
         setTier(raw === 'premium' ? 'pro' : raw);
         setSubscriptionEnd(subData.current_period_end ?? null);
       } else {
         setTier('free');
+        setSubscriptionEnd(null);
       }
 
       const { data: usageData } = await supabase.from('feature_usage').select('action, count').eq('user_id', session.user.id);
@@ -61,40 +69,84 @@ export const UsageLimitProvider = ({ children }: { children: ReactNode }) => {
         const map = { ...EMPTY_USAGE };
         usageData.forEach((row) => { if (row.action in map) map[row.action as UsageAction] = row.count; });
         setUsage(map);
+      } else {
+        setUsage({ ...EMPTY_USAGE });
       }
-    } catch (err) { console.error('[UsageLimit] fetchAll error:', err); }
-    finally { setLoading(false); }
+    } catch (err) { 
+      console.error('[UsageLimit] fetchAll error:', err);
+      // On error, set safe defaults (free tier, zero usage) to prevent false positives
+      setTier('free');
+      setUsage({ ...EMPTY_USAGE });
+    } finally { 
+      setLoading(false);
+      setInitialFetchDone(true);
+    }
   }, []);
 
   useEffect(() => {
     fetchAll();
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') fetchAll();
-      else if (event === 'SIGNED_OUT') { setTier('free'); setUsage({ ...EMPTY_USAGE }); }
+      else if (event === 'SIGNED_OUT') { 
+        setTier('free'); 
+        setUsage({ ...EMPTY_USAGE });
+        setLoading(false);
+        setInitialFetchDone(true);
+      }
     });
     return () => subscription.unsubscribe();
   }, [fetchAll]);
 
   const getLimit = (action: UsageAction) => TIER_LIMITS[tier]?.[action] ?? 0;
   const getRemaining = (action: UsageAction) => Math.max(0, getLimit(action) - (usage[action] || 0));
-  const canUse = (action: UsageAction) => getRemaining(action) > 0;
+  
+  // FIXED: canUse returns false while loading to prevent race conditions
+  const canUse = (action: UsageAction) => {
+    if (loading || !initialFetchDone) return false;
+    return getRemaining(action) > 0;
+  };
 
-  // ⚠️ Always call AFTER your API call succeeds — never before
+  // trackUsage now also checks loading state
   const trackUsage = async (action: UsageAction): Promise<boolean> => {
+    // Prevent tracking if still loading or no session
+    if (loading || !initialFetchDone) {
+      console.warn('[UsageLimit] trackUsage called while still loading');
+      return false;
+    }
+    
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return false;
+      
       const { error } = await supabase.rpc('increment_feature_usage', { p_user_id: session.user.id, p_action: action });
-      if (error) { console.error('[UsageLimit] trackUsage error:', error); return false; }
+      if (error) { 
+        console.error('[UsageLimit] trackUsage error:', error); 
+        return false; 
+      }
+      
       setUsage((prev) => ({ ...prev, [action]: (prev[action] || 0) + 1 }));
       return true;
-    } catch (err) { console.error('[UsageLimit] trackUsage error:', err); return false; }
+    } catch (err) { 
+      console.error('[UsageLimit] trackUsage error:', err); 
+      return false; 
+    }
   };
 
   const displayTier: 'Free' | 'Starter' | 'Pro' = tier === 'free' ? 'Free' : tier === 'starter' ? 'Starter' : 'Pro';
 
   return (
-    <UsageLimitContext.Provider value={{ tier, displayTier, subscriptionEnd, usage, loading, canUse, getRemaining, getLimit, trackUsage, refresh: fetchAll }}>
+    <UsageLimitContext.Provider value={{ 
+      tier, 
+      displayTier, 
+      subscriptionEnd, 
+      usage, 
+      loading, 
+      canUse, 
+      getRemaining, 
+      getLimit, 
+      trackUsage, 
+      refresh: fetchAll 
+    }}>
       {children}
     </UsageLimitContext.Provider>
   );
@@ -105,4 +157,5 @@ export const useUsageLimit = () => {
   if (!ctx) throw new Error('useUsageLimit must be used within UsageLimitProvider');
   return ctx;
 };
+
 export const useSubscription = useUsageLimit;
