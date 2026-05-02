@@ -15,7 +15,6 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useUsageLimit } from '@/contexts/UsageLimitContext';
-import { useSubscription } from '@/contexts/SubscriptionContext';
 
 // ===== Type Definitions =====
 type Tab = 'practice' | 'live' | 'tips' | 'history';
@@ -174,8 +173,7 @@ const getScoreLabel = (score: number): string => {
 const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ setActiveTab }) => {
   // ===== Hooks =====
   const { toast } = useToast();
-  const { canUse, trackUsage, getRemaining } = useUsageLimit();
-  const { tier } = useSubscription();
+  const { canUse, trackUsage, getRemaining, tier } = useUsageLimit();
 
   // ===== State =====
   const [tab, setTab] = useState<Tab>('practice');
@@ -752,8 +750,5 @@ const TabBar: React.FC<{
     ))}
   </div>
 );
-
-// Due to length constraints, I'll continue with the remaining subcomponents if you'd like.
-// The pattern above shows how to break down this massive component into manageable pieces.
 
 export default InterviewPrep;
