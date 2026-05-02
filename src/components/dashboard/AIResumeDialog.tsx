@@ -14,7 +14,7 @@ import { Loader2, Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { useSubscription } from '@/contexts/SubscriptionContext';
+import { useUsageLimit } from '@/contexts/UsageLimitContext';
 
 interface AIResumeDialogProps {
   open: boolean;
@@ -25,7 +25,7 @@ interface AIResumeDialogProps {
 const AIResumeDialog: React.FC<AIResumeDialogProps> = ({ open, onOpenChange, selectedTemplate }) => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { incrementUsage } = useSubscription();
+  const { trackUsage, canUse } = useUsageLimit();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -42,6 +42,16 @@ const AIResumeDialog: React.FC<AIResumeDialogProps> = ({ open, onOpenChange, sel
   };
 
   const handleGenerate = async () => {
+    // Check credits first
+    if (!canUse('resume_ats')) {
+      toast({
+        title: 'No credits remaining',
+        description: 'You need 1 credit to generate a resume. Upgrade for more.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     if (!formData.name || !formData.targetRole || !formData.skills) {
       toast({
         title: 'Missing Information',
@@ -101,9 +111,8 @@ const AIResumeDialog: React.FC<AIResumeDialogProps> = ({ open, onOpenChange, sel
 
       if (saveError) throw saveError;
 
-      // Track AI and resume usage
-      await incrementUsage('ai');
-      await incrementUsage('resume');
+      // Track usage AFTER successful generation and save
+      await trackUsage('resume_ats');
 
       toast({
         title: 'Success!',
