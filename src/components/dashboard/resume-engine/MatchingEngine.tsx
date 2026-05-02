@@ -16,6 +16,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import type { ParsedResume } from './ResumeParser';
 
+interface ScoreBreakdown {
+  skills_match: number;
+  experience_match: number;
+  education_match: number;
+  semantic_relevance: number;
+  keyword_match: number;
+}
+
 interface MatchResult {
   matchScore: number;
   isGoodFit: boolean;
@@ -31,6 +39,7 @@ interface MatchResult {
   keywordMatches: string[];
   missingKeywords: Array<{ keyword: string; importance: 'must-have' | 'nice-to-have'; context?: string }>;
   atsWarnings?: string[];
+  breakdown?: ScoreBreakdown;
 }
 
 interface MatchingEngineProps {
@@ -114,6 +123,7 @@ const MatchingEngine: React.FC<MatchingEngineProps> = ({ parsedResume, rawText, 
           context: k.context
         })),
         atsWarnings: data.ats_warnings || [],
+        breakdown: data.score_breakdown,
       };
 
       setMatchResult(result);
@@ -273,7 +283,53 @@ Include the job title, requirements, responsibilities, and qualifications for th
               </div>
             </Card>
 
-            {/* Strengths Section */}
+            {/* Score Breakdown */}
+            {matchResult.breakdown && (
+              <Card className="p-5">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">Score Breakdown</h3>
+                    <p className="text-xs text-muted-foreground">
+                      Overall match is calculated from these weighted dimensions
+                    </p>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  {[
+                    { label: 'Skills Match', value: matchResult.breakdown.skills_match, weight: '30%' },
+                    { label: 'Experience Match', value: matchResult.breakdown.experience_match, weight: '25%' },
+                    { label: 'Semantic Relevance (AI)', value: matchResult.breakdown.semantic_relevance, weight: '20%' },
+                    { label: 'ATS Keyword Match', value: matchResult.breakdown.keyword_match, weight: '15%' },
+                    { label: 'Education Match', value: matchResult.breakdown.education_match, weight: '10%' },
+                  ].map((dim) => (
+                    <div key={dim.label}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm text-foreground">{dim.label}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">weight {dim.weight}</span>
+                          <span className={`text-sm font-semibold ${getScoreColor(dim.value)}`}>{dim.value}%</span>
+                        </div>
+                      </div>
+                      <Progress value={dim.value} className="h-2" />
+                    </div>
+                  ))}
+                </div>
+                {matchResult.missingKeywords.length > 0 && (
+                  <div className="mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                    <p className="text-xs font-medium text-amber-600 dark:text-amber-400 mb-1">
+                      ATS Keyword Optimization Needed:
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {matchResult.missingKeywords.slice(0, 5).map(k => k.keyword).join(', ')}
+                      {matchResult.missingKeywords.length > 5 && ` +${matchResult.missingKeywords.length - 5} more`}
+                    </p>
+                  </div>
+                )}
+              </Card>
+            )}
             {matchResult.strengths.length > 0 && (
               <Collapsible open={expandedSections.strengths} onOpenChange={() => toggleSection('strengths')}>
                 <Card className="overflow-hidden">
