@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   FileText,
   Sparkles,
@@ -8,7 +8,6 @@ import {
   Coins
 } from 'lucide-react';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -31,7 +30,7 @@ interface FormData {
 const CoverLetterGenerator = () => {
   // ===== Hooks =====
   const { toast } = useToast();
-  const { canUse, trackUsage } = useUsageLimit();
+  const { canUse, trackUsage, isLoading: usageLoading } = useUsageLimit();
 
   // ===== State =====
   const [isGenerating, setIsGenerating] = useState(false);
@@ -46,74 +45,19 @@ const CoverLetterGenerator = () => {
   });
 
   // ===== Derived Values =====
-  const canGenerate = canUse('resume_ats');
+  const canGenerate = useMemo(() => {
+    return canUse('cover_letter') && !usageLoading;
+  }, [canUse, usageLoading]);
 
-  // ===== Validation =====
-  const isFormValid = (): boolean => {
+  const isFormValid = useMemo((): boolean => {
     return !!(formData.jobTitle && formData.companyName && formData.yourName);
-  };
+  }, [formData.jobTitle, formData.companyName, formData.yourName]);
 
-  // ===== Event Handlers =====
-  const handleGenerate = async () => {
-    // Validate required fields
-    if (!isFormValid()) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in at least the job title, company name, and your name.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setIsGenerating(true);
-
-    try {
-      // Spend 1 credit first
-      const credited = await trackUsage('resume_ats');
-      if (!credited) {
-        toast({
-          title: "No credits remaining",
-          description: "You need 1 credit to generate a cover letter. Upgrade for more credits.",
-          variant: "destructive"
-        });
-        setIsGenerating(false);
-        return;
-      }
-
-      // Call edge function
-      const { data, error } = await supabase.functions.invoke('generate-cover-letter', {
-        body: formData
-      });
-
-      if (error) throw error;
-
-      if (data.coverLetter) {
-        setGeneratedLetter(data.coverLetter);
-
-        // Save cover letter to database
-        await saveCoverLetter(data.coverLetter);
-
-        toast({
-          title: "Cover Letter Generated!",
-          description: "Your personalized cover letter is ready and saved."
-        });
-      }
-    } catch (error) {
-      console.error('Error generating cover letter:', error);
-      toast({
-        title: "Generation Failed",
-        description: "Failed to generate cover letter. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  const saveCoverLetter = async (content: string) => {
+  // ===== Helper Functions =====
+  const saveCoverLetter = useCallback(async (content: string): Promise<boolean> => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) return false;
 
       const { error: saveError } = await supabase
         .from('cover_letters')
@@ -126,21 +70,104 @@ const CoverLetterGenerator = () => {
 
       if (saveError) {
         console.error('Error saving cover letter:', saveError);
+        return false;
       }
+      
+      return true;
     } catch (error) {
       console.error('Error in saveCoverLetter:', error);
+      return false;
     }
-  };
+  }, [formData.jobTitle, formData.companyName]);
 
-  const handleCopy = () => {
+  // ===== Event Handlers =====
+  const handleInputChange = useCallback((field: keyof FormData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  }, []);
+
+  const handleGenerate = useCallback(async () => {
+    // Validate required fields
+    if (!isFormValid) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in at least the job title, company name, and your name.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    let generatedContent = '';
+
+    try {
+      // Step 1: Call edge function to generate cover letter
+      const { data, error } = await supabase.functions.invoke('generate-cover-letter', {
+        body: formData
+      });
+
+      if (error) throw error;
+
+      if (!data.coverLetter) {
+        throw new Error('No cover letter generated');
+      }
+
+      generatedContent = data.coverLetter;
+
+      // Step 2: Attempt to save to database (non-critical)
+      const saveSuccess = await saveCoverLetter(generatedContent);
+      
+      if (!saveSuccess) {
+        toast({
+          title: "Save Failed",
+          description: "Cover letter was generated but could not be saved. You can still copy or download it.",
+          variant: "destructive"
+        });
+      }
+
+      // Step 3: Deduct credit ONLY after successful generation
+      const credited = await trackUsage('cover_letter');
+      
+      if (!credited) {
+        // No credit deducted - do NOT show the letter
+        toast({
+          title: "Credit Required",
+          description: "You need 1 credit to generate a cover letter. Please upgrade your plan.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Step 4: Only show the letter if credit was successfully deducted
+      setGeneratedLetter(generatedContent);
+
+      toast({
+        title: "Success!",
+        description: saveSuccess 
+          ? "Your cover letter has been generated and saved." 
+          : "Your cover letter has been generated. Copy or download it to save locally.",
+      });
+
+    } catch (error) {
+      console.error('Error generating cover letter:', error);
+      toast({
+        title: "Generation Failed",
+        description: "Failed to generate cover letter. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [formData, isFormValid, saveCoverLetter, toast, trackUsage]);
+
+  const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(generatedLetter);
     toast({
       title: "Copied!",
       description: "Cover letter copied to clipboard."
     });
-  };
+  }, [generatedLetter, toast]);
 
-  const handleDownload = () => {
+  const handleDownload = useCallback(() => {
     const element = document.createElement('a');
     const file = new Blob([generatedLetter], { type: 'text/plain' });
     element.href = URL.createObjectURL(file);
@@ -153,30 +180,40 @@ const CoverLetterGenerator = () => {
       title: "Downloaded!",
       description: "Cover letter downloaded successfully."
     });
-  };
+  }, [generatedLetter, formData.companyName, toast]);
 
-  const handleInputChange = (field: keyof FormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  const handleReset = useCallback(() => {
+    setFormData({
+      jobTitle: '',
+      companyName: '',
+      yourName: '',
+      yourExperience: '',
+      keySkills: '',
+      whyInterested: ''
+    });
+    setGeneratedLetter('');
+    toast({
+      title: "Reset",
+      description: "Form has been cleared."
+    });
+  }, [toast]);
 
   // ===== Render =====
   return (
     <div className="p-6 space-y-8 max-w-5xl mx-auto">
-      {/* Header */}
       <HeaderSection />
 
-      {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Input Form */}
         <InputForm
           formData={formData}
           isGenerating={isGenerating}
           canGenerate={canGenerate}
+          usageLoading={usageLoading}
           onInputChange={handleInputChange}
           onGenerate={handleGenerate}
+          onReset={handleReset}
         />
 
-        {/* Generated Output */}
         <OutputSection
           generatedLetter={generatedLetter}
           companyName={formData.companyName}
@@ -215,35 +252,48 @@ interface InputFormProps {
   formData: FormData;
   isGenerating: boolean;
   canGenerate: boolean;
+  usageLoading: boolean;
   onInputChange: (field: keyof FormData, value: string) => void;
   onGenerate: () => Promise<void>;
+  onReset: () => void;
 }
 
 const InputForm: React.FC<InputFormProps> = ({
   formData,
   isGenerating,
   canGenerate,
+  usageLoading,
   onInputChange,
   onGenerate,
+  onReset,
 }) => (
-  <div className="command-card overflow-hidden">
+  <div className="border rounded-xl bg-card shadow-sm overflow-hidden">
     <div className="h-1 bg-gradient-to-r from-purple-500 to-pink-500" />
 
     <div className="p-6">
-      {/* Form Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl">
-          <Sparkles className="w-5 h-5 text-white" />
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl">
+            <Sparkles className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold">Your Information</h2>
+            <p className="text-sm text-muted-foreground">
+              Tell us about yourself and the job
+            </p>
+          </div>
         </div>
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">Your Information</h2>
-          <p className="text-sm text-muted-foreground">
-            Tell us about yourself and the job
-          </p>
-        </div>
+        
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={onReset}
+          disabled={isGenerating}
+        >
+          Reset
+        </Button>
       </div>
 
-      {/* Form Fields */}
       <div className="space-y-5">
         <FormField
           id="yourName"
@@ -293,10 +343,10 @@ const InputForm: React.FC<InputFormProps> = ({
           placeholder="What interests you about this position?"
         />
 
-        {/* Generate Button */}
         <GenerateButton
           isGenerating={isGenerating}
           canGenerate={canGenerate}
+          usageLoading={usageLoading}
           onClick={onGenerate}
         />
       </div>
@@ -330,7 +380,6 @@ const FormField: React.FC<FormFieldProps> = ({
       placeholder={placeholder}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="form-input-polished"
     />
   </div>
 );
@@ -358,7 +407,7 @@ const FormTextArea: React.FC<FormTextAreaProps> = ({
       placeholder={placeholder}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="form-input-polished min-h-[100px]"
+      className="min-h-[100px]"
     />
   </div>
 );
@@ -367,18 +416,20 @@ const FormTextArea: React.FC<FormTextAreaProps> = ({
 interface GenerateButtonProps {
   isGenerating: boolean;
   canGenerate: boolean;
+  usageLoading: boolean;
   onClick: () => Promise<void>;
 }
 
 const GenerateButton: React.FC<GenerateButtonProps> = ({
   isGenerating,
   canGenerate,
+  usageLoading,
   onClick,
 }) => (
   <Button
     onClick={onClick}
-    disabled={isGenerating || !canGenerate}
-    className="w-full h-12 text-base font-semibold saas-button"
+    disabled={isGenerating || !canGenerate || usageLoading}
+    className="w-full h-12 text-base font-semibold"
   >
     {isGenerating ? (
       <>
@@ -411,18 +462,17 @@ const OutputSection: React.FC<OutputSectionProps> = ({
   onCopy,
   onDownload,
 }) => (
-  <div className="command-card overflow-hidden">
+  <div className="border rounded-xl bg-card shadow-sm overflow-hidden">
     <div className="h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
 
     <div className="p-6">
-      {/* Output Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl">
             <FileText className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-foreground">Your Cover Letter</h2>
+            <h2 className="text-lg font-semibold">Your Cover Letter</h2>
             <p className="text-sm text-muted-foreground">
               AI-generated and ready to use
             </p>
@@ -430,62 +480,37 @@ const OutputSection: React.FC<OutputSectionProps> = ({
         </div>
 
         {generatedLetter && (
-          <OutputActions onCopy={onCopy} onDownload={onDownload} />
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={onCopy}>
+              <Copy className="w-4 h-4" />
+            </Button>
+            <Button variant="outline" size="sm" onClick={onDownload}>
+              <Download className="w-4 h-4" />
+            </Button>
+          </div>
         )}
       </div>
 
-      {/* Output Content */}
       {generatedLetter ? (
-        <GeneratedContent content={generatedLetter} />
+        <div className="bg-muted/30 rounded-xl p-6 min-h-[400px] border">
+          <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">
+            {generatedLetter}
+          </pre>
+        </div>
       ) : (
-        <EmptyState />
+        <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+          <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mb-4">
+            <FileText className="w-8 h-8 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-semibold mb-2">
+            No Cover Letter Yet
+          </h3>
+          <p className="text-sm text-muted-foreground max-w-sm">
+            Fill in the form and click "Generate Cover Letter" to create your personalized cover letter with AI
+          </p>
+        </div>
       )}
     </div>
-  </div>
-);
-
-// ===== Output Actions Component =====
-interface OutputActionsProps {
-  onCopy: () => void;
-  onDownload: () => void;
-}
-
-const OutputActions: React.FC<OutputActionsProps> = ({ onCopy, onDownload }) => (
-  <div className="flex gap-2">
-    <Button variant="outline" size="sm" onClick={onCopy} className="rounded-xl">
-      <Copy className="w-4 h-4" />
-    </Button>
-    <Button variant="outline" size="sm" onClick={onDownload} className="rounded-xl">
-      <Download className="w-4 h-4" />
-    </Button>
-  </div>
-);
-
-// ===== Generated Content Component =====
-interface GeneratedContentProps {
-  content: string;
-}
-
-const GeneratedContent: React.FC<GeneratedContentProps> = ({ content }) => (
-  <div className="bg-muted/30 rounded-xl p-6 min-h-[400px] border border-border">
-    <pre className="whitespace-pre-wrap font-sans text-sm text-foreground leading-relaxed">
-      {content}
-    </pre>
-  </div>
-);
-
-// ===== Empty State Component =====
-const EmptyState: React.FC = () => (
-  <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
-    <div className="empty-state-icon">
-      <FileText className="w-8 h-8 text-primary" />
-    </div>
-    <h3 className="text-lg font-semibold text-foreground mb-2">
-      No Cover Letter Yet
-    </h3>
-    <p className="text-sm text-muted-foreground max-w-sm">
-      Fill in the form and click "Generate Cover Letter" to create your personalized cover letter with AI
-    </p>
   </div>
 );
 
