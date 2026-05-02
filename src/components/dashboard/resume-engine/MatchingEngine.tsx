@@ -16,6 +16,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import type { ParsedResume } from './ResumeParser';
 
+interface ScoreBreakdown {
+  skills_match: number;
+  experience_match: number;
+  education_match: number;
+  semantic_relevance: number;
+  keyword_match: number;
+}
+
 interface MatchResult {
   matchScore: number;
   isGoodFit: boolean;
@@ -31,6 +39,7 @@ interface MatchResult {
   keywordMatches: string[];
   missingKeywords: Array<{ keyword: string; importance: 'must-have' | 'nice-to-have'; context?: string }>;
   atsWarnings?: string[];
+  breakdown?: ScoreBreakdown;
 }
 
 interface MatchingEngineProps {
@@ -114,6 +123,7 @@ const MatchingEngine: React.FC<MatchingEngineProps> = ({ parsedResume, rawText, 
           context: k.context
         })),
         atsWarnings: data.ats_warnings || [],
+        breakdown: data.score_breakdown,
       };
 
       setMatchResult(result);
