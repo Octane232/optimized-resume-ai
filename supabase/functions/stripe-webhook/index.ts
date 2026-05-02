@@ -49,7 +49,6 @@ serve(async (req) => {
     };
     const displayName = nameMap[planName.toLowerCase()] || planName;
 
-    // Try exact match first, then case-insensitive
     const { data, error } = await supabase
       .from("subscription_plans")
       .select("id")
@@ -62,10 +61,10 @@ serve(async (req) => {
     }
     if (data?.id) return data.id;
 
-    // Fallback: try partial match for legacy names
+    // Fixed fallback logic - correct mappings without cross-contamination
     const fallbackNames = planName === "pro"
       ? ["Pro", "Premium", "Pitchsora Premium"]
-      : ["Starter", "Pitchsora Pro"];
+      : ["Starter"];
 
     for (const name of fallbackNames) {
       const { data: fallback } = await supabase
@@ -79,6 +78,54 @@ serve(async (req) => {
 
     console.error(`Could not find subscription_plans entry for plan: ${planName}`);
     return null;
+  }
+
+  // Helper: reset feature usage for a user
+  async function resetFeatureUsage(userId: string) {
+    const { error } = await supabase
+      .from("feature_usage")
+      .update({
+        resume_ats_used: 0,
+        cover_letter_used: 0,
+        pitch_deck_used: 0,
+        updated_at: new Date().toISOString()
+      })
+      .eq("user_id", userId);
+
+    if (error) {
+      console.error("Error resetting feature usage:", error);
+    } else {
+      console.log(`✅ Feature usage reset for user ${userId}`);
+    }
+  }
+
+  // Helper: resolve subscription tier from Stripe subscription object
+  async function resolveSubscriptionTier(
+    subscription: Stripe.Subscription, 
+    userId: string
+  ): Promise<string> {
+    // Strategy 1: Check metadata first (most reliable)
+    if (subscription.metadata?.plan) {
+      const tier = subscription.metadata.plan === "pro" ? "pro" : "starter";
+      console.log(`Tier resolved from metadata: ${tier}`);
+      return tier;
+    }
+    
+    // Strategy 2: Query current tier from database
+    const { data: currentSub } = await supabase
+      .from("user_subscriptions")
+      .select("tier")
+      .eq("user_id", userId)
+      .single();
+    
+    if (currentSub?.tier) {
+      console.log(`Tier preserved from existing record: ${currentSub.tier}`);
+      return currentSub.tier;
+    }
+    
+    // Strategy 3: Final fallback to starter
+    console.log(`No metadata or existing record found for user ${userId}, defaulting to starter`);
+    return "starter";
   }
 
   try {
@@ -98,21 +145,30 @@ serve(async (req) => {
 
         console.log(`Processing checkout for user ${userId}, plan: ${plan}, billing: ${billing}`);
 
+        // Get actual subscription data from Stripe to get correct period end
+        let periodEnd: Date;
+        let stripeSubscriptionId: string | null = null;
+        
+        if (session.subscription) {
+          stripeSubscriptionId = session.subscription as string;
+          const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+          periodEnd = new Date(subscription.current_period_end * 1000);
+        } else {
+          // Fallback if no subscription (shouldn't happen for paid plans)
+          const now = new Date();
+          periodEnd = billing === "yearly"
+            ? new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000)
+            : new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+        }
+
         // Resolve plan_id UUID from subscription_plans table
         const planId = await resolvePlanId(plan);
         if (!planId) {
           console.error(`Could not find subscription_plans entry for plan: ${plan}. Will use fallback.`);
-          // Even if we can't find the plan, still update the subscription tier
         }
 
         // Map plan to tier
         const tier = plan === "pro" ? "pro" : "starter";
-
-        // Calculate subscription end date
-        const now = new Date();
-        const endDate = billing === "yearly"
-          ? new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000)
-          : new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
         // Determine price
         const priceMap: Record<string, Record<string, number>> = {
@@ -121,15 +177,22 @@ serve(async (req) => {
         };
         const price = priceMap[plan]?.[billing || "monthly"] || 0;
 
-        // Save Stripe customer ID to profile
+        // Save Stripe customer ID and subscription ID to profile
         if (session.customer) {
+          const updateData: Record<string, unknown> = {
+            stripe_customer_id: session.customer as string,
+            plan: tier,
+          };
+          
+          if (stripeSubscriptionId) {
+            updateData.stripe_subscription_id = stripeSubscriptionId;
+          }
+          
           const { error: profileError } = await supabase
             .from("profiles")
-            .update({
-              stripe_customer_id: session.customer as string,
-              plan: tier,
-            })
+            .update(updateData)
             .eq("user_id", userId);
+            
           if (profileError) {
             console.error("Error updating profile:", profileError);
           } else {
@@ -137,21 +200,24 @@ serve(async (req) => {
           }
         }
 
-        // Build subscription upsert - use a free plan ID as fallback if planId is null
+        // Build subscription upsert
         const subData: Record<string, unknown> = {
           user_id: userId,
           tier,
           billing_cycle: billing || "monthly",
           plan_status: "active",
           price,
-          current_period_end: endDate.toISOString(),
+          current_period_end: periodEnd.toISOString(),
           updated_at: new Date().toISOString(),
         };
+
+        if (stripeSubscriptionId) {
+          subData.stripe_subscription_id = stripeSubscriptionId;
+        }
 
         if (planId) {
           subData.plan_id = planId;
         } else {
-          // Get any plan ID as fallback
           const { data: anyPlan } = await supabase
             .from("subscription_plans")
             .select("id")
@@ -183,15 +249,24 @@ serve(async (req) => {
           console.error("Error updating credits:", credError);
         }
 
-        console.log(`✅ User ${userId} upgraded to ${tier} (${billing}), credits: ${credits}`);
+        // Reset feature usage on new subscription
+        await resetFeatureUsage(userId);
+
+        console.log(`✅ User ${userId} upgraded to ${tier} (${billing}), credits: ${credits}, period end: ${periodEnd.toISOString()}`);
         break;
       }
 
       // ── Subscription renewed ──────────────────────────────────
       case "invoice.payment_succeeded": {
         const invoice = event.data.object as Stripe.Invoice;
+        
+        // Skip first-time invoices (subscription creation)
+        if (invoice.billing_reason === 'subscription_create') {
+          console.log("Skipping first-time invoice, handled by checkout.session.completed");
+          break;
+        }
+        
         const subscriptionId = invoice.subscription as string;
-
         if (!subscriptionId) break;
 
         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
@@ -203,6 +278,9 @@ serve(async (req) => {
         }
 
         const periodEnd = new Date(subscription.current_period_end * 1000);
+        
+        // Resolve plan tier
+        const plan = await resolveSubscriptionTier(subscription, userId);
 
         await supabase.from("user_subscriptions")
           .update({
@@ -213,7 +291,6 @@ serve(async (req) => {
           .eq("user_id", userId);
 
         // Refresh credits on renewal
-        const plan = subscription.metadata?.plan || "starter";
         const credits = plan === "pro" ? 100 : 50;
         await supabase.from("user_credits").upsert({
           user_id: userId,
@@ -222,7 +299,82 @@ serve(async (req) => {
           updated_at: new Date().toISOString(),
         }, { onConflict: "user_id" });
 
-        console.log(`✅ Subscription renewed for user ${userId}`);
+        // Reset feature usage on renewal
+        await resetFeatureUsage(userId);
+
+        console.log(`✅ Subscription renewed for user ${userId}, credits: ${credits}, period end: ${periodEnd.toISOString()}`);
+        break;
+      }
+
+      // ── Subscription updated (upgrade/downgrade mid-cycle) ────
+      case "customer.subscription.updated": {
+        const subscription = event.data.object as Stripe.Subscription;
+        const userId = subscription.metadata?.supabase_user_id;
+
+        if (!userId) {
+          console.log("No supabase_user_id in subscription metadata, skipping");
+          break;
+        }
+
+        // Resolve the new tier using the helper function
+        const newTier = await resolveSubscriptionTier(subscription, userId);
+        
+        const periodEnd = new Date(subscription.current_period_end * 1000);
+        const status = subscription.status === "active" ? "active" : 
+                       subscription.status === "past_due" ? "past_due" : 
+                       subscription.status === "canceled" ? "cancelled" : "incomplete";
+
+        // Get current subscription to check for changes
+        const { data: existingSub } = await supabase
+          .from("user_subscriptions")
+          .select("tier, plan_status")
+          .eq("user_id", userId)
+          .single();
+
+        // Only update if tier actually changed or status changed
+        if (existingSub?.tier !== newTier || existingSub?.plan_status !== status) {
+          await supabase.from("user_subscriptions")
+            .update({
+              tier: newTier,
+              plan_status: status,
+              current_period_end: periodEnd.toISOString(),
+              updated_at: new Date().toISOString(),
+            })
+            .eq("user_id", userId);
+
+          // Update profile tier
+          await supabase.from("profiles")
+            .update({ plan: newTier })
+            .eq("user_id", userId);
+
+          // Adjust credits if upgrading to Pro
+          if (newTier === "pro" && existingSub?.tier !== "pro") {
+            const { data: credits } = await supabase
+              .from("user_credits")
+              .select("balance")
+              .eq("user_id", userId)
+              .single();
+            
+            if (!credits || credits.balance < 100) {
+              await supabase.from("user_credits")
+                .update({ balance: 100, monthly_allowance: 100 })
+                .eq("user_id", userId);
+              console.log(`Upgraded credits to 100 for user ${userId}`);
+            }
+          }
+          
+          // Adjust credits if downgrading to Starter
+          if (newTier === "starter" && existingSub?.tier === "pro") {
+            await supabase.from("user_credits")
+              .update({ balance: 50, monthly_allowance: 50 })
+              .eq("user_id", userId);
+            console.log(`Downgraded credits to 50 for user ${userId}`);
+          }
+
+          console.log(`✅ Subscription updated for user ${userId}: ${existingSub?.tier || 'none'} → ${newTier}, status = ${status}`);
+        } else {
+          console.log(`No tier change for user ${userId}, skipping update`);
+        }
         break;
       }
 
@@ -241,10 +393,16 @@ serve(async (req) => {
           })
           .eq("user_id", userId);
 
-        // Also update profile
         await supabase.from("profiles")
           .update({ plan: "free" })
           .eq("user_id", userId);
+
+        await supabase.from("user_credits").upsert({
+          user_id: userId,
+          balance: 0,
+          monthly_allowance: 0,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "user_id" });
 
         console.log(`✅ Subscription cancelled for user ${userId}`);
         break;
@@ -265,11 +423,16 @@ serve(async (req) => {
         await supabase.from("user_subscriptions")
           .update({
             plan_status: "past_due",
+            tier: "free",
             updated_at: new Date().toISOString(),
           })
           .eq("user_id", userId);
 
-        console.log(`⚠️ Payment failed for user ${userId}`);
+        await supabase.from("profiles")
+          .update({ plan: "free" })
+          .eq("user_id", userId);
+
+        console.log(`⚠️ Payment failed for user ${userId}, downgraded to free`);
         break;
       }
 
