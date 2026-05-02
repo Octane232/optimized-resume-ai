@@ -91,7 +91,7 @@ const getDemandColor = (demand: string): string => {
 const SalaryIntel: React.FC = () => {
   // ===== Hooks =====
   const { toast } = useToast();
-  const { canUse, trackUsage, getRemaining } = useUsageLimit();
+  const { canUse, trackUsage, loading: usageLoading } = useUsageLimit();
 
   // ===== State =====
   const [jobTitle, setJobTitle] = useState('');
@@ -109,17 +109,7 @@ const SalaryIntel: React.FC = () => {
 
   // ===== Event Handlers =====
   const handleSearch = async () => {
-    // Check credits
-    if (!hasCredits) {
-      toast({
-        title: 'Limit reached',
-        description: 'You have used all your salary lookups. Upgrade to get more.',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    // Validate input
+    // Validate input first
     if (!isFormValid) {
       toast({
         title: 'Missing Info',
@@ -128,9 +118,6 @@ const SalaryIntel: React.FC = () => {
       });
       return;
     }
-
-    // Spend credit
-    await trackUsage('salary_intel');
 
     setLoading(true);
     setResult(null);
@@ -151,6 +138,16 @@ const SalaryIntel: React.FC = () => {
 
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+
+      // Track usage AFTER successful API call
+      const credited = await trackUsage('salary_intel');
+      if (!credited) {
+        toast({
+          title: 'Credit issue',
+          description: 'Unable to record usage. Your result may not be saved.',
+          variant: 'destructive'
+        });
+      }
 
       setResult(data);
 
@@ -207,6 +204,7 @@ const SalaryIntel: React.FC = () => {
         yearsExp={yearsExp}
         currentSalary={currentSalary}
         loading={loading}
+        usageLoading={usageLoading}
         hasCredits={hasCredits}
         isFormValid={isFormValid}
         onJobTitleChange={setJobTitle}
@@ -259,6 +257,7 @@ interface InputFormProps {
   yearsExp: string;
   currentSalary: string;
   loading: boolean;
+  usageLoading: boolean;
   hasCredits: boolean;
   isFormValid: boolean;
   onJobTitleChange: (value: string) => void;
@@ -276,6 +275,7 @@ const InputForm: React.FC<InputFormProps> = ({
   yearsExp,
   currentSalary,
   loading,
+  usageLoading,
   hasCredits,
   isFormValid,
   onJobTitleChange,
@@ -336,7 +336,7 @@ const InputForm: React.FC<InputFormProps> = ({
 
         <Button
           onClick={onSearch}
-          disabled={loading || !isFormValid || !hasCredits}
+          disabled={loading || usageLoading || !isFormValid || !hasCredits}
           className="gap-2 w-full md:w-auto"
         >
           {loading ? (
