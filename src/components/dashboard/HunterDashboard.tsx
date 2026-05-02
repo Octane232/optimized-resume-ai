@@ -270,11 +270,8 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
         velocity={applicationVelocity}
       />
 
-      {/* Career Streak & Usage */}
-      <div className="grid lg:grid-cols-2 gap-4">
-        <CareerStreak compact />
-        <UsageIndicator />
-      </div>
+      {/* Usage */}
+      <UsageIndicator />
     </div>
   );
 };
