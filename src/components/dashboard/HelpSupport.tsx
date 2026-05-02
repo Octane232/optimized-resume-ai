@@ -39,14 +39,6 @@ const HelpSupport = () => {
 
   const supportOptions: SupportOption[] = [
     {
-      icon: BookOpen,
-      title: "Documentation",
-      description: "Browse our comprehensive guides and tutorials",
-      action: "View Docs",
-      href: "/documentation",
-      internal: true
-    },
-    {
       icon: Mail,
       title: "Email Support",
       description: "Send us an email and we'll respond within 24 hours",
