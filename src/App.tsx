@@ -14,8 +14,6 @@ import { UsageLimitProvider } from "./contexts/UsageLimitContext";
 const Index = lazy(() => import("./pages/Index"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-const AIFeatures = lazy(() => import("./pages/AIFeatures"));
-const Analytics = lazy(() => import("./pages/Analytics"));
 const AffiliateProgram = lazy(() => import("./pages/AffiliateProgram"));
 const AffiliateDashboard = lazy(() => import("./pages/AffiliateDashboard"));
 const ForIndividuals = lazy(() => import("./pages/ForIndividuals"));
@@ -68,9 +66,6 @@ const App = () => (
 
                 {/* Dashboard & Core Features */}
                 <Route path="/dashboard" element={<Dashboard />} />
-                
-                <Route path="/ai-features" element={<AIFeatures />} />
-                <Route path="/analytics" element={<Analytics />} />
 
                 
 
