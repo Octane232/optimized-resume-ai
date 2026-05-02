@@ -270,8 +270,6 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
         velocity={applicationVelocity}
       />
 
-      {/* Usage */}
-      <UsageIndicator />
     </div>
   );
 };
