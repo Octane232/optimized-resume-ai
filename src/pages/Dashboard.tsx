@@ -378,20 +378,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
       {/* Actions */}
       <div className="ml-auto flex items-center gap-4">
-        {/* Alerts Button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative"
-          onClick={onAlertClick}
-        >
-          <Bell className="h-5 w-5" />
-          {unreadAlerts > 0 && (
-            <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] font-medium text-destructive-foreground flex items-center justify-center">
-              {unreadAlerts > 9 ? '9+' : unreadAlerts}
-            </span>
-          )}
-        </Button>
+        {/* Notifications */}
+        <NotificationsBell
+          unreadAlerts={unreadAlerts}
+          onViewAll={onAlertClick}
+        />
 
         {/* Help Button */}
         <Button
@@ -465,11 +456,6 @@ const UserMenu: React.FC<UserMenuProps> = ({
       <DropdownMenuItem onClick={onBillingClick} className="cursor-pointer">
         <CreditCard className="mr-2 h-4 w-4" />
         <span>Billing</span>
-      </DropdownMenuItem>
-
-      <DropdownMenuItem className="cursor-pointer">
-        <User className="mr-2 h-4 w-4" />
-        <span>Profile</span>
       </DropdownMenuItem>
 
       <DropdownMenuSeparator />
