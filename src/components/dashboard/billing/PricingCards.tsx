@@ -191,7 +191,7 @@ const PricingCards = () => {
       </div>
 
       <p className="text-center text-xs text-muted-foreground">
-        All paid plans include a 14-day free trial. No credit card required to start. Cancel anytime.
+        Cancel anytime. Secure payment via Stripe.
       </p>
     </div>
   );
