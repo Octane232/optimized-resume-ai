@@ -218,9 +218,17 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
           </TabsList>
           <TabsContent value="resume">
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
+              <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
                 <CardTitle className="text-lg">Tailored Resume</CardTitle>
-                <Button variant="outline" size="sm" onClick={() => handleCopy(result.tailoredResume, 'Resume')} className="gap-2"><Copy className="w-4 h-4" />Copy</Button>
+                <div className="flex gap-2 flex-wrap">
+                  <Button variant="outline" size="sm" onClick={() => handleCopy(result.tailoredResume, 'Resume')} className="gap-2"><Copy className="w-4 h-4" />Copy</Button>
+                  <Button variant="outline" size="sm" onClick={downloadAsPDF} disabled={!isPro} className="gap-2" title={isPro ? 'Download PDF' : 'Pro feature'}>
+                    {isPro ? <Download className="w-4 h-4" /> : <Lock className="w-4 h-4" />} PDF{!isPro && ' (Pro)'}
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={downloadAsDOCX} disabled={!isPro} className="gap-2" title={isPro ? 'Download DOCX' : 'Pro feature'}>
+                    {isPro ? <Download className="w-4 h-4" /> : <Lock className="w-4 h-4" />} DOCX{!isPro && ' (Pro)'}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="bg-muted/30 rounded-xl p-6 whitespace-pre-wrap text-sm leading-relaxed max-h-[600px] overflow-y-auto font-mono">{result.tailoredResume}</div>
