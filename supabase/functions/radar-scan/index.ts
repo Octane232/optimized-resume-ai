@@ -113,6 +113,18 @@ serve(async (req) => {
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) throw new Error("Supabase not configured");
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    let requestingUserId: string | null = null;
+    if (hasUserJwt && authHeader) {
+      const token = authHeader.replace(/^Bearer\s+/i, "");
+      const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+      if (authError || !user) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      requestingUserId = user.id;
+    }
     const allArticles: any[] = [];
     const seenUrls = new Set<string>();
 
