@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Download, FileText, FileSpreadsheet, Copy, Check, Loader2, Share2 } from 'lucide-react';
+import { Download, FileText, FileSpreadsheet, Copy, Check, Loader2, Share2, FileType, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
+import { useSubscription } from '@/contexts/SubscriptionContext';
+import { Document, Packer, Paragraph, HeadingLevel, TextRun } from 'docx';
+import html2pdf from 'html2pdf.js';
 import type { ParsedResume } from './ResumeParser';
 
 interface ExportPanelProps {
@@ -21,6 +24,66 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
 }) => {
   const [isExporting, setIsExporting] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const { tier } = useSubscription();
+  const isPro = tier === 'pro' || tier === 'premium';
+
+  const handleExportPDF = async () => {
+    if (!isPro) {
+      toast({ title: 'Pro feature', description: 'Upgrade to Pro to export as PDF.', variant: 'destructive' });
+      return;
+    }
+    setIsExporting('pdf');
+    try {
+      const text = generateCleanText(parsedResume, rawText);
+      const container = document.createElement('div');
+      container.style.padding = '32px';
+      container.style.fontFamily = 'Arial, sans-serif';
+      container.style.fontSize = '11pt';
+      container.style.color = '#111';
+      container.style.whiteSpace = 'pre-wrap';
+      container.innerText = text;
+      await html2pdf().from(container).set({
+        margin: 0.5,
+        filename: 'resume.pdf',
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
+      }).save();
+      toast({ title: 'PDF Exported', description: 'Resume downloaded as PDF.' });
+    } catch (e: any) {
+      toast({ title: 'Export failed', description: e.message || 'Could not export PDF', variant: 'destructive' });
+    } finally {
+      setIsExporting(null);
+    }
+  };
+
+  const handleExportDOCX = async () => {
+    if (!isPro) {
+      toast({ title: 'Pro feature', description: 'Upgrade to Pro to export as DOCX.', variant: 'destructive' });
+      return;
+    }
+    setIsExporting('docx');
+    try {
+      const text = generateCleanText(parsedResume, rawText);
+      const paragraphs = text.split('\n').map(line =>
+        new Paragraph({ children: [new TextRun({ text: line || ' ' })] })
+      );
+      const doc = new Document({ sections: [{ children: paragraphs }] });
+      const blob = await Packer.toBlob(doc);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'resume.docx';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast({ title: 'DOCX Exported', description: 'Resume downloaded as Word document.' });
+    } catch (e: any) {
+      toast({ title: 'Export failed', description: e.message || 'Could not export DOCX', variant: 'destructive' });
+    } finally {
+      setIsExporting(null);
+    }
+  };
 
   const handleExportText = async () => {
     setIsExporting('text');
@@ -294,11 +357,7 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
             disabled={!hasContent || isExporting === 'text'}
             className="h-auto py-4 flex-col gap-2"
           >
-            {isExporting === 'text' ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <FileText className="w-5 h-5" />
-            )}
+            {isExporting === 'text' ? <Loader2 className="w-5 h-5 animate-spin" /> : <FileText className="w-5 h-5" />}
             <span className="text-xs">ATS Text File</span>
           </Button>
 
@@ -308,12 +367,30 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
             disabled={!parsedResume || isExporting === 'report'}
             className="h-auto py-4 flex-col gap-2"
           >
-            {isExporting === 'report' ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <FileSpreadsheet className="w-5 h-5" />
-            )}
+            {isExporting === 'report' ? <Loader2 className="w-5 h-5 animate-spin" /> : <FileSpreadsheet className="w-5 h-5" />}
             <span className="text-xs">Gap Report</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={handleExportPDF}
+            disabled={!hasContent || isExporting === 'pdf'}
+            className="h-auto py-4 flex-col gap-2"
+            title={isPro ? 'Download as PDF' : 'Pro feature'}
+          >
+            {isExporting === 'pdf' ? <Loader2 className="w-5 h-5 animate-spin" /> : (isPro ? <FileType className="w-5 h-5" /> : <Lock className="w-5 h-5" />)}
+            <span className="text-xs">PDF {!isPro && '(Pro)'}</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={handleExportDOCX}
+            disabled={!hasContent || isExporting === 'docx'}
+            className="h-auto py-4 flex-col gap-2"
+            title={isPro ? 'Download as DOCX' : 'Pro feature'}
+          >
+            {isExporting === 'docx' ? <Loader2 className="w-5 h-5 animate-spin" /> : (isPro ? <FileType className="w-5 h-5" /> : <Lock className="w-5 h-5" />)}
+            <span className="text-xs">DOCX {!isPro && '(Pro)'}</span>
           </Button>
         </div>
 
