@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Sparkles, Clipboard, RefreshCw, CheckCircle2, AlertTriangle, TrendingUp, Copy, Loader2 } from 'lucide-react';
+import { FileText, Sparkles, Clipboard, RefreshCw, CheckCircle2, AlertTriangle, TrendingUp, Copy, Loader2, Upload, Download, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useUsageLimit } from '@/contexts/UsageLimitContext';
+import { Document, Packer, Paragraph, TextRun } from 'docx';
+import html2pdf from 'html2pdf.js';
 
 interface BundleResult {
   tailoredResume: string;
@@ -35,11 +37,71 @@ const STEPS = [
 const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?: boolean }> = ({ setActiveTab }) => {
   const { toast } = useToast();
   const { canUse, trackUsage, getRemaining, tier } = useUsageLimit();
+  const isPro = tier === 'pro' || tier === 'premium';
   const [resumeText, setResumeText] = useState('');
   const [jobDescription, setJobDescription] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [result, setResult] = useState<BundleResult | null>(null);
   const [activeResultTab, setActiveResultTab] = useState('ats');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!isPro) {
+      toast({ title: 'Pro feature', description: 'Upgrade to Pro to upload PDF/DOCX resumes.', variant: 'destructive' });
+      return;
+    }
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`https://xpmhahyvtyvrxryrqane.supabase.co/functions/v1/parse-resume-file`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session?.access_token || ''}` },
+        body: formData,
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Upload failed');
+      setResumeText(json.text || '');
+      setUploadedFileName(file.name);
+      toast({ title: 'Resume uploaded', description: `${file.name} parsed successfully.` });
+    } catch (err: any) {
+      toast({ title: 'Upload failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const downloadAsPDF = async () => {
+    if (!isPro || !result) return;
+    const container = document.createElement('div');
+    container.style.cssText = 'padding:32px;font-family:Arial,sans-serif;font-size:11pt;color:#111;white-space:pre-wrap;';
+    container.innerText = result.tailoredResume;
+    await html2pdf().from(container).set({
+      margin: 0.5, filename: 'tailored-resume.pdf',
+      html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
+    }).save();
+  };
+
+  const downloadAsDOCX = async () => {
+    if (!isPro || !result) return;
+    const paragraphs = result.tailoredResume.split('\n').map(line =>
+      new Paragraph({ children: [new TextRun({ text: line || ' ' })] })
+    );
+    const doc = new Document({ sections: [{ children: paragraphs }] });
+    const blob = await Packer.toBlob(doc);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'tailored-resume.docx';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
 
   const handleGenerate = async () => {
     if (!resumeText.trim() || !jobDescription.trim()) {
@@ -156,9 +218,17 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
           </TabsList>
           <TabsContent value="resume">
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
+              <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
                 <CardTitle className="text-lg">Tailored Resume</CardTitle>
-                <Button variant="outline" size="sm" onClick={() => handleCopy(result.tailoredResume, 'Resume')} className="gap-2"><Copy className="w-4 h-4" />Copy</Button>
+                <div className="flex gap-2 flex-wrap">
+                  <Button variant="outline" size="sm" onClick={() => handleCopy(result.tailoredResume, 'Resume')} className="gap-2"><Copy className="w-4 h-4" />Copy</Button>
+                  <Button variant="outline" size="sm" onClick={downloadAsPDF} disabled={!isPro} className="gap-2" title={isPro ? 'Download PDF' : 'Pro feature'}>
+                    {isPro ? <Download className="w-4 h-4" /> : <Lock className="w-4 h-4" />} PDF{!isPro && ' (Pro)'}
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={downloadAsDOCX} disabled={!isPro} className="gap-2" title={isPro ? 'Download DOCX' : 'Pro feature'}>
+                    {isPro ? <Download className="w-4 h-4" /> : <Lock className="w-4 h-4" />} DOCX{!isPro && ' (Pro)'}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="bg-muted/30 rounded-xl p-6 whitespace-pre-wrap text-sm leading-relaxed max-h-[600px] overflow-y-auto font-mono">{result.tailoredResume}</div>
@@ -247,16 +317,46 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
       </div>
 
       <div className="space-y-4">
-        {[
-          { label: 'Your Resume', value: resumeText, set: setResumeText, placeholder: 'Paste your full resume text here...', hint: resumeText ? `${wordCount(resumeText)} words` : 'Copy from your resume document' },
-          { label: 'Job Description', value: jobDescription, set: setJobDescription, placeholder: 'Paste the full job posting here...', hint: jobDescription ? `${wordCount(jobDescription)} words` : 'Copy the entire posting from LinkedIn, Indeed, etc.' },
-        ].map((f) => (
-          <div key={f.label}>
-            <label className="text-sm font-medium mb-2 block">{f.label}</label>
-            <Textarea placeholder={f.placeholder} value={f.value} onChange={(e) => f.set(e.target.value)} className="min-h-[200px] bg-muted/30 resize-y" />
-            <p className="text-xs text-muted-foreground mt-1">{f.hint}</p>
+        <div>
+          <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+            <label className="text-sm font-medium">Your Resume</label>
+            <div className="flex items-center gap-2">
+              <input ref={fileInputRef} type="file" accept=".pdf,.docx,.txt" onChange={handleFileUpload} className="hidden" />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => isPro ? fileInputRef.current?.click() : toast({ title: 'Pro feature', description: 'Upgrade to Pro to upload PDF/DOCX resumes.', variant: 'destructive' })}
+                disabled={isUploading}
+                className="gap-2"
+                title={isPro ? 'Upload PDF or DOCX' : 'Pro feature'}
+              >
+                {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : (isPro ? <Upload className="w-4 h-4" /> : <Lock className="w-4 h-4" />)}
+                Upload PDF/DOCX{!isPro && ' (Pro)'}
+              </Button>
+            </div>
           </div>
-        ))}
+          <Textarea
+            placeholder="Paste your full resume text here..."
+            value={resumeText}
+            onChange={(e) => { setResumeText(e.target.value); if (uploadedFileName) setUploadedFileName(null); }}
+            className="min-h-[200px] bg-muted/30 resize-y"
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            {uploadedFileName ? `📎 ${uploadedFileName} — ${wordCount(resumeText)} words` : (resumeText ? `${wordCount(resumeText)} words` : 'Paste text or upload PDF/DOCX (Pro)')}
+          </p>
+        </div>
+
+        <div>
+          <label className="text-sm font-medium mb-2 block">Job Description</label>
+          <Textarea
+            placeholder="Paste the full job posting here..."
+            value={jobDescription}
+            onChange={(e) => setJobDescription(e.target.value)}
+            className="min-h-[200px] bg-muted/30 resize-y"
+          />
+          <p className="text-xs text-muted-foreground mt-1">{jobDescription ? `${wordCount(jobDescription)} words` : 'Copy the entire posting from LinkedIn, Indeed, etc.'}</p>
+        </div>
       </div>
 
       {!canUse('resume_ats') ? (
