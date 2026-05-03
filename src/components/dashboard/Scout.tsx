@@ -62,7 +62,7 @@ const Scout: React.FC = () => {
       });
       if (error) throw error;
       setAlerts(data.alerts || []);
-      setSignals(data.alerts?.map((a: any) => a.radar_signals) || []);
+      setSignals(data.signals || data.alerts?.map((a: any) => a.radar_signals).filter(Boolean) || []);
     } catch (error) {
       console.error('Error fetching radar data:', error);
     } finally {
@@ -82,7 +82,12 @@ const Scout: React.FC = () => {
 
     setScanning(true);
     try {
-      const { data, error } = await supabase.functions.invoke('radar-scan');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Please sign in to run a radar scan.');
+
+      const { data, error } = await supabase.functions.invoke('radar-scan', {
+        headers: { Authorization: `Bearer ${session.access_token}` }
+      });
       if (error) throw error;
       
       // Track usage after successful scan
@@ -90,7 +95,7 @@ const Scout: React.FC = () => {
       
       toast({
         title: "Radar Scan Complete",
-        description: `Found ${data?.signalsStored || 0} new signals. ${data?.alertsCreated || 0} matched your profile.`,
+        description: `Scored ${data?.signalsMatched || data?.signalsExtracted || 0} signals. ${data?.alertsCreated || data?.alertsUpdated || 0} matched your preferences.`,
       });
       await fetchData();
     } catch (error: any) {

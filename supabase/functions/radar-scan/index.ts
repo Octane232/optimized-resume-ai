@@ -3,8 +3,87 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-cron-secret",
 };
+
+const clampMatch = (value: unknown) => {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 0;
+  return Math.max(0, Math.min(100, Math.round(n)));
+};
+
+const fallbackPreferenceScore = (signal: any, preferences: any) => {
+  const targetRole = String(preferences?.target_role || "").toLowerCase();
+  const targetIndustry = String(preferences?.target_industry || "").toLowerCase();
+  const experienceLevel = String(preferences?.experience_level || "").toLowerCase();
+  const roles = Array.isArray(signal?.likely_roles) ? signal.likely_roles.map((r: string) => r.toLowerCase()) : [];
+  const industry = String(signal?.industry || "").toLowerCase();
+  let score = 48;
+  const reasons: string[] = [];
+
+  if (targetIndustry && industry && (industry.includes(targetIndustry) || targetIndustry.includes(industry))) {
+    score += 24;
+    reasons.push(`Industry aligns with ${preferences.target_industry}`);
+  }
+  if (targetRole && roles.some((role: string) => role.includes(targetRole) || targetRole.includes(role))) {
+    score += 24;
+    reasons.push(`Likely hiring includes ${preferences.target_role}`);
+  }
+  if (experienceLevel && roles.some((role: string) => role.includes(experienceLevel))) {
+    score += 8;
+    reasons.push(`Seniority signal fits ${preferences.experience_level}`);
+  }
+
+  return {
+    match_score: clampMatch(score),
+    match_reasons: reasons.length ? reasons : ["Broad hiring signal based on your saved preferences"],
+    insight: `${signal.company_name} is showing a funding-driven hiring signal. Review the likely roles and apply early if the company matches your target direction.`,
+  };
+};
+
+async function scoreSignalWithAI(signal: any, preferences: any, openAiKey: string) {
+  const fallback = fallbackPreferenceScore(signal, preferences);
+  try {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${openAiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        temperature: 0.2,
+        response_format: { type: "json_object" },
+        messages: [{
+          role: "user",
+          content: `You are matching a job seeker to a hidden hiring signal. Use meaning-level fit, not exact keywords only. Return JSON only: {"match_score":0-100,"match_reasons":["2-4 short reasons"],"insight":"2 direct sentences explaining why this company is or is not a good match and what to do next"}.
+
+User preferences:
+- Target role: ${preferences?.target_role || "not specified"}
+- Target industry: ${preferences?.target_industry || "not specified"}
+- Experience level: ${preferences?.experience_level || "not specified"}
+- Target salary: ${preferences?.target_salary || "not specified"}
+- Work style: ${preferences?.work_style || "not specified"}
+
+Funding signal:
+- Company: ${signal.company_name}
+- Industry: ${signal.industry || "unknown"}
+- Description: ${signal.description || ""}
+- Funding: ${signal.amount || "unknown"} ${signal.funding_stage || ""}
+- Likely roles: ${(signal.likely_roles || []).join(", ") || "unknown"}
+- Hiring window: ${signal.hiring_window || "unknown"}`
+        }],
+      }),
+    });
+    if (!res.ok) return fallback;
+    const data = await res.json();
+    const parsed = JSON.parse(data.choices?.[0]?.message?.content || "{}");
+    return {
+      match_score: clampMatch(parsed.match_score || fallback.match_score),
+      match_reasons: Array.isArray(parsed.match_reasons) && parsed.match_reasons.length ? parsed.match_reasons.slice(0, 4) : fallback.match_reasons,
+      insight: parsed.insight || fallback.insight,
+    };
+  } catch {
+    return fallback;
+  }
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -34,6 +113,18 @@ serve(async (req) => {
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) throw new Error("Supabase not configured");
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    let requestingUserId: string | null = null;
+    if (hasUserJwt && authHeader) {
+      const token = authHeader.replace(/^Bearer\s+/i, "");
+      const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+      if (authError || !user) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      requestingUserId = user.id;
+    }
     const allArticles: any[] = [];
     const seenUrls = new Set<string>();
 
@@ -125,42 +216,54 @@ serve(async (req) => {
     }
     console.log(`Extracted ${signals.length} valid signals`);
 
-    // STEP 3: Store new signals
+    // STEP 3: Store new signals and keep existing duplicates available for matching.
     const storedSignals: { id: string; signal: any }[] = [];
     for (const signal of signals) {
-      const { data: existing } = await supabase.from("radar_signals").select("id").eq("source_url", signal.source_url).single();
-      if (existing) continue;
+      const { data: existing } = await supabase.from("radar_signals").select("id").eq("source_url", signal.source_url).maybeSingle();
+      if (existing) {
+        storedSignals.push({ id: existing.id, signal });
+        continue;
+      }
       const { data: inserted, error } = await supabase.from("radar_signals").insert({ company_name: signal.company_name, amount: signal.amount, funding_stage: signal.funding_stage, industry: signal.industry, description: signal.description, source_url: signal.source_url, published_at: signal.published_at, likely_roles: signal.likely_roles, hiring_window: signal.hiring_window }).select("id").single();
       if (!error && inserted) storedSignals.push({ id: inserted.id, signal });
     }
-    console.log(`Stored ${storedSignals.length} new signals`);
+    console.log(`Prepared ${storedSignals.length} signals for matching`);
 
-    // STEP 4: Match signals against users
-    const { data: users } = await supabase.from("career_preferences").select("user_id, target_role, target_industry");
+    if (storedSignals.length === 0 && requestingUserId) {
+      const { data: recentSignals } = await supabase
+        .from("radar_signals")
+        .select("id, company_name, amount, funding_stage, industry, description, source_url, published_at, likely_roles, hiring_window")
+        .order("created_at", { ascending: false })
+        .limit(25);
+      for (const signal of recentSignals || []) storedSignals.push({ id: signal.id, signal });
+    }
+
+    // STEP 4: Match signals against user preferences with AI-generated percentages.
+    let usersQuery = supabase.from("career_preferences").select("user_id, target_role, target_industry, experience_level, target_salary, work_style");
+    if (requestingUserId) usersQuery = usersQuery.eq("user_id", requestingUserId);
+    const { data: users } = await usersQuery;
+    const usersToMatch = requestingUserId && (!users || users.length === 0)
+      ? [{ user_id: requestingUserId, target_role: null, target_industry: null, experience_level: null, target_salary: null, work_style: null }]
+      : users || [];
     let alertsCreated = 0;
-    if (users && users.length > 0) {
+    let alertsUpdated = 0;
+    if (usersToMatch.length > 0) {
       for (const { id: signalId, signal } of storedSignals) {
-        for (const user of users) {
-          let score = 40;
-          const reasons: string[] = [];
-          if (user.target_industry && signal.industry?.toLowerCase().includes(user.target_industry.toLowerCase())) { score += 30; reasons.push(`Industry match: ${signal.industry}`); }
-          if (user.target_role && signal.likely_roles?.some((r: string) => r.toLowerCase().includes(user.target_role.toLowerCase()) || user.target_role.toLowerCase().includes(r.toLowerCase()))) { score += 30; reasons.push(`Role match: ${user.target_role}`); }
-          if (score < 60) continue;
-          const { data: existing } = await supabase.from("radar_alerts").select("id").eq("user_id", user.user_id).eq("signal_id", signalId).single();
-          if (existing) continue;
-          let insight = `${signal.company_name} just raised ${signal.amount} and will hire ${user.target_role || "for your target roles"} in the next ${signal.hiring_window}. Apply before this goes public.`;
-          try {
-            const insightRes = await fetch("https://api.openai.com/v1/chat/completions", { method: "POST", headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ model: "gpt-4o-mini", messages: [{ role: "user", content: `Write exactly 2 sentences for a job seeker alert. Company: ${signal.company_name}. Funding: ${signal.amount} ${signal.funding_stage}. User target role: ${user.target_role || "not specified"}. Hiring window: ${signal.hiring_window}. Sentence 1: what this funding means for hiring. Sentence 2: what they should do right now. Second person, direct, no fluff.` }] }) });
-            const insightData = await insightRes.json();
-            insight = insightData.choices?.[0]?.message?.content || insight;
-          } catch { /* use fallback */ }
-          const { error } = await supabase.from("radar_alerts").insert({ user_id: user.user_id, signal_id: signalId, match_score: Math.min(score, 100), match_reasons: reasons.length > 0 ? reasons : ["General relevance"], insight, is_read: false });
-          if (!error) alertsCreated++;
+        for (const user of usersToMatch) {
+          const match = await scoreSignalWithAI(signal, user, OPENAI_API_KEY);
+          const { data: existing } = await supabase.from("radar_alerts").select("id").eq("user_id", user.user_id).eq("signal_id", signalId).maybeSingle();
+          if (existing) {
+            const { error } = await supabase.from("radar_alerts").update({ match_score: match.match_score, match_reasons: match.match_reasons, insight: match.insight }).eq("id", existing.id);
+            if (!error) alertsUpdated++;
+          } else {
+            const { error } = await supabase.from("radar_alerts").insert({ user_id: user.user_id, signal_id: signalId, match_score: match.match_score, match_reasons: match.match_reasons, insight: match.insight, is_read: false });
+            if (!error) alertsCreated++;
+          }
         }
       }
     }
 
-    return new Response(JSON.stringify({ success: true, articlesFound: allArticles.length, signalsExtracted: signals.length, signalsStored: storedSignals.length, alertsCreated }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ success: true, articlesFound: allArticles.length, signalsExtracted: signals.length, signalsMatched: storedSignals.length, signalsStored: storedSignals.length, alertsCreated, alertsUpdated }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {
     console.error("Radar scan error:", error);
     return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });

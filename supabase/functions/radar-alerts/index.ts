@@ -24,19 +24,55 @@ serve(async (req) => {
     const limit = parseInt(url.searchParams.get("limit") || "50");
     const unreadOnly = url.searchParams.get("unread") === "true";
     const industry = url.searchParams.get("industry") || null;
-    let query = supabase.from("radar_alerts").select(`id, match_score, match_reasons, insight, is_read, created_at, radar_signals (id, company_name, amount, funding_stage, industry, description, likely_roles, hiring_window, source_url, published_at)`).eq("user_id", user.id).order("created_at", { ascending: false }).limit(limit);
-    if (unreadOnly) query = query.eq("is_read", false);
-    const { data: alerts, error: alertsError } = await query;
+
+    let alertsQuery = supabase
+      .from("radar_alerts")
+      .select("id, signal_id, match_score, match_reasons, insight, is_read, created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (unreadOnly) alertsQuery = alertsQuery.eq("is_read", false);
+
+    const { data: alertRows, error: alertsError } = await alertsQuery;
     if (alertsError) throw alertsError;
-    const filteredAlerts = industry && industry !== "all" ? (alerts || []).filter((a: any) => a.radar_signals?.industry?.toLowerCase() === industry.toLowerCase()) : alerts || [];
+
+    const signalIds = [...new Set((alertRows || []).map((a: any) => a.signal_id).filter(Boolean))];
+    const { data: alertSignals, error: alertSignalsError } = signalIds.length
+      ? await supabase
+          .from("radar_signals")
+          .select("id, company_name, amount, funding_stage, industry, description, likely_roles, hiring_window, source_url, published_at, created_at")
+          .in("id", signalIds)
+      : { data: [], error: null };
+    if (alertSignalsError) throw alertSignalsError;
+
+    const signalMap = new Map((alertSignals || []).map((s: any) => [s.id, s]));
+    const alerts = (alertRows || [])
+      .map((alert: any) => ({ ...alert, radar_signals: signalMap.get(alert.signal_id) || null }))
+      .filter((alert: any) => alert.radar_signals);
+
+    let signalsQuery = supabase
+      .from("radar_signals")
+      .select("id, company_name, amount, funding_stage, industry, description, likely_roles, hiring_window, source_url, published_at, created_at")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    const { data: allSignals, error: allSignalsError } = await signalsQuery;
+    if (allSignalsError) throw allSignalsError;
+
+    const filteredAlerts = industry && industry !== "all"
+      ? alerts.filter((a: any) => a.radar_signals?.industry?.toLowerCase() === industry.toLowerCase())
+      : alerts;
+    const filteredSignals = industry && industry !== "all"
+      ? (allSignals || []).filter((s: any) => s.industry?.toLowerCase() === industry.toLowerCase())
+      : allSignals || [];
+
     const { count: unreadCount } = await supabase.from("radar_alerts").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("is_read", false);
     const industryCounts: Record<string, number> = {};
-    for (const alert of (alerts || [])) {
-      const ind = (alert as any).radar_signals?.industry;
+    for (const signal of filteredSignals) {
+      const ind = (signal as any).industry;
       if (ind) industryCounts[ind] = (industryCounts[ind] || 0) + 1;
     }
     const { data: lastSignal } = await supabase.from("radar_signals").select("created_at").order("created_at", { ascending: false }).limit(1).single();
-    return new Response(JSON.stringify({ alerts: filteredAlerts, unreadCount: unreadCount || 0, totalCount: (alerts || []).length, industryCounts, lastScanAt: lastSignal?.created_at || null }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ alerts: filteredAlerts, signals: filteredSignals, unreadCount: unreadCount || 0, totalCount: filteredAlerts.length, industryCounts, lastScanAt: lastSignal?.created_at || null }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {
     return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
