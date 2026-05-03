@@ -30,7 +30,7 @@ interface FormData {
 const CoverLetterGenerator = () => {
   // ===== Hooks =====
   const { toast } = useToast();
-  const { canUse, trackUsage, isLoading: usageLoading } = useUsageLimit();
+  const { canUse, trackUsage, loading: usageLoading } = useUsageLimit();
 
   // ===== State =====
   const [isGenerating, setIsGenerating] = useState(false);
