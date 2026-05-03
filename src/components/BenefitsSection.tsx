@@ -2,7 +2,7 @@ import React from 'react';
 import { Shield, Zap, Clock, ArrowRight, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import VayaChatPreview from './VayaChatPreview';
+
 
 const BenefitsSection = () => {
   return (
