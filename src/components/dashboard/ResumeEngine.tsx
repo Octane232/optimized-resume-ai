@@ -317,16 +317,46 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
       </div>
 
       <div className="space-y-4">
-        {[
-          { label: 'Your Resume', value: resumeText, set: setResumeText, placeholder: 'Paste your full resume text here...', hint: resumeText ? `${wordCount(resumeText)} words` : 'Copy from your resume document' },
-          { label: 'Job Description', value: jobDescription, set: setJobDescription, placeholder: 'Paste the full job posting here...', hint: jobDescription ? `${wordCount(jobDescription)} words` : 'Copy the entire posting from LinkedIn, Indeed, etc.' },
-        ].map((f) => (
-          <div key={f.label}>
-            <label className="text-sm font-medium mb-2 block">{f.label}</label>
-            <Textarea placeholder={f.placeholder} value={f.value} onChange={(e) => f.set(e.target.value)} className="min-h-[200px] bg-muted/30 resize-y" />
-            <p className="text-xs text-muted-foreground mt-1">{f.hint}</p>
+        <div>
+          <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+            <label className="text-sm font-medium">Your Resume</label>
+            <div className="flex items-center gap-2">
+              <input ref={fileInputRef} type="file" accept=".pdf,.docx,.txt" onChange={handleFileUpload} className="hidden" />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => isPro ? fileInputRef.current?.click() : toast({ title: 'Pro feature', description: 'Upgrade to Pro to upload PDF/DOCX resumes.', variant: 'destructive' })}
+                disabled={isUploading}
+                className="gap-2"
+                title={isPro ? 'Upload PDF or DOCX' : 'Pro feature'}
+              >
+                {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : (isPro ? <Upload className="w-4 h-4" /> : <Lock className="w-4 h-4" />)}
+                Upload PDF/DOCX{!isPro && ' (Pro)'}
+              </Button>
+            </div>
           </div>
-        ))}
+          <Textarea
+            placeholder="Paste your full resume text here..."
+            value={resumeText}
+            onChange={(e) => { setResumeText(e.target.value); if (uploadedFileName) setUploadedFileName(null); }}
+            className="min-h-[200px] bg-muted/30 resize-y"
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            {uploadedFileName ? `📎 ${uploadedFileName} — ${wordCount(resumeText)} words` : (resumeText ? `${wordCount(resumeText)} words` : 'Paste text or upload PDF/DOCX (Pro)')}
+          </p>
+        </div>
+
+        <div>
+          <label className="text-sm font-medium mb-2 block">Job Description</label>
+          <Textarea
+            placeholder="Paste the full job posting here..."
+            value={jobDescription}
+            onChange={(e) => setJobDescription(e.target.value)}
+            className="min-h-[200px] bg-muted/30 resize-y"
+          />
+          <p className="text-xs text-muted-foreground mt-1">{jobDescription ? `${wordCount(jobDescription)} words` : 'Copy the entire posting from LinkedIn, Indeed, etc.'}</p>
+        </div>
       </div>
 
       {!canUse('resume_ats') ? (
