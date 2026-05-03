@@ -3,8 +3,87 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-cron-secret",
 };
+
+const clampMatch = (value: unknown) => {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 0;
+  return Math.max(0, Math.min(100, Math.round(n)));
+};
+
+const fallbackPreferenceScore = (signal: any, preferences: any) => {
+  const targetRole = String(preferences?.target_role || "").toLowerCase();
+  const targetIndustry = String(preferences?.target_industry || "").toLowerCase();
+  const experienceLevel = String(preferences?.experience_level || "").toLowerCase();
+  const roles = Array.isArray(signal?.likely_roles) ? signal.likely_roles.map((r: string) => r.toLowerCase()) : [];
+  const industry = String(signal?.industry || "").toLowerCase();
+  let score = 48;
+  const reasons: string[] = [];
+
+  if (targetIndustry && industry && (industry.includes(targetIndustry) || targetIndustry.includes(industry))) {
+    score += 24;
+    reasons.push(`Industry aligns with ${preferences.target_industry}`);
+  }
+  if (targetRole && roles.some((role: string) => role.includes(targetRole) || targetRole.includes(role))) {
+    score += 24;
+    reasons.push(`Likely hiring includes ${preferences.target_role}`);
+  }
+  if (experienceLevel && roles.some((role: string) => role.includes(experienceLevel))) {
+    score += 8;
+    reasons.push(`Seniority signal fits ${preferences.experience_level}`);
+  }
+
+  return {
+    match_score: clampMatch(score),
+    match_reasons: reasons.length ? reasons : ["Broad hiring signal based on your saved preferences"],
+    insight: `${signal.company_name} is showing a funding-driven hiring signal. Review the likely roles and apply early if the company matches your target direction.`,
+  };
+};
+
+async function scoreSignalWithAI(signal: any, preferences: any, openAiKey: string) {
+  const fallback = fallbackPreferenceScore(signal, preferences);
+  try {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${openAiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        temperature: 0.2,
+        response_format: { type: "json_object" },
+        messages: [{
+          role: "user",
+          content: `You are matching a job seeker to a hidden hiring signal. Use meaning-level fit, not exact keywords only. Return JSON only: {"match_score":0-100,"match_reasons":["2-4 short reasons"],"insight":"2 direct sentences explaining why this company is or is not a good match and what to do next"}.
+
+User preferences:
+- Target role: ${preferences?.target_role || "not specified"}
+- Target industry: ${preferences?.target_industry || "not specified"}
+- Experience level: ${preferences?.experience_level || "not specified"}
+- Target salary: ${preferences?.target_salary || "not specified"}
+- Work style: ${preferences?.work_style || "not specified"}
+
+Funding signal:
+- Company: ${signal.company_name}
+- Industry: ${signal.industry || "unknown"}
+- Description: ${signal.description || ""}
+- Funding: ${signal.amount || "unknown"} ${signal.funding_stage || ""}
+- Likely roles: ${(signal.likely_roles || []).join(", ") || "unknown"}
+- Hiring window: ${signal.hiring_window || "unknown"}`
+        }],
+      }),
+    });
+    if (!res.ok) return fallback;
+    const data = await res.json();
+    const parsed = JSON.parse(data.choices?.[0]?.message?.content || "{}");
+    return {
+      match_score: clampMatch(parsed.match_score || fallback.match_score),
+      match_reasons: Array.isArray(parsed.match_reasons) && parsed.match_reasons.length ? parsed.match_reasons.slice(0, 4) : fallback.match_reasons,
+      insight: parsed.insight || fallback.insight,
+    };
+  } catch {
+    return fallback;
+  }
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
