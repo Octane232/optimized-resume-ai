@@ -131,15 +131,12 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
           supabase.from('resumes').insert({
             user_id: user.id,
             title: `Tailored Resume — ${new Date().toLocaleDateString()}`,
-            content: data.tailoredResume,
-            job_description: jobDescription.trim(),
-            ats_score: data.atsData?.afterScore ?? null,
+            content: { text: data.tailoredResume, ats_score: data.atsData?.afterScore ?? null, job_description: jobDescription.trim() } as any,
           }),
           supabase.from('cover_letters').insert({
             user_id: user.id,
-            title: `Cover Letter — ${new Date().toLocaleDateString()}`,
+            job_title: 'Tailored Application',
             content: data.coverLetter,
-            job_description: jobDescription.trim(),
           }),
         ]);
       }
