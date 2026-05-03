@@ -37,11 +37,71 @@ const STEPS = [
 const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?: boolean }> = ({ setActiveTab }) => {
   const { toast } = useToast();
   const { canUse, trackUsage, getRemaining, tier } = useUsageLimit();
+  const isPro = tier === 'pro' || tier === 'premium';
   const [resumeText, setResumeText] = useState('');
   const [jobDescription, setJobDescription] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [result, setResult] = useState<BundleResult | null>(null);
   const [activeResultTab, setActiveResultTab] = useState('ats');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!isPro) {
+      toast({ title: 'Pro feature', description: 'Upgrade to Pro to upload PDF/DOCX resumes.', variant: 'destructive' });
+      return;
+    }
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`https://xpmhahyvtyvrxryrqane.supabase.co/functions/v1/parse-resume-file`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session?.access_token || ''}` },
+        body: formData,
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Upload failed');
+      setResumeText(json.text || '');
+      setUploadedFileName(file.name);
+      toast({ title: 'Resume uploaded', description: `${file.name} parsed successfully.` });
+    } catch (err: any) {
+      toast({ title: 'Upload failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const downloadAsPDF = async () => {
+    if (!isPro || !result) return;
+    const container = document.createElement('div');
+    container.style.cssText = 'padding:32px;font-family:Arial,sans-serif;font-size:11pt;color:#111;white-space:pre-wrap;';
+    container.innerText = result.tailoredResume;
+    await html2pdf().from(container).set({
+      margin: 0.5, filename: 'tailored-resume.pdf',
+      html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
+    }).save();
+  };
+
+  const downloadAsDOCX = async () => {
+    if (!isPro || !result) return;
+    const paragraphs = result.tailoredResume.split('\n').map(line =>
+      new Paragraph({ children: [new TextRun({ text: line || ' ' })] })
+    );
+    const doc = new Document({ sections: [{ children: paragraphs }] });
+    const blob = await Packer.toBlob(doc);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'tailored-resume.docx';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
 
   const handleGenerate = async () => {
     if (!resumeText.trim() || !jobDescription.trim()) {
