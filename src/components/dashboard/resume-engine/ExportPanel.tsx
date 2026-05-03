@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Download, FileText, FileSpreadsheet, Copy, Check, Loader2, Share2 } from 'lucide-react';
+import { Download, FileText, FileSpreadsheet, Copy, Check, Loader2, Share2, FileType, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
+import { useSubscription } from '@/contexts/SubscriptionContext';
+import { Document, Packer, Paragraph, HeadingLevel, TextRun } from 'docx';
+import html2pdf from 'html2pdf.js';
 import type { ParsedResume } from './ResumeParser';
 
 interface ExportPanelProps {
