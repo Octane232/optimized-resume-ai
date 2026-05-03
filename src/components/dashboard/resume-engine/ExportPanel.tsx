@@ -357,11 +357,7 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
             disabled={!hasContent || isExporting === 'text'}
             className="h-auto py-4 flex-col gap-2"
           >
-            {isExporting === 'text' ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <FileText className="w-5 h-5" />
-            )}
+            {isExporting === 'text' ? <Loader2 className="w-5 h-5 animate-spin" /> : <FileText className="w-5 h-5" />}
             <span className="text-xs">ATS Text File</span>
           </Button>
 
@@ -371,12 +367,30 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
             disabled={!parsedResume || isExporting === 'report'}
             className="h-auto py-4 flex-col gap-2"
           >
-            {isExporting === 'report' ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <FileSpreadsheet className="w-5 h-5" />
-            )}
+            {isExporting === 'report' ? <Loader2 className="w-5 h-5 animate-spin" /> : <FileSpreadsheet className="w-5 h-5" />}
             <span className="text-xs">Gap Report</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={handleExportPDF}
+            disabled={!hasContent || isExporting === 'pdf'}
+            className="h-auto py-4 flex-col gap-2"
+            title={isPro ? 'Download as PDF' : 'Pro feature'}
+          >
+            {isExporting === 'pdf' ? <Loader2 className="w-5 h-5 animate-spin" /> : (isPro ? <FileType className="w-5 h-5" /> : <Lock className="w-5 h-5" />)}
+            <span className="text-xs">PDF {!isPro && '(Pro)'}</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={handleExportDOCX}
+            disabled={!hasContent || isExporting === 'docx'}
+            className="h-auto py-4 flex-col gap-2"
+            title={isPro ? 'Download as DOCX' : 'Pro feature'}
+          >
+            {isExporting === 'docx' ? <Loader2 className="w-5 h-5 animate-spin" /> : (isPro ? <FileType className="w-5 h-5" /> : <Lock className="w-5 h-5" />)}
+            <span className="text-xs">DOCX {!isPro && '(Pro)'}</span>
           </Button>
         </div>
 
