@@ -11,10 +11,13 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
   try {
-    // Cron-style endpoint — require shared secret to prevent abuse.
+    // Allow either: (a) cron call with shared secret, or (b) authenticated user from the app.
     const SEED_SECRET = Deno.env.get("SEED_SECRET");
-    const provided = req.headers.get("x-cron-secret");
-    if (!SEED_SECRET || provided !== SEED_SECRET) {
+    const providedSecret = req.headers.get("x-cron-secret");
+    const authHeader = req.headers.get("Authorization") || req.headers.get("authorization");
+    const isCron = !!SEED_SECRET && providedSecret === SEED_SECRET;
+    const hasUserJwt = !!authHeader && authHeader.toLowerCase().startsWith("bearer ");
+    if (!isCron && !hasUserJwt) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
