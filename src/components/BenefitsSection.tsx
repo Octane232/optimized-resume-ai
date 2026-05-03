@@ -58,7 +58,16 @@ const BenefitsSection = () => {
 
           {/* Right — AI Chat Preview */}
           <div className="order-1 lg:order-2 animate-fade-in">
-            <VayaChatPreview />
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-lg">
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="w-5 h-5 text-primary" />
+                <span className="font-semibold text-foreground">Vaylance AI</span>
+              </div>
+              <div className="space-y-3 text-sm">
+                <div className="rounded-lg bg-muted p-3 text-muted-foreground">How do I tailor my resume for a senior PM role?</div>
+                <div className="rounded-lg bg-primary/10 p-3 text-foreground">I'll rewrite your bullets to emphasize stakeholder leadership, roadmap ownership, and measurable outcomes. Want me to start?</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
