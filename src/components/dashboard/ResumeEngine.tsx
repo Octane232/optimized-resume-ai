@@ -46,6 +46,7 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [result, setResult] = useState<BundleResult | null>(null);
   const [activeResultTab, setActiveResultTab] = useState('ats');
+  const [showRewritePrompt, setShowRewritePrompt] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
