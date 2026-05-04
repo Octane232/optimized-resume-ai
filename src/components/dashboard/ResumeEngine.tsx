@@ -438,10 +438,14 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
               onClick={() => {
                 setShowRewritePrompt(false);
                 if (!jobDescription.trim()) {
-                  toast({ title: 'Add a job description', description: 'Paste the job description below, then click Generate.' });
+                  toast({ title: 'Add a job description', description: 'Paste the JD, then click "Rewrite my DOCX" below.' });
                   return;
                 }
-                handleGenerate();
+                if (uploadedDocxFile) {
+                  handleRewriteDocx();
+                } else {
+                  handleGenerate();
+                }
               }}
             >
               Yes, rewrite with AI
