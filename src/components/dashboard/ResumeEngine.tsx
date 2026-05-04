@@ -424,6 +424,44 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
           <p className="text-xs text-center text-muted-foreground">{remaining} bundle{remaining !== 1 ? 's' : ''} remaining {tier === 'free' ? '(free plan)' : 'this month'}</p>
         </div>
       )}
+
+      {uploadedDocxFile && isPro && (
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="p-4 space-y-3">
+            <div className="flex items-start gap-3">
+              <Sparkles className="w-5 h-5 text-primary mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold">AI DOCX Editing (Pro)</p>
+                <p className="text-xs text-muted-foreground">
+                  Let GPT rewrite your uploaded DOCX paragraph-by-paragraph to match the job description — your original template, fonts, and formatting stay intact.
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                size="sm"
+                onClick={handleRewriteDocx}
+                disabled={isRewritingDocx || !jobDescription.trim()}
+                className="gap-2"
+              >
+                {isRewritingDocx ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                {editedDocxBase64 ? 'Rewrite again' : 'Rewrite my DOCX'}
+              </Button>
+              {editedDocxBase64 && (
+                <Button size="sm" variant="outline" onClick={downloadEditedDocx} className="gap-2">
+                  <Download className="w-4 h-4" /> Download edited DOCX
+                </Button>
+              )}
+            </div>
+            {editedDocxBase64 && (
+              <div className="bg-background/60 rounded-lg p-3 border max-h-[300px] overflow-y-auto">
+                <p className="text-xs font-semibold text-muted-foreground mb-2">Rewritten resume preview:</p>
+                <pre className="text-xs whitespace-pre-wrap font-mono leading-relaxed">{resumeText}</pre>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
       <AlertDialog open={showRewritePrompt} onOpenChange={setShowRewritePrompt}>
         <AlertDialogContent>
           <AlertDialogHeader>
