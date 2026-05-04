@@ -71,6 +71,7 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
       setResumeText(json.text || '');
       setUploadedFileName(file.name);
       toast({ title: 'Resume uploaded', description: `${file.name} parsed successfully.` });
+      setShowRewritePrompt(true);
     } catch (err: any) {
       toast({ title: 'Upload failed', description: err.message, variant: 'destructive' });
     } finally {
