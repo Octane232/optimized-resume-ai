@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useUsageLimit } from '@/contexts/UsageLimitContext';
@@ -45,6 +46,7 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [result, setResult] = useState<BundleResult | null>(null);
   const [activeResultTab, setActiveResultTab] = useState('ats');
+  const [showRewritePrompt, setShowRewritePrompt] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,6 +71,7 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
       setResumeText(json.text || '');
       setUploadedFileName(file.name);
       toast({ title: 'Resume uploaded', description: `${file.name} parsed successfully.` });
+      setShowRewritePrompt(true);
     } catch (err: any) {
       toast({ title: 'Upload failed', description: err.message, variant: 'destructive' });
     } finally {
@@ -370,6 +373,31 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
           <p className="text-xs text-center text-muted-foreground">{remaining} bundle{remaining !== 1 ? 's' : ''} remaining {tier === 'free' ? '(free plan)' : 'this month'}</p>
         </div>
       )}
+      <AlertDialog open={showRewritePrompt} onOpenChange={setShowRewritePrompt}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Rewrite resume to match the job?</AlertDialogTitle>
+            <AlertDialogDescription>
+              We can have AI rewrite your uploaded resume to better match the job description, add missing keywords, and boost your ATS score. You'll be able to download it as PDF or DOCX.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>No, keep as is</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setShowRewritePrompt(false);
+                if (!jobDescription.trim()) {
+                  toast({ title: 'Add a job description', description: 'Paste the job description below, then click Generate.' });
+                  return;
+                }
+                handleGenerate();
+              }}
+            >
+              Yes, rewrite with AI
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
