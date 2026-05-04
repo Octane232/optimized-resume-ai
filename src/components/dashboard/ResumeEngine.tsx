@@ -73,6 +73,12 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
       if (!res.ok) throw new Error(json.error || 'Upload failed');
       setResumeText(json.text || '');
       setUploadedFileName(file.name);
+      setEditedDocxBase64(null);
+      if (file.name.toLowerCase().endsWith('.docx')) {
+        setUploadedDocxFile(file);
+      } else {
+        setUploadedDocxFile(null);
+      }
       toast({ title: 'Resume uploaded', description: `${file.name} parsed successfully.` });
       setShowRewritePrompt(true);
     } catch (err: any) {
@@ -81,6 +87,48 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
+  };
+
+  const handleRewriteDocx = async () => {
+    if (!uploadedDocxFile || !jobDescription.trim()) {
+      toast({ title: 'Missing input', description: 'Need a DOCX file and a job description.', variant: 'destructive' });
+      return;
+    }
+    setIsRewritingDocx(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', uploadedDocxFile);
+      fd.append('jobDescription', jobDescription.trim());
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`https://xpmhahyvtyvrxryrqane.supabase.co/functions/v1/rewrite-docx`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session?.access_token || ''}` },
+        body: fd,
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Rewrite failed');
+      setEditedDocxBase64(json.docxBase64);
+      setResumeText(json.previewText || resumeText);
+      toast({ title: 'Resume rewritten', description: `${json.rewrittenCount} of ${json.totalParagraphs} paragraphs improved. Original formatting preserved.` });
+    } catch (err: any) {
+      toast({ title: 'Rewrite failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setIsRewritingDocx(false);
+    }
+  };
+
+  const downloadEditedDocx = () => {
+    if (!editedDocxBase64) return;
+    const bin = atob(editedDocxBase64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = (uploadedFileName?.replace(/\.docx$/i, '') || 'resume') + '-rewritten.docx';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const downloadAsPDF = async () => {
