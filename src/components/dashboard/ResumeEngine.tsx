@@ -373,6 +373,31 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
           <p className="text-xs text-center text-muted-foreground">{remaining} bundle{remaining !== 1 ? 's' : ''} remaining {tier === 'free' ? '(free plan)' : 'this month'}</p>
         </div>
       )}
+      <AlertDialog open={showRewritePrompt} onOpenChange={setShowRewritePrompt}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Rewrite resume to match the job?</AlertDialogTitle>
+            <AlertDialogDescription>
+              We can have AI rewrite your uploaded resume to better match the job description, add missing keywords, and boost your ATS score. You'll be able to download it as PDF or DOCX.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>No, keep as is</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setShowRewritePrompt(false);
+                if (!jobDescription.trim()) {
+                  toast({ title: 'Add a job description', description: 'Paste the job description below, then click Generate.' });
+                  return;
+                }
+                handleGenerate();
+              }}
+            >
+              Yes, rewrite with AI
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
