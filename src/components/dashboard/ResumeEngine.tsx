@@ -47,6 +47,9 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
   const [result, setResult] = useState<BundleResult | null>(null);
   const [activeResultTab, setActiveResultTab] = useState('ats');
   const [showRewritePrompt, setShowRewritePrompt] = useState(false);
+  const [uploadedDocxFile, setUploadedDocxFile] = useState<File | null>(null);
+  const [editedDocxBase64, setEditedDocxBase64] = useState<string | null>(null);
+  const [isRewritingDocx, setIsRewritingDocx] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
