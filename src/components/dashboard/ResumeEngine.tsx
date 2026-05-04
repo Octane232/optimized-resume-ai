@@ -47,6 +47,9 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
   const [result, setResult] = useState<BundleResult | null>(null);
   const [activeResultTab, setActiveResultTab] = useState('ats');
   const [showRewritePrompt, setShowRewritePrompt] = useState(false);
+  const [uploadedDocxFile, setUploadedDocxFile] = useState<File | null>(null);
+  const [editedDocxBase64, setEditedDocxBase64] = useState<string | null>(null);
+  const [isRewritingDocx, setIsRewritingDocx] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,6 +73,12 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
       if (!res.ok) throw new Error(json.error || 'Upload failed');
       setResumeText(json.text || '');
       setUploadedFileName(file.name);
+      setEditedDocxBase64(null);
+      if (file.name.toLowerCase().endsWith('.docx')) {
+        setUploadedDocxFile(file);
+      } else {
+        setUploadedDocxFile(null);
+      }
       toast({ title: 'Resume uploaded', description: `${file.name} parsed successfully.` });
       setShowRewritePrompt(true);
     } catch (err: any) {
@@ -78,6 +87,48 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
+  };
+
+  const handleRewriteDocx = async () => {
+    if (!uploadedDocxFile || !jobDescription.trim()) {
+      toast({ title: 'Missing input', description: 'Need a DOCX file and a job description.', variant: 'destructive' });
+      return;
+    }
+    setIsRewritingDocx(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', uploadedDocxFile);
+      fd.append('jobDescription', jobDescription.trim());
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`https://xpmhahyvtyvrxryrqane.supabase.co/functions/v1/rewrite-docx`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session?.access_token || ''}` },
+        body: fd,
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Rewrite failed');
+      setEditedDocxBase64(json.docxBase64);
+      setResumeText(json.previewText || resumeText);
+      toast({ title: 'Resume rewritten', description: `${json.rewrittenCount} of ${json.totalParagraphs} paragraphs improved. Original formatting preserved.` });
+    } catch (err: any) {
+      toast({ title: 'Rewrite failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setIsRewritingDocx(false);
+    }
+  };
+
+  const downloadEditedDocx = () => {
+    if (!editedDocxBase64) return;
+    const bin = atob(editedDocxBase64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = (uploadedFileName?.replace(/\.docx$/i, '') || 'resume') + '-rewritten.docx';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const downloadAsPDF = async () => {
@@ -373,6 +424,44 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
           <p className="text-xs text-center text-muted-foreground">{remaining} bundle{remaining !== 1 ? 's' : ''} remaining {tier === 'free' ? '(free plan)' : 'this month'}</p>
         </div>
       )}
+
+      {uploadedDocxFile && isPro && (
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="p-4 space-y-3">
+            <div className="flex items-start gap-3">
+              <Sparkles className="w-5 h-5 text-primary mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold">AI DOCX Editing (Pro)</p>
+                <p className="text-xs text-muted-foreground">
+                  Let GPT rewrite your uploaded DOCX paragraph-by-paragraph to match the job description — your original template, fonts, and formatting stay intact.
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                size="sm"
+                onClick={handleRewriteDocx}
+                disabled={isRewritingDocx || !jobDescription.trim()}
+                className="gap-2"
+              >
+                {isRewritingDocx ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                {editedDocxBase64 ? 'Rewrite again' : 'Rewrite my DOCX'}
+              </Button>
+              {editedDocxBase64 && (
+                <Button size="sm" variant="outline" onClick={downloadEditedDocx} className="gap-2">
+                  <Download className="w-4 h-4" /> Download edited DOCX
+                </Button>
+              )}
+            </div>
+            {editedDocxBase64 && (
+              <div className="bg-background/60 rounded-lg p-3 border max-h-[300px] overflow-y-auto">
+                <p className="text-xs font-semibold text-muted-foreground mb-2">Rewritten resume preview:</p>
+                <pre className="text-xs whitespace-pre-wrap font-mono leading-relaxed">{resumeText}</pre>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
       <AlertDialog open={showRewritePrompt} onOpenChange={setShowRewritePrompt}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -387,10 +476,14 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
               onClick={() => {
                 setShowRewritePrompt(false);
                 if (!jobDescription.trim()) {
-                  toast({ title: 'Add a job description', description: 'Paste the job description below, then click Generate.' });
+                  toast({ title: 'Add a job description', description: 'Paste the JD, then click "Rewrite my DOCX" below.' });
                   return;
                 }
-                handleGenerate();
+                if (uploadedDocxFile) {
+                  handleRewriteDocx();
+                } else {
+                  handleGenerate();
+                }
               }}
             >
               Yes, rewrite with AI
