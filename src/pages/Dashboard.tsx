@@ -317,11 +317,6 @@ const Dashboard = () => {
         </div>
       </main>
 
-      {/* Right Panel (optional) */}
-      {activeTab === 'briefing' && mode === 'hunter' && (
-        <div className="w-80 hidden lg:block h-screen overflow-y-auto border-l border-border" />
-      )}
-
       {/* Mobile Navigation */}
       <MobileNav
         activeTab={activeTab}

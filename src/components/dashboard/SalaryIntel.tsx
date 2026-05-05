@@ -153,11 +153,20 @@ const SalaryIntel: React.FC = () => {
 
     } catch (error: any) {
       console.error('Salary intel error:', error);
-      toast({
-        title: 'Error',
-        description: error.message || 'Could not fetch salary data.',
-        variant: 'destructive'
-      });
+      const status = error?.context?.status;
+      if (status === 402 || status === 429) {
+        toast({
+          title: "You've used all your credits",
+          description: 'Upgrade your plan to keep using Salary Intelligence.',
+          variant: 'destructive'
+        });
+      } else {
+        toast({
+          title: 'Error',
+          description: error.message || 'Could not fetch salary data.',
+          variant: 'destructive'
+        });
+      }
     } finally {
       setLoading(false);
     }

@@ -88,7 +88,12 @@ const LinkedInOptimizer: React.FC = () => {
       if (saved) setHistory([saved, ...history.slice(0, 4)]);
       toast({ title: 'Done!', description: 'Your optimized content is ready to copy.' });
     } catch (err: any) {
-      toast({ title: 'Error', description: err.message || 'Could not optimize. Try again.', variant: 'destructive' });
+      const status = err?.context?.status;
+      if (status === 402 || status === 429 || getRemaining('linkedin') <= 0) {
+        toast({ title: "You've used all your credits", description: 'Upgrade your plan to keep optimizing.', variant: 'destructive' });
+      } else {
+        toast({ title: 'Error', description: err.message || 'Could not optimize. Try again.', variant: 'destructive' });
+      }
     } finally {
       setIsOptimizing(false);
     }
