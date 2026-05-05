@@ -358,13 +358,24 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
       if (currentQ === questions.length - 1) {
         await saveSession(updatedAnswers);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting answer:', error);
-      toast({
-        title: 'Error',
-        description: 'Could not get AI feedback.',
-        variant: 'destructive'
-      });
+      const remaining = getRemaining('interview_prep');
+      const ctx = error?.context;
+      const status = ctx?.status;
+      if (status === 402 || status === 429 || remaining <= 0) {
+        toast({
+          title: "You've used all your credits",
+          description: 'Upgrade your plan to keep practicing.',
+          variant: 'destructive'
+        });
+      } else {
+        toast({
+          title: 'Could not get AI feedback',
+          description: 'Please try again in a moment.',
+          variant: 'destructive'
+        });
+      }
     } finally {
       setLoadingFeedback(false);
     }
