@@ -439,19 +439,10 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
     setUserAnswer('');
   };
 
-  // Live Mode Handlers — charges 1 credit per session
-  const startLive = async () => {
+  // Live Mode Handlers
+  const startLive = () => {
     if (!livePosition.trim()) {
       toast({ title: 'Enter your role first', variant: 'destructive' });
-      return;
-    }
-    if (!canUse('interview_prep')) {
-      toast({ title: "You've used all your credits", description: 'Upgrade your plan to keep using Live Mode.', variant: 'destructive' });
-      return;
-    }
-    const credited = await trackUsage('interview_prep', 'Live interview session');
-    if (!credited) {
-      toast({ title: "You've used all your credits", description: 'Upgrade your plan to keep using Live Mode.', variant: 'destructive' });
       return;
     }
     setLiveEntries([]);

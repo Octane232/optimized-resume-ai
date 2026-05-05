@@ -1,22 +1,17 @@
 import { Zap, ArrowRight, ExternalLink } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useUsageLimit, PLAN_CREDITS, FREE_MONTHLY_CREDITS } from '@/contexts/UsageLimitContext';
+import { useUsageLimit, UsageAction, ACTION_LABELS } from '@/contexts/UsageLimitContext';
+
+const TRACKED_ACTIONS: UsageAction[] = ['resume_ats', 'cover_letter', 'interview_prep', 'salary_intel', 'linkedin', 'skill_gap'];
 
 const UsageHeader = ({ setActiveTab }: { setActiveTab?: (tab: string) => void }) => {
-  const { tier, displayTier, totalCredits, planCredits, monthlyCredits } = useUsageLimit();
+  const { tier, displayTier, getLimit, getRemaining } = useUsageLimit();
 
   const tierBadgeClass =
     tier === 'free' ? 'bg-muted text-muted-foreground border-border' :
     tier === 'starter' ? 'bg-primary/10 text-primary border-primary/20' :
     'bg-emerald-500/10 text-emerald-600 border-emerald-500/20';
-
-  const planAllowance = PLAN_CREDITS[tier];
-  const planUsed = Math.max(0, planAllowance - planCredits);
-  const planPct = planAllowance > 0 ? Math.min((planUsed / planAllowance) * 100, 100) : 0;
-
-  const monthlyUsed = Math.max(0, FREE_MONTHLY_CREDITS - monthlyCredits);
-  const monthlyPct = (monthlyUsed / FREE_MONTHLY_CREDITS) * 100;
 
   return (
     <div className="rounded-xl border border-border/60 bg-card p-6 space-y-5">
@@ -40,35 +35,35 @@ const UsageHeader = ({ setActiveTab }: { setActiveTab?: (tab: string) => void })
         )}
       </div>
 
-      <div className="rounded-lg border border-border/40 bg-muted/30 p-4">
-        <div className="flex items-baseline justify-between mb-1">
-          <span className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Available Credits</span>
-          <span className="text-2xl font-bold text-foreground">{totalCredits}</span>
-        </div>
-        <p className="text-xs text-muted-foreground">1 credit = 1 action (Resume ATS, Interview session, LinkedIn optimization, etc.)</p>
-      </div>
-
       <div className="space-y-3">
-        {planAllowance > 0 && (
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Plan credits ({displayTier})</span>
-              <span className="text-xs font-semibold text-foreground">{planCredits} / {planAllowance}</span>
-            </div>
-            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-              <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${planPct}%` }} />
-            </div>
-          </div>
-        )}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">Free monthly credits</span>
-            <span className="text-xs font-semibold text-foreground">{monthlyCredits} / {FREE_MONTHLY_CREDITS}</span>
-          </div>
-          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-            <div className="h-full bg-emerald-500 rounded-full transition-all" style={{ width: `${monthlyPct}%` }} />
-          </div>
-          <p className="text-[10px] text-muted-foreground">Resets at the start of each month.</p>
+        <p className="text-xs font-semibold text-foreground uppercase tracking-wide">
+          {tier === 'free' ? 'Lifetime Usage' : 'This Month'}
+        </p>
+        <div className="grid sm:grid-cols-2 gap-3">
+          {TRACKED_ACTIONS.map((action) => {
+            const limit = getLimit(action);
+            const remaining = getRemaining(action);
+            const used = limit - remaining;
+            const pct = limit > 0 ? Math.min((used / limit) * 100, 100) : 0;
+            const isEmpty = remaining === 0;
+            const isLow = pct >= 70 && !isEmpty;
+            return (
+              <div key={action} className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">{ACTION_LABELS[action]}</span>
+                  <span className={`text-xs font-semibold ${isEmpty ? 'text-destructive' : isLow ? 'text-amber-500' : 'text-foreground'}`}>
+                    {used} / {limit}
+                  </span>
+                </div>
+                <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all ${isEmpty ? 'bg-destructive' : isLow ? 'bg-amber-500' : 'bg-primary'}`}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 

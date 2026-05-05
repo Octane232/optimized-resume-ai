@@ -1220,7 +1220,6 @@ export type Database = {
           id: string
           last_reset_at: string
           monthly_allowance: number
-          plan_credits: number
           total_spent: number
           updated_at: string
           user_id: string
@@ -1231,7 +1230,6 @@ export type Database = {
           id?: string
           last_reset_at?: string
           monthly_allowance?: number
-          plan_credits?: number
           total_spent?: number
           updated_at?: string
           user_id: string
@@ -1242,7 +1240,6 @@ export type Database = {
           id?: string
           last_reset_at?: string
           monthly_allowance?: number
-          plan_credits?: number
           total_spent?: number
           updated_at?: string
           user_id?: string
@@ -1464,15 +1461,10 @@ export type Database = {
     }
     Functions: {
       generate_affiliate_code: { Args: never; Returns: string }
-      grant_plan_credits: {
-        Args: { p_amount: number; p_description?: string; p_user_id: string }
-        Returns: undefined
-      }
       increment_feature_usage: {
         Args: { p_action: string; p_user_id: string }
         Returns: undefined
       }
-      reset_monthly_credits: { Args: never; Returns: undefined }
       reset_monthly_usage: { Args: never; Returns: undefined }
       spend_credit: {
         Args: { p_action: string; p_description?: string; p_user_id: string }
