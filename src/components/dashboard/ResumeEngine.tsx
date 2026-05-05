@@ -203,7 +203,13 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
       toast({ title: 'Done!', description: 'Tailored resume, cover letter, and ATS score ready. Saved to your account.' });
     } catch (error: any) {
       console.error('Apply bundle error:', error);
-      toast({ title: 'Error', description: error.message || 'Something went wrong.', variant: 'destructive' });
+      const status = error?.context?.status;
+      const remaining = getRemaining('resume_ats');
+      if (status === 402 || status === 429 || remaining <= 0) {
+        toast({ title: "You've used all your credits", description: 'Upgrade your plan to keep generating bundles.', variant: 'destructive' });
+      } else {
+        toast({ title: 'Error', description: error.message || 'Something went wrong. Please try again.', variant: 'destructive' });
+      }
     } finally {
       setIsProcessing(false);
     }
