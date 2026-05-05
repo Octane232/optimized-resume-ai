@@ -460,35 +460,36 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
     setLiveEntries(prev => [...prev, { id, question, suggestion: null, loading: true }]);
 
     try {
-      const { data } = await supabase.functions.invoke('interview-feedback', {
-        body: { 
-          liveMode: true, 
-          question, 
-          position: livePosition, 
-          company: liveCompany 
+      const { data, error } = await supabase.functions.invoke('interview-feedback', {
+        body: {
+          liveMode: true,
+          question,
+          position: livePosition,
+          company: liveCompany
         },
       });
 
+      if (error) throw error;
+
+      const suggestion = data?.suggestion?.trim();
+      if (!suggestion) throw new Error('Empty AI response');
+
       setLiveEntries(prev => prev.map(entry =>
-        entry.id === id 
-          ? { 
-              ...entry, 
-              suggestion: data?.suggestion || 'Use STAR — Situation, Task, Action, Result.', 
-              loading: false 
-            } 
+        entry.id === id
+          ? { ...entry, suggestion, loading: false }
           : entry
       ));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in live mode:', error);
-      setLiveEntries(prev => prev.map(entry =>
-        entry.id === id 
-          ? { 
-              ...entry, 
-              suggestion: 'Use STAR method. Give a concrete example with a measurable result. Keep under 2 minutes.', 
-              loading: false 
-            } 
-          : entry
-      ));
+      const status = error?.context?.status;
+      const remaining = getRemaining('interview_prep');
+      const isCredit = status === 402 || status === 429 || remaining <= 0;
+      setLiveEntries(prev => prev.filter(entry => entry.id !== id));
+      toast({
+        title: isCredit ? "You've used all your credits" : 'Live coaching unavailable',
+        description: isCredit ? 'Upgrade your plan to keep using Live Mode.' : 'Could not reach the AI. Try again.',
+        variant: 'destructive'
+      });
     } finally {
       setLiveLoading(false);
     }
