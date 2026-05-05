@@ -123,11 +123,20 @@ export const SkillGapAnalyzer = () => {
 
     } catch (error: any) {
       console.error('Error analyzing skill gap:', error);
-      toast({
-        title: "Analysis Failed",
-        description: error.message || "Failed to analyze skills. Please try again.",
-        variant: "destructive"
-      });
+      const status = error?.context?.status;
+      if (status === 402 || status === 429) {
+        toast({
+          title: "You've used all your credits",
+          description: 'Upgrade your plan to keep using Skill Gap.',
+          variant: 'destructive'
+        });
+      } else {
+        toast({
+          title: "Analysis Failed",
+          description: error.message || "Failed to analyze skills. Please try again.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setLoading(false);
     }
