@@ -114,13 +114,13 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
     >
       {/* Logo & Toggle */}
       <div className="p-4 flex items-center justify-between border-b border-sidebar-border">
-        {!collapsed && (
-          <span className="text-xl font-bold bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
-            Vaylance
-          </span>
-        )}
-        {collapsed && (
-          <span className="text-lg font-bold text-primary mx-auto">VL</span>
+        {!collapsed ? (
+          <div className="flex items-center gap-2">
+            <img src="/favicon.png" alt="Vaylance" className="w-7 h-7 rounded-md" />
+            <span className="text-xl font-bold text-foreground">Vaylance</span>
+          </div>
+        ) : (
+          <img src="/favicon.png" alt="Vaylance" className="w-8 h-8 rounded-md mx-auto" />
         )}
         <Button 
           variant="ghost" 

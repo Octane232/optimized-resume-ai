@@ -26,20 +26,20 @@ const getBadgeClasses = (isLow: boolean, collapsed: boolean = false): string => 
   return `${baseClasses} ${colorClasses}`;
 };
 
-const getPluralizedBundles = (count: number): string => {
-  return `bundle${count !== 1 ? 's' : ''}`;
+const getPluralizedCredits = (count: number): string => {
+  return `credit${count !== 1 ? 's' : ''}`;
 };
 
 // ===== Main Component =====
 const CreditBadge: React.FC<CreditBadgeProps> = ({ collapsed = false }) => {
   // ===== Hooks =====
-  const { getRemaining } = useUsageLimit();
+  const { credits } = useUsageLimit();
 
   // ===== Derived Values =====
-  const remaining = getRemaining('resume_ats');
-  const isLow = remaining <= 1;
+  const remaining = credits;
+  const isLow = remaining <= 3;
   const badgeClasses = getBadgeClasses(isLow, collapsed);
-  const bundleText = getPluralizedBundles(remaining);
+  const bundleText = getPluralizedCredits(remaining);
 
   // ===== Render =====
   if (collapsed) {

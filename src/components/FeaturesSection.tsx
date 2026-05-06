@@ -81,7 +81,7 @@ const FeaturesSection = () => (
       <div className="mt-12 text-center">
         <Button asChild size="lg" className="h-12 px-8 font-semibold gap-2">
           <Link to="/auth">
-            Start free — 14 days
+            Get Started
             <ArrowRight className="w-4 h-4" />
           </Link>
         </Button>

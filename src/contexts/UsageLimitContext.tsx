@@ -2,40 +2,76 @@ import React, { createContext, useContext, useState, useEffect, useCallback, Rea
 import { supabase } from '@/integrations/supabase/client';
 
 export type SubscriptionTier = 'free' | 'starter' | 'pro' | 'premium';
-export type UsageAction = 'resume_ats' | 'cover_letter' | 'interview_prep' | 'salary_intel' | 'linkedin' | 'skill_gap' | 'radar_alert';
+export type UsageAction =
+  | 'resume_ats'
+  | 'cover_letter'
+  | 'interview_prep'
+  | 'salary_intel'
+  | 'linkedin'
+  | 'skill_gap'
+  | 'radar_alert'
+  | 'docx_rewrite';
 
-export const TIER_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> = {
-  free:    { resume_ats: 3,  cover_letter: 3,  interview_prep: 2, salary_intel: 2, linkedin: 2, skill_gap: 2, radar_alert: 5  },
-  starter: { resume_ats: 15, cover_letter: 15, interview_prep: 10, salary_intel: 8, linkedin: 8, skill_gap: 8, radar_alert: 20 },
-  pro:     { resume_ats: 40, cover_letter: 40, interview_prep: 30, salary_intel: 20, linkedin: 20, skill_gap: 20, radar_alert: 60 },
-  premium: { resume_ats: 40, cover_letter: 40, interview_prep: 30, salary_intel: 20, linkedin: 20, skill_gap: 20, radar_alert: 60 },
+// Credit cost per action (single unified wallet model)
+export const ACTION_COSTS: Record<UsageAction, number> = {
+  resume_ats: 1,
+  cover_letter: 1,
+  linkedin: 1,
+  skill_gap: 1,
+  interview_prep: 3,
+  salary_intel: 2,
+  radar_alert: 2,
+  docx_rewrite: 3,
 };
 
 export const ACTION_LABELS: Record<UsageAction, string> = {
-  resume_ats: 'Application bundles', cover_letter: 'Cover letters', interview_prep: 'Mock interviews',
-  salary_intel: 'Salary insights', linkedin: 'LinkedIn optimizations', skill_gap: 'Skill gap analyses', radar_alert: 'Job Radar alerts',
+  resume_ats: 'Resume + ATS',
+  cover_letter: 'Cover letter',
+  interview_prep: 'Mock interview',
+  salary_intel: 'Salary insight',
+  linkedin: 'LinkedIn optimization',
+  skill_gap: 'Skill gap analysis',
+  radar_alert: 'Job Radar scan',
+  docx_rewrite: 'AI DOCX rewrite',
+};
+
+// Total monthly credit pool per tier
+export const TIER_POOL: Record<SubscriptionTier, number> = {
+  free: 25,
+  starter: 80,
+  pro: 250,
+  premium: 600,
 };
 
 interface UsageLimitContextType {
   tier: SubscriptionTier;
   displayTier: 'Free' | 'Starter' | 'Pro';
   subscriptionEnd: string | null;
-  usage: Record<UsageAction, number>;
+  /** Total credits available right now (monthly + plan top-ups) */
+  credits: number;
+  /** Monthly allowance for the user's tier */
+  monthlyAllowance: number;
   loading: boolean;
+  /** Cost of an action in credits */
+  costOf: (action: UsageAction) => number;
+  /** Can the user afford this action? */
   canUse: (action: UsageAction) => boolean;
+  /** How many times the user can still perform this action with current balance */
   getRemaining: (action: UsageAction) => number;
+  /** Tier-defined max number of times the action could be performed in a fresh month */
   getLimit: (action: UsageAction) => number;
+  /** Spend credits for an action. Returns true on success. */
   trackUsage: (action: UsageAction) => Promise<boolean>;
   refresh: () => Promise<void>;
 }
 
 const UsageLimitContext = createContext<UsageLimitContextType | undefined>(undefined);
-const EMPTY_USAGE: Record<UsageAction, number> = { resume_ats: 0, cover_letter: 0, interview_prep: 0, salary_intel: 0, linkedin: 0, skill_gap: 0, radar_alert: 0 };
 
 export const UsageLimitProvider = ({ children }: { children: ReactNode }) => {
   const [tier, setTier] = useState<SubscriptionTier>('free');
   const [subscriptionEnd, setSubscriptionEnd] = useState<string | null>(null);
-  const [usage, setUsage] = useState<Record<UsageAction, number>>({ ...EMPTY_USAGE });
+  const [credits, setCredits] = useState<number>(0);
+  const [monthlyAllowance, setMonthlyAllowance] = useState<number>(25);
   const [loading, setLoading] = useState(true);
   const [initialFetchDone, setInitialFetchDone] = useState(false);
 
@@ -43,41 +79,48 @@ export const UsageLimitProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { 
+      if (!session) {
         setTier('free');
-        setUsage({ ...EMPTY_USAGE });
+        setCredits(0);
         setLoading(false);
         setInitialFetchDone(true);
-        return; 
+        return;
       }
 
       const { data: subData } = await supabase
-        .from('user_subscriptions').select('tier, plan_status, current_period_end')
-        .eq('user_id', session.user.id).maybeSingle();
+        .from('user_subscriptions')
+        .select('tier, plan_status, current_period_end')
+        .eq('user_id', session.user.id)
+        .maybeSingle();
 
+      let resolvedTier: SubscriptionTier = 'free';
       if (subData?.plan_status === 'active' && subData?.tier) {
         const raw = subData.tier as SubscriptionTier;
-        setTier(raw === 'premium' ? 'pro' : raw);
+        resolvedTier = raw === 'premium' ? 'pro' : raw;
         setSubscriptionEnd(subData.current_period_end ?? null);
       } else {
-        setTier('free');
         setSubscriptionEnd(null);
       }
+      setTier(resolvedTier);
+      setMonthlyAllowance(TIER_POOL[resolvedTier]);
 
-      const { data: usageData } = await supabase.from('feature_usage').select('action, count').eq('user_id', session.user.id);
-      if (usageData) {
-        const map = { ...EMPTY_USAGE };
-        usageData.forEach((row) => { if (row.action in map) map[row.action as UsageAction] = row.count; });
-        setUsage(map);
+      const { data: creditData } = await supabase
+        .from('user_credits')
+        .select('balance, plan_credits, monthly_allowance')
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+
+      if (creditData) {
+        setCredits((creditData.balance ?? 0) + (creditData.plan_credits ?? 0));
+        if (creditData.monthly_allowance) setMonthlyAllowance(creditData.monthly_allowance);
       } else {
-        setUsage({ ...EMPTY_USAGE });
+        setCredits(0);
       }
-    } catch (err) { 
+    } catch (err) {
       console.error('[UsageLimit] fetchAll error:', err);
-      // On error, set safe defaults (free tier, zero usage) to prevent false positives
       setTier('free');
-      setUsage({ ...EMPTY_USAGE });
-    } finally { 
+      setCredits(0);
+    } finally {
       setLoading(false);
       setInitialFetchDone(true);
     }
@@ -87,9 +130,9 @@ export const UsageLimitProvider = ({ children }: { children: ReactNode }) => {
     fetchAll();
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') fetchAll();
-      else if (event === 'SIGNED_OUT') { 
-        setTier('free'); 
-        setUsage({ ...EMPTY_USAGE });
+      else if (event === 'SIGNED_OUT') {
+        setTier('free');
+        setCredits(0);
         setLoading(false);
         setInitialFetchDone(true);
       }
@@ -97,56 +140,60 @@ export const UsageLimitProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, [fetchAll]);
 
-  const getLimit = (action: UsageAction) => TIER_LIMITS[tier]?.[action] ?? 0;
-  const getRemaining = (action: UsageAction) => Math.max(0, getLimit(action) - (usage[action] || 0));
-  
-  // FIXED: canUse returns false while loading to prevent race conditions
+  const costOf = (action: UsageAction) => ACTION_COSTS[action] ?? 1;
+  const getLimit = (action: UsageAction) => Math.floor(monthlyAllowance / costOf(action));
+  const getRemaining = (action: UsageAction) => Math.max(0, Math.floor(credits / costOf(action)));
+
   const canUse = (action: UsageAction) => {
     if (loading || !initialFetchDone) return false;
-    return getRemaining(action) > 0;
+    return credits >= costOf(action);
   };
 
-  // trackUsage now also checks loading state
   const trackUsage = async (action: UsageAction): Promise<boolean> => {
-    // Prevent tracking if still loading or no session
-    if (loading || !initialFetchDone) {
-      console.warn('[UsageLimit] trackUsage called while still loading');
-      return false;
-    }
-    
+    if (loading || !initialFetchDone) return false;
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return false;
-      
-      const { error } = await supabase.rpc('increment_feature_usage', { p_user_id: session.user.id, p_action: action });
-      if (error) { 
-        console.error('[UsageLimit] trackUsage error:', error); 
-        return false; 
+
+      const cost = costOf(action);
+      const { data, error } = await supabase.rpc('spend_credit', {
+        p_user_id: session.user.id,
+        p_action: action,
+        p_amount: cost,
+        p_description: ACTION_LABELS[action],
+      });
+      if (error || data === false) {
+        console.error('[UsageLimit] spend_credit failed:', error);
+        return false;
       }
-      
-      setUsage((prev) => ({ ...prev, [action]: (prev[action] || 0) + 1 }));
+      setCredits((prev) => Math.max(0, prev - cost));
       return true;
-    } catch (err) { 
-      console.error('[UsageLimit] trackUsage error:', err); 
-      return false; 
+    } catch (err) {
+      console.error('[UsageLimit] trackUsage error:', err);
+      return false;
     }
   };
 
-  const displayTier: 'Free' | 'Starter' | 'Pro' = tier === 'free' ? 'Free' : tier === 'starter' ? 'Starter' : 'Pro';
+  const displayTier: 'Free' | 'Starter' | 'Pro' =
+    tier === 'free' ? 'Free' : tier === 'starter' ? 'Starter' : 'Pro';
 
   return (
-    <UsageLimitContext.Provider value={{ 
-      tier, 
-      displayTier, 
-      subscriptionEnd, 
-      usage, 
-      loading, 
-      canUse, 
-      getRemaining, 
-      getLimit, 
-      trackUsage, 
-      refresh: fetchAll 
-    }}>
+    <UsageLimitContext.Provider
+      value={{
+        tier,
+        displayTier,
+        subscriptionEnd,
+        credits,
+        monthlyAllowance,
+        loading,
+        costOf,
+        canUse,
+        getRemaining,
+        getLimit,
+        trackUsage,
+        refresh: fetchAll,
+      }}
+    >
       {children}
     </UsageLimitContext.Provider>
   );

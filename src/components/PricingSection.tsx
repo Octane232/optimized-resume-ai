@@ -19,7 +19,7 @@ const plans = [
       'Skill Gap Analyzer',
       'Email support',
     ],
-    cta: 'Start 14-day free trial',
+    cta: 'Get Started',
     popular: false,
     href: '/auth',
   },
@@ -37,7 +37,7 @@ const plans = [
       'Early access to new features',
       'Priority support',
     ],
-    cta: 'Start 14-day free trial',
+    cta: 'Get Started',
     popular: true,
     href: '/auth',
   },
@@ -53,7 +53,7 @@ const PricingSection = () => {
         <div className="max-w-2xl mb-16">
           <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">Pricing</p>
           <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight mb-4">
-            Two plans. 14 days free.
+            Two plans. Start free.
           </h2>
           <p className="text-muted-foreground text-lg leading-relaxed">
             No charge until day 15. Cancel anytime. No credit card required to start.
@@ -145,7 +145,7 @@ const PricingSection = () => {
 
         <p className="text-sm text-muted-foreground mt-8 flex items-center gap-2">
           <Check className="w-4 h-4 text-emerald-500 shrink-0" />
-          14-day free trial on all plans. No charge until day 15. Cancel anytime.
+          Free plan available — no credit card required. Upgrade anytime.
         </p>
       </div>
     </section>

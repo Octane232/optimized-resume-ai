@@ -125,7 +125,7 @@ const ProductShowcase = () => {
         <div className="text-center mt-12 sm:mt-16">
           <Button asChild size="lg" className="saas-button h-13 sm:h-14 px-8 sm:px-10 text-base sm:text-lg font-bold">
             <Link to="/auth" className="flex items-center gap-2">
-              Start Free Trial — 14 Days Free
+              Get Started Free
               <ArrowRight className="w-5 h-5" />
             </Link>
           </Button>

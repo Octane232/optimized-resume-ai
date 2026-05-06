@@ -80,22 +80,23 @@ serve(async (req) => {
     return null;
   }
 
-  // Helper: reset feature usage for a user
-  async function resetFeatureUsage(userId: string) {
+  // Helper: refill the user's monthly credit balance to their tier allowance
+  async function resetFeatureUsage(userId: string, tier: string = "free") {
+    const allowance = tier === "pro" || tier === "premium" ? 250 : tier === "starter" ? 80 : 25;
     const { error } = await supabase
-      .from("feature_usage")
+      .from("user_credits")
       .update({
-        resume_ats_used: 0,
-        cover_letter_used: 0,
-        pitch_deck_used: 0,
-        updated_at: new Date().toISOString()
+        balance: allowance,
+        monthly_allowance: allowance,
+        last_reset_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       })
       .eq("user_id", userId);
 
     if (error) {
-      console.error("Error resetting feature usage:", error);
+      console.error("Error resetting credits:", error);
     } else {
-      console.log(`✅ Feature usage reset for user ${userId}`);
+      console.log(`✅ Credits reset for user ${userId} to ${allowance}`);
     }
   }
 
