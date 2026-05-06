@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { TIER_LIMITS, SubscriptionTier, UsageAction } from "./tierLimits.ts";
+import { SubscriptionTier, UsageAction, ACTION_COSTS } from "./tierLimits.ts";
 
 export const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,7 +23,6 @@ export interface AuthedUser {
 
 /**
  * Authenticate the caller via Authorization: Bearer <jwt>.
- * Returns either the user (with their resolved subscription tier) or a Response to send back.
  */
 export async function requireUser(req: Request): Promise<AuthedUser | Response> {
   const authHeader = req.headers.get("Authorization");
@@ -46,7 +45,6 @@ export async function requireUser(req: Request): Promise<AuthedUser | Response> 
     auth: { persistSession: false },
   });
 
-  // Resolve tier
   let tier: SubscriptionTier = "free";
   const { data: subData } = await serviceClient
     .from("user_subscriptions")
@@ -66,56 +64,45 @@ export async function requireUser(req: Request): Promise<AuthedUser | Response> 
 }
 
 /**
- * Check the user's monthly usage for an action. Returns null if allowed,
- * or a 429 Response if over the quota for their tier.
+ * Pre-flight: check the user has enough credits for the action.
+ * Returns null if allowed, or a 402 response if not.
  */
 export async function enforceQuota(
   user: AuthedUser,
   action: UsageAction,
 ): Promise<Response | null> {
-  const limit = TIER_LIMITS[user.tier]?.[action] ?? 0;
-  if (limit <= 0) {
-    return jsonResponse(
-      { error: "Your plan does not include this feature.", action, tier: user.tier },
-      402,
-    );
-  }
-
-  const periodStart = new Date(
-    Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1),
-  ).toISOString();
-
-  const { data: usage } = await user.serviceClient
-    .from("feature_usage")
-    .select("count")
+  const cost = ACTION_COSTS[action] ?? 1;
+  const { data } = await user.serviceClient
+    .from("user_credits")
+    .select("balance, plan_credits")
     .eq("user_id", user.id)
-    .eq("action", action)
-    .gte("period_start", periodStart)
     .maybeSingle();
-
-  const used = usage?.count ?? 0;
-  if (used >= limit) {
+  const total = (data?.balance ?? 0) + (data?.plan_credits ?? 0);
+  if (total < cost) {
     return jsonResponse(
       {
-        error: "Monthly limit reached for this feature. Upgrade to continue.",
+        error: "You've used all your credits. Upgrade to keep going.",
         action,
         tier: user.tier,
-        used,
-        limit,
+        credits: total,
+        cost,
       },
-      429,
+      402,
     );
   }
   return null;
 }
 
 /**
- * Record successful usage. Call AFTER the AI call returned a usable result.
+ * Record successful usage by spending credits via the secured RPC.
  */
 export async function recordUsage(user: AuthedUser, action: UsageAction): Promise<void> {
-  const { error } = await user.serviceClient.rpc("increment_feature_usage", {
+  const cost = ACTION_COSTS[action] ?? 1;
+  const { error } = await user.serviceClient.rpc("spend_credit", {
     p_user_id: user.id,
     p_action: action,
+    p_amount: cost,
+    p_description: action,
   });
   if (error) console.error("[recordUsage] failed:", error.message);
 }
