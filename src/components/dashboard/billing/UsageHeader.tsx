@@ -1,6 +1,5 @@
-import { Zap, ArrowRight, ExternalLink } from 'lucide-react';
+import { Zap } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { useUsageLimit, UsageAction, ACTION_LABELS, ACTION_COSTS } from '@/contexts/UsageLimitContext';
 
 const TRACKED_ACTIONS: UsageAction[] = [
@@ -35,11 +34,7 @@ const UsageHeader = ({ setActiveTab }: { setActiveTab?: (tab: string) => void })
             </div>
           </div>
         </div>
-        {tier === 'free' && setActiveTab && (
-          <Button size="sm" className="gap-1.5 font-semibold" onClick={() => setActiveTab('billing')}>
-            Upgrade <ArrowRight className="w-3.5 h-3.5" />
-          </Button>
-        )}
+        {/* Change 2: Removed upgrade button */}
       </div>
 
       <div className="space-y-3">
@@ -52,7 +47,7 @@ const UsageHeader = ({ setActiveTab }: { setActiveTab?: (tab: string) => void })
         <div className="h-2 bg-muted rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all ${isEmpty ? 'bg-destructive' : isLow ? 'bg-amber-500' : 'bg-primary'}`}
-            style={{ width: `${100 - pct}%` }}
+            style={{ width: `${pct}%` }}  // Change 1: Fixed inverted progress bar
           />
         </div>
         <p className="text-[11px] text-muted-foreground">
@@ -72,14 +67,7 @@ const UsageHeader = ({ setActiveTab }: { setActiveTab?: (tab: string) => void })
         </div>
       </div>
 
-      <div className="flex items-start gap-2 pt-2 border-t border-border/40">
-        <p className="text-xs text-muted-foreground leading-relaxed">
-          💡 Salary figures are AI estimates. Always verify with{' '}
-          <a href="https://www.glassdoor.com/Salaries/index.htm" target="_blank" rel="noopener noreferrer" className="underline inline-flex items-center gap-0.5">Glassdoor<ExternalLink className="w-2.5 h-2.5 ml-0.5" /></a>,{' '}
-          <a href="https://www.levels.fyi" target="_blank" rel="noopener noreferrer" className="underline inline-flex items-center gap-0.5">Levels.fyi<ExternalLink className="w-2.5 h-2.5 ml-0.5" /></a>, or{' '}
-          <a href="https://www.linkedin.com/salary/" target="_blank" rel="noopener noreferrer" className="underline inline-flex items-center gap-0.5">LinkedIn Salary<ExternalLink className="w-2.5 h-2.5 ml-0.5" /></a>.
-        </p>
-      </div>
+      {/* Change 3: Removed salary disclaimer */}
     </div>
   );
 };
