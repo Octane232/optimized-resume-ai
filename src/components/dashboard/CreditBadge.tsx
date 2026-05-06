@@ -33,13 +33,13 @@ const getPluralizedCredits = (count: number): string => {
 // ===== Main Component =====
 const CreditBadge: React.FC<CreditBadgeProps> = ({ collapsed = false }) => {
   // ===== Hooks =====
-  const { getRemaining } = useUsageLimit();
+  const { credits } = useUsageLimit();
 
   // ===== Derived Values =====
-  const remaining = getRemaining('resume_ats');
-  const isLow = remaining <= 1;
+  const remaining = credits;
+  const isLow = remaining <= 3;
   const badgeClasses = getBadgeClasses(isLow, collapsed);
-  const bundleText = getPluralizedBundles(remaining);
+  const bundleText = getPluralizedCredits(remaining);
 
   // ===== Render =====
   if (collapsed) {
