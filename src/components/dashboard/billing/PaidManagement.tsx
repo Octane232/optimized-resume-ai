@@ -109,7 +109,8 @@ const PaidManagement = () => {
 
       {/* Usage Statistics */}
       <div className="rounded-xl border border-border/60 bg-card p-5 space-y-4">
-        <h4 className="text-sm font-semibold text-foreground">Remaining This Month</h4>
+        {/* CHANGE 1: Updated section title */}
+        <h4 className="text-sm font-semibold text-foreground">What You Can Still Do</h4>
 
         {/* Usage Bars */}
         <div className="grid sm:grid-cols-2 gap-3">
@@ -164,9 +165,9 @@ const PaidManagement = () => {
           })}
         </div>
 
-        {/* Usage Note */}
+        {/* CHANGE 2: Updated description text */}
         <p className="text-xs text-muted-foreground">
-          Usage resets on the 1st of each month.
+          Shows how many more times you can use each feature with your current credit balance.
         </p>
       </div>
 
