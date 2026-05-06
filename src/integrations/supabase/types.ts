@@ -417,36 +417,6 @@ export type Database = {
         }
         Relationships: []
       }
-      feature_usage: {
-        Row: {
-          action: string
-          count: number
-          created_at: string
-          id: string
-          period_start: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          action: string
-          count?: number
-          created_at?: string
-          id?: string
-          period_start?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          action?: string
-          count?: number
-          created_at?: string
-          id?: string
-          period_start?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       interview_answers: {
         Row: {
           answer: string
@@ -1055,42 +1025,6 @@ export type Database = {
         }
         Relationships: []
       }
-      scouted_jobs: {
-        Row: {
-          company_name: string | null
-          created_at: string
-          id: number
-          is_active: boolean | null
-          job_title: string | null
-          job_url: string | null
-          location: string | null
-          salary_range: string | null
-          skills: string[] | null
-        }
-        Insert: {
-          company_name?: string | null
-          created_at?: string
-          id?: number
-          is_active?: boolean | null
-          job_title?: string | null
-          job_url?: string | null
-          location?: string | null
-          salary_range?: string | null
-          skills?: string[] | null
-        }
-        Update: {
-          company_name?: string | null
-          created_at?: string
-          id?: number
-          is_active?: boolean | null
-          job_title?: string | null
-          job_url?: string | null
-          location?: string | null
-          salary_range?: string | null
-          skills?: string[] | null
-        }
-        Relationships: []
-      }
       skill_gaps: {
         Row: {
           created_at: string
@@ -1468,14 +1402,14 @@ export type Database = {
         Args: { p_amount: number; p_description?: string; p_user_id: string }
         Returns: undefined
       }
-      increment_feature_usage: {
-        Args: { p_action: string; p_user_id: string }
-        Returns: undefined
-      }
       reset_monthly_credits: { Args: never; Returns: undefined }
-      reset_monthly_usage: { Args: never; Returns: undefined }
       spend_credit: {
-        Args: { p_action: string; p_description?: string; p_user_id: string }
+        Args: {
+          p_action: string
+          p_amount?: number
+          p_description?: string
+          p_user_id: string
+        }
         Returns: boolean
       }
     }
