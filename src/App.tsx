@@ -68,6 +68,7 @@ const App = () => (
                 
 
                 {/* Audience Pages */}
+                <Route path="/templates" element={<Index />} />
                 <Route path="/for-individuals" element={<ForIndividuals />} />
                 <Route path="/for-students" element={<ForStudents />} />
 
