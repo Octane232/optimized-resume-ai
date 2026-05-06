@@ -237,23 +237,11 @@ serve(async (req) => {
           break;
         }
 
-        // Add credits based on plan
-        const credits = plan === "pro" ? 100 : 50;
-        const { error: credError } = await supabase.from("user_credits").upsert({
-          user_id: userId,
-          balance: credits,
-          monthly_allowance: credits,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: "user_id" });
+        // FIXED PROBLEM 1: Only use resetFeatureUsage with correct tier
+        // Removed the duplicate upsert block
+        await resetFeatureUsage(userId, tier);
 
-        if (credError) {
-          console.error("Error updating credits:", credError);
-        }
-
-        // Reset feature usage on new subscription
-        await resetFeatureUsage(userId);
-
-        console.log(`✅ User ${userId} upgraded to ${tier} (${billing}), credits: ${credits}, period end: ${periodEnd.toISOString()}`);
+        console.log(`✅ User ${userId} upgraded to ${tier} (${billing}), period end: ${periodEnd.toISOString()}`);
         break;
       }
 
@@ -291,19 +279,11 @@ serve(async (req) => {
           })
           .eq("user_id", userId);
 
-        // Refresh credits on renewal
-        const credits = plan === "pro" ? 100 : 50;
-        await supabase.from("user_credits").upsert({
-          user_id: userId,
-          balance: credits,
-          monthly_allowance: credits,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: "user_id" });
+        // FIXED PROBLEM 2: Only use resetFeatureUsage with correct plan tier
+        // Removed the duplicate upsert block
+        await resetFeatureUsage(userId, plan);
 
-        // Reset feature usage on renewal
-        await resetFeatureUsage(userId);
-
-        console.log(`✅ Subscription renewed for user ${userId}, credits: ${credits}, period end: ${periodEnd.toISOString()}`);
+        console.log(`✅ Subscription renewed for user ${userId}, period end: ${periodEnd.toISOString()}`);
         break;
       }
 
@@ -348,7 +328,7 @@ serve(async (req) => {
             .update({ plan: newTier })
             .eq("user_id", userId);
 
-          // Adjust credits if upgrading to Pro
+          // Adjust credits if upgrading to Pro - set to 250
           if (newTier === "pro" && existingSub?.tier !== "pro") {
             const { data: credits } = await supabase
               .from("user_credits")
@@ -356,20 +336,20 @@ serve(async (req) => {
               .eq("user_id", userId)
               .single();
             
-            if (!credits || credits.balance < 100) {
+            if (!credits || credits.balance < 250) {
               await supabase.from("user_credits")
-                .update({ balance: 100, monthly_allowance: 100 })
+                .update({ balance: 250, monthly_allowance: 250 })
                 .eq("user_id", userId);
-              console.log(`Upgraded credits to 100 for user ${userId}`);
+              console.log(`Upgraded credits to 250 for user ${userId}`);
             }
           }
           
-          // Adjust credits if downgrading to Starter
+          // Adjust credits if downgrading to Starter - set to 80
           if (newTier === "starter" && existingSub?.tier === "pro") {
             await supabase.from("user_credits")
-              .update({ balance: 50, monthly_allowance: 50 })
+              .update({ balance: 80, monthly_allowance: 80 })
               .eq("user_id", userId);
-            console.log(`Downgraded credits to 50 for user ${userId}`);
+            console.log(`Downgraded credits to 80 for user ${userId}`);
           }
 
           console.log(`✅ Subscription updated for user ${userId}: ${existingSub?.tier || 'none'} → ${newTier}, status = ${status}`);
@@ -433,7 +413,16 @@ serve(async (req) => {
           .update({ plan: "free" })
           .eq("user_id", userId);
 
-        console.log(`⚠️ Payment failed for user ${userId}, downgraded to free`);
+        // FIXED PROBLEM 3: Clear credits when payment fails
+        await supabase.from("user_credits")
+          .update({
+            balance: 0,
+            monthly_allowance: 0,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("user_id", userId);
+
+        console.log(`⚠️ Payment failed for user ${userId}, downgraded to free and credits cleared`);
         break;
       }
 
