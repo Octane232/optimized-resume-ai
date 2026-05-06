@@ -56,7 +56,7 @@ const PricingSection = () => {
             Two plans. Start free.
           </h2>
           <p className="text-muted-foreground text-lg leading-relaxed">
-            No charge until day 15. Cancel anytime. No credit card required to start.
+            Start free. Upgrade anytime. Cancel anytime — no questions asked.
           </p>
         </div>
 
