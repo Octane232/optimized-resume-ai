@@ -12,14 +12,16 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-// All usage actions for display
+// All usage actions for display - FIXED: Added missing actions
 const ACTIONS: UsageAction[] = [
-  'resume_ats', 
+  'resume_ats',
+  'cover_letter',
   'interview_prep', 
   'salary_intel', 
   'linkedin', 
   'skill_gap', 
-  'radar_alert'
+  'radar_alert',
+  'docx_rewrite',
 ];
 
 const PaidManagement = () => {
@@ -107,17 +109,17 @@ const PaidManagement = () => {
 
       {/* Usage Statistics */}
       <div className="rounded-xl border border-border/60 bg-card p-5 space-y-4">
-        <h4 className="text-sm font-semibold text-foreground">Usage This Month</h4>
+        <h4 className="text-sm font-semibold text-foreground">Remaining This Month</h4>
 
         {/* Usage Bars */}
         <div className="grid sm:grid-cols-2 gap-3">
           {ACTIONS.map((action) => {
+            // FIXED: Show remaining instead of used
             const limit = getLimit(action);
             const remaining = getRemaining(action);
-            const used = limit - remaining;
-            const percentage = limit > 0 ? Math.min((used / limit) * 100, 100) : 0;
+            const percentage = limit > 0 ? Math.min((remaining / limit) * 100, 100) : 0;
             const isEmpty = remaining === 0;
-            const isLow = percentage >= 70 && !isEmpty;
+            const isLow = percentage <= 30 && !isEmpty;
 
             // Determine status color
             const statusColor = isEmpty 
@@ -140,13 +142,13 @@ const PaidManagement = () => {
 
             return (
               <div key={action} className="space-y-1.5">
-                {/* Label and Count */}
+                {/* Label and Count - FIXED: Show remaining instead of used/limit */}
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-muted-foreground">
                     {ACTION_LABELS[action]}
                   </span>
                   <span className={`text-xs font-semibold ${textColor}`}>
-                    {used}/{limit}
+                    {remaining} left
                   </span>
                 </div>
 
