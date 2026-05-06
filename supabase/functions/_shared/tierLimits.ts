@@ -1,4 +1,4 @@
-// Shared tier limits — must stay in sync with src/contexts/UsageLimitContext.tsx
+// Shared credit costs (server-side mirror of ACTION_COSTS in UsageLimitContext)
 export type SubscriptionTier = "free" | "starter" | "pro" | "premium";
 
 export type UsageAction =
@@ -8,11 +8,24 @@ export type UsageAction =
   | "salary_intel"
   | "linkedin"
   | "skill_gap"
-  | "radar_alert";
+  | "radar_alert"
+  | "docx_rewrite";
 
-export const TIER_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> = {
-  free:    { resume_ats: 3,  cover_letter: 3,  interview_prep: 2,  salary_intel: 2,  linkedin: 2,  skill_gap: 2,  radar_alert: 5  },
-  starter: { resume_ats: 15, cover_letter: 15, interview_prep: 10, salary_intel: 8,  linkedin: 8,  skill_gap: 8,  radar_alert: 20 },
-  pro:     { resume_ats: 40, cover_letter: 40, interview_prep: 30, salary_intel: 20, linkedin: 20, skill_gap: 20, radar_alert: 60 },
-  premium: { resume_ats: 40, cover_letter: 40, interview_prep: 30, salary_intel: 20, linkedin: 20, skill_gap: 20, radar_alert: 60 },
+export const ACTION_COSTS: Record<UsageAction, number> = {
+  resume_ats: 1,
+  cover_letter: 1,
+  linkedin: 1,
+  skill_gap: 1,
+  interview_prep: 3,
+  salary_intel: 2,
+  radar_alert: 2,
+  docx_rewrite: 3,
+};
+
+// Total monthly pool per tier
+export const TIER_POOL: Record<SubscriptionTier, number> = {
+  free: 25,
+  starter: 80,
+  pro: 250,
+  premium: 600,
 };
