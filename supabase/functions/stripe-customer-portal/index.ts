@@ -8,7 +8,7 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const RETURN_URL = "https://vaylance.com/dashboard?tab=billing";
+const RETURN_URL = `${Deno.env.get("SITE_URL") || "https://vaylance.com"}/dashboard?upgrade=cancelled`;
 
 // ===== Helper Functions =====
 const handleCorsPreflight = (req: Request): Response | null => {
