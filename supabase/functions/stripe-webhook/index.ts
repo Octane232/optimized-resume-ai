@@ -85,13 +85,13 @@ serve(async (req) => {
     const allowance = tier === "pro" || tier === "premium" ? 250 : tier === "starter" ? 80 : 25;
     const { error } = await supabase
       .from("user_credits")
-      .update({
+      .upsert({
+        user_id: userId,
         balance: allowance,
         monthly_allowance: allowance,
         last_reset_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-      })
-      .eq("user_id", userId);
+      }, { onConflict: "user_id" });
 
     if (error) {
       console.error("Error resetting credits:", error);
@@ -237,8 +237,7 @@ serve(async (req) => {
           break;
         }
 
-        // FIXED PROBLEM 1: Only use resetFeatureUsage with correct tier
-        // Removed the duplicate upsert block
+        // Only use resetFeatureUsage with correct tier
         await resetFeatureUsage(userId, tier);
 
         console.log(`✅ User ${userId} upgraded to ${tier} (${billing}), period end: ${periodEnd.toISOString()}`);
@@ -279,8 +278,7 @@ serve(async (req) => {
           })
           .eq("user_id", userId);
 
-        // FIXED PROBLEM 2: Only use resetFeatureUsage with correct plan tier
-        // Removed the duplicate upsert block
+        // Only use resetFeatureUsage with correct plan tier
         await resetFeatureUsage(userId, plan);
 
         console.log(`✅ Subscription renewed for user ${userId}, period end: ${periodEnd.toISOString()}`);
@@ -413,14 +411,14 @@ serve(async (req) => {
           .update({ plan: "free" })
           .eq("user_id", userId);
 
-        // FIXED PROBLEM 3: Clear credits when payment fails
+        // Clear credits when payment fails
         await supabase.from("user_credits")
-          .update({
+          .upsert({
+            user_id: userId,
             balance: 0,
             monthly_allowance: 0,
             updated_at: new Date().toISOString(),
-          })
-          .eq("user_id", userId);
+          }, { onConflict: "user_id" });
 
         console.log(`⚠️ Payment failed for user ${userId}, downgraded to free and credits cleared`);
         break;
