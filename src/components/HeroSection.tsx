@@ -36,7 +36,7 @@ const HeroSection = () => {
   const applications = useCountUp(12, 1000, animating);
   const interviews = useCountUp(3, 800, animating);
 
-  const trustItems = ['No credit card required', 'Cancel anytime', 'Free for 14 days'];
+  const trustItems = ['No credit card required', 'Cancel anytime', 'Free plan'];
 
   const dashboardStats = [
     { label: 'ATS Score', value: `${atsScore}%`, color: 'text-emerald-500' },
@@ -82,7 +82,7 @@ const HeroSection = () => {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10">
           <Button asChild size="lg" className="h-12 px-8 font-semibold text-base gap-2 w-full sm:w-auto">
             <Link to="/auth">
-              Start free — 14 days
+              Get Started
               <ArrowRight className="w-4 h-4" />
             </Link>
           </Button>

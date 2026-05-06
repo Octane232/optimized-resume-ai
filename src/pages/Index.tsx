@@ -33,7 +33,7 @@ const Index = () => {
     <div className="min-h-screen">
       <SEOHead
         title="Vaylance — AI Job Search Platform | Get Hired Faster"
-        description="Vaylance helps you tailor your resume to pass ATS filters, prep for interviews, and find companies hiring before they post publicly. Start free for 14 days."
+        description="Vaylance helps you tailor your resume to pass ATS filters, prep for interviews, and find companies hiring before they post publicly. Start free."
         keywords="AI resume builder, ATS resume checker, interview prep AI, job search tool, cover letter generator, salary intelligence"
         canonical="https://vaylance.com/"
       />
