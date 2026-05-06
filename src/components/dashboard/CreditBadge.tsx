@@ -26,8 +26,8 @@ const getBadgeClasses = (isLow: boolean, collapsed: boolean = false): string => 
   return `${baseClasses} ${colorClasses}`;
 };
 
-const getPluralizedBundles = (count: number): string => {
-  return `bundle${count !== 1 ? 's' : ''}`;
+const getPluralizedCredits = (count: number): string => {
+  return `credit${count !== 1 ? 's' : ''}`;
 };
 
 // ===== Main Component =====
