@@ -80,11 +80,7 @@ const App = () => (
                 <Route path="/privacy" element={<PrivacyPolicy />} />
                 <Route path="/cookie-policy" element={<CookiePolicy />} />
 
-                
 
-                {/* Affiliate Program */}
-                <Route path="/affiliate-program" element={<AffiliateProgram />} />
-                <Route path="/affiliate-dashboard" element={<AffiliateDashboard />} />
 
                 {/* 404 */}
                 <Route path="*" element={<NotFound />} />
