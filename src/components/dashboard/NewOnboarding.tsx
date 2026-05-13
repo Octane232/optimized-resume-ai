@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, Loader2, Sparkles, Target, Rocket, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -18,30 +18,37 @@ const NewOnboarding: React.FC<NewOnboardingProps> = ({ onComplete }) => {
   const [scanText, setScanText] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(true);
-  };
+  }, []);
 
-  const handleDragLeave = () => {
+  const handleDragLeave = useCallback(() => {
     setIsDragging(false);
-  };
+  }, []);
 
-  const handleDrop = async (e: React.DragEvent) => {
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files[0];
     if (file) {
       await processFile(file);
     }
-  };
+  }, []);
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       await processFile(file);
     }
-  };
+  }, []);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent, action: () => void) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      action();
+    }
+  }, []);
 
   const processFile = async (file: File) => {
     const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
@@ -133,9 +140,17 @@ const NewOnboarding: React.FC<NewOnboardingProps> = ({ onComplete }) => {
     }
   };
 
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
-    <div className="fixed inset-0 z-50 bg-background flex items-center justify-center">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-background" />
+    <div 
+      className="fixed inset-0 z-50 bg-background flex items-center justify-center"
+      role="main"
+      aria-label="Onboarding wizard"
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-background" aria-hidden="true" />
       
       <AnimatePresence mode="wait">
         {step === 'upload' && (
@@ -156,35 +171,51 @@ const NewOnboarding: React.FC<NewOnboardingProps> = ({ onComplete }) => {
               </p>
             </div>
 
-            <div
+            <button
+              type="button"
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
+              onClick={triggerFileInput}
+              onKeyDown={(e) => handleKeyDown(e, triggerFileInput)}
               className={`
-                relative cursor-pointer rounded-2xl border-2 border-dashed p-16
-                transition-all duration-300 text-center
+                w-full cursor-pointer rounded-2xl border-2 border-dashed p-16
+                transition-all duration-300 text-center focus:outline-none focus:ring-2 
+                focus:ring-primary focus:ring-offset-2 focus:ring-offset-background
                 ${isDragging 
                   ? 'border-primary bg-primary/10 scale-105' 
                   : 'border-border hover:border-primary/50 hover:bg-muted/50'
                 }
               `}
+              aria-label="Upload resume. Click or drag and drop your PDF or DOCX file."
+              aria-describedby="upload-description"
             >
-              <div className={`
-                w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center
-                transition-all duration-300
-                ${isDragging ? 'bg-primary animate-pulse' : 'bg-primary/10'}
-              `}>
-                <Upload className={`w-10 h-10 ${isDragging ? 'text-primary-foreground' : 'text-primary'}`} />
+              <div 
+                className={`
+                  w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center
+                  transition-all duration-300
+                  ${isDragging ? 'bg-primary animate-pulse' : 'bg-primary/10'}
+                `}
+                aria-hidden="true"
+              >
+                <Upload className={`w-10 h-10 ${isDragging ? 'text-primary-foreground' : 'text-primary'}`} aria-hidden="true" />
               </div>
               
               <h2 className="text-xl font-semibold mb-2">
                 Drag and drop your Resume
               </h2>
-              <p className="text-muted-foreground mb-4">
+              <p id="upload-description" className="text-muted-foreground mb-4">
                 PDF or DOCX files accepted
               </p>
-              <Button variant="outline" className="pointer-events-none">
+              <Button 
+                variant="outline" 
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  triggerFileInput();
+                }}
+                className="pointer-events-auto"
+              >
                 Or click to browse
               </Button>
 
@@ -194,8 +225,9 @@ const NewOnboarding: React.FC<NewOnboardingProps> = ({ onComplete }) => {
                 accept=".pdf,.docx"
                 onChange={handleFileSelect}
                 className="hidden"
+                aria-hidden="true"
               />
-            </div>
+            </button>
           </motion.div>
         )}
 
@@ -206,10 +238,12 @@ const NewOnboarding: React.FC<NewOnboardingProps> = ({ onComplete }) => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             className="relative z-10 w-full max-w-md px-6 text-center"
+            role="status"
+            aria-live="polite"
           >
             <div className="relative w-32 h-32 mx-auto mb-8">
-              <div className="absolute inset-0 rounded-full border-4 border-muted" />
-              <svg className="absolute inset-0 w-full h-full -rotate-90">
+              <div className="absolute inset-0 rounded-full border-4 border-muted" aria-hidden="true" />
+              <svg className="absolute inset-0 w-full h-full -rotate-90" aria-hidden="true">
                 <circle
                   cx="64"
                   cy="64"
@@ -222,7 +256,7 @@ const NewOnboarding: React.FC<NewOnboardingProps> = ({ onComplete }) => {
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <Sparkles className="w-10 h-10 text-primary animate-pulse" />
+                <Sparkles className="w-10 h-10 text-primary animate-pulse" aria-hidden="true" />
               </div>
             </div>
             
@@ -235,6 +269,7 @@ const NewOnboarding: React.FC<NewOnboardingProps> = ({ onComplete }) => {
                 transition={{ duration: 0.5 }}
               />
             </div>
+            <p className="sr-only">Processing resume: {scanText} {scanProgress}% complete</p>
           </motion.div>
         )}
 
@@ -248,7 +283,7 @@ const NewOnboarding: React.FC<NewOnboardingProps> = ({ onComplete }) => {
           >
             <div className="text-center mb-12">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-4">
-                <CheckCircle2 className="w-4 h-4" />
+                <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
                 <span className="text-sm font-medium">Profile Created</span>
               </div>
               <h1 className="text-3xl font-bold mb-2">
@@ -259,17 +294,24 @@ const NewOnboarding: React.FC<NewOnboardingProps> = ({ onComplete }) => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div 
+              className="grid grid-cols-1 md:grid-cols-2 gap-6"
+              role="radiogroup"
+              aria-label="Choose your primary mission mode"
+            >
               {/* Hunter Mode */}
-              <motion.button
-                whileHover={{ scale: 1.02, y: -4 }}
-                whileTap={{ scale: 0.98 }}
+              <button
+                type="button"
                 onClick={() => selectMode('hunter')}
-                className="group relative overflow-hidden rounded-2xl p-8 text-left transition-all duration-300 bg-gradient-to-br from-[hsl(217,100%,50%)] to-[hsl(230,80%,45%)] text-white shadow-lg hover:shadow-xl"
+                onKeyDown={(e) => handleKeyDown(e, () => selectMode('hunter'))}
+                className="group relative overflow-hidden rounded-2xl p-8 text-left transition-all duration-300 bg-gradient-to-br from-[hsl(217,100%,50%)] to-[hsl(230,80%,45%)] text-white shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background focus:ring-primary"
+                role="radio"
+                aria-checked="false"
+                aria-label="Hunter Mode: I need a new job ASAP. Scout roles and optimize my applications."
               >
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" aria-hidden="true" />
                 <div className="relative">
-                  <div className="w-16 h-16 rounded-xl bg-white/20 flex items-center justify-center mb-6">
+                  <div className="w-16 h-16 rounded-xl bg-white/20 flex items-center justify-center mb-6" aria-hidden="true">
                     <Target className="w-8 h-8" />
                   </div>
                   <h3 className="text-2xl font-bold mb-2">Hunter Mode</h3>
@@ -277,18 +319,21 @@ const NewOnboarding: React.FC<NewOnboardingProps> = ({ onComplete }) => {
                     I need a new job ASAP. Scout roles and optimize my applications.
                   </p>
                 </div>
-              </motion.button>
+              </button>
 
               {/* Growth Mode */}
-              <motion.button
-                whileHover={{ scale: 1.02, y: -4 }}
-                whileTap={{ scale: 0.98 }}
+              <button
+                type="button"
                 onClick={() => selectMode('growth')}
-                className="group relative overflow-hidden rounded-2xl p-8 text-left transition-all duration-300 bg-gradient-to-br from-[hsl(262,83%,58%)] to-[hsl(280,70%,45%)] text-white shadow-lg hover:shadow-xl"
+                onKeyDown={(e) => handleKeyDown(e, () => selectMode('growth'))}
+                className="group relative overflow-hidden rounded-2xl p-8 text-left transition-all duration-300 bg-gradient-to-br from-[hsl(262,83%,58%)] to-[hsl(280,70%,45%)] text-white shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background focus:ring-primary"
+                role="radio"
+                aria-checked="false"
+                aria-label="Growth Mode: I am employed. I want to track my wins and plan a promotion."
               >
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" aria-hidden="true" />
                 <div className="relative">
-                  <div className="w-16 h-16 rounded-xl bg-white/20 flex items-center justify-center mb-6">
+                  <div className="w-16 h-16 rounded-xl bg-white/20 flex items-center justify-center mb-6" aria-hidden="true">
                     <Rocket className="w-8 h-8" />
                   </div>
                   <h3 className="text-2xl font-bold mb-2">Growth Mode</h3>
@@ -296,7 +341,7 @@ const NewOnboarding: React.FC<NewOnboardingProps> = ({ onComplete }) => {
                     I am employed. I want to track my wins and plan a promotion.
                   </p>
                 </div>
-              </motion.button>
+              </button>
             </div>
           </motion.div>
         )}
