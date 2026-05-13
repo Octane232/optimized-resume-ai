@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { 
@@ -236,54 +235,78 @@ const MissionControl = () => {
         <div className="flex items-center gap-3">
           {/* Filter Dropdown */}
           {uniqueCompanies.length > 0 && (
-            <Select value={filter} onValueChange={setFilter}>
-              <SelectTrigger className="w-[160px] h-9 text-sm">
-                <Filter className="w-3.5 h-3.5 mr-2" />
-                <SelectValue placeholder="Filter" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All companies</SelectItem>
-                {uniqueCompanies.slice(0, 10).map(company => (
-                  <SelectItem key={company} value={company}>{company}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-2">
+              <label htmlFor="company-filter" className="sr-only">
+                Filter by company
+              </label>
+              <Select value={filter} onValueChange={setFilter}>
+                <SelectTrigger id="company-filter" className="w-[160px] h-9 text-sm">
+                  <Filter className="w-3.5 h-3.5 mr-2" aria-hidden="true" />
+                  <SelectValue placeholder="Filter" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All companies</SelectItem>
+                  {uniqueCompanies.slice(0, 10).map(company => (
+                    <SelectItem key={company} value={company}>{company}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           )}
 
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button className="saas-button h-9">
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className="w-4 h-4 mr-2" aria-hidden="true" />
                 Add Application
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent aria-labelledby="add-application-title">
               <DialogHeader>
-                <DialogTitle>Add New Application</DialogTitle>
+                <DialogTitle id="add-application-title">Add New Application</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 pt-4">
+                {/* Company Name */}
                 <div>
-                  <label className="text-sm font-medium text-foreground">Company *</label>
+                  <label htmlFor="company-name" className="text-sm font-medium text-foreground">
+                    Company <span aria-hidden="true">*</span>
+                    <span className="sr-only">Required</span>
+                  </label>
                   <Input 
+                    id="company-name"
                     placeholder="Company name"
                     value={newApp.company_name}
                     onChange={(e) => setNewApp({ ...newApp, company_name: e.target.value })}
                     className="mt-1"
+                    aria-required="true"
+                    required
                   />
                 </div>
+
+                {/* Job Title */}
                 <div>
-                  <label className="text-sm font-medium text-foreground">Job Title *</label>
+                  <label htmlFor="job-title" className="text-sm font-medium text-foreground">
+                    Job Title <span aria-hidden="true">*</span>
+                    <span className="sr-only">Required</span>
+                  </label>
                   <Input 
+                    id="job-title"
                     placeholder="Position title"
                     value={newApp.job_title}
                     onChange={(e) => setNewApp({ ...newApp, job_title: e.target.value })}
                     className="mt-1"
+                    aria-required="true"
+                    required
                   />
                 </div>
+
+                {/* Status */}
                 <div>
-                  <label className="text-sm font-medium text-foreground">Status</label>
+                  <label htmlFor="application-status" className="text-sm font-medium text-foreground">
+                    Status
+                  </label>
                   <Select value={newApp.status} onValueChange={(val) => setNewApp({ ...newApp, status: val })}>
-                    <SelectTrigger className="mt-1">
+                    <SelectTrigger id="application-status" className="mt-1">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -293,24 +316,36 @@ const MissionControl = () => {
                     </SelectContent>
                   </Select>
                 </div>
+
+                {/* Job URL */}
                 <div>
-                  <label className="text-sm font-medium text-foreground">Job URL</label>
+                  <label htmlFor="job-url" className="text-sm font-medium text-foreground">
+                    Job URL
+                  </label>
                   <Input 
+                    id="job-url"
+                    type="url"
                     placeholder="https://..."
                     value={newApp.job_url}
                     onChange={(e) => setNewApp({ ...newApp, job_url: e.target.value })}
                     className="mt-1"
                   />
                 </div>
+
+                {/* Notes */}
                 <div>
-                  <label className="text-sm font-medium text-foreground">Notes</label>
+                  <label htmlFor="notes" className="text-sm font-medium text-foreground">
+                    Notes
+                  </label>
                   <Textarea 
+                    id="notes"
                     placeholder="Any notes about this application..."
                     value={newApp.notes}
                     onChange={(e) => setNewApp({ ...newApp, notes: e.target.value })}
                     className="mt-1 min-h-[80px]"
                   />
                 </div>
+
                 <Button className="w-full saas-button" onClick={addApplication}>
                   Add Application
                 </Button>
@@ -323,27 +358,36 @@ const MissionControl = () => {
       {/* Kanban Board */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {STATUS_COLUMNS.map(column => (
-          <div key={column.id} className="kanban-column p-4 min-h-[400px]">
+          <div 
+            key={column.id} 
+            className="kanban-column p-4 min-h-[400px]"
+            role="region"
+            aria-label={`${column.label} applications column`}
+          >
             {/* Column Header */}
             <div className="flex items-center gap-2 mb-4">
-              <div className={`w-2.5 h-2.5 rounded-full ${column.color}`}></div>
+              <div className={`w-2.5 h-2.5 rounded-full ${column.color}`} aria-hidden="true"></div>
               <span className="font-semibold text-foreground text-sm">{column.label}</span>
-              <span className="ml-auto text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+              <span 
+                className="ml-auto text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full"
+                aria-label={`${getApplicationsByStatus(column.id).length} applications`}
+              >
                 {getApplicationsByStatus(column.id).length}
               </span>
             </div>
 
             {/* Cards */}
-            <div className="space-y-2.5">
+            <div className="space-y-2.5" role="list" aria-label={`${column.label} applications`}>
               {getApplicationsByStatus(column.id).map(app => (
                 <div 
                   key={app.id} 
                   className={`kanban-card p-3.5 ${isStale(app) ? 'ring-1 ring-amber-500/50' : ''}`}
+                  role="listitem"
                 >
                   {/* Stale indicator */}
                   {isStale(app) && (
                     <div className="flex items-center gap-1.5 text-amber-500 text-xs mb-2">
-                      <AlertCircle className="w-3 h-3" />
+                      <AlertCircle className="w-3 h-3" aria-hidden="true" />
                       <span>Stale — follow up</span>
                     </div>
                   )}
@@ -352,15 +396,20 @@ const MissionControl = () => {
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-foreground text-sm truncate">{app.job_title}</p>
                       <div className="flex items-center gap-1 text-muted-foreground text-xs mt-1">
-                        <Building2 className="w-3 h-3 shrink-0" />
+                        <Building2 className="w-3 h-3 shrink-0" aria-hidden="true" />
                         <span className="truncate">{app.company_name}</span>
                       </div>
                     </div>
                     
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0">
-                          <MoreHorizontal className="w-4 h-4" />
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-6 w-6 shrink-0"
+                          aria-label={`Actions for ${app.job_title} at ${app.company_name}`}
+                        >
+                          <MoreHorizontal className="w-4 h-4" aria-hidden="true" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
@@ -375,7 +424,7 @@ const MissionControl = () => {
                         <DropdownMenuSeparator />
                         {app.job_url && (
                           <DropdownMenuItem onClick={() => window.open(app.job_url, '_blank')}>
-                            <ExternalLink className="w-4 h-4 mr-2" />
+                            <ExternalLink className="w-4 h-4 mr-2" aria-hidden="true" />
                             Open Job Posting
                           </DropdownMenuItem>
                         )}
@@ -383,7 +432,7 @@ const MissionControl = () => {
                           onClick={() => deleteApplication(app.id)}
                           className="text-destructive focus:text-destructive"
                         >
-                          <Trash2 className="w-4 h-4 mr-2" />
+                          <Trash2 className="w-4 h-4 mr-2" aria-hidden="true" />
                           Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -393,14 +442,14 @@ const MissionControl = () => {
                   {/* Notes indicator */}
                   {app.notes && (
                     <div className="flex items-center gap-1 text-muted-foreground text-xs mt-2">
-                      <StickyNote className="w-3 h-3" />
+                      <StickyNote className="w-3 h-3" aria-hidden="true" />
                       <span className="truncate">{app.notes.slice(0, 40)}{app.notes.length > 40 ? '...' : ''}</span>
                     </div>
                   )}
 
                   <div className="flex items-center gap-1 text-muted-foreground text-xs mt-2">
-                    <Calendar className="w-3 h-3" />
-                    <span>{formatDate(app.applied_date)}</span>
+                    <Calendar className="w-3 h-3" aria-hidden="true" />
+                    <time dateTime={app.applied_date}>{formatDate(app.applied_date)}</time>
                   </div>
                 </div>
               ))}
@@ -419,14 +468,14 @@ const MissionControl = () => {
       {applications.length === 0 && (
         <div className="command-card p-12 text-center mt-8">
           <div className="w-14 h-14 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Building2 className="w-7 h-7 text-muted-foreground" />
+            <Building2 className="w-7 h-7 text-muted-foreground" aria-hidden="true" />
           </div>
           <h3 className="text-lg font-semibold text-foreground mb-2">No applications yet</h3>
           <p className="text-muted-foreground mb-6 max-w-md mx-auto text-sm">
             Start tracking your job applications to never lose sight of where you've applied.
           </p>
           <Button className="saas-button" onClick={() => setIsAddDialogOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="w-4 h-4 mr-2" aria-hidden="true" />
             Add Your First Application
           </Button>
         </div>
