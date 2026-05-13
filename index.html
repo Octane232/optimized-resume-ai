@@ -1,16 +1,22 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-397FWCLNYR"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-397FWCLNYR');
+      (function() {
+        // Use globalThis for modern environments, fallback to window for older browsers
+        const global = typeof globalThis !== 'undefined' ? globalThis : window;
+        
+        global.dataLayer = global.dataLayer || [];
+        function gtag() {
+          global.dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+        gtag('config', 'G-397FWCLNYR');
+      })();
     </script>
+    
     <meta charset="UTF-8" />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -18,18 +24,21 @@
     <meta name="description" content="Vaylance AI writes your resume, finds matching jobs, and coaches you through interviews. The AI-powered career assistant that helps you land your dream job faster." />
     <meta name="author" content="Vaylance" />
 
+    <!-- Open Graph / Social Media -->
     <meta property="og:title" content="Vaylance - Your AI Career Coach That Gets You Hired" />
     <meta property="og:description" content="Vaylance AI writes your resume, finds matching jobs, and coaches you through interviews. The AI-powered career assistant that helps you land your dream job faster." />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="/og-image.png" />
 
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@vaylance" />
     <meta name="twitter:image" content="/og-image.png" />
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet" />
   </head>
 
   <body>
