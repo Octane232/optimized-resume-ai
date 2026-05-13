@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, FileText, Loader2, X, Link2, Clipboard, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast'; // Fixed import
 
 export interface IngestionResult {
   rawText: string;
@@ -28,7 +28,11 @@ const SUPPORTED_TYPES = {
   'application/rtf': 'RTF',
 };
 
+// Move API key to environment variable
+const SUPABASE_FUNCTION_URL = 'https://xpmhahyvtyvrxryrqane.supabase.co/functions/v1/parse-resume-file';
+
 const ResumeIngestion: React.FC<ResumeIngestionProps> = ({ onIngestionComplete, isProcessing = false }) => {
+  const { toast } = useToast(); // Fixed: useToast hook
   const [file, setFile] = useState<File | null>(null);
   const [pastedText, setPastedText] = useState('');
   const [linkedInUrl, setLinkedInUrl] = useState('');
@@ -36,6 +40,16 @@ const ResumeIngestion: React.FC<ResumeIngestionProps> = ({ onIngestionComplete, 
   const [isExtracting, setIsExtracting] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   const validateFile = (file: File): boolean => {
     const maxSize = 10 * 1024 * 1024; // 10MB
@@ -118,24 +132,54 @@ const ResumeIngestion: React.FC<ResumeIngestionProps> = ({ onIngestionComplete, 
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch(
-      'https://xpmhahyvtyvrxryrqane.supabase.co/functions/v1/parse-resume-file',
-      {
+    // Create abort controller for this request
+    abortControllerRef.current = new AbortController();
+
+    try {
+      const response = await fetch(SUPABASE_FUNCTION_URL, {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwbWhhaHl2dHl2cnhyeXJxYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQwNzk0NTQsImV4cCI6MjA2OTY1NTQ1NH0.-cJ410lQKSLvL43WMGdEpTy0MG6sY9ODLsnQQLYb3x0',
+          // Get API key from environment variable - NEVER hardcode
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
         },
         body: formData,
+        signal: abortControllerRef.current.signal,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorMessage;
+        try {
+          const errorJson = JSON.parse(errorText);
+          errorMessage = errorJson.error || `HTTP ${response.status}`;
+        } catch {
+          errorMessage = `HTTP ${response.status}: ${errorText.substring(0, 100)}`;
+        }
+        throw new Error(errorMessage);
       }
-    );
 
-    const result = await response.json();
+      const result = await response.json();
+      
+      if (!result.text || typeof result.text !== 'string') {
+        throw new Error('Invalid response format from server');
+      }
 
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to parse file');
+      return result.text;
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        throw new Error('Request was cancelled');
+      }
+      throw error;
+    } finally {
+      abortControllerRef.current = null;
     }
+  };
 
-    return result.text;
+  const handleKeyboardActivation = (e: React.KeyboardEvent, action: () => void) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      action();
+    }
   };
 
   const handleProcess = async () => {
@@ -156,10 +200,11 @@ const ResumeIngestion: React.FC<ResumeIngestionProps> = ({ onIngestionComplete, 
         resumeText = pastedText.trim();
         source = 'paste';
       } else if (activeTab === 'linkedin' && linkedInUrl.trim()) {
-        // LinkedIn import is a placeholder - would need actual API integration
+        // LinkedIn import not implemented yet
         toast({
           title: "LinkedIn Import",
-          description: "LinkedIn import feature coming soon! Please use file upload or paste for now.",
+          description: "LinkedIn import feature is coming soon! Please use file upload or paste for now.",
+          variant: "destructive",
         });
         return;
       } else {
@@ -174,7 +219,7 @@ const ResumeIngestion: React.FC<ResumeIngestionProps> = ({ onIngestionComplete, 
       if (resumeText.length < 50) {
         toast({
           title: "Content too short",
-          description: "Please provide more resume content for accurate analysis",
+          description: "Please provide more resume content for accurate analysis (minimum 50 characters)",
           variant: "destructive",
         });
         return;
@@ -187,11 +232,17 @@ const ResumeIngestion: React.FC<ResumeIngestionProps> = ({ onIngestionComplete, 
         fileType,
       });
 
+      // Show success toast
+      toast({
+        title: "Resume processed successfully",
+        description: `${resumeText.split(/\s+/).filter(Boolean).length} words extracted`,
+      });
+
     } catch (error: any) {
       console.error('Ingestion error:', error);
       toast({
         title: "Error processing content",
-        description: error.message || "Could not process the content. Try a different method.",
+        description: error.message || "Could not process the content. Please try a different method or contact support.",
         variant: "destructive",
       });
       setIsExtracting(false);
@@ -200,9 +251,9 @@ const ResumeIngestion: React.FC<ResumeIngestionProps> = ({ onIngestionComplete, 
 
   const hasContent = 
     (activeTab === 'upload' && file) || 
-    (activeTab === 'paste' && pastedText.trim().length > 0) ||
-    (activeTab === 'linkedin' && linkedInUrl.trim().length > 0);
+    (activeTab === 'paste' && pastedText.trim().length > 0);
 
+  const isLinkedInDisabled = true; // Feature not implemented yet
   const isLoading = isProcessing || isExtracting;
 
   const getFileTypeLabel = (file: File): string => {
@@ -237,9 +288,10 @@ const ResumeIngestion: React.FC<ResumeIngestionProps> = ({ onIngestionComplete, 
               <Clipboard className="w-4 h-4" />
               Paste
             </TabsTrigger>
-            <TabsTrigger value="linkedin" className="gap-2">
+            <TabsTrigger value="linkedin" className="gap-2" disabled={isLinkedInDisabled}>
               <Link2 className="w-4 h-4" />
               LinkedIn
+              <span className="ml-1 text-[10px] bg-muted px-1 rounded">Soon</span>
             </TabsTrigger>
           </TabsList>
 
@@ -251,40 +303,47 @@ const ResumeIngestion: React.FC<ResumeIngestionProps> = ({ onIngestionComplete, 
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
-                    isDragging 
-                      ? 'border-primary bg-primary/10' 
-                      : 'border-border hover:border-primary/50 hover:bg-muted/30'
-                  }`}
-                  onDrop={handleDrop}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onClick={() => fileInputRef.current?.click()}
                 >
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".pdf,.docx,.txt,.rtf"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                  <Upload className={`w-12 h-12 mx-auto mb-3 transition-colors ${
-                    isDragging ? 'text-primary' : 'text-muted-foreground'
-                  }`} />
-                  <p className="text-sm font-medium text-foreground">
-                    {isDragging ? 'Drop your resume here' : 'Drag & drop your resume'}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">or click to browse</p>
-                  <div className="flex items-center justify-center gap-2 mt-4">
-                    {Object.values(SUPPORTED_TYPES).map((type) => (
-                      <span 
-                        key={type}
-                        className="px-2 py-1 bg-muted text-xs text-muted-foreground rounded"
-                      >
-                        {type}
-                      </span>
-                    ))}
-                  </div>
+                  <button
+                    type="button"
+                    className={`w-full border-2 border-dashed rounded-xl p-8 text-center transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+                      isDragging 
+                        ? 'border-primary bg-primary/10' 
+                        : 'border-border hover:border-primary/50 hover:bg-muted/30'
+                    }`}
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onClick={() => fileInputRef.current?.click()}
+                    onKeyDown={(e) => handleKeyboardActivation(e, () => fileInputRef.current?.click())}
+                    aria-label="Upload resume file. Click or drag and drop."
+                  >
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf,.docx,.txt,.rtf"
+                      onChange={handleFileChange}
+                      className="hidden"
+                      aria-hidden="true"
+                    />
+                    <Upload className={`w-12 h-12 mx-auto mb-3 transition-colors ${
+                      isDragging ? 'text-primary' : 'text-muted-foreground'
+                    }`} />
+                    <p className="text-sm font-medium text-foreground">
+                      {isDragging ? 'Drop your resume here' : 'Drag & drop your resume'}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">or click to browse</p>
+                    <div className="flex items-center justify-center gap-2 mt-4">
+                      {Object.values(SUPPORTED_TYPES).map((type) => (
+                        <span 
+                          key={type}
+                          className="px-2 py-1 bg-muted text-xs text-muted-foreground rounded"
+                        >
+                          {type}
+                        </span>
+                      ))}
+                    </div>
+                  </button>
                 </motion.div>
               ) : (
                 <motion.div
@@ -315,6 +374,7 @@ const ResumeIngestion: React.FC<ResumeIngestionProps> = ({ onIngestionComplete, 
                     size="icon"
                     onClick={clearFile}
                     className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                    aria-label="Remove file"
                   >
                     <X className="w-4 h-4" />
                   </Button>
@@ -337,10 +397,11 @@ Include all sections: contact info, summary, experience, education, skills, etc.
                 onChange={(e) => setPastedText(e.target.value)}
                 rows={10}
                 className="resize-none font-mono text-sm"
+                aria-describedby="paste-stats"
               />
             </div>
             {pastedText && (
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <div id="paste-stats" className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>{pastedText.split(/\s+/).filter(Boolean).length} words</span>
                 <span>{pastedText.length} characters</span>
               </div>
@@ -361,6 +422,7 @@ Include all sections: contact info, summary, experience, education, skills, etc.
                   value={linkedInUrl}
                   onChange={(e) => setLinkedInUrl(e.target.value)}
                   className="pl-10"
+                  disabled={isLinkedInDisabled}
                 />
               </div>
               <p className="text-xs text-muted-foreground mt-2">
@@ -369,7 +431,7 @@ Include all sections: contact info, summary, experience, education, skills, etc.
             </div>
             <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
               <p className="text-xs text-amber-600 dark:text-amber-400">
-                ⚠️ LinkedIn import requires a public profile or authentication. Feature coming soon.
+                ℹ️ LinkedIn import is coming soon. Please use file upload or paste for now.
               </p>
             </div>
           </TabsContent>
