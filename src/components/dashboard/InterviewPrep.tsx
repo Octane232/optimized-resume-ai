@@ -527,24 +527,45 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground">Target Position</label>
-                        <Input placeholder="e.g. Software Engineer" value={position} onChange={e => setPosition(e.target.value)} />
+                        <label htmlFor="target-position" className="text-sm font-medium text-foreground">
+                          Target Position
+                        </label>
+                        <Input 
+                          id="target-position"
+                          placeholder="e.g. Software Engineer" 
+                          value={position} 
+                          onChange={e => setPosition(e.target.value)} 
+                          aria-required="true"
+                        />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground">Company (optional)</label>
-                        <Input placeholder="e.g. Google" value={company} onChange={e => setCompany(e.target.value)} />
+                        <label htmlFor="company-name" className="text-sm font-medium text-foreground">
+                          Company (optional)
+                        </label>
+                        <Input 
+                          id="company-name"
+                          placeholder="e.g. Google" 
+                          value={company} 
+                          onChange={e => setCompany(e.target.value)} 
+                        />
                       </div>
                     </div>
-                    <Button onClick={generateQuestions} disabled={!position.trim() || loadingQuestions || !canUse('interview_prep')} className="w-full">
+                    <Button 
+                      onClick={generateQuestions} 
+                      disabled={!position.trim() || loadingQuestions || !canUse('interview_prep')} 
+                      className="w-full"
+                    >
                       {loadingQuestions ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generating…</> : <><Brain className="w-4 h-4 mr-2" />Generate Questions</>}
                     </Button>
                     {!canUse('interview_prep') && (
-                      <p className="text-xs text-muted-foreground flex items-center gap-1"><Lock className="w-3 h-3" /> No sessions remaining this period.
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Lock className="w-3 h-3" /> No sessions remaining this period.
                         {setActiveTab && <button className="text-primary underline ml-1" onClick={() => setActiveTab('billing')}>Upgrade</button>}
                       </p>
                     )}
                   </div>
                 )}
+                
                 {stage === 'question' && questions.length > 0 && (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
@@ -552,12 +573,28 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                       <span className="text-xs text-muted-foreground">{wordCount} words</span>
                     </div>
                     <p className="text-foreground font-medium">{questions[currentQ]}</p>
-                    <Textarea placeholder="Type your answer…" value={userAnswer} onChange={e => setUserAnswer(e.target.value)} rows={6} />
+                    <div className="space-y-2">
+                      <label htmlFor="user-answer" className="text-sm font-medium text-foreground">
+                        Your Answer
+                      </label>
+                      <Textarea 
+                        id="user-answer"
+                        placeholder="Type your answer…" 
+                        value={userAnswer} 
+                        onChange={e => setUserAnswer(e.target.value)} 
+                        rows={6}
+                        aria-describedby="word-count"
+                      />
+                      <p id="word-count" className="text-xs text-muted-foreground text-right">
+                        {wordCount} words
+                      </p>
+                    </div>
                     <Button onClick={submitAnswer} disabled={!userAnswer.trim() || loadingFeedback}>
                       {loadingFeedback ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Analyzing…</> : <><Send className="w-4 h-4 mr-2" />Submit Answer</>}
                     </Button>
                   </div>
                 )}
+                
                 {stage === 'feedback' && currentFeedback && (
                   <div className="space-y-4">
                     <div className={`p-4 rounded-xl border ${getScoreBackground(currentFeedback.score)}`}>
@@ -569,27 +606,47 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                     </div>
                     {currentFeedback.strengths.length > 0 && (
                       <div className="space-y-1">
-                        <p className="text-sm font-medium text-emerald-600 flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Strengths</p>
-                        {currentFeedback.strengths.map((s, i) => <p key={i} className="text-sm text-muted-foreground ml-5">• {s}</p>)}
+                        <p className="text-sm font-medium text-emerald-600 flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Strengths
+                        </p>
+                        <ul className="space-y-1">
+                          {currentFeedback.strengths.map((s, i) => (
+                            <li key={i} className="text-sm text-muted-foreground ml-5">• {s}</li>
+                          ))}
+                        </ul>
                       </div>
                     )}
                     {currentFeedback.improvements.length > 0 && (
                       <div className="space-y-1">
-                        <p className="text-sm font-medium text-amber-600 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5" /> Improvements</p>
-                        {currentFeedback.improvements.map((s, i) => <p key={i} className="text-sm text-muted-foreground ml-5">• {s}</p>)}
+                        <p className="text-sm font-medium text-amber-600 flex items-center gap-1">
+                          <AlertCircle className="w-3.5 h-3.5" /> Improvements
+                        </p>
+                        <ul className="space-y-1">
+                          {currentFeedback.improvements.map((s, i) => (
+                            <li key={i} className="text-sm text-muted-foreground ml-5">• {s}</li>
+                          ))}
+                        </ul>
                       </div>
                     )}
-                    <Button onClick={nextQuestion}><ArrowRight className="w-4 h-4 mr-2" />{currentQ + 1 < questions.length ? 'Next Question' : 'See Results'}</Button>
+                    <Button onClick={nextQuestion}>
+                      <ArrowRight className="w-4 h-4 mr-2" />
+                      {currentQ + 1 < questions.length ? 'Next Question' : 'See Results'}
+                    </Button>
                   </div>
                 )}
+                
                 {stage === 'results' && (
                   <div className="space-y-4 text-center">
                     <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl border ${getScoreBackground(overallScore)}`}>
                       <span className={`text-3xl font-bold ${getScoreColor(overallScore)}`}>{overallScore.toFixed(1)}</span>
                       <span className="text-sm text-muted-foreground">/ 10 overall</span>
                     </div>
-                    <p className="text-muted-foreground text-sm">You answered {answers.length} question{answers.length !== 1 ? 's' : ''}.</p>
-                    <Button variant="outline" onClick={resetPractice}><RotateCcw className="w-4 h-4 mr-2" />Practice Again</Button>
+                    <p className="text-muted-foreground text-sm">
+                      You answered {answers.length} question{answers.length !== 1 ? 's' : ''}.
+                    </p>
+                    <Button variant="outline" onClick={resetPractice}>
+                      <RotateCcw className="w-4 h-4 mr-2" />Practice Again
+                    </Button>
                   </div>
                 )}
               </CardContent>
@@ -604,8 +661,29 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                 {!liveActive ? (
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <Input placeholder="Position" value={livePosition} onChange={e => setLivePosition(e.target.value)} />
-                      <Input placeholder="Company (optional)" value={liveCompany} onChange={e => setLiveCompany(e.target.value)} />
+                      <div className="space-y-2">
+                        <label htmlFor="live-position" className="text-sm font-medium text-foreground">
+                          Position
+                        </label>
+                        <Input 
+                          id="live-position"
+                          placeholder="e.g. Software Engineer" 
+                          value={livePosition} 
+                          onChange={e => setLivePosition(e.target.value)} 
+                          aria-required="true"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label htmlFor="live-company" className="text-sm font-medium text-foreground">
+                          Company (optional)
+                        </label>
+                        <Input 
+                          id="live-company"
+                          placeholder="e.g. Google" 
+                          value={liveCompany} 
+                          onChange={e => setLiveCompany(e.target.value)} 
+                        />
+                      </div>
                     </div>
                     <Button onClick={startLive} disabled={!livePosition.trim()} className="w-full">
                       <Radio className="w-4 h-4 mr-2" />Start Live Session
@@ -614,25 +692,49 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                 ) : (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <Badge variant="destructive" className="animate-pulse"><Radio className="w-3 h-3 mr-1" />Live</Badge>
-                      <Button variant="ghost" size="sm" onClick={endLive}>End Session</Button>
+                      <Badge variant="destructive" className="animate-pulse">
+                        <Radio className="w-3 h-3 mr-1" />Live
+                      </Badge>
+                      <Button variant="ghost" size="sm" onClick={endLive}>
+                        End Session
+                      </Button>
                     </div>
-                    <div className="space-y-3 max-h-96 overflow-y-auto">
+                    <div className="space-y-3 max-h-96 overflow-y-auto" aria-live="polite">
                       {liveEntries.map(entry => (
                         <div key={entry.id} className="p-3 rounded-lg border border-border/60 space-y-2">
                           <p className="text-sm font-medium text-foreground">{entry.question}</p>
                           {entry.loading ? (
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground"><Loader2 className="w-3 h-3 animate-spin" />Thinking…</div>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <Loader2 className="w-3 h-3 animate-spin" />Thinking…
+                            </div>
                           ) : entry.suggestion && (
-                            <p className="text-sm text-muted-foreground bg-primary/5 p-2 rounded">{entry.suggestion}</p>
+                            <p className="text-sm text-muted-foreground bg-primary/5 p-2 rounded">
+                              {entry.suggestion}
+                            </p>
                           )}
                         </div>
                       ))}
                       <div ref={liveBottomRef} />
                     </div>
                     <div className="flex gap-2">
-                      <Input placeholder="Type the question being asked…" value={liveQuestion} onChange={e => setLiveQuestion(e.target.value)} onKeyDown={e => e.key === 'Enter' && askLive()} />
-                      <Button onClick={askLive} disabled={!liveQuestion.trim() || liveLoading}><Send className="w-4 h-4" /></Button>
+                      <div className="flex-1 space-y-2">
+                        <label htmlFor="live-question" className="text-sm font-medium text-foreground">
+                          Question Being Asked
+                        </label>
+                        <Input 
+                          id="live-question"
+                          placeholder="Type the question being asked…" 
+                          value={liveQuestion} 
+                          onChange={e => setLiveQuestion(e.target.value)} 
+                          onKeyDown={e => e.key === 'Enter' && askLive()} 
+                        />
+                      </div>
+                      <div className="flex items-end">
+                        <Button onClick={askLive} disabled={!liveQuestion.trim() || liveLoading}>
+                          <Send className="w-4 h-4" />
+                          <span className="sr-only">Send question</span>
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -648,8 +750,8 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                 <Card key={i} className="border-border/60">
                   <CardContent className="p-4 space-y-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-lg">{tip.icon}</span>
-                      <span className="font-medium text-foreground text-sm">{tip.title}</span>
+                      <span className="text-lg" aria-hidden="true">{tip.icon}</span>
+                      <h3 className="font-medium text-foreground text-sm">{tip.title}</h3>
                       <Badge variant="secondary" className="ml-auto text-[10px]">{tip.priority}</Badge>
                     </div>
                     <p className="text-xs text-muted-foreground leading-relaxed">{tip.desc}</p>
@@ -663,25 +765,35 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
         {tab === 'history' && (
           <motion.div key="history" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             {loadingHistory ? (
-              <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                <span className="sr-only">Loading history...</span>
+              </div>
             ) : sessions.length === 0 ? (
               <Card className="border-border/60">
                 <CardContent className="p-8 text-center space-y-3">
-                  <BarChart3 className="w-10 h-10 text-muted-foreground mx-auto" />
+                  <BarChart3 className="w-10 h-10 text-muted-foreground mx-auto" aria-hidden="true" />
                   <p className="text-muted-foreground text-sm">No sessions yet. Complete a practice round to see your history.</p>
-                  <Button variant="outline" onClick={() => setTab('practice')}><Brain className="w-4 h-4 mr-2" />Start Practice</Button>
+                  <Button variant="outline" onClick={() => setTab('practice')}>
+                    <Brain className="w-4 h-4 mr-2" />Start Practice
+                  </Button>
                 </CardContent>
               </Card>
             ) : (
               <div className="space-y-3">
+                <h2 className="sr-only">Interview History</h2>
                 {sessions.map(session => (
                   <Card key={session.id} className="border-border/60">
                     <CardContent className="p-4 flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-sm text-foreground">{session.position}</p>
-                        <p className="text-xs text-muted-foreground">{new Date(session.date).toLocaleDateString()} · {session.answers.length} question{session.answers.length !== 1 ? 's' : ''}</p>
+                        <h3 className="font-medium text-sm text-foreground">{session.position}</h3>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(session.date).toLocaleDateString()} · {session.answers.length} question{session.answers.length !== 1 ? 's' : ''}
+                        </p>
                       </div>
-                      <div className={`text-lg font-bold ${getScoreColor(session.overallScore)}`}>{session.overallScore.toFixed(1)}</div>
+                      <div className={`text-lg font-bold ${getScoreColor(session.overallScore)}`}>
+                        {session.overallScore.toFixed(1)}
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
@@ -709,10 +821,10 @@ const HeaderSection: React.FC<{ avgScore: number; sessionsCount: number }> = ({
     <div className="flex items-center gap-3">
       <div className="relative shrink-0">
         <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-          <Mic className="w-5 h-5 text-white" />
+          <Mic className="w-5 h-5 text-white" aria-hidden="true" />
         </div>
         <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-background flex items-center justify-center">
-          <Sparkles className="w-2 h-2 text-white" />
+          <Sparkles className="w-2 h-2 text-white" aria-hidden="true" />
         </div>
       </div>
       <div>
@@ -723,7 +835,7 @@ const HeaderSection: React.FC<{ avgScore: number; sessionsCount: number }> = ({
 
     {sessionsCount > 0 && (
       <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/5 border border-primary/10">
-        <Trophy className="w-3.5 h-3.5 text-primary" />
+        <Trophy className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
         <span className="text-sm font-bold text-primary">{avgScore.toFixed(1)}</span>
         <span className="text-xs text-muted-foreground">avg / 10</span>
       </div>
@@ -738,11 +850,18 @@ const TabBar: React.FC<{
   onTabChange: (tab: Tab) => void;
   sessionsCount: number;
 }> = ({ tabs, activeTab, onTabChange, sessionsCount }) => (
-  <div className="inline-flex gap-0.5 p-1 rounded-xl bg-muted/60 border border-border/50">
+  <div 
+    className="inline-flex gap-0.5 p-1 rounded-xl bg-muted/60 border border-border/50"
+    role="tablist"
+    aria-label="Interview preparation sections"
+  >
     {tabs.map(({ id, label, icon: Icon }) => (
       <button
         key={id}
         onClick={() => onTabChange(id)}
+        role="tab"
+        aria-selected={activeTab === id}
+        aria-label={`${label} section${id === 'history' && sessionsCount > 0 ? `, ${sessionsCount} items` : ''}`}
         className={`
           relative flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-150
           ${activeTab === id 
@@ -751,10 +870,13 @@ const TabBar: React.FC<{
           }
         `}
       >
-        <Icon className="w-3.5 h-3.5 shrink-0" />
+        <Icon className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
         <span>{label}</span>
         {id === 'history' && sessionsCount > 0 && (
-          <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-primary text-[8px] font-bold text-primary-foreground flex items-center justify-center">
+          <span 
+            className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-primary text-[8px] font-bold text-primary-foreground flex items-center justify-center"
+            aria-label={`${sessionsCount} saved sessions`}
+          >
             {sessionsCount > 9 ? '9+' : sessionsCount}
           </span>
         )}
