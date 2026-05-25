@@ -1,73 +1,319 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders, jsonResponse, requireUser, enforceQuota, recordUsage } from "../_shared/requireUser.ts";
 
+// ===== Constants =====
+const OPENAI_MODEL = "gpt-4o-mini";
+const MAX_RETRIES = 2;
+const RETRY_DELAY_MS = 1000;
+
+// ===== Helper Functions =====
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+const callOpenAIWithRetry = async (
+  apiKey: string,
+  prompt: string,
+  responseFormat?: { type: string },
+  retryCount: number = 0
+): Promise<string> => {
+  try {
+    const body: any = {
+      model: OPENAI_MODEL,
+      messages: [{ role: "user", content: prompt }],
+    };
+    
+    if (responseFormat) {
+      body.response_format = responseFormat;
+    }
+    
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: { 
+        Authorization: `Bearer ${apiKey}`, 
+        "Content-Type": "application/json" 
+      },
+      body: JSON.stringify(body),
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("OpenAI API error:", response.status, errorText);
+      
+      // Retry on rate limit or server errors
+      if ((response.status === 429 || response.status >= 500) && retryCount < MAX_RETRIES) {
+        console.log(`Retrying... (${retryCount + 1}/${MAX_RETRIES})`);
+        await sleep(RETRY_DELAY_MS * (retryCount + 1));
+        return callOpenAIWithRetry(apiKey, prompt, responseFormat, retryCount + 1);
+      }
+      
+      throw new Error(`OpenAI error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content || "";
+    
+    if (!content) {
+      throw new Error("OpenAI returned empty response");
+    }
+    
+    return content;
+  } catch (error) {
+    if (retryCount < MAX_RETRIES) {
+      console.log(`Retrying after error... (${retryCount + 1}/${MAX_RETRIES})`);
+      await sleep(RETRY_DELAY_MS * (retryCount + 1));
+      return callOpenAIWithRetry(apiKey, prompt, responseFormat, retryCount + 1);
+    }
+    throw error;
+  }
+};
+
+// ===== Prompt Builders =====
+const buildResumePrompt = (userResume: string, jobDescription: string): string => {
+  return `You are an expert resume writer and career coach.
+
+Your job is to COMPLETELY rewrite the resume below to strongly match the job description. This is not a light edit — restructure, reorder, and rewrite aggressively.
+
+RULES:
+1. Rewrite EVERY bullet point using strong action verbs and quantifiable achievements
+2. Reorder sections and experience to prioritize what matters most for THIS role
+3. Mirror the exact language and keywords from the job description naturally throughout
+4. Rewrite the professional summary to speak directly to this specific role
+5. Remove or de-emphasize experience irrelevant to this job
+6. Add missing keywords from the job description where experience supports it
+7. Do NOT fabricate experience, titles, companies or dates
+8. Output ONLY the rewritten resume — no explanations, no commentary, no preamble
+
+FORMAT:
+- Use clean markdown formatting
+- Bold section headers
+- Bullet points for experience
+- Keep to 1-2 pages worth of content
+
+RESUME:
+${userResume}
+
+JOB DESCRIPTION:
+${jobDescription}`;
+};
+
+const buildCoverLetterPrompt = (userResume: string, jobDescription: string, userName?: string): string => {
+  return `You are a professional cover letter writer.
+
+Write a compelling, concise 3-paragraph cover letter for this role. Use real experience from the resume. Be professional but personable.
+
+STRUCTURE:
+- Paragraph 1: Hook + why you're excited about THIS specific role and company
+- Paragraph 2: Your relevant achievements and skills that match their needs (use numbers!)
+- Paragraph 3: Call to action + enthusiasm for next steps
+
+RULES:
+- Do NOT fabricate experience
+- Keep to 250-350 words
+- Address the hiring manager directly
+- Use specific details from the job description
+- Output ONLY the cover letter — no explanations, no preamble
+
+${userName ? `\nApplicant name: ${userName}` : ""}
+
+RESUME:
+${userResume}
+
+JOB DESCRIPTION:
+${jobDescription}`;
+};
+
+const buildATSPrompt = (userResume: string, jobDescription: string): string => {
+  return `You are an expert ATS (Applicant Tracking System) analyst.
+
+Analyse the resume against the job description and return JSON only. Be honest and critical.
+
+{
+  "beforeScore": number between 0-100 (current resume match percentage),
+  "afterScore": number between 0-100 (realistic optimized score after suggested improvements),
+  "foundKeywords": ["keywords already present in resume"],
+  "missingKeywords": ["important keywords missing from resume that should be added"],
+  "partialKeywords": ["keywords partially matched or implied but not explicit"],
+  "improvements": [
+    "specific reason 1 why the beforeScore was low",
+    "specific reason 2",
+    "what was fixed to achieve the afterScore"
+  ]
+}
+
+RESUME:
+${userResume}
+
+JOB DESCRIPTION:
+${jobDescription}`;
+};
+
+// ===== Validation =====
+const validateInputs = (jobDescription: string, userResume: string): void => {
+  if (!jobDescription || typeof jobDescription !== 'string') {
+    throw new Error("jobDescription is required and must be a string");
+  }
+  if (!userResume || typeof userResume !== 'string') {
+    throw new Error("userResume is required and must be a string");
+  }
+  if (jobDescription.trim().length < 50) {
+    throw new Error("Job description is too short (minimum 50 characters)");
+  }
+  if (userResume.trim().length < 50) {
+    throw new Error("Resume is too short (minimum 50 characters)");
+  }
+};
+
+// ===== ATS Data Parser =====
+const parseATSData = (rawData: string, userResume: string, jobDescription: string): any => {
+  try {
+    const parsed = JSON.parse(rawData);
+    
+    // Validate required fields
+    return {
+      beforeScore: Math.min(100, Math.max(0, parsed.beforeScore || 50)),
+      afterScore: Math.min(100, Math.max(0, parsed.afterScore || 70)),
+      foundKeywords: Array.isArray(parsed.foundKeywords) ? parsed.foundKeywords.slice(0, 20) : [],
+      missingKeywords: Array.isArray(parsed.missingKeywords) ? parsed.missingKeywords.slice(0, 20) : [],
+      partialKeywords: Array.isArray(parsed.partialKeywords) ? parsed.partialKeywords.slice(0, 10) : [],
+      improvements: Array.isArray(parsed.improvements) ? parsed.improvements.slice(0, 10) : [
+        "Resume could better match job description keywords",
+        "Consider adding more quantifiable achievements",
+        "Professional summary should target this specific role"
+      ],
+    };
+  } catch (parseError) {
+    console.error("Failed to parse ATS response:", rawData);
+    
+    // Intelligent fallback based on resume/job length
+    const hasContent = userResume.length > 200 && jobDescription.length > 200;
+    
+    return {
+      beforeScore: hasContent ? 45 : 30,
+      afterScore: 75,
+      foundKeywords: [],
+      missingKeywords: ["analysis failed - using fallback"],
+      partialKeywords: [],
+      improvements: [
+        "Unable to fully analyze ATS compatibility due to parsing error",
+        "Consider manually reviewing keyword matches",
+        "Ensure your resume includes terms from the job description"
+      ],
+    };
+  }
+};
+
+// ===== Main Handler =====
 serve(async (req) => {
+  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+  
+  const startTime = Date.now();
+  
   try {
+    // 1. Authentication
     const auth = await requireUser(req);
     if (auth instanceof Response) return auth;
+    
+    // 2. Quota Check
     const overQuota = await enforceQuota(auth, "resume_ats");
     if (overQuota) return overQuota;
-
+    
+    // 3. API Key Validation
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY not configured");
-
+    if (!OPENAI_API_KEY) {
+      console.error("OPENAI_API_KEY not configured");
+      throw new Error("OPENAI_API_KEY not configured");
+    }
+    
+    // 4. Request Body Parsing
     const { jobDescription, userResume, userName } = await req.json();
-    if (!jobDescription || !userResume) throw new Error("jobDescription and userResume are required");
-
-    const [resumeRes, coverLetterRes, atsRes] = await Promise.all([
-      fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [{ role: "user", content: `Rewrite this resume to match the job description. Add missing keywords naturally. Do not fabricate experience. Keep it concise.\n\nRESUME:\n${userResume}\n\nJOB DESCRIPTION:\n${jobDescription}` }]
-        }),
-      }).then(r => r.json()),
-
-      fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [{ role: "user", content: `Write a concise 3-paragraph cover letter for this role. Use real experience from the resume. Professional but personable.${userName ? `\nApplicant name: ${userName}` : ""}\n\nRESUME:\n${userResume}\n\nJOB DESCRIPTION:\n${jobDescription}` }]
-        }),
-      }).then(r => r.json()),
-
-      fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          response_format: { type: "json_object" },
-          messages: [{ role: "user", content: `You are an ATS system. Analyse the resume against the job description and return JSON only:
-{
-  "beforeScore": number between 0-100,
-  "afterScore": number between 0-100 (assume optimised version),
-  "foundKeywords": ["keywords present in resume"],
-  "missingKeywords": ["important keywords missing from resume"],
-  "partialKeywords": ["keywords partially matched"],
-  "improvements": ["specific reason 1 why score was low", "specific reason 2", "what was fixed"]
-}
-
-RESUME:\n${userResume}\n\nJOB DESCRIPTION:\n${jobDescription}` }]
-        }),
-      }).then(r => r.json()),
+    
+    // 5. Input Validation
+    validateInputs(jobDescription, userResume);
+    
+    console.log(`[${auth.user.id}] Processing bundle...`);
+    console.log(`  Resume: ${userResume.length} chars, ${userResume.split(/\s+/).length} words`);
+    console.log(`  Job Desc: ${jobDescription.length} chars, ${jobDescription.split(/\s+/).length} words`);
+    
+    // 6. Parallel AI Calls
+    const [tailoredResume, coverLetter, atsDataRaw] = await Promise.all([
+      callOpenAIWithRetry(OPENAI_API_KEY, buildResumePrompt(userResume, jobDescription)),
+      callOpenAIWithRetry(OPENAI_API_KEY, buildCoverLetterPrompt(userResume, jobDescription, userName)),
+      callOpenAIWithRetry(OPENAI_API_KEY, buildATSPrompt(userResume, jobDescription), { type: "json_object" }),
     ]);
-
-    const tailoredResume = resumeRes.choices?.[0]?.message?.content || "";
-    const coverLetter = coverLetterRes.choices?.[0]?.message?.content || "";
-    const atsData = JSON.parse(atsRes.choices?.[0]?.message?.content || "{}");
-
-    if (!tailoredResume || !coverLetter) throw new Error("AI returned empty response");
-
+    
+    // 7. Validate AI Responses
+    if (!tailoredResume || tailoredResume.length < 50) {
+      throw new Error("AI returned insufficient resume content");
+    }
+    if (!coverLetter || coverLetter.length < 100) {
+      throw new Error("AI returned insufficient cover letter content");
+    }
+    
+    // 8. Parse ATS Data
+    const atsData = parseATSData(atsDataRaw, userResume, jobDescription);
+    
+    // 9. Record Usage
     await recordUsage(auth, "resume_ats");
-
-    return jsonResponse({ success: true, tailoredResume, coverLetter, atsData });
+    
+    const duration = Date.now() - startTime;
+    console.log(`[${auth.user.id}] Bundle complete in ${duration}ms`);
+    console.log(`  Resume: ${tailoredResume.length} chars`);
+    console.log(`  Cover Letter: ${coverLetter.length} chars`);
+    console.log(`  ATS Score: ${atsData.beforeScore} → ${atsData.afterScore}`);
+    
+    // 10. Return Response
+    return jsonResponse({
+      success: true,
+      tailoredResume,
+      coverLetter,
+      atsData,
+      metadata: {
+        processingTimeMs: duration,
+        resumeWordCount: tailoredResume.split(/\s+/).length,
+        coverLetterWordCount: coverLetter.split(/\s+/).length,
+      },
+    });
+    
   } catch (error) {
-    console.error("apply-bundle error:", error);
-    return jsonResponse({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
+    const duration = Date.now() - startTime;
+    console.error(`[ERROR] apply-bundle failed after ${duration}ms:`, error);
+    
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    
+    // Handle specific error types
+    if (errorMessage.includes("quota") || errorMessage.includes("limit")) {
+      return jsonResponse({ 
+        error: "You have reached your usage limit. Please upgrade to continue.",
+        code: "QUOTA_EXCEEDED"
+      }, 429);
+    }
+    
+    if (errorMessage.includes("API key") || errorMessage.includes("OPENAI_API_KEY")) {
+      return jsonResponse({ 
+        error: "Service configuration error. Please try again later.",
+        code: "CONFIGURATION_ERROR"
+      }, 500);
+    }
+    
+    if (errorMessage.includes("rate limit") || errorMessage.includes("429")) {
+      return jsonResponse({ 
+        error: "Rate limit exceeded. Please try again in a moment.",
+        code: "RATE_LIMIT"
+      }, 429);
+    }
+    
+    if (errorMessage.includes("minimum 50 characters")) {
+      return jsonResponse({ 
+        error: errorMessage,
+        code: "INVALID_INPUT"
+      }, 400);
+    }
+    
+    return jsonResponse({ 
+      error: errorMessage,
+      code: "INTERNAL_ERROR"
+    }, 500);
   }
 });
