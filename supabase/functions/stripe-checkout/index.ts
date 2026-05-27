@@ -7,11 +7,12 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// CHANGE 1: Replaced PRICE_IDS with Pro and Elite prices
 const PRICE_IDS = {
-  starter_monthly: "price_1TLYd5R3o3XGOyJGOpBbc7UF",
-  starter_yearly: "price_1TLYdMR3o3XGOyJGKSV1Nfgv",
-  pro_monthly: "price_1TLYdcR3o3XGOyJG0Jb5w4ed",
-  pro_yearly: "price_1TLYdqR3o3XGOyJGVnkazUUi",
+  pro_monthly: "price_1TbqEhR3o3XGOyJGaJdIHMBw",
+  pro_yearly: "price_1TbqHXR3o3XGOyJGWAkkq3pe",
+  elite_monthly: "price_1TbqFjR3o3XGOyJGwMAz2cEo",
+  elite_yearly: "price_1TbqIkR3o3XGOyJGywzYOhwm",
 };
 
 serve(async (req) => {
@@ -40,7 +41,7 @@ serve(async (req) => {
 
     const { plan, billing } = await req.json();
 
-    // Build price key e.g. "starter_monthly"
+    // Build price key e.g. "pro_monthly" or "elite_yearly"
     const priceKey = `${plan}_${billing}` as keyof typeof PRICE_IDS;
     const priceId = PRICE_IDS[priceKey];
     if (!priceId) throw new Error(`Invalid plan: ${priceKey}`);
