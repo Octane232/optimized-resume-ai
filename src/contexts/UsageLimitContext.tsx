@@ -14,8 +14,8 @@ export type UsageAction =
   | 'docx_rewrite'
   | 'resume_parse';
 
-// ===== STEP 4: Add PLAN_LIMITS Constant =====
-const PLAN_LIMITS: Record<string, Record<string, number>> = {
+// ===== STEP 4: Add PLAN_LIMITS Constant - MUST BE EXPORTED =====
+export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> = {
   free: {
     resume_ats: 1,
     cover_letter: 1,
