@@ -49,7 +49,8 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
   ];
 
   const toolsItems = [
-    { id: 'resume-engine', label: 'Resume + ATS ', icon: Stethoscope },
+    // CHANGE 1: Renamed "Resume + ATS" to "Resume Engine"
+    { id: 'resume-engine', label: 'Resume Engine', icon: Stethoscope },
     { id: 'interview-prep', label: 'Interview Coach ', icon: Mic },
     { id: 'mission-control', label: 'App Tracker ', icon: Crosshair },
     { id: 'linkedin', label: 'LinkedIn', icon: Sparkles },
@@ -198,7 +199,7 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
       {/* Navigation with sections */}
       <nav className="flex-1 p-3 space-y-1 overflow-hidden">
         <TooltipProvider delayDuration={0}>
-          {/* Briefing */}
+          {/* CHANGE 2: Removed the "Briefing" comment */}
           <Tooltip>
             <TooltipTrigger asChild>
               <button
