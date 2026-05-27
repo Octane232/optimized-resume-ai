@@ -232,7 +232,7 @@ serve(async (req) => {
     // 5. Input Validation
     validateInputs(jobDescription, userResume);
     
-    // FIXED: Use auth.id directly (not auth.user.id)
+    // FIXED: Use auth.id instead of auth.user.id
     console.log(`[${auth.id}] Processing bundle...`);
     console.log(`  Resume: ${userResume.length} chars, ${userResume.split(/\s+/).length} words`);
     console.log(`  Job Desc: ${jobDescription.length} chars, ${jobDescription.split(/\s+/).length} words`);
@@ -259,7 +259,7 @@ serve(async (req) => {
     await recordUsage(auth, "resume_ats");
     
     const duration = Date.now() - startTime;
-    // FIXED: Use auth.id directly
+    // FIXED: Use auth.id instead of auth.user.id
     console.log(`[${auth.id}] Bundle complete in ${duration}ms`);
     console.log(`  Resume: ${tailoredResume.length} chars`);
     console.log(`  Cover Letter: ${coverLetter.length} chars`);
