@@ -116,14 +116,16 @@ export const UsageLimitProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      // Get subscription tier
+      // Get subscription tier - UPDATED to include trial_end
       const { data: subData } = await supabase
         .from('user_subscriptions')
-        .select('tier, plan_status, current_period_end')
+        .select('tier, plan_status, current_period_end, trial_end')
         .eq('user_id', session.user.id)
         .maybeSingle();
 
       let resolvedTier: SubscriptionTier = 'free';
+      
+      // FIXED: Handle trial status properly
       if (subData?.plan_status === 'active' && subData?.tier) {
         const raw = subData.tier as string;
         // Map old tier names to new ones
@@ -133,6 +135,17 @@ export const UsageLimitProvider = ({ children }: { children: ReactNode }) => {
         else if (raw === 'elite') resolvedTier = 'elite';
         else resolvedTier = 'free';
         setSubscriptionEnd(subData.current_period_end ?? null);
+      } else if (subData?.plan_status === 'trial') {
+        // Trial user - grant elite access if trial hasn't expired
+        const trialEnd = subData?.trial_end ? new Date(subData.trial_end) : null;
+        if (trialEnd && new Date() < trialEnd) {
+          resolvedTier = 'elite';
+          console.log(`[UsageLimit] Active trial for user, granting elite access until ${subData.trial_end}`);
+        } else {
+          resolvedTier = 'free';
+          console.log(`[UsageLimit] Trial expired for user, downgraded to free`);
+        }
+        setSubscriptionEnd(subData.trial_end ?? null);
       } else {
         setSubscriptionEnd(null);
       }
