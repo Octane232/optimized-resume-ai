@@ -1,5 +1,6 @@
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { SubscriptionTier, UsageAction, ACTION_COSTS } from "./tierLimits.ts";
+// PROBLEM 1 FIXED: Updated imports to use PLAN_LIMITS instead of ACTION_COSTS
+import { SubscriptionTier, UsageAction, PLAN_LIMITS, getFeatureLimit, getRemainingUses } from "./tierLimits.ts";
 
 export const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -48,11 +49,28 @@ export async function requireUser(req: Request): Promise<AuthedUser | Response> 
   let tier: SubscriptionTier = "free";
   const { data: subData } = await serviceClient
     .from("user_subscriptions")
-    .select("tier, plan_status")
+    .select("tier, plan_status, trial_end")
     .eq("user_id", data.user.id)
     .maybeSingle();
-  if (subData?.plan_status === "active" && subData?.tier) {
-    tier = subData.tier as SubscriptionTier;
+  
+  // Updated: Now includes 'trial' as a valid status
+  if ((subData?.plan_status === 'active' || subData?.plan_status === 'trial') && subData?.tier) {
+    // Check if trial has expired
+    if (subData?.plan_status === 'trial' && subData?.trial_end) {
+      const trialEnd = new Date(subData.trial_end);
+      if (new Date() > trialEnd) {
+        // Trial expired, downgrade to free
+        tier = 'free';
+        console.log(`Trial expired for user ${data.user.id}, downgraded to free`);
+      } else {
+        // Active trial: grant elite access (full features)
+        tier = 'elite';
+        console.log(`Active trial for user ${data.user.id}, granting elite access until ${subData.trial_end}`);
+      }
+    } else {
+      // Regular active subscription
+      tier = subData.tier as SubscriptionTier;
+    }
   }
 
   return {
@@ -63,46 +81,89 @@ export async function requireUser(req: Request): Promise<AuthedUser | Response> 
   };
 }
 
-/**
- * Pre-flight: check the user has enough credits for the action.
- * Returns null if allowed, or a 402 response if not.
- */
+// ===== PROBLEM 4: Add checkFeatureLimit function =====
+export async function checkFeatureLimit(
+  user: AuthedUser,
+  action: UsageAction
+): Promise<Response | null> {
+  const limit = getFeatureLimit(user.tier, action);
+
+  if (limit === 0) {
+    return jsonResponse({
+      error: `This feature is not available on your ${user.tier} plan. Upgrade to access it.`,
+      action,
+      tier: user.tier,
+      limit: 0,
+      remaining: 0,
+    }, 402);
+  }
+
+  const { data } = await user.serviceClient
+    .from("user_usage")
+    .select("used")
+    .eq("user_id", user.id)
+    .eq("feature", action)
+    .maybeSingle();
+
+  const used = data?.used ?? 0;
+  const remaining = Math.max(0, limit - used);
+
+  if (remaining <= 0) {
+    return jsonResponse({
+      error: `You've reached your monthly limit for ${action}. Upgrade to get more uses.`,
+      action,
+      tier: user.tier,
+      limit,
+      used,
+      remaining: 0,
+    }, 402);
+  }
+
+  return null;
+}
+
+// ===== PROBLEM 4: Add incrementFeatureUsage function =====
+export async function incrementFeatureUsage(
+  user: AuthedUser,
+  action: UsageAction
+): Promise<boolean> {
+  const { data: existing } = await user.serviceClient
+    .from("user_usage")
+    .select("used")
+    .eq("user_id", user.id)
+    .eq("feature", action)
+    .maybeSingle();
+
+  const currentUsed = existing?.used ?? 0;
+  const resetDate = new Date();
+  resetDate.setDate(resetDate.getDate() + 30);
+
+  const { error } = await user.serviceClient
+    .from("user_usage")
+    .upsert({
+      user_id: user.id,
+      feature: action,
+      used: currentUsed + 1,
+      reset_date: resetDate.toISOString(),
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "user_id,feature" });
+
+  if (error) {
+    console.error("[incrementFeatureUsage] error:", error.message);
+    return false;
+  }
+  return true;
+}
+
+// ===== PROBLEM 2 FIXED: enforceQuota now uses checkFeatureLimit =====
 export async function enforceQuota(
   user: AuthedUser,
   action: UsageAction,
 ): Promise<Response | null> {
-  const cost = ACTION_COSTS[action] ?? 1;
-  const { data } = await user.serviceClient
-    .from("user_credits")
-    .select("balance, plan_credits")
-    .eq("user_id", user.id)
-    .maybeSingle();
-  const total = (data?.balance ?? 0) + (data?.plan_credits ?? 0);
-  if (total < cost) {
-    return jsonResponse(
-      {
-        error: "You've used all your credits. Upgrade to keep going.",
-        action,
-        tier: user.tier,
-        credits: total,
-        cost,
-      },
-      402,
-    );
-  }
-  return null;
+  return checkFeatureLimit(user, action);
 }
 
-/**
- * Record successful usage by spending credits via the secured RPC.
- */
+// ===== PROBLEM 3 FIXED: recordUsage now uses incrementFeatureUsage =====
 export async function recordUsage(user: AuthedUser, action: UsageAction): Promise<void> {
-  const cost = ACTION_COSTS[action] ?? 1;
-  const { error } = await user.serviceClient.rpc("spend_credit", {
-    p_user_id: user.id,
-    p_action: action,
-    p_amount: cost,
-    p_description: action,
-  });
-  if (error) console.error("[recordUsage] failed:", error.message);
+  await incrementFeatureUsage(user, action);
 }
