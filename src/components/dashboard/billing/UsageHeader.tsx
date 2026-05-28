@@ -7,7 +7,7 @@ const TRACKED_ACTIONS: UsageAction[] = [
 ];
 
 const UsageHeader = ({ setActiveTab }: { setActiveTab?: (tab: string) => void }) => {
-  const { tier, displayTier, getCurrentUsage, loading } = useUsageLimit();
+  const { tier, displayTier, getCurrentUsage, loading, subscriptionEnd } = useUsageLimit();
 
   const tierBadgeClass =
     tier === 'free' ? 'bg-muted text-muted-foreground border-border' :
@@ -48,12 +48,19 @@ const UsageHeader = ({ setActiveTab }: { setActiveTab?: (tab: string) => void })
   const isEmpty = totalUsed >= totalLimit && totalLimit > 0;
   const isLow = pct >= 70 && !isEmpty;
 
-  // Get display name for tier
+  // FIXED: Get display name for tier - show "Trial" for free users with active trial
   const getDisplayTierName = () => {
+    // Trial user: free tier but has subscriptionEnd (active trial)
+    if (tier === 'free' && subscriptionEnd) {
+      return 'Trial';
+    }
     if (displayTier === 'Free') return 'Free';
     if (displayTier === 'Pro') return 'Pro';
     return 'Elite';
   };
+
+  const displayName = getDisplayTierName();
+  const isTrial = displayName === 'Trial';
 
   return (
     <div className="rounded-xl border border-border/60 bg-card p-6 space-y-5">
@@ -65,9 +72,16 @@ const UsageHeader = ({ setActiveTab }: { setActiveTab?: (tab: string) => void })
           <div>
             <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mb-0.5">Current Plan</p>
             <div className="flex items-center gap-2">
-              <h3 className="text-lg font-bold text-foreground">{getDisplayTierName()}</h3>
-              <Badge className={`text-xs border ${tierBadgeClass}`}>{getDisplayTierName()}</Badge>
+              <h3 className="text-lg font-bold text-foreground">{displayName}</h3>
+              <Badge className={`text-xs border ${tierBadgeClass}`}>
+                {isTrial ? 'Trial' : displayName}
+              </Badge>
             </div>
+            {isTrial && subscriptionEnd && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Trial ends {new Date(subscriptionEnd).toLocaleDateString()}
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -86,7 +100,9 @@ const UsageHeader = ({ setActiveTab }: { setActiveTab?: (tab: string) => void })
           />
         </div>
         <p className="text-[11px] text-muted-foreground">
-          Each feature has a monthly limit. Upgrade to get more uses.
+          {isTrial 
+            ? 'Full access during your trial. Upgrade to continue after trial ends.'
+            : 'Each feature has a monthly limit. Upgrade to get more uses.'}
         </p>
       </div>
 
@@ -100,7 +116,8 @@ const UsageHeader = ({ setActiveTab }: { setActiveTab?: (tab: string) => void })
             const label = ACTION_LABELS[action];
             
             // Skip actions with 0 limit for free tier to reduce clutter
-            if (limit === 0) return null;
+            // For trial users, show all limits since they have elite access
+            if (limit === 0 && !isTrial) return null;
             
             return (
               <div key={action} className="flex items-center justify-between rounded-md bg-muted/40 px-2.5 py-1.5">
