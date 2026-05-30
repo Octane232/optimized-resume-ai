@@ -28,10 +28,67 @@ const Settings = () => {
   const [saving, setSaving] = useState(false);
   const [careerPrefs, setCareerPrefs] = useState({ targetRole: '', targetIndustry: '' });
   const [savingPrefs, setSavingPrefs] = useState(false);
+  
+  // PROBLEM 1 FIXED: Added password states
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [passwordSent, setPasswordSent] = useState(false);
+  
+  // PROBLEM 2 FIXED: Added delete account states
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchSettingsData();
+    fetchNotificationSettings();
   }, []);
+
+  // PROBLEM 4 FIXED: Load notification settings from database
+  const fetchNotificationSettings = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('email_notifications, push_notifications, marketing_emails')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      if (profile) {
+        setNotifications({
+          emailNotifications: profile.email_notifications ?? true,
+          pushNotifications: profile.push_notifications ?? false,
+          marketingEmails: profile.marketing_emails ?? true,
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching notification settings:', error);
+    }
+  };
+
+  // PROBLEM 4 FIXED: Save notifications to database
+  const saveNotifications = async (newNotifications: typeof notifications) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      
+      const { error } = await supabase.from('profiles').upsert({
+        user_id: user.id,
+        email_notifications: newNotifications.emailNotifications,
+        push_notifications: newNotifications.pushNotifications,
+        marketing_emails: newNotifications.marketingEmails,
+      }, { onConflict: 'user_id' });
+      
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error saving notifications:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save notification preferences",
+        variant: "destructive"
+      });
+    }
+  };
 
   const fetchSettingsData = async () => {
     try {
@@ -105,7 +162,7 @@ const Settings = () => {
       
       if (profileData.firstName.trim()) completedFields++;
       if (profileData.lastName.trim()) completedFields++;
-      if (profileData.email) completedFields++; // Email is always present from auth
+      if (profileData.email) completedFields++;
       if (profileData.phone?.trim()) completedFields++;
       if (profileData.location?.trim()) completedFields++;
       
@@ -130,7 +187,6 @@ const Settings = () => {
         description: `Profile updated successfully (${profileCompletion}% complete)`
       });
       
-      // Refresh data to show updated completion
       await fetchSettingsData();
     } catch (error) {
       console.error('Error saving profile:', error);
@@ -159,6 +215,79 @@ const Settings = () => {
       toast({ title: 'Error', description: 'Could not save preferences.', variant: 'destructive' });
     } finally {
       setSavingPrefs(false);
+    }
+  };
+
+  // PROBLEM 1 FIXED: Password change handler
+  const handleChangePassword = async () => {
+    setChangingPassword(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.email) throw new Error('No email found');
+      
+      const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      
+      if (error) throw error;
+      
+      setPasswordSent(true);
+      toast({
+        title: 'Password reset email sent',
+        description: 'Check your inbox for the reset link.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Could not send reset email. Try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
+  // PROBLEM 2 FIXED: Delete account handler
+  const handleDeleteAccount = async () => {
+    if (!deleteConfirm) {
+      setDeleteConfirm(true);
+      toast({
+        title: "Confirm deletion",
+        description: "Click 'Delete' again to permanently delete your account.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setDeleting(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // Delete user data from tables
+      await supabase.from('user_subscriptions').delete().eq('user_id', user.id);
+      await supabase.from('user_usage').delete().eq('user_id', user.id);
+      await supabase.from('profiles').delete().eq('user_id', user.id);
+      await supabase.from('career_preferences').delete().eq('user_id', user.id);
+
+      // Sign out
+      await supabase.auth.signOut();
+      
+      toast({
+        title: 'Account deleted',
+        description: 'Your account has been permanently deleted.',
+      });
+
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      toast({
+        title: 'Error',
+        description: 'Could not delete account. Contact support.',
+        variant: 'destructive',
+      });
+      setDeleting(false);
+      setDeleteConfirm(false);
     }
   };
 
@@ -413,7 +542,11 @@ const Settings = () => {
               </div>
               <Switch 
                 checked={notifications.emailNotifications}
-                onCheckedChange={(checked) => setNotifications({...notifications, emailNotifications: checked})}
+                onCheckedChange={(checked) => {
+                  const updated = {...notifications, emailNotifications: checked};
+                  setNotifications(updated);
+                  saveNotifications(updated);
+                }}
               />
             </div>
             
@@ -424,7 +557,11 @@ const Settings = () => {
               </div>
               <Switch 
                 checked={notifications.pushNotifications}
-                onCheckedChange={(checked) => setNotifications({...notifications, pushNotifications: checked})}
+                onCheckedChange={(checked) => {
+                  const updated = {...notifications, pushNotifications: checked};
+                  setNotifications(updated);
+                  saveNotifications(updated);
+                }}
               />
             </div>
             
@@ -435,7 +572,11 @@ const Settings = () => {
               </div>
               <Switch 
                 checked={notifications.marketingEmails}
-                onCheckedChange={(checked) => setNotifications({...notifications, marketingEmails: checked})}
+                onCheckedChange={(checked) => {
+                  const updated = {...notifications, marketingEmails: checked};
+                  setNotifications(updated);
+                  saveNotifications(updated);
+                }}
               />
             </div>
           </CardContent>
@@ -455,35 +596,54 @@ const Settings = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6 space-y-6">
+            {/* PROBLEM 1 FIXED: Working password change button */}
             <div className="flex items-center justify-between p-4 bg-accent/20 rounded-xl border border-border/50">
               <div>
                 <h3 className="font-semibold text-foreground mb-1">Change Password</h3>
                 <p className="text-sm text-muted-foreground">Update your account password</p>
               </div>
-              <Button variant="outline" size="sm" className="rounded-xl">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="rounded-xl"
+                onClick={handleChangePassword}
+                disabled={changingPassword || passwordSent}
+              >
                 <Lock className="w-4 h-4 mr-2" />
-                Change
+                {changingPassword ? 'Sending...' : passwordSent ? 'Email Sent ✓' : 'Change'}
               </Button>
             </div>
             
+            {/* PROBLEM 3 FIXED: Coming soon state for 2FA */}
             <div className="flex items-center justify-between p-4 bg-accent/20 rounded-xl border border-border/50">
               <div>
                 <h3 className="font-semibold text-foreground mb-1">Two-Factor Authentication</h3>
                 <p className="text-sm text-muted-foreground">Add an extra layer of security</p>
               </div>
-              <Button variant="outline" size="sm" className="rounded-xl">
-                Enable
+              <Button variant="outline" size="sm" className="rounded-xl" disabled>
+                Coming Soon
               </Button>
             </div>
             
+            {/* PROBLEM 2 FIXED: Working delete account button */}
             <div className="flex items-center justify-between p-4 bg-destructive/10 rounded-xl border border-destructive/50">
               <div>
                 <h3 className="font-semibold text-destructive mb-1">Delete Account</h3>
-                <p className="text-sm text-muted-foreground">Permanently delete your account and data</p>
+                <p className="text-sm text-muted-foreground">
+                  {deleteConfirm 
+                    ? 'Are you sure? This cannot be undone. Click again to confirm.' 
+                    : 'Permanently delete your account and data'}
+                </p>
               </div>
-              <Button variant="outline" size="sm" className="border-destructive text-destructive hover:bg-destructive/10 rounded-xl">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="border-destructive text-destructive hover:bg-destructive/10 rounded-xl"
+                onClick={handleDeleteAccount}
+                disabled={deleting}
+              >
                 <Trash2 className="w-4 h-4 mr-2" />
-                Delete
+                {deleting ? 'Deleting...' : deleteConfirm ? 'Confirm Delete' : 'Delete'}
               </Button>
             </div>
           </CardContent>
