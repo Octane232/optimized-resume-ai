@@ -23,6 +23,8 @@ import {
   TooltipProvider,
   TooltipTrigger 
 } from '@/components/ui/tooltip';
+// STEP 3 FIXED: Added ThemeToggle import
+import ThemeToggle from '@/components/ThemeToggle';
 
 interface NewSidebarProps {
   activeTab: string;
@@ -49,7 +51,6 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
   ];
 
   const toolsItems = [
-    // CHANGE 1: Renamed "Resume + ATS" to "Resume Engine"
     { id: 'resume-engine', label: 'Resume Engine', icon: Stethoscope },
     { id: 'interview-prep', label: 'Interview Coach ', icon: Mic },
     { id: 'mission-control', label: 'App Tracker ', icon: Crosshair },
@@ -199,7 +200,6 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
       {/* Navigation with sections */}
       <nav className="flex-1 p-3 space-y-1 overflow-hidden">
         <TooltipProvider delayDuration={0}>
-          {/* CHANGE 2: Removed the "Briefing" comment */}
           <Tooltip>
             <TooltipTrigger asChild>
               <button
@@ -241,9 +241,10 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
         </TooltipProvider>
       </nav>
 
-      {/* Bottom */}
-      <div className="p-3 border-t border-sidebar-border">
-        {/* Account management in navbar dropdown */}
+      {/* STEP 2 FIXED: Bottom section with ThemeToggle */}
+      <div className="p-3 border-t border-sidebar-border flex items-center justify-between">
+        {!collapsed && <span className="text-xs text-muted-foreground">Theme</span>}
+        <ThemeToggle />
       </div>
     </div>
   );
