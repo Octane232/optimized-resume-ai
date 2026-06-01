@@ -196,7 +196,7 @@ const AIFeatures: React.FC<AIFeaturesProps> = ({ resumeData }) => {
               </Button>
               {resumeData && (
                 <p className="text-xs text-gray-500">
-                  Using resume: {resumeData?.personalInfo?.name || 'Your profile'}
+                  Using resume: {resumeData?.contact?.name || 'Your profile'}
                 </p>
               )}
             </div>

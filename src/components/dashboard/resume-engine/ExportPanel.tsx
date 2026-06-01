@@ -25,7 +25,7 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
   const [isExporting, setIsExporting] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const { tier } = useSubscription();
-  const isPro = tier === 'pro' || tier === 'premium';
+  const isPro = tier === 'pro' || tier === 'elite';
 
   const handleExportPDF = async () => {
     if (!isPro) {
