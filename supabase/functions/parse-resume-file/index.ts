@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { JSZip } from "https://deno.land/x/jszip@0.11.0/mod.ts";
-import { corsHeaders, requireUser, jsonResponse } from "../_shared/requireUser.ts";
+import { corsHeaders, requireUser, jsonResponse, enforceQuota, recordUsage } from "../_shared/requireUser.ts";
 
 // ===== Constants =====
 const MIN_TEXT_LENGTH = 20;
@@ -265,6 +265,9 @@ serve(async (req) => {
     const auth = await requireUser(req);
     if (auth instanceof Response) return auth;
 
+    const quotaResp = await enforceQuota(auth, "resume_parse");
+    if (quotaResp) return quotaResp;
+
     // Get file from request
     const formData = await req.formData();
     const file = formData.get('file') as File;
@@ -283,6 +286,7 @@ serve(async (req) => {
     // Process file based on type
     try {
       const extractedText = await processFile(file, uint8Array, fileName, fileType);
+      await recordUsage(auth, "resume_parse");
       return createSuccessResponse(extractedText);
     } catch (error: any) {
       console.error('File processing error:', error);

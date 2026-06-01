@@ -1,13 +1,15 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { corsHeaders, jsonResponse, requireUser } from "../_shared/requireUser.ts";
+import { corsHeaders, jsonResponse, requireUser, enforceQuota, recordUsage } from "../_shared/requireUser.ts";
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
-    // Auth required. No per-action quota — parsing is part of upload, not a metered feature.
     const auth = await requireUser(req);
     if (auth instanceof Response) return auth;
+
+    const quotaResp = await enforceQuota(auth, "resume_parse");
+    if (quotaResp) return quotaResp;
 
     const { resumeText } = await req.json();
     if (!resumeText || typeof resumeText !== 'string') {
@@ -37,6 +39,7 @@ serve(async (req) => {
 
     const result = await response.json();
     const parsedResume = JSON.parse(result.choices?.[0]?.message?.content || '{}');
+    await recordUsage(auth, "resume_parse");
     return jsonResponse(parsedResume);
   } catch (error) {
     console.error('Error in parse-resume-ai:', error);

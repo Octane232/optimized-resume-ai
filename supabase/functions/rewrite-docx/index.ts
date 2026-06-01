@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { JSZip } from "https://deno.land/x/jszip@0.11.0/mod.ts";
 import { encode as encodeBase64 } from "https://deno.land/std@0.168.0/encoding/base64.ts";
-import { corsHeaders, requireUser, jsonResponse } from "../_shared/requireUser.ts";
+import { corsHeaders, requireUser, jsonResponse, enforceQuota, recordUsage } from "../_shared/requireUser.ts";
 
 interface ParaItem {
   id: number;
@@ -18,6 +18,9 @@ serve(async (req) => {
   try {
     const auth = await requireUser(req);
     if (auth instanceof Response) return auth;
+
+    const quotaResp = await enforceQuota(auth, "docx_rewrite");
+    if (quotaResp) return quotaResp;
 
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
     if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured");
@@ -151,6 +154,8 @@ serve(async (req) => {
       .map((p, i) => rewriteMap.get(i) ?? p.text)
       .filter((t) => t.trim().length > 0)
       .join("\n");
+
+    await recordUsage(auth, "docx_rewrite");
 
     return jsonResponse({
       docxBase64: base64,
