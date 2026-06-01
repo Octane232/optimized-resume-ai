@@ -50,15 +50,16 @@ const Settings = () => {
       
       const { data: profile } = await supabase
         .from('profiles')
-        .select('email_notifications, push_notifications, marketing_emails')
+        .select('*')
         .eq('user_id', user.id)
         .maybeSingle();
       
       if (profile) {
+        const p = profile as Record<string, unknown>;
         setNotifications({
-          emailNotifications: profile.email_notifications ?? true,
-          pushNotifications: profile.push_notifications ?? false,
-          marketingEmails: profile.marketing_emails ?? true,
+          emailNotifications: (p.email_notifications as boolean | undefined) ?? true,
+          pushNotifications: (p.push_notifications as boolean | undefined) ?? false,
+          marketingEmails: (p.marketing_emails as boolean | undefined) ?? true,
         });
       }
     } catch (error) {
