@@ -39,6 +39,7 @@ serve(async (req) => {
 
     const result = await response.json();
     const parsedResume = JSON.parse(result.choices?.[0]?.message?.content || '{}');
+    await recordUsage(auth, "resume_parse");
     return jsonResponse(parsedResume);
   } catch (error) {
     console.error('Error in parse-resume-ai:', error);
