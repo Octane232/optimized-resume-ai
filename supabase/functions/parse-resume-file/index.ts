@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { JSZip } from "https://deno.land/x/jszip@0.11.0/mod.ts";
-import { corsHeaders, requireUser, jsonResponse } from "../_shared/requireUser.ts";
+import { corsHeaders, requireUser, jsonResponse, enforceQuota, recordUsage } from "../_shared/requireUser.ts";
 
 // ===== Constants =====
 const MIN_TEXT_LENGTH = 20;
