@@ -5,9 +5,11 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
-    // Auth required. No per-action quota — parsing is part of upload, not a metered feature.
     const auth = await requireUser(req);
     if (auth instanceof Response) return auth;
+
+    const quotaResp = await enforceQuota(auth, "resume_parse");
+    if (quotaResp) return quotaResp;
 
     const { resumeText } = await req.json();
     if (!resumeText || typeof resumeText !== 'string') {
