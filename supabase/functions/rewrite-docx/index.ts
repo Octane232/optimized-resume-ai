@@ -155,6 +155,8 @@ serve(async (req) => {
       .filter((t) => t.trim().length > 0)
       .join("\n");
 
+    await recordUsage(auth, "docx_rewrite");
+
     return jsonResponse({
       docxBase64: base64,
       previewText,
