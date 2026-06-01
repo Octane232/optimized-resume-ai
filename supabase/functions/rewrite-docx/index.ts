@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { JSZip } from "https://deno.land/x/jszip@0.11.0/mod.ts";
 import { encode as encodeBase64 } from "https://deno.land/std@0.168.0/encoding/base64.ts";
-import { corsHeaders, requireUser, jsonResponse } from "../_shared/requireUser.ts";
+import { corsHeaders, requireUser, jsonResponse, enforceQuota, recordUsage } from "../_shared/requireUser.ts";
 
 interface ParaItem {
   id: number;
