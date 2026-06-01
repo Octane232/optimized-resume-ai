@@ -215,42 +215,6 @@ export type Database = {
         }
         Relationships: []
       }
-      connected_services: {
-        Row: {
-          color_class: string | null
-          created_at: string
-          icon_name: string | null
-          id: string
-          is_connected: boolean | null
-          service_description: string | null
-          service_name: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          color_class?: string | null
-          created_at?: string
-          icon_name?: string | null
-          id?: string
-          is_connected?: boolean | null
-          service_description?: string | null
-          service_name: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          color_class?: string | null
-          created_at?: string
-          icon_name?: string | null
-          id?: string
-          is_connected?: boolean | null
-          service_description?: string | null
-          service_name?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       cover_letters: {
         Row: {
           company_name: string | null
@@ -471,6 +435,27 @@ export type Database = {
           target_role?: string | null
           type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      plan_feature_limits: {
+        Row: {
+          feature: string
+          id: string
+          monthly_limit: number
+          tier: string
+        }
+        Insert: {
+          feature: string
+          id?: string
+          monthly_limit?: number
+          tier: string
+        }
+        Update: {
+          feature?: string
+          id?: string
+          monthly_limit?: number
+          tier?: string
         }
         Relationships: []
       }
@@ -944,42 +929,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_credits: {
-        Row: {
-          balance: number
-          created_at: string
-          id: string
-          last_reset_at: string
-          monthly_allowance: number
-          plan_credits: number
-          total_spent: number
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          balance?: number
-          created_at?: string
-          id?: string
-          last_reset_at?: string
-          monthly_allowance?: number
-          plan_credits?: number
-          total_spent?: number
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          balance?: number
-          created_at?: string
-          id?: string
-          last_reset_at?: string
-          monthly_allowance?: number
-          plan_credits?: number
-          total_spent?: number
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       user_subscriptions: {
         Row: {
           billing_cycle: string | null
@@ -987,11 +936,14 @@ export type Database = {
           current_period_end: string | null
           features: Json | null
           id: string
+          is_trial: boolean | null
           plan_id: string
           plan_status: string
           price: number | null
           stripe_subscription_id: string | null
           tier: string | null
+          trial_end: string | null
+          trial_start: string | null
           updated_at: string
           user_id: string
         }
@@ -1001,11 +953,14 @@ export type Database = {
           current_period_end?: string | null
           features?: Json | null
           id?: string
+          is_trial?: boolean | null
           plan_id: string
           plan_status?: string
           price?: number | null
           stripe_subscription_id?: string | null
           tier?: string | null
+          trial_end?: string | null
+          trial_start?: string | null
           updated_at?: string
           user_id: string
         }
@@ -1015,11 +970,14 @@ export type Database = {
           current_period_end?: string | null
           features?: Json | null
           id?: string
+          is_trial?: boolean | null
           plan_id?: string
           plan_status?: string
           price?: number | null
           stripe_subscription_id?: string | null
           tier?: string | null
+          trial_end?: string | null
+          trial_start?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -1033,80 +991,29 @@ export type Database = {
           },
         ]
       }
-      user_usage_stats: {
+      user_usage: {
         Row: {
-          ai_generations: number | null
-          created_at: string
-          downloads: number | null
+          feature: string
           id: string
-          monthly_ai_generations: number | null
-          monthly_pdf_downloads: number | null
-          monthly_template_selections: number | null
-          resumes_created: number | null
-          templates_used: number | null
+          reset_date: string
           updated_at: string
-          usage_cycle_reset_date: string | null
+          used: number
           user_id: string
         }
         Insert: {
-          ai_generations?: number | null
-          created_at?: string
-          downloads?: number | null
+          feature: string
           id?: string
-          monthly_ai_generations?: number | null
-          monthly_pdf_downloads?: number | null
-          monthly_template_selections?: number | null
-          resumes_created?: number | null
-          templates_used?: number | null
+          reset_date: string
           updated_at?: string
-          usage_cycle_reset_date?: string | null
+          used?: number
           user_id: string
         }
         Update: {
-          ai_generations?: number | null
-          created_at?: string
-          downloads?: number | null
+          feature?: string
           id?: string
-          monthly_ai_generations?: number | null
-          monthly_pdf_downloads?: number | null
-          monthly_template_selections?: number | null
-          resumes_created?: number | null
-          templates_used?: number | null
+          reset_date?: string
           updated_at?: string
-          usage_cycle_reset_date?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-      user_vault: {
-        Row: {
-          certifications: Json | null
-          created_at: string
-          id: string
-          projects: Json | null
-          resume_tags: string[] | null
-          skills: string[] | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          certifications?: Json | null
-          created_at?: string
-          id?: string
-          projects?: Json | null
-          resume_tags?: string[] | null
-          skills?: string[] | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          certifications?: Json | null
-          created_at?: string
-          id?: string
-          projects?: Json | null
-          resume_tags?: string[] | null
-          skills?: string[] | null
-          updated_at?: string
+          used?: number
           user_id?: string
         }
         Relationships: []
@@ -1198,16 +1105,11 @@ export type Database = {
         Args: { p_amount: number; p_description?: string; p_user_id: string }
         Returns: undefined
       }
-      reset_monthly_credits: { Args: never; Returns: undefined }
-      spend_credit: {
-        Args: {
-          p_action: string
-          p_amount?: number
-          p_description?: string
-          p_user_id: string
-        }
+      increment_usage: {
+        Args: { p_feature: string; p_user_id: string }
         Returns: boolean
       }
+      reset_monthly_credits: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
