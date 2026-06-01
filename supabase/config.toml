@@ -86,3 +86,6 @@ verify_jwt = false
 
 [functions.salary-intel]
 verify_jwt = false
+
+[functions.job-search]
+verify_jwt = true
