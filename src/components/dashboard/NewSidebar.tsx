@@ -14,7 +14,8 @@ import {
   Lock,
   Radar,
   DollarSign,
-  Globe
+  Globe,
+  Search
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -45,9 +46,9 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
 }) => {
   // Navigation structure per document spec
   const intelligenceItems = [
+    { id: 'job-search', label: 'Job Search', icon: Search },
     { id: 'scout', label: 'Job Radar ', icon: Telescope },
     { id: 'salary-intel', label: 'Salary Intel ', icon: DollarSign },
-    
   ];
 
   const toolsItems = [
