@@ -1,5 +1,17 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { corsHeaders, jsonResponse, requireUser } from "../_shared/requireUser.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+function jsonResponse(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -7,27 +19,41 @@ serve(async (req) => {
   }
 
   try {
-    const auth = await requireUser(req);
-    if (auth instanceof Response) return auth;
-
     const RAPIDAPI_KEY = Deno.env.get("RAPIDAPI_KEY");
     if (!RAPIDAPI_KEY) throw new Error("RAPIDAPI_KEY not configured");
+
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) return jsonResponse({ error: "Unauthorized" }, 401);
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+    const authClient = createClient(supabaseUrl, anonKey);
+
+    const { data, error } = await authClient.auth.getUser(
+      authHeader.replace("Bearer ", "")
+    );
+    if (error || !data?.user) {
+      return jsonResponse({ error: "Unauthorized" }, 401);
+    }
 
     const { query, location, jobType, datePosted, page } = await req.json();
     if (!query) throw new Error("query is required");
 
-    // Build search query
     const searchQuery = location ? `${query} in ${location}` : query;
-    
+
     const params = new URLSearchParams({
       query: searchQuery,
       page: page?.toString() || "1",
       num_pages: "1",
-      date_posted: datePosted || "all",
-      remote_jobs_only: jobType === "remote" ? "true" : "false",
     });
 
-    if (jobType && jobType !== "remote") {
+    if (datePosted && datePosted !== "all") {
+      params.append("date_posted", datePosted);
+    }
+
+    if (jobType === "remote") {
+      params.append("remote_jobs_only", "true");
+    } else if (jobType && jobType !== "all") {
       params.append("employment_types", jobType.toUpperCase());
     }
 
@@ -43,13 +69,14 @@ serve(async (req) => {
     );
 
     if (!response.ok) {
+      const errText = await response.text();
+      console.error("JSearch error response:", errText);
       throw new Error(`JSearch API error: ${response.status}`);
     }
 
-    const data = await response.json();
+    const apiData = await response.json();
 
-    // Clean and return only what frontend needs
-    const jobs = (data.data || []).map((job: any) => ({
+    const jobs = (apiData.data || []).map((job: any) => ({
       id: job.job_id,
       title: job.job_title,
       company: job.employer_name,
@@ -68,7 +95,7 @@ serve(async (req) => {
       highlights: job.job_highlights?.Qualifications?.slice(0, 3) || [],
     }));
 
-    return jsonResponse({ success: true, jobs, total: data.status });
+    return jsonResponse({ success: true, jobs });
 
   } catch (error) {
     console.error("job-search error:", error);
