@@ -116,28 +116,56 @@ const HeroSection = () => {
               <span className="ml-4 text-xs text-muted-foreground font-mono">vaylance.com/dashboard</span>
             </div>
 
-            <div className="p-6 grid grid-cols-3 gap-4">
-              {dashboardStats.map((stat, index) => (
-                <div key={index} className="p-4 rounded-xl bg-muted/40 border border-border/60 text-center">
-                  <p className={`text-2xl font-black tabular-nums ${stat.color}`}>{stat.value}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
+            {/* Job Radar header */}
+            <div className="px-6 pt-6 pb-4 flex items-center justify-between border-b border-border/60">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
                 </div>
-              ))}
+                <div className="text-left">
+                  <p className="text-sm font-bold text-foreground">Hidden Job Radar</p>
+                  <p className="text-[11px] text-muted-foreground">Companies raising funding = hiring soon</p>
+                </div>
+              </div>
+              <div className="hidden sm:flex items-center gap-2">
+                <span className="px-2.5 py-1 rounded-md bg-muted/60 text-[11px] font-semibold text-foreground tabular-nums">My Alerts ({alertsCount})</span>
+                <span className="px-2.5 py-1 rounded-md text-[11px] font-medium text-muted-foreground tabular-nums">All Signals ({signalsCount})</span>
+              </div>
             </div>
 
-            <div className="px-6 pb-6 grid grid-cols-2 gap-3">
-              {dashboardActivities.map((activity, index) => (
+            {/* Radar alert cards */}
+            <div className="p-4 sm:p-6 space-y-3">
+              {radarAlerts.map((alert, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-2 p-3 rounded-lg bg-muted/30 border border-border/40"
+                  className="flex items-start gap-3 p-4 rounded-xl bg-muted/30 border border-border/60 text-left"
                   style={{
                     opacity: animating ? 1 : 0,
                     transform: animating ? 'translateY(0)' : 'translateY(8px)',
-                    transition: `opacity 0.4s ease ${0.6 + index * 0.15}s, transform 0.4s ease ${0.6 + index * 0.15}s`,
+                    transition: `opacity 0.5s ease ${0.4 + index * 0.2}s, transform 0.5s ease ${0.4 + index * 0.2}s`,
                   }}
                 >
-                  <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                  <span className="text-xs text-muted-foreground">{activity}</span>
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${alert.tone}`}>
+                    {alert.initial}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                      <span className="text-sm font-semibold text-foreground">{alert.company}</span>
+                      <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold">{alert.round}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{alert.description}</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {alert.roles.map((role) => (
+                        <span key={role} className="px-2 py-0.5 rounded-md bg-background border border-border/60 text-[10px] font-medium text-foreground/80">
+                          {role}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-lg font-black text-primary tabular-nums leading-none">{matchScore}%</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">match</p>
+                  </div>
                 </div>
               ))}
             </div>
