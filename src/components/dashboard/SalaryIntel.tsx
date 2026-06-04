@@ -378,12 +378,12 @@ const InputForm: React.FC<InputFormProps> = ({
         </Button>
 
         {/* Usage info */}
-        {!hasCredits && limit > 0 && (
+        {!hasCredits && (
           <p className="text-xs text-destructive mt-2">
-            You've reached your monthly limit ({remaining}/0). Upgrade to continue.
+            You've reached your monthly limit. Upgrade to continue.
           </p>
         )}
-        {hasCredits && limit > 0 && (
+        {hasCredits && (
           <p className="text-xs text-muted-foreground mt-2">
             {remaining} query{remaining !== 1 ? 'ies' : ''} remaining this month
           </p>
