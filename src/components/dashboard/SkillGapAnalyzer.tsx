@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Target, TrendingUp, BookOpen, Clock, Coins, Lock } from "lucide-react";
+import { Target, TrendingUp, BookOpen, Clock } from "lucide-react";
 import { useUsageLimit } from "@/contexts/UsageLimitContext";
 
 // ===== Type Definitions =====
@@ -53,7 +53,7 @@ const getPriorityBadge = (priority: string) => {
 export const SkillGapAnalyzer = () => {
   // ===== Hooks =====
   const { toast } = useToast();
-  const { canUse, trackUsage } = useUsageLimit();
+  const { canUse, trackUsage, getRemaining, getCurrentUsage, getLimit } = useUsageLimit();
 
   // ===== State =====
   const [loading, setLoading] = useState(false);
@@ -63,7 +63,10 @@ export const SkillGapAnalyzer = () => {
     jobDescription: "",
     userSkills: ""
   });
-  const [showDetailedAdvice, setShowDetailedAdvice] = useState(false);
+
+  const remaining = getRemaining('skill_gap');
+  const used = getCurrentUsage('skill_gap');
+  const limit = getLimit('skill_gap');
 
   // ===== Event Handlers =====
   const handleAnalyze = async () => {
@@ -73,6 +76,16 @@ export const SkillGapAnalyzer = () => {
         title: "Missing Information",
         description: "Please provide job title and your skills",
         variant: "destructive"
+      });
+      return;
+    }
+
+    // PROBLEM 1 FIXED: Add quota check before analysis
+    if (!canUse('skill_gap')) {
+      toast({
+        title: 'Limit reached',
+        description: `You have used all your skill gap analyses this month (${used}/${limit}). Upgrade to continue.`,
+        variant: 'destructive',
       });
       return;
     }
@@ -112,8 +125,8 @@ export const SkillGapAnalyzer = () => {
         });
       }
 
-      // Analysis is FREE - no credit charge
-      setShowDetailedAdvice(false);
+      // PROBLEM 2 FIXED: Move trackUsage to after analysis and auto-show details
+      await trackUsage('skill_gap');
       setAnalysis(data);
 
       toast({
@@ -142,12 +155,7 @@ export const SkillGapAnalyzer = () => {
     }
   };
 
-  const handleUnlockDetails = async () => {
-    const credited = await trackUsage('skill_gap');
-    if (credited) {
-      setShowDetailedAdvice(true);
-    }
-  };
+  // PROBLEM 4 FIXED: Removed handleUnlockDetails function
 
   // ===== Render =====
   return (
@@ -158,16 +166,15 @@ export const SkillGapAnalyzer = () => {
         setFormData={setFormData}
         loading={loading}
         onAnalyze={handleAnalyze}
+        canAnalyze={canUse('skill_gap') && !loading}
+        remaining={remaining}
+        used={used}
+        limit={limit}
       />
 
-      {/* Analysis Results */}
+      {/* Analysis Results - Always show detailed */}
       {analysis && (
-        <AnalysisResultsCard
-          analysis={analysis}
-          showDetailedAdvice={showDetailedAdvice}
-          canUnlock={canUse('skill_gap')}
-          onUnlock={handleUnlockDetails}
-        />
+        <AnalysisResultsCard analysis={analysis} />
       )}
     </div>
   );
@@ -180,6 +187,10 @@ interface InputFormCardProps {
   setFormData: React.Dispatch<React.SetStateAction<FormData>>;
   loading: boolean;
   onAnalyze: () => Promise<void>;
+  canAnalyze: boolean;
+  remaining: number;
+  used: number;
+  limit: number;
 }
 
 const InputFormCard: React.FC<InputFormCardProps> = ({
@@ -187,6 +198,10 @@ const InputFormCard: React.FC<InputFormCardProps> = ({
   setFormData,
   loading,
   onAnalyze,
+  canAnalyze,
+  remaining,
+  used,
+  limit,
 }) => (
   <Card className="p-6">
     <div className="space-y-4">
@@ -239,25 +254,26 @@ const InputFormCard: React.FC<InputFormCardProps> = ({
       </div>
 
       {/* Analyze Button */}
-      <Button onClick={onAnalyze} disabled={loading} className="w-full">
+      <Button onClick={onAnalyze} disabled={loading || !canAnalyze} className="w-full">
         {loading ? "Analyzing..." : "Analyze Skill Gap"}
       </Button>
+
+      {/* Usage Info */}
+      {limit > 0 && (
+        <p className="text-xs text-center text-muted-foreground">
+          {remaining} analysis{remaining !== 1 ? 's' : ''} remaining this month
+        </p>
+      )}
     </div>
   </Card>
 );
 
 interface AnalysisResultsCardProps {
   analysis: Analysis;
-  showDetailedAdvice: boolean;
-  canUnlock: boolean;
-  onUnlock: () => Promise<void>;
 }
 
 const AnalysisResultsCard: React.FC<AnalysisResultsCardProps> = ({
   analysis,
-  showDetailedAdvice,
-  canUnlock,
-  onUnlock,
 }) => (
   <Card className="p-6">
     <div className="space-y-6">
@@ -284,14 +300,9 @@ const AnalysisResultsCard: React.FC<AnalysisResultsCardProps> = ({
         badgeClassName="bg-red-50"
       />
 
-      {/* Learning Recommendations */}
+      {/* Learning Recommendations - Always show detailed */}
       {analysis.recommendations?.length > 0 && (
-        <RecommendationsSection
-          recommendations={analysis.recommendations}
-          showDetailed={showDetailedAdvice}
-          canUnlock={canUnlock}
-          onUnlock={onUnlock}
-        />
+        <RecommendationsSection recommendations={analysis.recommendations} />
       )}
     </div>
   </Card>
@@ -345,16 +356,11 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
 
 interface RecommendationsSectionProps {
   recommendations: Recommendation[];
-  showDetailed: boolean;
-  canUnlock: boolean;
-  onUnlock: () => Promise<void>;
 }
 
+// PROBLEM 3 FIXED: Removed unlock button and always show detailed
 const RecommendationsSection: React.FC<RecommendationsSectionProps> = ({
   recommendations,
-  showDetailed,
-  canUnlock,
-  onUnlock,
 }) => (
   <div>
     {/* Header */}
@@ -363,30 +369,10 @@ const RecommendationsSection: React.FC<RecommendationsSectionProps> = ({
         <BookOpen className="w-4 h-4 text-primary" />
         Learning Recommendations
       </h4>
-
-      {!showDetailed && (
-        <Button
-          size="sm"
-          variant="outline"
-          disabled={!canUnlock}
-          onClick={onUnlock}
-          className="gap-1.5"
-        >
-          <Lock className="w-3 h-3" />
-          Unlock Details
-          <span className="inline-flex items-center gap-0.5 text-xs opacity-80">
-            <Coins className="w-3 h-3" />1
-          </span>
-        </Button>
-      )}
     </div>
 
-    {/* Content */}
-    {showDetailed ? (
-      <DetailedRecommendations recommendations={recommendations} />
-    ) : (
-      <LockedRecommendations recommendations={recommendations} />
-    )}
+    {/* Always show detailed recommendations */}
+    <DetailedRecommendations recommendations={recommendations} />
   </div>
 );
 
@@ -429,29 +415,5 @@ const DetailedRecommendations: React.FC<DetailedRecommendationsProps> = ({
         )}
       </Card>
     ))}
-  </div>
-);
-
-interface LockedRecommendationsProps {
-  recommendations: Recommendation[];
-}
-
-const LockedRecommendations: React.FC<LockedRecommendationsProps> = ({
-  recommendations,
-}) => (
-  <div className="space-y-2">
-    {recommendations.map((rec, index) => (
-      <div key={index} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-        <div className="flex items-center gap-2">
-          <span className="font-medium text-sm">{rec.skill}</span>
-          {getPriorityBadge(rec.priority)}
-        </div>
-        <Lock className="w-4 h-4 text-muted-foreground" />
-      </div>
-    ))}
-
-    <p className="text-xs text-muted-foreground text-center mt-2">
-      Unlock detailed learning paths, time estimates, and resources
-    </p>
   </div>
 );
