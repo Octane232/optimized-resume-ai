@@ -32,23 +32,29 @@ const HeroSection = () => {
     return () => observer.disconnect();
   }, []);
 
-  const atsScore = useCountUp(94, 1400, animating);
-  const applications = useCountUp(12, 1000, animating);
-  const interviews = useCountUp(3, 800, animating);
+  const matchScore = useCountUp(85, 1400, animating);
+  const alertsCount = useCountUp(40, 1200, animating);
+  const signalsCount = useCountUp(50, 1200, animating);
 
   const trustItems = ['No credit card required', 'Cancel anytime', 'Free plan'];
 
-  const dashboardStats = [
-    { label: 'ATS Score', value: `${atsScore}%`, color: 'text-emerald-500' },
-    { label: 'Applications', value: String(applications), color: 'text-primary' },
-    { label: 'Interviews', value: String(interviews), color: 'text-amber-500' },
-  ];
-
-  const dashboardActivities = [
-    'Resume tailored to Senior PM at Stripe',
-    'Cover letter generated',
-    'ATS score improved from 61% to 94%',
-    'Interview prep session completed',
+  const radarAlerts = [
+    {
+      initial: 'N',
+      company: 'Nectar Social',
+      round: 'Series A · $30M',
+      description: 'AI-powered marketing platform raised a $30M Series A round.',
+      roles: ['Product Manager', 'Software Engineer', 'Data Analyst'],
+      tone: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+    },
+    {
+      initial: 'S',
+      company: 'Stilta',
+      round: 'Series A · $10.5M',
+      description: 'AI platform automating research behind intellectual property cases.',
+      roles: ['Research Analyst', 'AI Specialist', 'Product Manager'],
+      tone: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
+    },
   ];
 
   return (
