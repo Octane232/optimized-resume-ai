@@ -423,21 +423,31 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
   );
 };
 
-const LockedTeaser: React.FC<{ lockedCount: number }> = ({ lockedCount }) => (
+interface LockedTeaserProps {
+  lockedCount: number;
+  onUpgradeClick: () => void;
+}
+
+// PROBLEM 3 FIXED: Added onUpgradeClick prop
+const LockedTeaser: React.FC<LockedTeaserProps> = ({ lockedCount, onUpgradeClick }) => (
   <Card className="border-dashed border-2 border-amber-500/30 bg-gradient-to-r from-amber-500/5 to-orange-500/5">
     <CardContent className="p-6 text-center">
       <Lock className="w-8 h-8 text-amber-500 mx-auto mb-3" />
       <h3 className="font-semibold text-lg mb-2">+{lockedCount} More Signals</h3>
       <p className="text-sm text-muted-foreground mb-4">Upgrade to see all funding signals and get matched alerts.</p>
-      <Button className="gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
+      <Button 
+        className="gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+        onClick={onUpgradeClick}
+      >
         <Crown className="w-4 h-4" />
-        Upgrade to Pro
+        {/* PROBLEM 2 FIXED: Changed button text */}
+        Upgrade to Unlock
       </Button>
     </CardContent>
   </Card>
 );
 
-const SignalsList: React.FC<{
+interface SignalsListProps {
   signals: any[];
   loading: boolean;
   viewMode: 'alerts' | 'all';
@@ -446,9 +456,23 @@ const SignalsList: React.FC<{
   usageLoading: boolean;
   canScan: boolean;
   tier: string;
-}> = ({ signals, loading, viewMode, onScan, scanning, usageLoading, canScan, tier }) => {
-  const isPro = tier === 'pro' || tier === 'premium';
-  const visibleSignals = isPro ? signals : signals.slice(0, 3);
+  onUpgradeClick: () => void;
+}
+
+const SignalsList: React.FC<SignalsListProps> = ({ 
+  signals, 
+  loading, 
+  viewMode, 
+  onScan, 
+  scanning, 
+  usageLoading, 
+  canScan, 
+  tier,
+  onUpgradeClick 
+}) => {
+  // PROBLEM 1 FIXED: Correct tier check (pro or elite, and trial users get full access)
+  const hasFullAccess = tier === 'pro' || tier === 'elite';
+  const visibleSignals = hasFullAccess ? signals : signals.slice(0, 3);
   const lockedCount = signals.length - visibleSignals.length;
 
   if (loading) return <LoadingSkeleton />;
@@ -466,18 +490,28 @@ const SignalsList: React.FC<{
           index={index}
         />
       ))}
-      {lockedCount > 0 && <LockedTeaser lockedCount={lockedCount} />}
+      {lockedCount > 0 && <LockedTeaser lockedCount={lockedCount} onUpgradeClick={onUpgradeClick} />}
     </div>
   );
 };
 
 // ===== Main Component =====
-const Scout: React.FC = () => {
+interface ScoutProps {
+  setActiveTab?: (tab: string) => void;
+}
+
+const Scout: React.FC<ScoutProps> = ({ setActiveTab }) => {
   const { tier } = useUsageLimit();
   const { alerts, signals, loading, fetchData, markAllRead } = useRadarData();
   const { scanning, usageLoading, canScan, handleScan } = useRadarScan(fetchData);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'alerts' | 'all'>('alerts');
+
+  const handleUpgradeClick = () => {
+    if (setActiveTab) {
+      setActiveTab('billing');
+    }
+  };
 
   const getDisplaySignals = (): any[] => {
     const baseSignals = viewMode === 'alerts' 
@@ -521,6 +555,7 @@ const Scout: React.FC = () => {
         usageLoading={usageLoading}
         canScan={canScan}
         tier={tier}
+        onUpgradeClick={handleUpgradeClick}
       />
     </div>
   );
