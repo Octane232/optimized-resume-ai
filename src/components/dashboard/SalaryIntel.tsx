@@ -91,7 +91,7 @@ const getDemandColor = (demand: string): string => {
 const SalaryIntel: React.FC = () => {
   // ===== Hooks =====
   const { toast } = useToast();
-  const { canUse, trackUsage, loading: usageLoading } = useUsageLimit();
+  const { canUse, trackUsage, loading: usageLoading, getRemaining, getCurrentUsage, getLimit } = useUsageLimit();
 
   // ===== State =====
   const [jobTitle, setJobTitle] = useState('');
@@ -106,6 +106,9 @@ const SalaryIntel: React.FC = () => {
   // ===== Derived Values =====
   const hasCredits = canUse('salary_intel');
   const isFormValid = jobTitle.trim().length > 0;
+  const remaining = getRemaining('salary_intel');
+  const used = getCurrentUsage('salary_intel');
+  const limit = getLimit('salary_intel');
 
   // ===== Event Handlers =====
   const handleSearch = async () => {
@@ -115,6 +118,16 @@ const SalaryIntel: React.FC = () => {
         title: 'Missing Info',
         description: 'Please enter a job title.',
         variant: 'destructive'
+      });
+      return;
+    }
+
+    // PROBLEM FIXED: Add quota check inside handler
+    if (!hasCredits) {
+      toast({
+        title: 'Limit reached',
+        description: `You have used all your salary intelligence queries this month (${used}/${limit}). Upgrade to continue.`,
+        variant: 'destructive',
       });
       return;
     }
@@ -216,6 +229,7 @@ const SalaryIntel: React.FC = () => {
         usageLoading={usageLoading}
         hasCredits={hasCredits}
         isFormValid={isFormValid}
+        remaining={remaining}
         onJobTitleChange={setJobTitle}
         onCompanyChange={setCompany}
         onLocationChange={setLocation}
@@ -269,6 +283,7 @@ interface InputFormProps {
   usageLoading: boolean;
   hasCredits: boolean;
   isFormValid: boolean;
+  remaining: number;
   onJobTitleChange: (value: string) => void;
   onCompanyChange: (value: string) => void;
   onLocationChange: (value: string) => void;
@@ -287,6 +302,7 @@ const InputForm: React.FC<InputFormProps> = ({
   usageLoading,
   hasCredits,
   isFormValid,
+  remaining,
   onJobTitleChange,
   onCompanyChange,
   onLocationChange,
@@ -360,6 +376,18 @@ const InputForm: React.FC<InputFormProps> = ({
             </>
           )}
         </Button>
+
+        {/* Usage info */}
+        {!hasCredits && limit > 0 && (
+          <p className="text-xs text-destructive mt-2">
+            You've reached your monthly limit ({remaining}/0). Upgrade to continue.
+          </p>
+        )}
+        {hasCredits && limit > 0 && (
+          <p className="text-xs text-muted-foreground mt-2">
+            {remaining} query{remaining !== 1 ? 'ies' : ''} remaining this month
+          </p>
+        )}
       </CardContent>
     </Card>
   </motion.div>
