@@ -2,9 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Brain, Mic, RotateCcw, ArrowRight, Loader2,
-  CheckCircle2, AlertCircle, Sparkles, ChevronRight, TrendingUp,
-  Coins, BarChart3, BookOpen, Zap, Radio, Send, Lock,
-  Target, Clock, Trophy, Flame, MessageSquare
+  CheckCircle2, AlertCircle, Sparkles, Radio, Send, Lock,
+  BarChart3, BookOpen, Trophy
 } from 'lucide-react';
 
 import { Card, CardContent } from '@/components/ui/card';
@@ -279,16 +278,6 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
       return;
     }
 
-    const credited = await trackUsage('interview_prep');
-    if (!credited) {
-      toast({ 
-        title: 'No credits', 
-        description: 'You need 1 credit to start.', 
-        variant: 'destructive' 
-      });
-      return;
-    }
-
     setLoadingQuestions(true);
 
     try {
@@ -299,6 +288,18 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
       const generatedQuestions: string[] = data?.questions?.length 
         ? data.questions 
         : getFallbackQuestions(position);
+
+      // Only charge AFTER successful generation
+      const credited = await trackUsage('interview_prep');
+      if (!credited) {
+        toast({ 
+          title: 'No credits', 
+          description: 'You need 1 credit to start.', 
+          variant: 'destructive' 
+        });
+        setLoadingQuestions(false);
+        return;
+      }
 
       setQuestions(generatedQuestions);
       setCurrentQ(0);
@@ -452,6 +453,16 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
   const askLive = async () => {
     if (!liveQuestion.trim() || liveLoading) return;
 
+    // Add quota check before live mode
+    if (!canUse('interview_prep')) {
+      toast({
+        title: 'Limit reached',
+        description: 'You have used all your interview sessions this month.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     const id = Date.now().toString();
     const question = liveQuestion.trim();
 
@@ -473,6 +484,9 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
 
       const suggestion = data?.suggestion?.trim();
       if (!suggestion) throw new Error('Empty AI response');
+
+      // Track usage after successful response
+      await trackUsage('interview_prep');
 
       setLiveEntries(prev => prev.map(entry =>
         entry.id === id
@@ -654,93 +668,109 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
           </motion.div>
         )}
 
+        {/* Lock Live Mode to Elite only */}
         {tab === 'live' && (
-          <motion.div key="live" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+          tier !== 'elite' ? (
             <Card className="border-border/60">
-              <CardContent className="p-6 space-y-4">
-                {!liveActive ? (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label htmlFor="live-position" className="text-sm font-medium text-foreground">
-                          Position
-                        </label>
-                        <Input 
-                          id="live-position"
-                          placeholder="e.g. Software Engineer" 
-                          value={livePosition} 
-                          onChange={e => setLivePosition(e.target.value)} 
-                          aria-required="true"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label htmlFor="live-company" className="text-sm font-medium text-foreground">
-                          Company (optional)
-                        </label>
-                        <Input 
-                          id="live-company"
-                          placeholder="e.g. Google" 
-                          value={liveCompany} 
-                          onChange={e => setLiveCompany(e.target.value)} 
-                        />
-                      </div>
-                    </div>
-                    <Button onClick={startLive} disabled={!livePosition.trim()} className="w-full">
-                      <Radio className="w-4 h-4 mr-2" />Start Live Session
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <Badge variant="destructive" className="animate-pulse">
-                        <Radio className="w-3 h-3 mr-1" />Live
-                      </Badge>
-                      <Button variant="ghost" size="sm" onClick={endLive}>
-                        End Session
-                      </Button>
-                    </div>
-                    <div className="space-y-3 max-h-96 overflow-y-auto" aria-live="polite">
-                      {liveEntries.map(entry => (
-                        <div key={entry.id} className="p-3 rounded-lg border border-border/60 space-y-2">
-                          <p className="text-sm font-medium text-foreground">{entry.question}</p>
-                          {entry.loading ? (
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                              <Loader2 className="w-3 h-3 animate-spin" />Thinking…
-                            </div>
-                          ) : entry.suggestion && (
-                            <p className="text-sm text-muted-foreground bg-primary/5 p-2 rounded">
-                              {entry.suggestion}
-                            </p>
-                          )}
-                        </div>
-                      ))}
-                      <div ref={liveBottomRef} />
-                    </div>
-                    <div className="flex gap-2">
-                      <div className="flex-1 space-y-2">
-                        <label htmlFor="live-question" className="text-sm font-medium text-foreground">
-                          Question Being Asked
-                        </label>
-                        <Input 
-                          id="live-question"
-                          placeholder="Type the question being asked…" 
-                          value={liveQuestion} 
-                          onChange={e => setLiveQuestion(e.target.value)} 
-                          onKeyDown={e => e.key === 'Enter' && askLive()} 
-                        />
-                      </div>
-                      <div className="flex items-end">
-                        <Button onClick={askLive} disabled={!liveQuestion.trim() || liveLoading}>
-                          <Send className="w-4 h-4" />
-                          <span className="sr-only">Send question</span>
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
+              <CardContent className="p-8 text-center space-y-3">
+                <Lock className="w-10 h-10 text-muted-foreground mx-auto" />
+                <h3 className="font-semibold text-lg">Elite Feature</h3>
+                <p className="text-sm text-muted-foreground">
+                  Live Interview Coach is available on the Elite plan only.
+                </p>
+                <Button onClick={() => setActiveTab?.('billing')}>
+                  Upgrade to Elite
+                </Button>
               </CardContent>
             </Card>
-          </motion.div>
+          ) : (
+            <motion.div key="live" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <Card className="border-border/60">
+                <CardContent className="p-6 space-y-4">
+                  {!liveActive ? (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label htmlFor="live-position" className="text-sm font-medium text-foreground">
+                            Position
+                          </label>
+                          <Input 
+                            id="live-position"
+                            placeholder="e.g. Software Engineer" 
+                            value={livePosition} 
+                            onChange={e => setLivePosition(e.target.value)} 
+                            aria-required="true"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label htmlFor="live-company" className="text-sm font-medium text-foreground">
+                            Company (optional)
+                          </label>
+                          <Input 
+                            id="live-company"
+                            placeholder="e.g. Google" 
+                            value={liveCompany} 
+                            onChange={e => setLiveCompany(e.target.value)} 
+                          />
+                        </div>
+                      </div>
+                      <Button onClick={startLive} disabled={!livePosition.trim()} className="w-full">
+                        <Radio className="w-4 h-4 mr-2" />Start Live Session
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <Badge variant="destructive" className="animate-pulse">
+                          <Radio className="w-3 h-3 mr-1" />Live
+                        </Badge>
+                        <Button variant="ghost" size="sm" onClick={endLive}>
+                          End Session
+                        </Button>
+                      </div>
+                      <div className="space-y-3 max-h-96 overflow-y-auto" aria-live="polite">
+                        {liveEntries.map(entry => (
+                          <div key={entry.id} className="p-3 rounded-lg border border-border/60 space-y-2">
+                            <p className="text-sm font-medium text-foreground">{entry.question}</p>
+                            {entry.loading ? (
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <Loader2 className="w-3 h-3 animate-spin" />Thinking…
+                              </div>
+                            ) : entry.suggestion && (
+                              <p className="text-sm text-muted-foreground bg-primary/5 p-2 rounded">
+                                {entry.suggestion}
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                        <div ref={liveBottomRef} />
+                      </div>
+                      <div className="flex gap-2">
+                        <div className="flex-1 space-y-2">
+                          <label htmlFor="live-question" className="text-sm font-medium text-foreground">
+                            Question Being Asked
+                          </label>
+                          <Input 
+                            id="live-question"
+                            placeholder="Type the question being asked…" 
+                            value={liveQuestion} 
+                            onChange={e => setLiveQuestion(e.target.value)} 
+                            onKeyDown={e => e.key === 'Enter' && askLive()} 
+                          />
+                        </div>
+                        <div className="flex items-end">
+                          <Button onClick={askLive} disabled={!liveQuestion.trim() || liveLoading}>
+                            <Send className="w-4 h-4" />
+                            <span className="sr-only">Send question</span>
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+          )
         )}
 
         {tab === 'tips' && (
