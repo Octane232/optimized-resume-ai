@@ -20,21 +20,17 @@ function useCountUp(target: number, duration: number, start: boolean) {
 }
 
 const HeroSection = () => {
-  const [animating, setAnimating] = useState(false);
+  const [animating, setAnimating] = useState(true);
   const previewRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setAnimating(true); },
-      { threshold: 0.3 }
-    );
-    if (previewRef.current) observer.observe(previewRef.current);
-    return () => observer.disconnect();
+    setAnimating(true);
   }, []);
 
   const matchScore = useCountUp(85, 1400, animating);
   const alertsCount = useCountUp(40, 1200, animating);
   const signalsCount = useCountUp(50, 1200, animating);
+
 
   const trustItems = ['No credit card required', 'Cancel anytime', 'Free plan'];
 
