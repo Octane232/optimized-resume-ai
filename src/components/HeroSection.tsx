@@ -2,25 +2,63 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import heroDashboard from '@/assets/hero-dashboard.png.asset.json';
+
+function useCountUp(target: number, duration: number, start: boolean) {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    if (!start) return;
+    let startTime: number | null = null;
+    const step = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      setValue(Math.floor(progress * target));
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [start, target, duration]);
+  return value;
+}
 
 const HeroSection = () => {
-  const [visible, setVisible] = useState(false);
+  const [animating, setAnimating] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setVisible(true); },
-      { threshold: 0.2 }
+      ([entry]) => { if (entry.isIntersecting) setAnimating(true); },
+      { threshold: 0.3 }
     );
     if (previewRef.current) observer.observe(previewRef.current);
     return () => observer.disconnect();
   }, []);
 
+  const matchScore = useCountUp(85, 1400, animating);
+  const alertsCount = useCountUp(40, 1200, animating);
+  const signalsCount = useCountUp(50, 1200, animating);
+
   const trustItems = ['No credit card required', 'Cancel anytime', 'Free plan'];
 
+  const radarAlerts = [
+    {
+      initial: 'N',
+      company: 'Nectar Social',
+      round: 'Series A · $30M',
+      description: 'AI-powered marketing platform raised a $30M Series A round.',
+      roles: ['Product Manager', 'Software Engineer', 'Data Analyst'],
+      tone: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+    },
+    {
+      initial: 'S',
+      company: 'Stilta',
+      round: 'Series A · $10.5M',
+      description: 'AI platform automating research behind intellectual property cases.',
+      roles: ['Research Analyst', 'AI Specialist', 'Product Manager'],
+      tone: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
+    },
+  ];
+
   return (
-    <section className="relative min-h-screen flex items-center bg-background pt-16 overflow-hidden">
+    <section className="relative min-h-screen flex items-center bg-background pt-16">
       <div
         className="absolute inset-0 opacity-[0.03]"
         style={{
@@ -68,42 +106,70 @@ const HeroSection = () => {
           ))}
         </div>
 
-        {/* Product screenshot */}
-        <div
-          ref={previewRef}
-          className="mt-20 max-w-6xl mx-auto relative"
-          style={{
-            opacity: visible ? 1 : 0,
-            transform: visible ? 'translateY(0)' : 'translateY(24px)',
-            transition: 'opacity 0.8s ease, transform 0.8s ease',
-          }}
-        >
-          {/* Glow */}
-          <div className="absolute -inset-4 bg-gradient-to-tr from-primary/20 via-primary/5 to-transparent rounded-3xl blur-2xl pointer-events-none" />
+        {/* Animated dashboard preview */}
+        <div className="mt-20 max-w-4xl mx-auto" ref={previewRef}>
+          <div className="relative rounded-2xl border border-border bg-card shadow-xl overflow-hidden">
+            <div className="h-8 bg-muted/50 border-b border-border flex items-center gap-2 px-4">
+              <div className="w-3 h-3 rounded-full bg-red-400/60" />
+              <div className="w-3 h-3 rounded-full bg-amber-400/60" />
+              <div className="w-3 h-3 rounded-full bg-emerald-400/60" />
+              <span className="ml-4 text-xs text-muted-foreground font-mono">vaylance.com/dashboard</span>
+            </div>
 
-          <div className="relative rounded-2xl border border-border bg-card shadow-2xl overflow-hidden">
-            {/* Browser chrome */}
-            <div className="h-9 bg-muted/60 border-b border-border flex items-center gap-2 px-4">
-              <div className="w-3 h-3 rounded-full bg-red-400/70" />
-              <div className="w-3 h-3 rounded-full bg-amber-400/70" />
-              <div className="w-3 h-3 rounded-full bg-emerald-400/70" />
-              <div className="flex-1 flex justify-center">
-                <span className="px-3 py-0.5 rounded-md bg-background/60 text-[11px] text-muted-foreground font-mono">
-                  vaylance.com/dashboard
-                </span>
+            {/* Job Radar header */}
+            <div className="px-6 pt-6 pb-4 flex items-center justify-between border-b border-border/60">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                </div>
+                <div className="text-left">
+                  <p className="text-sm font-bold text-foreground">Hidden Job Radar</p>
+                  <p className="text-[11px] text-muted-foreground">Companies raising funding = hiring soon</p>
+                </div>
+              </div>
+              <div className="hidden sm:flex items-center gap-2">
+                <span className="px-2.5 py-1 rounded-md bg-muted/60 text-[11px] font-semibold text-foreground tabular-nums">My Alerts ({alertsCount})</span>
+                <span className="px-2.5 py-1 rounded-md text-[11px] font-medium text-muted-foreground tabular-nums">All Signals ({signalsCount})</span>
               </div>
             </div>
 
-            <img
-              src={heroDashboard.url}
-              alt="Vaylance dashboard showing the Hidden Job Radar with company funding alerts and match scores"
-              className="w-full h-auto block"
-              loading="eager"
-            />
+            {/* Radar alert cards */}
+            <div className="p-4 sm:p-6 space-y-3">
+              {radarAlerts.map((alert, index) => (
+                <div
+                  key={index}
+                  className="flex items-start gap-3 p-4 rounded-xl bg-muted/30 border border-border/60 text-left"
+                  style={{
+                    opacity: animating ? 1 : 0,
+                    transform: animating ? 'translateY(0)' : 'translateY(8px)',
+                    transition: `opacity 0.5s ease ${0.4 + index * 0.2}s, transform 0.5s ease ${0.4 + index * 0.2}s`,
+                  }}
+                >
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${alert.tone}`}>
+                    {alert.initial}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                      <span className="text-sm font-semibold text-foreground">{alert.company}</span>
+                      <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold">{alert.round}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{alert.description}</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {alert.roles.map((role) => (
+                        <span key={role} className="px-2 py-0.5 rounded-md bg-background border border-border/60 text-[10px] font-medium text-foreground/80">
+                          {role}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-lg font-black text-primary tabular-nums leading-none">{matchScore}%</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">match</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-
-          {/* Bottom fade */}
-          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background to-transparent pointer-events-none rounded-b-2xl" />
         </div>
       </div>
     </section>
