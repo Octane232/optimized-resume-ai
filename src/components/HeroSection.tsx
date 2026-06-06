@@ -1,169 +1,175 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle } from 'lucide-react';
+import { Play, CheckCircle, Search, Bell, User, Briefcase, FileText, PenTool, Mic, BarChart3, Settings, Layers, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-function useCountUp(target: number, duration: number, start: boolean) {
-  const [value, setValue] = useState(0);
-  useEffect(() => {
-    if (!start) return;
-    let startTime: number | null = null;
-    const step = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      setValue(Math.floor(progress * target));
-      if (progress < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  }, [start, target, duration]);
-  return value;
-}
+const sidebarItems = [
+  { icon: Layers, label: 'Dashboard', active: true },
+  { icon: Briefcase, label: 'Job Matches' },
+  { icon: FileText, label: 'Applications' },
+  { icon: PenTool, label: 'Resume Builder' },
+  { icon: FileText, label: 'AI Cover Letter' },
+  { icon: Mic, label: 'Interview Coach' },
+  { icon: BarChart3, label: 'Analytics' },
+  { icon: Sparkles, label: 'Saved Items' },
+  { icon: Settings, label: 'Settings' },
+];
+
+const jobMatches = [
+  { initial: 'S', company: 'Senior Product Designer', sub: 'Linear', location: 'Remote', match: '95%', tone: 'from-blue-500 to-blue-600' },
+  { initial: 'P', company: 'Product Designer', sub: '', location: 'Remote', match: '92%', tone: 'from-violet-500 to-violet-600' },
+  { initial: 'S', company: 'UI/UX Designer', sub: 'Stripe', location: 'New York, NY', match: '90%', tone: 'from-emerald-500 to-emerald-600' },
+];
 
 const HeroSection = () => {
-  const [animating, setAnimating] = useState(true);
-  const previewRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setAnimating(true);
-  }, []);
-
-  const matchScore = useCountUp(85, 1400, animating);
-  const alertsCount = useCountUp(40, 1200, animating);
-  const signalsCount = useCountUp(50, 1200, animating);
-
-
-  const trustItems = ['No credit card required', 'Cancel anytime', 'Free plan'];
-
-  const radarAlerts = [
-    {
-      initial: 'N',
-      company: 'Nectar Social',
-      round: 'Series A · $30M',
-      description: 'AI-powered marketing platform raised a $30M Series A round.',
-      roles: ['Product Manager', 'Software Engineer', 'Data Analyst'],
-      tone: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-    },
-    {
-      initial: 'S',
-      company: 'Stilta',
-      round: 'Series A · $10.5M',
-      description: 'AI platform automating research behind intellectual property cases.',
-      roles: ['Research Analyst', 'AI Specialist', 'Product Manager'],
-      tone: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
-    },
-  ];
-
   return (
-    <section className="relative min-h-screen flex items-center bg-background pt-16">
-      <div
-        className="absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage: `linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)`,
-          backgroundSize: '64px 64px',
-        }}
-      />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-primary/8 rounded-full blur-3xl pointer-events-none" />
+    <section className="relative pt-28 pb-16 overflow-hidden">
+      {/* Background glow */}
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute top-0 left-1/3 w-[700px] h-[700px] bg-violet-600/15 rounded-full blur-[140px]" />
+        <div className="absolute top-40 right-0 w-[600px] h-[600px] bg-blue-600/15 rounded-full blur-[140px]" />
+      </div>
 
-      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-card text-xs font-semibold text-muted-foreground mb-8">
-          <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-          AI-powered job search platform
-        </div>
-
-        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-foreground tracking-tight leading-[1.05] mb-6 max-w-4xl mx-auto">
-          Land your next job{' '}
-          <span className="text-primary">faster</span>
-          {' '}with AI
-        </h1>
-
-        <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-          Vaylance tailors your resume to pass ATS filters, preps you for interviews,
-          and finds companies hiring before they post publicly — all in one place.
-        </p>
-
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10">
-          <Button asChild size="lg" className="h-12 px-8 font-semibold text-base gap-2 w-full sm:w-auto">
-            <Link to="/auth">
-              Get Started
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </Button>
-          <Button asChild size="lg" variant="outline" className="h-12 px-8 font-medium text-base w-full sm:w-auto">
-            <Link to="/auth">Sign in</Link>
-          </Button>
-        </div>
-
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-sm text-muted-foreground">
-          {trustItems.map((item, index) => (
-            <span key={index} className="flex items-center gap-1.5">
-              <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
-              {item}
-            </span>
-          ))}
-        </div>
-
-        {/* Animated dashboard preview */}
-        <div className="mt-20 max-w-4xl mx-auto" ref={previewRef}>
-          <div className="relative rounded-2xl border border-border bg-card shadow-xl overflow-hidden">
-            <div className="h-8 bg-muted/50 border-b border-border flex items-center gap-2 px-4">
-              <div className="w-3 h-3 rounded-full bg-red-400/60" />
-              <div className="w-3 h-3 rounded-full bg-amber-400/60" />
-              <div className="w-3 h-3 rounded-full bg-emerald-400/60" />
-              <span className="ml-4 text-xs text-muted-foreground font-mono">vaylance.com/dashboard</span>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          {/* Left: copy */}
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-card/50 backdrop-blur text-xs font-semibold text-muted-foreground mb-6">
+              <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+              AI-Powered Job Search
             </div>
 
-            {/* Job Radar header */}
-            <div className="px-6 pt-6 pb-4 flex items-center justify-between border-b border-border/60">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-                </div>
-                <div className="text-left">
-                  <p className="text-sm font-bold text-foreground">Hidden Job Radar</p>
-                  <p className="text-[11px] text-muted-foreground">Companies raising funding = hiring soon</p>
-                </div>
-              </div>
-              <div className="hidden sm:flex items-center gap-2">
-                <span className="px-2.5 py-1 rounded-md bg-muted/60 text-[11px] font-semibold text-foreground tabular-nums">My Alerts ({alertsCount})</span>
-                <span className="px-2.5 py-1 rounded-md text-[11px] font-medium text-muted-foreground tabular-nums">All Signals ({signalsCount})</span>
-              </div>
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-foreground tracking-tight leading-[1.05] mb-6">
+              Land your next job{' '}
+              <span className="bg-gradient-to-r from-blue-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
+                faster
+              </span>
+              {' '}with AI
+            </h1>
+
+            <p className="text-lg text-muted-foreground max-w-lg mb-8 leading-relaxed">
+              Vaylance helps you create the perfect resume, find matching jobs,
+              and apply with AI — so you can get hired faster.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-3 mb-8">
+              <Button asChild size="lg" className="h-12 px-7 font-semibold text-base bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white shadow-xl shadow-blue-600/30">
+                <Link to="/auth">Get Started Free →</Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="h-12 px-7 font-semibold text-base border-border bg-card/30 hover:bg-card text-foreground">
+                <Link to="/auth">
+                  <Play className="w-4 h-4 mr-1 fill-current" />
+                  Watch Demo
+                </Link>
+              </Button>
             </div>
 
-            {/* Radar alert cards */}
-            <div className="p-4 sm:p-6 space-y-3">
-              {radarAlerts.map((alert, index) => (
-                <div
-                  key={index}
-                  className="flex items-start gap-3 p-4 rounded-xl bg-muted/30 border border-border/60 text-left"
-                  style={{
-                    opacity: animating ? 1 : 0,
-                    transform: animating ? 'translateY(0)' : 'translateY(8px)',
-                    transition: `opacity 0.5s ease ${0.4 + index * 0.2}s, transform 0.5s ease ${0.4 + index * 0.2}s`,
-                  }}
-                >
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${alert.tone}`}>
-                    {alert.initial}
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> No credit card required</span>
+              <span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> Cancel anytime</span>
+              <span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> Loved by 10,000+ users</span>
+            </div>
+          </div>
+
+          {/* Right: dashboard mockup */}
+          <div className="relative">
+            <div className="absolute -inset-4 bg-gradient-to-tr from-blue-600/30 via-violet-600/20 to-fuchsia-600/30 rounded-3xl blur-2xl" />
+            <div className="relative rounded-2xl border border-border/80 bg-card shadow-2xl overflow-hidden">
+              {/* Topbar */}
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border/60 bg-card">
+                <div className="flex items-center gap-2">
+                  <svg width="18" height="18" viewBox="0 0 32 32" fill="none"><path d="M4 6 L16 28 L28 6" stroke="url(#vh)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/><defs><linearGradient id="vh" x1="0" y1="0" x2="32" y2="32"><stop stopColor="hsl(217 91% 65%)"/><stop offset="1" stopColor="hsl(262 83% 65%)"/></linearGradient></defs></svg>
+                  <span className="text-xs font-bold text-foreground">Vaylance</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Search className="w-3.5 h-3.5 text-muted-foreground" />
+                  <Bell className="w-3.5 h-3.5 text-muted-foreground" />
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center"><User className="w-3 h-3 text-white" /></div>
+                </div>
+              </div>
+
+              <div className="flex">
+                {/* Sidebar */}
+                <div className="w-36 border-r border-border/60 bg-background/50 p-2 space-y-0.5 hidden sm:block">
+                  {sidebarItems.map((item, i) => {
+                    const Icon = item.icon;
+                    return (
+                      <div key={i} className={`flex items-center gap-1.5 px-2 py-1.5 rounded-md text-[10px] ${item.active ? 'bg-primary/15 text-primary font-semibold' : 'text-muted-foreground'}`}>
+                        <Icon className="w-3 h-3" />
+                        <span>{item.label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 p-3 space-y-3">
+                  <div>
+                    <p className="text-[11px] font-bold text-foreground">Good morning, Alex 👋</p>
+                    <p className="text-[9px] text-muted-foreground">Here's your job search overview</p>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <span className="text-sm font-semibold text-foreground">{alert.company}</span>
-                      <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold">{alert.round}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{alert.description}</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {alert.roles.map((role) => (
-                        <span key={role} className="px-2 py-0.5 rounded-md bg-background border border-border/60 text-[10px] font-medium text-foreground/80">
-                          {role}
-                        </span>
-                      ))}
-                    </div>
+
+                  {/* Stat tiles */}
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {[
+                      { label: 'Job Matches', value: '128', chg: '+24 this week' },
+                      { label: 'Applications', value: '32', chg: '+12 this week' },
+                      { label: 'Interview Calls', value: '8', chg: 'this week' },
+                      { label: 'Profile Score', value: '85%', chg: '+15% improv' },
+                    ].map((s, i) => (
+                      <div key={i} className="rounded-md border border-border/60 bg-background/40 p-1.5">
+                        <p className="text-[7px] text-muted-foreground">{s.label}</p>
+                        <p className="text-sm font-bold text-foreground">{s.value}</p>
+                        <p className="text-[6px] text-emerald-400">{s.chg}</p>
+                      </div>
+                    ))}
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-lg font-black text-primary tabular-nums leading-none">{matchScore}%</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">match</p>
+
+                  <div className="grid grid-cols-3 gap-2">
+                    {/* Top job matches */}
+                    <div className="col-span-2 rounded-md border border-border/60 bg-background/40 p-2">
+                      <p className="text-[9px] font-bold text-foreground mb-1.5">Top Job Matches</p>
+                      <div className="space-y-1">
+                        {jobMatches.map((j, i) => (
+                          <div key={i} className="flex items-center gap-1.5 p-1 rounded bg-card/60">
+                            <div className={`w-5 h-5 rounded bg-gradient-to-br ${j.tone} flex items-center justify-center text-[8px] font-bold text-white`}>{j.initial}</div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[8px] font-semibold text-foreground truncate">{j.company}</p>
+                              <p className="text-[6px] text-muted-foreground">{j.location}</p>
+                            </div>
+                            <span className="text-[7px] font-bold text-emerald-400">{j.match} match</span>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-[7px] text-primary mt-1 font-semibold">View all matches →</p>
+                    </div>
+
+                    {/* Profile strength */}
+                    <div className="rounded-md border border-border/60 bg-background/40 p-2">
+                      <p className="text-[9px] font-bold text-foreground mb-1">Profile Strength</p>
+                      <div className="relative w-12 h-12 mx-auto mb-1">
+                        <svg viewBox="0 0 36 36" className="w-12 h-12 -rotate-90">
+                          <circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--muted))" strokeWidth="3"/>
+                          <circle cx="18" cy="18" r="15" fill="none" stroke="url(#pg)" strokeWidth="3" strokeDasharray="80 100" strokeLinecap="round"/>
+                          <defs><linearGradient id="pg" x1="0" y1="0" x2="36" y2="36"><stop stopColor="#60a5fa"/><stop offset="1" stopColor="#a78bfa"/></linearGradient></defs>
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <span className="text-[10px] font-bold text-foreground">85%</span>
+                          <span className="text-[5px] text-muted-foreground">Excellent</span>
+                        </div>
+                      </div>
+                      <div className="space-y-0.5">
+                        {['Resume', 'Skills', 'Experience', 'Keywords'].map((s) => (
+                          <div key={s} className="flex items-center gap-1 text-[6px] text-muted-foreground">
+                            <CheckCircle className="w-1.5 h-1.5 text-emerald-400" />{s}
+                          </div>
+                        ))}
+                      </div>
+                      <button className="mt-1 w-full rounded text-[6px] font-semibold py-1 bg-gradient-to-r from-blue-600 to-violet-600 text-white">Improve Score</button>
+                    </div>
                   </div>
                 </div>
-              ))}
+              </div>
             </div>
           </div>
         </div>
