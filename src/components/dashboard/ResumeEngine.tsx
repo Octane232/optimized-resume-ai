@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast, toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { useUsageLimit } from '@/contexts/UsageLimitContext';
 import { Document, Packer, Paragraph, TextRun } from 'docx';
 import html2pdf from 'html2pdf.js';
@@ -51,7 +51,7 @@ const wordCount = (t: string): number => {
 };
 
 const isProUser = (tier: string): boolean => {
-  return tier === 'pro' || tier === 'premium';
+  return tier === 'pro' || tier === 'elite';
 };
 
 const hasValidInputs = (resume: string, jobDesc: string): boolean => {
@@ -71,7 +71,11 @@ const useFileUpload = (isPro: boolean, onTextExtracted: (text: string, fileName:
     if (!file) return;
 
     if (!isPro) {
-      toast({ title: 'Pro feature', description: 'Upgrade to Pro to upload PDF/DOCX resumes.', variant: 'destructive' });
+      toast({ 
+        title: 'Pro Feature', 
+        description: 'Upgrade to Pro or Elite to upload PDF/DOCX resumes.', 
+        variant: 'destructive' 
+      });
       return;
     }
 
@@ -79,11 +83,23 @@ const useFileUpload = (isPro: boolean, onTextExtracted: (text: string, fileName:
     try {
       const formData = new FormData();
       formData.append('file', file);
+      
       const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error('No active session');
+      }
+      
       const res = await fetch(
-        `https://xpmhahyvtyvrxryrqane.supabase.co/functions/v1/parse-resume-file`,
-        { method: 'POST', headers: { Authorization: `Bearer ${session?.access_token || ''}` }, body: formData }
+        `${import.meta.env.VITE_SUPABASE_FUNCTIONS_URL || 'https://xpmhahyvtyvrxryrqane.supabase.co/functions/v1'}/parse-resume-file`,
+        { 
+          method: 'POST', 
+          headers: { 
+            Authorization: `Bearer ${session.access_token}` 
+          }, 
+          body: formData 
+        }
       );
+      
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Upload failed');
 
@@ -92,9 +108,17 @@ const useFileUpload = (isPro: boolean, onTextExtracted: (text: string, fileName:
       if (file.name.toLowerCase().endsWith('.docx')) {
         setUploadedDocxFile(file);
       }
-      toast({ title: 'Resume uploaded', description: `${file.name} parsed successfully.` });
+      toast({ 
+        title: 'Resume Uploaded', 
+        description: `${file.name} parsed successfully.` 
+      });
     } catch (err: any) {
-      toast({ title: 'Upload failed', description: err.message, variant: 'destructive' });
+      console.error('Upload error:', err);
+      toast({ 
+        title: 'Upload Failed', 
+        description: err.message || 'Failed to parse resume file', 
+        variant: 'destructive' 
+      });
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -127,7 +151,11 @@ const useDocxRewrite = (
 
   const handleRewriteDocx = async () => {
     if (!uploadedDocxFile || !jobDescription.trim()) {
-      toast({ title: 'Missing input', description: 'Need a DOCX file and a job description.', variant: 'destructive' });
+      toast({ 
+        title: 'Missing Input', 
+        description: 'Need a DOCX file and a job description.', 
+        variant: 'destructive' 
+      });
       return;
     }
 
@@ -136,19 +164,39 @@ const useDocxRewrite = (
       const fd = new FormData();
       fd.append('file', uploadedDocxFile);
       fd.append('jobDescription', jobDescription.trim());
+      
       const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error('No active session');
+      }
+      
       const res = await fetch(
-        `https://xpmhahyvtyvrxryrqane.supabase.co/functions/v1/rewrite-docx`,
-        { method: 'POST', headers: { Authorization: `Bearer ${session?.access_token || ''}` }, body: fd }
+        `${import.meta.env.VITE_SUPABASE_FUNCTIONS_URL || 'https://xpmhahyvtyvrxryrqane.supabase.co/functions/v1'}/rewrite-docx`,
+        { 
+          method: 'POST', 
+          headers: { 
+            Authorization: `Bearer ${session.access_token}` 
+          }, 
+          body: fd 
+        }
       );
+      
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Rewrite failed');
 
       setEditedDocxBase64(json.docxBase64);
       onRewriteComplete(json.docxBase64, json.previewText);
-      toast({ title: 'Resume rewritten', description: `${json.rewrittenCount} paragraphs improved.` });
+      toast({ 
+        title: 'Resume Rewritten', 
+        description: `${json.rewrittenCount || 'Multiple'} paragraphs improved.` 
+      });
     } catch (err: any) {
-      toast({ title: 'Rewrite failed', description: err.message, variant: 'destructive' });
+      console.error('Rewrite error:', err);
+      toast({ 
+        title: 'Rewrite Failed', 
+        description: err.message || 'Failed to rewrite document', 
+        variant: 'destructive' 
+      });
     } finally {
       setIsRewritingDocx(false);
     }
@@ -156,18 +204,27 @@ const useDocxRewrite = (
 
   const downloadEditedDocx = () => {
     if (!editedDocxBase64) return;
-    const bin = atob(editedDocxBase64);
-    const bytes = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-    const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = (uploadedDocxFile?.name.replace(/\.docx$/i, '') || 'resume') + '-rewritten.docx';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    try {
+      const bin = atob(editedDocxBase64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = (uploadedDocxFile?.name.replace(/\.docx$/i, '') || 'resume') + '-rewritten.docx';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Download error:', err);
+      toast({ 
+        title: 'Download Failed', 
+        description: 'Could not download the rewritten document', 
+        variant: 'destructive' 
+      });
+    }
   };
 
   return {
@@ -180,23 +237,32 @@ const useDocxRewrite = (
 
 const useBundleGeneration = () => {
   const { toast } = useToast();
-  const { canUse, trackUsage, getRemaining, tier } = useUsageLimit();
+  const { canUse, getRemaining, tier } = useUsageLimit();
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<BundleResult | null>(null);
 
   const saveToDatabase = async (userId: string, data: BundleResult, jobDescription: string) => {
-    await Promise.allSettled([
-      supabase.from('resumes').insert({
-        user_id: userId,
-        title: `Tailored Resume — ${new Date().toLocaleDateString()}`,
-        content: { text: data.tailoredResume, ats_score: data.atsData?.afterScore ?? null, job_description: jobDescription.trim() } as any,
-      }),
-      supabase.from('cover_letters').insert({
-        user_id: userId,
-        job_title: 'Tailored Application',
-        content: data.coverLetter,
-      }),
-    ]);
+    try {
+      await Promise.allSettled([
+        supabase.from('resumes').insert({
+          user_id: userId,
+          title: `Tailored Resume — ${new Date().toLocaleDateString()}`,
+          content: { 
+            text: data.tailoredResume, 
+            ats_score: data.atsData?.afterScore ?? null, 
+            job_description: jobDescription.trim() 
+          },
+        }),
+        supabase.from('cover_letters').insert({
+          user_id: userId,
+          job_title: 'Tailored Application',
+          content: data.coverLetter,
+        }),
+      ]);
+    } catch (err) {
+      console.error('Failed to save to database:', err);
+      // Don't throw - the generation still succeeded
+    }
   };
 
   const handleGenerate = async (
@@ -205,42 +271,80 @@ const useBundleGeneration = () => {
     userName: string
   ): Promise<BundleResult | null> => {
     if (!hasValidInputs(resumeText, jobDescription)) {
-      toast({ title: 'Missing Input', description: 'Paste both your resume and the job description.', variant: 'destructive' });
+      toast({ 
+        title: 'Missing Input', 
+        description: 'Please paste both your resume and the job description.', 
+        variant: 'destructive' 
+      });
       return null;
     }
 
     if (!canUse('resume_ats')) {
-      toast({ title: 'Limit reached', description: 'You have used all your application bundles.', variant: 'destructive' });
+      const remaining = getRemaining('resume_ats');
+      toast({ 
+        title: 'Limit Reached', 
+        description: `You have used all your application bundles. ${remaining === 0 ? 'Upgrade to continue.' : ''}`, 
+        variant: 'destructive' 
+      });
       return null;
     }
 
     setIsProcessing(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      const { data: profile } = await supabase.from('profiles').select('full_name').eq('user_id', user?.id || '').maybeSingle();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+      
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('user_id', user.id)
+        .maybeSingle();
 
       const { data, error } = await supabase.functions.invoke('apply-bundle', {
-        body: { jobDescription: jobDescription.trim(), userResume: resumeText.trim(), userName: userName || profile?.full_name || '' },
+        body: { 
+          jobDescription: jobDescription.trim(), 
+          userResume: resumeText.trim(), 
+          userName: userName || profile?.full_name || '' 
+        },
       });
 
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-
-      if (user) {
-        await saveToDatabase(user.id, data, jobDescription);
+      if (!data?.tailoredResume || !data?.coverLetter || !data?.atsData) {
+        throw new Error('Invalid response from server');
       }
 
-      await trackUsage('resume_ats');
+      // Save to database (read-only copy for user history)
+      await saveToDatabase(user.id, data, jobDescription);
+
+      // NOTE: trackUsage is NOT called here because the edge function (apply-bundle)
+      // already calls recordUsage on the backend. Calling it again would double-count.
+
       setResult(data);
-      toast({ title: 'Done!', description: 'Tailored resume, cover letter, and ATS score ready.' });
+      toast({ 
+        title: 'Success!', 
+        description: 'Your tailored resume, cover letter, and ATS score are ready.' 
+      });
       return data;
     } catch (error: any) {
+      console.error('Generation error:', error);
       const status = error?.context?.status;
       const remaining = getRemaining('resume_ats');
+      
       if (status === 402 || status === 429 || remaining <= 0) {
-        toast({ title: "You've used all your credits", description: 'Upgrade your plan to keep generating bundles.', variant: 'destructive' });
+        toast({ 
+          title: "Credits Used", 
+          description: 'You\'ve used all your credits. Upgrade your plan to keep generating bundles.', 
+          variant: 'destructive' 
+        });
       } else {
-        toast({ title: 'Error', description: error.message || 'Something went wrong.', variant: 'destructive' });
+        toast({ 
+          title: 'Generation Failed', 
+          description: error.message || 'Something went wrong. Please try again.', 
+          variant: 'destructive' 
+        });
       }
       return null;
     } finally {
@@ -288,7 +392,8 @@ const ResultsView: React.FC<{
           </div>
         </div>
         <Button variant="outline" onClick={onReset} className="gap-2">
-          <RefreshCw className="w-4 h-4" />Start Over
+          <RefreshCw className="w-4 h-4" />
+          Start Over
         </Button>
       </div>
 
@@ -364,9 +469,18 @@ const ResultTabs: React.FC<{
 }> = ({ result, isPro, activeTab, onTabChange, onCopy, onDownloadPDF, onDownloadDOCX }) => (
   <Tabs value={activeTab} onValueChange={onTabChange}>
     <TabsList className="grid w-full grid-cols-3">
-      <TabsTrigger value="resume"><FileText className="w-4 h-4 mr-2" />Tailored Resume</TabsTrigger>
-      <TabsTrigger value="cover"><Clipboard className="w-4 h-4 mr-2" />Cover Letter</TabsTrigger>
-      <TabsTrigger value="ats"><Sparkles className="w-4 h-4 mr-2" />ATS Details</TabsTrigger>
+      <TabsTrigger value="resume">
+        <FileText className="w-4 h-4 mr-2" />
+        Tailored Resume
+      </TabsTrigger>
+      <TabsTrigger value="cover">
+        <Clipboard className="w-4 h-4 mr-2" />
+        Cover Letter
+      </TabsTrigger>
+      <TabsTrigger value="ats">
+        <Sparkles className="w-4 h-4 mr-2" />
+        ATS Details
+      </TabsTrigger>
     </TabsList>
 
     <TabsContent value="resume">
@@ -404,13 +518,30 @@ const ResumeTabContent: React.FC<{
       <CardTitle className="text-lg">Tailored Resume</CardTitle>
       <div className="flex gap-2 flex-wrap">
         <Button variant="outline" size="sm" onClick={onCopy} className="gap-2">
-          <Copy className="w-4 h-4" />Copy
+          <Copy className="w-4 h-4" />
+          Copy
         </Button>
-        <Button variant="outline" size="sm" onClick={onDownloadPDF} disabled={!isPro} className="gap-2">
-          {isPro ? <Download className="w-4 h-4" /> : <Lock className="w-4 h-4" />} PDF{!isPro && ' (Pro)'}
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={onDownloadPDF} 
+          disabled={!isPro} 
+          className="gap-2"
+          title={!isPro ? "Upgrade to Pro or Elite to download PDF" : "Download as PDF"}
+        >
+          {isPro ? <Download className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+          PDF{!isPro && ' (Pro)'}
         </Button>
-        <Button variant="outline" size="sm" onClick={onDownloadDOCX} disabled={!isPro} className="gap-2">
-          {isPro ? <Download className="w-4 h-4" /> : <Lock className="w-4 h-4" />} DOCX{!isPro && ' (Pro)'}
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={onDownloadDOCX} 
+          disabled={!isPro} 
+          className="gap-2"
+          title={!isPro ? "Upgrade to Pro or Elite to download DOCX" : "Download as DOCX"}
+        >
+          {isPro ? <Download className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+          DOCX{!isPro && ' (Pro)'}
         </Button>
       </div>
     </CardHeader>
@@ -430,7 +561,8 @@ const CoverLetterTabContent: React.FC<{
     <CardHeader className="flex flex-row items-center justify-between">
       <CardTitle className="text-lg">Cover Letter</CardTitle>
       <Button variant="outline" size="sm" onClick={onCopy} className="gap-2">
-        <Copy className="w-4 h-4" />Copy
+        <Copy className="w-4 h-4" />
+        Copy
       </Button>
     </CardHeader>
     <CardContent>
@@ -471,7 +603,7 @@ const ATSTabContent: React.FC<{ atsData: BundleResult['atsData'] }> = ({ atsData
 const KeywordSection: React.FC<{
   title: string;
   icon: React.ReactNode;
-  keywords: any[];
+  keywords: string[];
   variant: 'warning' | 'success';
   showCheckmark?: boolean;
 }> = ({ title, icon, keywords, variant, showCheckmark }) => {
@@ -481,11 +613,14 @@ const KeywordSection: React.FC<{
 
   return (
     <div>
-      <h4 className="font-semibold mb-3 flex items-center gap-2">{icon}{title}</h4>
+      <h4 className="font-semibold mb-3 flex items-center gap-2">
+        {icon}
+        {title}
+      </h4>
       <div className="flex flex-wrap gap-2">
         {keywords.map((kw, i) => (
           <Badge key={i} variant="outline" className={colorClass}>
-            {showCheckmark && '✓ '}{typeof kw === 'string' ? kw : kw.keyword ?? JSON.stringify(kw)}
+            {showCheckmark && '✓ '}{kw}
           </Badge>
         ))}
       </div>
@@ -496,7 +631,8 @@ const KeywordSection: React.FC<{
 const ImprovementsSection: React.FC<{ improvements: string[] }> = ({ improvements }) => (
   <div>
     <h4 className="font-semibold mb-3 flex items-center gap-2">
-      <CheckCircle2 className="w-4 h-4 text-emerald-500" />Improvements Made
+      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+      Improvements Made
     </h4>
     <ul className="space-y-2">
       {improvements.map((imp, i) => (
@@ -510,7 +646,10 @@ const ImprovementsSection: React.FC<{ improvements: string[] }> = ({ improvement
 );
 
 // ===== Main Component =====
-const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?: boolean }> = ({ setActiveTab }) => {
+const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?: boolean }> = ({ 
+  setActiveTab, 
+  hasResume = false 
+}) => {
   const { toast } = useToast();
   const { tier } = useUsageLimit();
   const isPro = isProUser(tier);
@@ -518,15 +657,29 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
   const [resumeText, setResumeText] = useState('');
   const [jobDescription, setJobDescription] = useState('');
   const [showRewritePrompt, setShowRewritePrompt] = useState(false);
+  const [pendingResumeText, setPendingResumeText] = useState('');
 
   const handleTextExtracted = (text: string, fileName: string, docxFile: File | null) => {
     setResumeText(text);
+    setPendingResumeText(text);
     setShowRewritePrompt(true);
   };
 
-  const { isUploading, uploadedFileName, uploadedDocxFile, fileInputRef, handleFileUpload, resetFileUpload } = useFileUpload(isPro, handleTextExtracted);
+  const { 
+    isUploading, 
+    uploadedFileName, 
+    uploadedDocxFile, 
+    fileInputRef, 
+    handleFileUpload, 
+    resetFileUpload 
+  } = useFileUpload(isPro, handleTextExtracted);
   
-  const { isRewritingDocx, editedDocxBase64, handleRewriteDocx, downloadEditedDocx } = useDocxRewrite(
+  const { 
+    isRewritingDocx, 
+    editedDocxBase64, 
+    handleRewriteDocx, 
+    downloadEditedDocx 
+  } = useDocxRewrite(
     uploadedDocxFile,
     jobDescription,
     (base64, previewText) => {
@@ -534,45 +687,120 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
     }
   );
 
-  const { isProcessing, result, remaining, canGenerate, handleGenerate, resetResult } = useBundleGeneration();
+  const { 
+    isProcessing, 
+    result, 
+    remaining, 
+    canGenerate, 
+    handleGenerate, 
+    resetResult 
+  } = useBundleGeneration();
 
   const handleCopy = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
-    toast({ title: 'Copied!', description: `${label} copied to clipboard.` });
+    toast({ 
+      title: 'Copied!', 
+      description: `${label} copied to clipboard.` 
+    });
   };
 
   const downloadAsPDF = async () => {
-    if (!isPro || !result) return;
-    const container = document.createElement('div');
-    container.style.cssText = 'padding:32px;font-family:Arial,sans-serif;font-size:11pt;color:#111;white-space:pre-wrap;';
-    container.innerText = result.tailoredResume;
-    await html2pdf().from(container).set({
-      margin: 0.5, filename: 'tailored-resume.pdf',
-      html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
-    }).save();
+    if (!isPro || !result) {
+      toast({ 
+        title: 'Pro Feature', 
+        description: 'Upgrade to Pro or Elite to download PDF files.', 
+        variant: 'destructive' 
+      });
+      return;
+    }
+    
+    try {
+      const container = document.createElement('div');
+      container.style.cssText = 'padding:32px;font-family:Arial,sans-serif;font-size:11pt;color:#111;white-space:pre-wrap;';
+      container.innerText = result.tailoredResume;
+      await html2pdf().from(container).set({
+        margin: 0.5, 
+        filename: 'tailored-resume.pdf',
+        html2canvas: { scale: 2 }, 
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
+      }).save();
+      
+      toast({ title: 'PDF Downloaded', description: 'Your resume has been saved as PDF.' });
+    } catch (err) {
+      console.error('PDF generation error:', err);
+      toast({ 
+        title: 'PDF Generation Failed', 
+        description: 'Could not generate PDF. Please try again.', 
+        variant: 'destructive' 
+      });
+    }
   };
 
   const downloadAsDOCX = async () => {
-    if (!isPro || !result) return;
-    const paragraphs = result.tailoredResume.split('\n').map(line =>
-      new Paragraph({ children: [new TextRun({ text: line || ' ' })] })
-    );
-    const doc = new Document({ sections: [{ children: paragraphs }] });
-    const blob = await Packer.toBlob(doc);
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'tailored-resume.docx';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    if (!isPro || !result) {
+      toast({ 
+        title: 'Pro Feature', 
+        description: 'Upgrade to Pro or Elite to download DOCX files.', 
+        variant: 'destructive' 
+      });
+      return;
+    }
+    
+    try {
+      const paragraphs = result.tailoredResume.split('\n').map(line =>
+        new Paragraph({ 
+          children: [new TextRun({ text: line || ' ', size: 24 })] 
+        })
+      );
+      const doc = new Document({ 
+        sections: [{ 
+          properties: {}, 
+          children: paragraphs 
+        }] 
+      });
+      const blob = await Packer.toBlob(doc);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'tailored-resume.docx';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast({ title: 'DOCX Downloaded', description: 'Your resume has been saved as DOCX.' });
+    } catch (err) {
+      console.error('DOCX generation error:', err);
+      toast({ 
+        title: 'DOCX Generation Failed', 
+        description: 'Could not generate DOCX. Please try again.', 
+        variant: 'destructive' 
+      });
+    }
   };
 
   const handleFormSubmit = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    const { data: profile } = await supabase.from('profiles').select('full_name').eq('user_id', user?.id || '').maybeSingle();
-    await handleGenerate(resumeText, jobDescription, profile?.full_name || '');
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({ 
+          title: 'Not Signed In', 
+          description: 'Please sign in to generate resumes.', 
+          variant: 'destructive' 
+        });
+        return;
+      }
+      
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      await handleGenerate(resumeText, jobDescription, profile?.full_name || '');
+    } catch (err) {
+      console.error('Form submission error:', err);
+    }
   };
 
   const handleReset = () => {
@@ -580,8 +808,11 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
     setResumeText('');
     setJobDescription('');
     resetFileUpload();
+    setShowRewritePrompt(false);
+    setPendingResumeText('');
   };
 
+  // If we have results, show the results view
   if (result) {
     return (
       <ResultsView
@@ -595,10 +826,12 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
     );
   }
 
+  // Otherwise show the input form
   return (
     <div className="p-6 space-y-6 max-w-4xl mx-auto">
       <HeaderSection />
       <StepsSection />
+      
       <InputSection
         resumeText={resumeText}
         jobDescription={jobDescription}
@@ -607,7 +840,10 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
         isUploading={isUploading}
         isPro={isPro}
         fileInputRef={fileInputRef}
-        onResumeChange={(val) => { setResumeText(val); resetFileUpload(); }}
+        onResumeChange={(val) => { 
+          setResumeText(val); 
+          resetFileUpload();
+        }}
         onJobDescChange={setJobDescription}
         onFileUpload={handleFileUpload}
       />
@@ -653,7 +889,7 @@ const HeaderSection: React.FC = () => (
         <FileText className="w-6 h-6" />
       </div>
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Resume + ATS</h1>
+        <h1 className="text-2xl font-bold text-foreground">Resume + ATS Optimizer</h1>
         <p className="text-sm text-muted-foreground">
           Paste your resume and a job description. Get a tailored resume, cover letter, and ATS score in 60 seconds.
         </p>
@@ -663,7 +899,7 @@ const HeaderSection: React.FC = () => (
 );
 
 const StepsSection: React.FC = () => (
-  <div className="grid grid-cols-3 gap-4">
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
     {STEPS.map((step, i) => (
       <Card key={i} className="border-0 shadow-sm">
         <CardContent className="p-4 text-center">
@@ -687,7 +923,18 @@ const InputSection: React.FC<{
   onResumeChange: (val: string) => void;
   onJobDescChange: (val: string) => void;
   onFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}> = ({ resumeText, jobDescription, uploadedFileName, uploadedDocxFile, isUploading, isPro, fileInputRef, onResumeChange, onJobDescChange, onFileUpload }) => (
+}> = ({ 
+  resumeText, 
+  jobDescription, 
+  uploadedFileName, 
+  uploadedDocxFile, 
+  isUploading, 
+  isPro, 
+  fileInputRef, 
+  onResumeChange, 
+  onJobDescChange, 
+  onFileUpload 
+}) => (
   <div className="space-y-4">
     <ResumeInputSection
       resumeText={resumeText}
@@ -715,12 +962,27 @@ const ResumeInputSection: React.FC<{
   fileInputRef: React.RefObject<HTMLInputElement>;
   onResumeChange: (val: string) => void;
   onFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}> = ({ resumeText, uploadedFileName, uploadedDocxFile, isUploading, isPro, fileInputRef, onResumeChange, onFileUpload }) => (
+}> = ({ 
+  resumeText, 
+  uploadedFileName, 
+  uploadedDocxFile, 
+  isUploading, 
+  isPro, 
+  fileInputRef, 
+  onResumeChange, 
+  onFileUpload 
+}) => (
   <div>
     <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
       <label className="text-sm font-medium">Your Resume</label>
       <div className="flex items-center gap-2">
-        <input ref={fileInputRef} type="file" accept=".pdf,.docx,.txt" onChange={onFileUpload} className="hidden" />
+        <input 
+          ref={fileInputRef} 
+          type="file" 
+          accept=".pdf,.docx,.txt" 
+          onChange={onFileUpload} 
+          className="hidden" 
+        />
         <Button
           type="button"
           variant="outline"
@@ -728,9 +990,16 @@ const ResumeInputSection: React.FC<{
           onClick={() => isPro ? fileInputRef.current?.click() : null}
           disabled={isUploading}
           className="gap-2"
+          title={!isPro ? "Upgrade to Pro or Elite to upload files" : "Upload resume file"}
         >
-          {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : (isPro ? <Upload className="w-4 h-4" /> : <Lock className="w-4 h-4" />)}
-          Upload PDF/DOCX{!isPro && ' (Pro)'}
+          {isUploading ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : isPro ? (
+            <Upload className="w-4 h-4" />
+          ) : (
+            <Lock className="w-4 h-4" />
+          )}
+          Upload{!isPro && ' (Pro)'}
         </Button>
       </div>
     </div>
@@ -741,7 +1010,9 @@ const ResumeInputSection: React.FC<{
       className="min-h-[200px] bg-muted/30 resize-y"
     />
     <p className="text-xs text-muted-foreground mt-1">
-      {uploadedFileName ? `📎 ${uploadedFileName} — ${wordCount(resumeText)} words` : (resumeText ? `${wordCount(resumeText)} words` : 'Paste text or upload PDF/DOCX (Pro)')}
+      {uploadedFileName ? `📎 ${uploadedFileName} — ${wordCount(resumeText)} words` : 
+       resumeText ? `${wordCount(resumeText)} words` : 
+       'Paste text or upload PDF/DOCX (Pro/Elite feature)'}
     </p>
   </div>
 );
@@ -776,19 +1047,42 @@ const ActionButtonsSection: React.FC<{
   if (!canGenerate) {
     return (
       <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-center space-y-2">
-        <p className="text-sm font-semibold">{tier === 'free' ? 'Free limit reached' : 'Monthly limit reached'}</p>
-        <p className="text-xs text-muted-foreground">You've used all your application bundles {tier === 'free' ? 'on the free plan' : 'this month'}.</p>
-        <Button size="sm" className="mt-2" onClick={onUpgrade}>Upgrade to continue</Button>
+        <p className="text-sm font-semibold">
+          {tier === 'free' ? 'Free Limit Reached' : 'Monthly Limit Reached'}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          You've used all your application bundles {tier === 'free' ? 'on the free plan' : 'this month'}.
+        </p>
+        <Button size="sm" className="mt-2" onClick={onUpgrade}>
+          Upgrade to {tier === 'free' ? 'Pro' : 'Elite'} to continue
+        </Button>
       </div>
     );
   }
 
   return (
     <div className="space-y-2">
-      <Button onClick={onGenerate} disabled={isProcessing || !hasInputs} size="lg" className="w-full h-14 text-lg font-semibold gap-3 rounded-2xl">
-        {isProcessing ? <><Loader2 className="w-5 h-5 animate-spin" />Generating... (takes ~30 seconds)</> : <><Sparkles className="w-5 h-5" />Generate Tailored Resume + Cover Letter + ATS Score</>}
+      <Button 
+        onClick={onGenerate} 
+        disabled={isProcessing || !hasInputs} 
+        size="lg" 
+        className="w-full h-14 text-lg font-semibold gap-3 rounded-2xl"
+      >
+        {isProcessing ? (
+          <>
+            <Loader2 className="w-5 h-5 animate-spin" />
+            Generating... (takes ~30 seconds)
+          </>
+        ) : (
+          <>
+            <Sparkles className="w-5 h-5" />
+            Generate Tailored Resume + Cover Letter + ATS Score
+          </>
+        )}
       </Button>
-      <p className="text-xs text-center text-muted-foreground">{remaining} bundle{remaining !== 1 ? 's' : ''} remaining {tier === 'free' ? '(free plan)' : 'this month'}</p>
+      <p className="text-xs text-center text-muted-foreground">
+        {remaining} bundle{remaining !== 1 ? 's' : ''} remaining {tier === 'free' ? '(free plan)' : 'this month'}
+      </p>
     </div>
   );
 };
@@ -802,7 +1096,16 @@ const DocxRewriteSection: React.FC<{
   resumeText: string;
   onRewriteDocx: () => void;
   onDownloadEditedDocx: () => void;
-}> = ({ uploadedDocxFile, isPro, isRewritingDocx, editedDocxBase64, jobDescription, resumeText, onRewriteDocx, onDownloadEditedDocx }) => {
+}> = ({ 
+  uploadedDocxFile, 
+  isPro, 
+  isRewritingDocx, 
+  editedDocxBase64, 
+  jobDescription, 
+  resumeText, 
+  onRewriteDocx, 
+  onDownloadEditedDocx 
+}) => {
   if (!uploadedDocxFile || !isPro) return null;
 
   return (
@@ -811,26 +1114,37 @@ const DocxRewriteSection: React.FC<{
         <div className="flex items-start gap-3">
           <Sparkles className="w-5 h-5 text-primary mt-0.5" />
           <div className="flex-1">
-            <p className="text-sm font-semibold">AI DOCX Editing (Pro)</p>
+            <p className="text-sm font-semibold">AI DOCX Editing (Pro/Elite Feature)</p>
             <p className="text-xs text-muted-foreground">
-              Let GPT rewrite your uploaded DOCX paragraph-by-paragraph to match the job description — your original template, fonts, and formatting stay intact.
+              Let AI rewrite your uploaded DOCX paragraph-by-paragraph to match the job description — 
+              your original template, fonts, and formatting stay intact.
             </p>
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button size="sm" onClick={onRewriteDocx} disabled={isRewritingDocx || !jobDescription.trim()} className="gap-2">
-            {isRewritingDocx ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-            {editedDocxBase64 ? 'Rewrite again' : 'Rewrite my DOCX'}
+          <Button 
+            size="sm" 
+            onClick={onRewriteDocx} 
+            disabled={isRewritingDocx || !jobDescription.trim()} 
+            className="gap-2"
+          >
+            {isRewritingDocx ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Sparkles className="w-4 h-4" />
+            )}
+            {editedDocxBase64 ? 'Rewrite Again' : 'Rewrite My DOCX'}
           </Button>
           {editedDocxBase64 && (
             <Button size="sm" variant="outline" onClick={onDownloadEditedDocx} className="gap-2">
-              <Download className="w-4 h-4" /> Download edited DOCX
+              <Download className="w-4 h-4" />
+              Download Edited DOCX
             </Button>
           )}
         </div>
-        {editedDocxBase64 && (
+        {editedDocxBase64 && resumeText && (
           <div className="bg-background/60 rounded-lg p-3 border max-h-[300px] overflow-y-auto">
-            <p className="text-xs font-semibold text-muted-foreground mb-2">Rewritten resume preview:</p>
+            <p className="text-xs font-semibold text-muted-foreground mb-2">Rewritten Resume Preview:</p>
             <pre className="text-xs whitespace-pre-wrap font-mono leading-relaxed">{resumeText}</pre>
           </div>
         )}
@@ -847,10 +1161,16 @@ const RewritePromptDialog: React.FC<{
   onRewriteDocx: () => void;
   onGenerate: () => void;
 }> = ({ open, onOpenChange, hasJobDescription, uploadedDocxFile, onRewriteDocx, onGenerate }) => {
+  const { toast } = useToast();
+  
   const handleConfirm = () => {
     onOpenChange(false);
     if (!hasJobDescription) {
-      toast({ title: 'Add a job description', description: 'Paste the JD, then click "Rewrite my DOCX" below.' });
+      toast({ 
+        title: 'Job Description Required', 
+        description: 'Please paste the job description first, then click "Rewrite My DOCX" below.', 
+        variant: 'destructive' 
+      });
       return;
     }
     if (uploadedDocxFile) {
@@ -864,14 +1184,15 @@ const RewritePromptDialog: React.FC<{
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Rewrite resume to match the job?</AlertDialogTitle>
+          <AlertDialogTitle>Rewrite Resume to Match the Job?</AlertDialogTitle>
           <AlertDialogDescription>
-            We can have AI rewrite your uploaded resume to better match the job description, add missing keywords, and boost your ATS score. You'll be able to download it as PDF or DOCX.
+            We can have AI rewrite your uploaded resume to better match the job description, 
+            add missing keywords, and boost your ATS score. You'll be able to download it as PDF or DOCX.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>No, keep as is</AlertDialogCancel>
-          <AlertDialogAction onClick={handleConfirm}>Yes, rewrite with AI</AlertDialogAction>
+          <AlertDialogCancel>No, Keep As Is</AlertDialogCancel>
+          <AlertDialogAction onClick={handleConfirm}>Yes, Rewrite with AI</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
