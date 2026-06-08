@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Menu, X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-// ===== Logo Component =====
+// ===== Logo Components =====
 const VaylanceLogo = () => (
   <svg width="28" height="28" viewBox="0 0 48 48" fill="none" aria-hidden="true">
     <rect width="48" height="48" rx="11" fill="#1d4ed8"/>
@@ -14,6 +14,13 @@ const VaylanceLogo = () => (
     <line x1="32.5" y1="13" x2="36" y2="13" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
     <line x1="36" y1="13" x2="36" y2="16.5" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
   </svg>
+);
+
+const Logo = () => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+    <VaylanceLogo />
+    <span style={{ fontWeight: 700, fontSize: 20, color: 'white', letterSpacing: '-0.02em' }}>Vaylance</span>
+  </div>
 );
 
 // ===== Navigation Items =====
@@ -52,8 +59,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <VaylanceLogo />
-            <span className="font-bold text-lg text-foreground tracking-tight">Vaylance</span>
+            <Logo />
           </Link>
 
           {/* Desktop Navigation - Centered */}
