@@ -39,7 +39,7 @@ const HeroSection = () => {
               AI-Powered Job Search
             </div>
 
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-foreground tracking-tight leading-[1.05] mb-6">
+            <h1 className="text-6xl sm:text-7xl lg:text-7xl font-black text-foreground tracking-tight leading-[1.02] mb-6">
               Land your next job{' '}
               <span className="bg-gradient-to-r from-blue-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
                 faster
