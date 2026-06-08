@@ -5,13 +5,15 @@ import { Link } from 'react-router-dom';
 
 const plans = [
   {
-    name: 'Free',
+    name: 'Free Trial',
     price: 0,
-    description: 'Get started with the basics.',
-    features: ['5 Job Matches / day', '1 Resume', 'AI Cover Letter (3 / month)', 'Application Tracker'],
-    cta: 'Get Started',
+    trial: true,
+    description: 'Try Vaylance free for 3 days.',
+    features: ['Full access for 3 days', '5 Job Matches / day', '1 Resume', 'AI Cover Letter (3 / month)', 'Application Tracker'],
+    cta: 'Start Free Trial',
     popular: false,
   },
+
   {
     name: 'Pro',
     price: 15,
