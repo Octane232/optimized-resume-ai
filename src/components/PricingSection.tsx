@@ -65,10 +65,19 @@ const PricingSection = () => (
               <h3 className="text-lg font-bold text-foreground mb-1">{plan.name}</h3>
               <p className="text-xs text-muted-foreground mb-4">{plan.description}</p>
               <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-black text-foreground">${plan.price}</span>
-                <span className="text-muted-foreground text-sm">/month</span>
+                {plan.trial ? (
+                  <>
+                    <span className="text-4xl font-black text-foreground">3 days</span>
+                    <span className="text-muted-foreground text-sm">free</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-4xl font-black text-foreground">${plan.price}</span>
+                    <span className="text-muted-foreground text-sm">/month</span>
+                  </>
+                )}
               </div>
-            </div>
+
 
             <Button
               asChild
