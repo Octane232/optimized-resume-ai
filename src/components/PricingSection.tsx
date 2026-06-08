@@ -5,16 +5,19 @@ import { Link } from 'react-router-dom';
 
 const plans = [
   {
-    name: 'Free',
+    name: 'Free Trial',
     price: 0,
-    description: 'Get started with the basics.',
-    features: ['5 Job Matches / day', '1 Resume', 'AI Cover Letter (3 / month)', 'Application Tracker'],
-    cta: 'Get Started',
+    trial: true,
+    description: 'Try Vaylance free for 3 days.',
+    features: ['Full access for 3 days', '5 Job Matches / day', '1 Resume', 'AI Cover Letter (3 / month)', 'Application Tracker'],
+    cta: 'Start Free Trial',
     popular: false,
   },
+
   {
     name: 'Pro',
     price: 15,
+    trial: false,
     description: 'Everything you need to get hired.',
     features: ['Unlimited Job Matches', 'Unlimited Resumes', 'AI Cover Letters (Unlimited)', 'Interview Coach', 'Salary Insights'],
     cta: 'Start Free Trial',
@@ -23,15 +26,17 @@ const plans = [
   {
     name: 'Elite',
     price: 29,
+    trial: false,
     description: 'For serious job seekers.',
     features: ['Everything in Pro', 'Priority Support', 'ATS Resume Review', 'Job Application Automation'],
     cta: 'Start Free Trial',
     popular: false,
   },
+
 ];
 
 const PricingSection = () => (
-  <section id="pricing" className="py-24">
+  <section id="pricing" className="py-16">
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="text-center mb-14">
         <p className="text-xs font-bold tracking-[0.25em] mb-3 bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">SIMPLE, TRANSPARENT PRICING</p>
@@ -63,10 +68,22 @@ const PricingSection = () => (
               <h3 className="text-lg font-bold text-foreground mb-1">{plan.name}</h3>
               <p className="text-xs text-muted-foreground mb-4">{plan.description}</p>
               <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-black text-foreground">${plan.price}</span>
-                <span className="text-muted-foreground text-sm">/month</span>
+                {plan.trial ? (
+                  <>
+                    <span className="text-4xl font-black text-foreground">3 days</span>
+                    <span className="text-muted-foreground text-sm">free</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-4xl font-black text-foreground">${plan.price}</span>
+                    <span className="text-muted-foreground text-sm">/month</span>
+                  </>
+                )}
               </div>
             </div>
+
+
+
 
             <Button
               asChild

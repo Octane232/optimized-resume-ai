@@ -9,7 +9,7 @@ const testimonials = [
 
 const TestimonialsSection = () => {
   return (
-    <section className="py-24">
+    <section className="py-14">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-14">
           <p className="text-xs font-bold tracking-[0.25em] mb-3 bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">LOVED BY JOB SEEKERS</p>

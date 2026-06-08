@@ -139,10 +139,11 @@ const Footer = () => {
               <button
                 type="submit"
                 disabled={formStatus === 'submitting'}
-                className="w-full px-4 py-2 text-sm font-semibold bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="block w-full mt-1 px-4 py-2.5 text-sm font-semibold bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {formStatus === 'submitting' ? 'Sending...' : 'Send Message'}
               </button>
+
             </form>
             <p className="text-xs text-muted-foreground text-center mt-2">
               Or email us directly at <a href="mailto:contact-us@vaylance.com" className="text-primary hover:underline">contact-us@vaylance.com</a>
