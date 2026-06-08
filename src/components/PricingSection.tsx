@@ -17,6 +17,7 @@ const plans = [
   {
     name: 'Pro',
     price: 15,
+    trial: false,
     description: 'Everything you need to get hired.',
     features: ['Unlimited Job Matches', 'Unlimited Resumes', 'AI Cover Letters (Unlimited)', 'Interview Coach', 'Salary Insights'],
     cta: 'Start Free Trial',
@@ -25,11 +26,13 @@ const plans = [
   {
     name: 'Elite',
     price: 29,
+    trial: false,
     description: 'For serious job seekers.',
     features: ['Everything in Pro', 'Priority Support', 'ATS Resume Review', 'Job Application Automation'],
     cta: 'Start Free Trial',
     popular: false,
   },
+
 ];
 
 const PricingSection = () => (
