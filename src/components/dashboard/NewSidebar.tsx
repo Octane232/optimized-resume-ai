@@ -1,4 +1,5 @@
 import React from 'react';
+import VaylanceLogo from '@/components/VaylanceLogo';
 import { 
   Home, 
   Target, 
