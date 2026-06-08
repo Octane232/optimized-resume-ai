@@ -17,8 +17,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
-
-
 import { useUsageLimit } from '@/contexts/UsageLimitContext';
 
 // ===== Type Definitions =====
@@ -165,7 +163,8 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
 
       if (alerts && alerts.length > 0) {
         setScoutJobs(alerts.map((alert: any, index: number) => ({
-          company: alert.radar_signals?.company_name || 'Unknown',
+          // FIX 1: Better fallback label for unknown company
+          company: alert.radar_signals?.company_name || 'New Signal',
           role: alert.radar_signals?.likely_roles?.[0] || 'Position',
           match: alert.match_score || 75,
           color: SCOUT_COLORS[index % SCOUT_COLORS.length],
@@ -252,7 +251,8 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
         {/* Scout Report */}
         <ScoutReport
           scoutJobs={scoutJobs}
-          onReviewMatches={() => setActiveTab('resume-engine')}
+          // FIX 2: Changed from 'resume-engine' to 'job-search'
+          onReviewMatches={() => setActiveTab('job-search')}
         />
 
         {/* Action Required */}
@@ -410,7 +410,7 @@ const ScoutReport: React.FC<ScoutReportProps> = ({ scoutJobs, onReviewMatches })
         {/* Scout Jobs List */}
         <ScoutJobsList jobs={scoutJobs} />
 
-        {/* Review Button */}
+        {/* Review Button - FIX 2 applied here via prop */}
         <Button onClick={onReviewMatches} className="w-full mt-4 gap-2" size="sm">
           <Sparkles className="w-3.5 h-3.5" />
           Review Matches
