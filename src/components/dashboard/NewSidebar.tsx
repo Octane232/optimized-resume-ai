@@ -24,7 +24,6 @@ import {
   TooltipProvider,
   TooltipTrigger 
 } from '@/components/ui/tooltip';
-// STEP 3 FIXED: Added ThemeToggle import
 import ThemeToggle from '@/components/ThemeToggle';
 
 interface NewSidebarProps {
@@ -119,11 +118,27 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
       <div className="p-4 flex items-center justify-between border-b border-sidebar-border">
         {!collapsed ? (
           <div className="flex items-center gap-2">
-            <img src="/favicon.png" alt="Vaylance" className="w-7 h-7 rounded-md" />
+            <svg width="28" height="28" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+              <rect width="48" height="48" rx="11" fill="#1d4ed8"/>
+              <circle cx="22" cy="27" r="11" stroke="white" strokeWidth="2.2" fill="none"/>
+              <circle cx="22" cy="27" r="6.5" stroke="white" strokeWidth="1.6" strokeOpacity="0.6" fill="none"/>
+              <circle cx="22" cy="27" r="2.6" fill="white"/>
+              <line x1="29.5" y1="19.5" x2="36" y2="13" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
+              <line x1="32.5" y1="13" x2="36" y2="13" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
+              <line x1="36" y1="13" x2="36" y2="16.5" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
+            </svg>
             <span className="text-xl font-bold text-foreground">Vaylance</span>
           </div>
         ) : (
-          <img src="/favicon.png" alt="Vaylance" className="w-8 h-8 rounded-md mx-auto" />
+          <svg width="32" height="32" viewBox="0 0 48 48" fill="none" aria-hidden="true" className="mx-auto">
+            <rect width="48" height="48" rx="11" fill="#1d4ed8"/>
+            <circle cx="22" cy="27" r="11" stroke="white" strokeWidth="2.2" fill="none"/>
+            <circle cx="22" cy="27" r="6.5" stroke="white" strokeWidth="1.6" strokeOpacity="0.6" fill="none"/>
+            <circle cx="22" cy="27" r="2.6" fill="white"/>
+            <line x1="29.5" y1="19.5" x2="36" y2="13" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
+            <line x1="32.5" y1="13" x2="36" y2="13" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
+            <line x1="36" y1="13" x2="36" y2="16.5" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
+          </svg>
         )}
         <Button 
           variant="ghost" 
@@ -242,7 +257,7 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
         </TooltipProvider>
       </nav>
 
-      {/* STEP 2 FIXED: Bottom section with ThemeToggle */}
+      {/* Bottom section with ThemeToggle */}
       <div className="p-3 border-t border-sidebar-border flex items-center justify-between">
         {!collapsed && <span className="text-xs text-muted-foreground">Theme</span>}
         <ThemeToggle />
