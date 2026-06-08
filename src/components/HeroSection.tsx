@@ -78,7 +78,16 @@ const HeroSection = () => {
               {/* Topbar */}
               <div className="flex items-center justify-between px-4 py-3 border-b border-border/60 bg-card">
                 <div className="flex items-center gap-2">
-                  <svg width="18" height="18" viewBox="0 0 32 32" fill="none"><path d="M4 6 L16 28 L28 6" stroke="url(#vh)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/><defs><linearGradient id="vh" x1="0" y1="0" x2="32" y2="32"><stop stopColor="hsl(217 91% 65%)"/><stop offset="1" stopColor="hsl(262 83% 65%)"/></linearGradient></defs></svg>
+                  {/* Fixed: Replaced gradient mountain logo with target logo */}
+                  <svg width="18" height="18" viewBox="0 0 48 48" fill="none">
+                    <rect width="48" height="48" rx="11" fill="#1d4ed8"/>
+                    <circle cx="22" cy="27" r="11" stroke="white" strokeWidth="2.2" fill="none"/>
+                    <circle cx="22" cy="27" r="6.5" stroke="white" strokeWidth="1.6" strokeOpacity="0.6" fill="none"/>
+                    <circle cx="22" cy="27" r="2.6" fill="white"/>
+                    <line x1="29.5" y1="19.5" x2="36" y2="13" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
+                    <line x1="32.5" y1="13" x2="36" y2="13" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
+                    <line x1="36" y1="13" x2="36" y2="16.5" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
+                  </svg>
                   <span className="text-xs font-bold text-foreground">Vaylance</span>
                 </div>
                 <div className="flex items-center gap-2">
