@@ -3,18 +3,20 @@ import { Link } from 'react-router-dom';
 import { Menu, X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+// ===== Logo Component =====
 const VaylanceLogo = () => (
-  <svg width="26" height="26" viewBox="0 0 32 32" fill="none">
-    <defs>
-      <linearGradient id="vlogo" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-        <stop stopColor="hsl(217 91% 65%)" />
-        <stop offset="1" stopColor="hsl(262 83% 65%)" />
-      </linearGradient>
-    </defs>
-    <path d="M4 6 L16 28 L28 6" stroke="url(#vlogo)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+  <svg width="28" height="28" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+    <rect width="48" height="48" rx="11" fill="#1d4ed8"/>
+    <circle cx="22" cy="27" r="11" stroke="white" strokeWidth="2.2" fill="none"/>
+    <circle cx="22" cy="27" r="6.5" stroke="white" strokeWidth="1.6" strokeOpacity="0.6" fill="none"/>
+    <circle cx="22" cy="27" r="2.6" fill="white"/>
+    <line x1="29.5" y1="19.5" x2="36" y2="13" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
+    <line x1="32.5" y1="13" x2="36" y2="13" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
+    <line x1="36" y1="13" x2="36" y2="16.5" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
   </svg>
 );
 
+// ===== Navigation Items =====
 const navItems = [
   { label: 'Product', id: 'features' },
   { label: 'Features', id: 'features' },
@@ -23,6 +25,7 @@ const navItems = [
   { label: 'Company', id: 'features' },
 ];
 
+// ===== Main Header Component =====
 const Header = () => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -34,7 +37,10 @@ const Header = () => {
   }, []);
 
   const scrollTo = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
     setMenuOpen(false);
   };
 
@@ -44,11 +50,13 @@ const Header = () => {
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
+          {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
             <VaylanceLogo />
             <span className="font-bold text-lg text-foreground tracking-tight">Vaylance</span>
           </Link>
 
+          {/* Desktop Navigation - Centered */}
           <nav className="hidden md:flex items-center gap-7 absolute left-1/2 -translate-x-1/2">
             {navItems.map((item, idx) => (
               <button
@@ -64,6 +72,7 @@ const Header = () => {
             ))}
           </nav>
 
+          {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center gap-3">
             <Button asChild variant="ghost" size="sm" className="font-medium text-muted-foreground hover:text-foreground">
               <Link to="/auth">Sign in</Link>
@@ -73,6 +82,7 @@ const Header = () => {
             </Button>
           </div>
 
+          {/* Mobile Menu Button */}
           <button
             className="md:hidden p-2 text-foreground"
             onClick={() => setMenuOpen(!menuOpen)}
@@ -82,17 +92,26 @@ const Header = () => {
           </button>
         </div>
 
+        {/* Mobile Navigation Menu */}
         {menuOpen && (
           <div className="md:hidden py-4 border-t border-border bg-background">
             <div className="flex flex-col gap-3 px-2">
               {navItems.map((item, idx) => (
-                <button key={idx} onClick={() => scrollTo(item.id)} className="text-sm font-medium text-muted-foreground hover:text-foreground py-2 text-left">
+                <button 
+                  key={idx} 
+                  onClick={() => scrollTo(item.id)} 
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground py-2 text-left"
+                >
                   {item.label}
                 </button>
               ))}
               <div className="flex flex-col gap-2 pt-2 border-t border-border">
-                <Button asChild variant="outline" size="sm"><Link to="/auth">Sign in</Link></Button>
-                <Button asChild size="sm" className="bg-gradient-to-r from-blue-600 to-violet-600 text-white"><Link to="/auth">Get Started Free</Link></Button>
+                <Button asChild variant="outline" size="sm">
+                  <Link to="/auth">Sign in</Link>
+                </Button>
+                <Button asChild size="sm" className="bg-gradient-to-r from-blue-600 to-violet-600 text-white">
+                  <Link to="/auth">Get Started Free</Link>
+                </Button>
               </div>
             </div>
           </div>
