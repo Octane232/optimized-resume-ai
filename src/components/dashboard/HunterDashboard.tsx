@@ -152,24 +152,37 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Fetch radar alerts
-      const { data: alerts } = await supabase
+      // FIXED: Explicitly specify the foreign key column with !signal_id
+      const { data: alerts, error } = await supabase
         .from('radar_alerts')
-        .select('match_score, radar_signals(company_name, likely_roles, source_url)')
+        .select(`
+          match_score,
+          radar_signals!signal_id(
+            company_name,
+            likely_roles,
+            source_url
+          )
+        `)
         .eq('user_id', user.id)
         .eq('is_read', false)
         .order('created_at', { ascending: false })
         .limit(3);
 
+      if (error) {
+        console.error('Error fetching radar alerts:', error);
+        return;
+      }
+
       if (alerts && alerts.length > 0) {
         setScoutJobs(alerts.map((alert: any, index: number) => ({
-          // FIX 1: Better fallback label for unknown company
           company: alert.radar_signals?.company_name || 'New Signal',
           role: alert.radar_signals?.likely_roles?.[0] || 'Position',
           match: alert.match_score || 75,
           color: SCOUT_COLORS[index % SCOUT_COLORS.length],
           url: alert.radar_signals?.source_url
         })));
+      } else {
+        setScoutJobs([]);
       }
 
       // Check for stale applications
@@ -192,6 +205,8 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
             jobTitle: app.job_title,
             daysSince
           });
+        } else {
+          setStaleApplication(null);
         }
       }
     } catch (error) {
@@ -251,7 +266,6 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
         {/* Scout Report */}
         <ScoutReport
           scoutJobs={scoutJobs}
-          // FIX 2: Changed from 'resume-engine' to 'job-search'
           onReviewMatches={() => setActiveTab('job-search')}
         />
 
@@ -410,7 +424,7 @@ const ScoutReport: React.FC<ScoutReportProps> = ({ scoutJobs, onReviewMatches })
         {/* Scout Jobs List */}
         <ScoutJobsList jobs={scoutJobs} />
 
-        {/* Review Button - FIX 2 applied here via prop */}
+        {/* Review Button */}
         <Button onClick={onReviewMatches} className="w-full mt-4 gap-2" size="sm">
           <Sparkles className="w-3.5 h-3.5" />
           Review Matches
