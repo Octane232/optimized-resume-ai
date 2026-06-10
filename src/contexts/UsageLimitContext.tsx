@@ -17,13 +17,13 @@ export type UsageAction =
 // ===== STEP 4: Add PLAN_LIMITS Constant - MUST BE EXPORTED =====
 export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> = {
   free: {
-    resume_ats: 1,
-    cover_letter: 1,
-    linkedin: 1,
-    skill_gap: 1,
-    interview_prep: 3,
+    resume_ats: 3,
+    cover_letter: 3,
+    linkedin: 3,
+    skill_gap: 3,
+    interview_prep: 5,
     salary_intel: 0,
-    radar_alert: 1,
+    radar_alert: 3,
     docx_rewrite: 0,
     resume_parse: 3,
   },
