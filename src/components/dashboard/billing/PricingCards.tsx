@@ -9,18 +9,18 @@ import { useToast } from '@/hooks/use-toast';
 type PlanId = 'pro' | 'elite';
 type Billing = 'monthly' | 'yearly';
 
-// FIXED: Updated FREE_FEATURES for 3-day trial
+// FIXED: Updated FREE_FEATURES for 3-day trial (all features, no free tier after)
 const FREE_FEATURES = [
-  '3 day free trial — full access',
-  '3 Resume Engine runs',
-  '3 Cover Letters',
-  '3 LinkedIn Optimizations',
-  '5 Interview Sessions',
-  '3 Job Radar Scans',
-  '3 Skill Gap Analyses',
-  'Application Tracker',
-  'No credit card required',
-  '⏰ Trial ends after 3 days',
+  '✅ Full access to ALL features for 3 days',
+  '✅ Resume Engine + ATS Score',
+  '✅ Cover Letter Generation',
+  '✅ LinkedIn Optimizer',
+  '✅ Interview Coach',
+  '✅ Job Radar Alerts',
+  '✅ Skill Gap Analyzer',
+  '✅ Application Tracker',
+  '✅ No credit card required',
+  '⏰ Trial ends after 3 days — upgrade to continue',
 ];
 
 // FIXED: Updated PLANS array for Pro and Elite
