@@ -25,6 +25,17 @@ export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> 
     docx_rewrite: 0,
     resume_parse: 0,
   },
+  trial: {
+    resume_ats: 3,
+    cover_letter: 3,
+    linkedin: 3,
+    skill_gap: 3,
+    interview_prep: 5,
+    salary_intel: 2,
+    radar_alert: 3,
+    docx_rewrite: 2,
+    resume_parse: 10,
+  },
   pro: {
     resume_ats: 15,
     cover_letter: 15,
