@@ -76,7 +76,7 @@ const PricingCards = () => {
   const [billing, setBilling] = useState<Billing>('monthly');
   const [loading, setLoading] = useState<PlanId | null>(null);
 
-  const isTrial = tier === 'free' && subscriptionEnd;
+  const isTrial = tier === 'trial' || (tier === 'free' && subscriptionEnd);
   const isTrialActive = isTrial && subscriptionEnd && new Date(subscriptionEnd) > new Date();
 
   const handleUpgrade = async (planId: PlanId) => {

@@ -35,12 +35,12 @@ const PaidManagement = () => {
   const getTierLabel = () => {
     if (tier === 'elite') return 'Elite';
     if (tier === 'pro') return 'Pro';
-    if (tier === 'free' && subscriptionEnd) return 'Trial';
+    if (tier === 'trial' || (tier === 'free' && subscriptionEnd)) return 'Trial';
     return 'Free';
   };
   
   const tierLabel = getTierLabel();
-  const isTrial = tier === 'free' && subscriptionEnd;
+  const isTrial = tier === 'trial' || (tier === 'free' && subscriptionEnd);
 
   // Handle billing portal redirect
   const handleManageBilling = async () => {

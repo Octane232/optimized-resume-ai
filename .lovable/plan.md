@@ -1,79 +1,60 @@
-## Critical scaling bug: Unauthenticated, unmetered AI edge functions
 
-### The bug
+# Add a Dedicated `trial` Tier
 
-Every expensive AI edge function in your project is **publicly callable by anyone on the internet, with no authentication and no usage tracking server-side**. A single attacker (or a curious user with browser devtools) can drain your OpenAI budget in minutes, and there is nothing in the code to stop them.
+## Goal
+Stop granting trial users full Elite access. Create a separate `trial` tier with sensible, cost-controlled limits that still feel generous for 3 days. After trial ends, users fall to `free` (all zeros → paywall).
 
-This will not just hurt you at scale — it can bankrupt the project on day one of going viral.
+## New Tier Limits
 
-### Evidence
+Proposed `trial` limits (tuned for a 3-day window — enough to experience every feature, not enough to abuse):
 
-In `supabase/config.toml`, all AI functions are set to `verify_jwt = false`:
+| Feature              | Trial | Pro  | Elite |
+| -------------------- | ----- | ---- | ----- |
+| resume_ats           | 3     | 15   | 40    |
+| cover_letter         | 3     | 15   | 40    |
+| linkedin             | 3     | 10   | 30    |
+| skill_gap            | 3     | 10   | 30    |
+| interview_prep       | 5     | 20   | 60    |
+| salary_intel         | 2     | 5    | 15    |
+| radar_alert          | 3     | 10   | 30    |
+| docx_rewrite         | 2     | 5    | 20    |
+| resume_parse         | 10    | 50   | 200   |
 
-```
-[functions.apply-bundle]        verify_jwt = false
-[functions.optimize-linkedin]   verify_jwt = false
-[functions.analyze-resume-ats]  verify_jwt = false
-[functions.generate-cover-letter] verify_jwt = false
-[functions.analyze-skill-gap]   verify_jwt = false
-[functions.salary-intel]        verify_jwt = false
-[functions.vaylance-chat]       verify_jwt = false
-[functions.parse-resume-ai]     verify_jwt = false
-[functions.rewrite-bullet]      verify_jwt = false
-[functions.generate-resume-content] verify_jwt = false
-```
+These match the "3-day trial" features you originally showed on the pricing card.
 
-And inside those functions there is **no `supabase.auth.getUser(token)` call, no usage limit check, and no credit deduction**. The only `Authorization` headers in the files are the ones being sent *out* to OpenAI. Example — `apply-bundle` (the most expensive: 3 parallel GPT calls per request):
+## Changes
 
-```ts
-serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-  const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-  const { jobDescription, userResume } = await req.json();
-  // → 3x fetch to OpenAI. No auth. No rate limit. No usage check.
-});
-```
+### 1. Type updates (frontend + edge)
+- Add `'trial'` to `SubscriptionTier` union in:
+  - `src/contexts/UsageLimitContext.tsx`
+  - `supabase/functions/_shared/tierLimits.ts`
+- Add `trial: { ... }` block to `PLAN_LIMITS` in both files using the table above.
+- `displayTier` mapping: `trial → 'Free'` (still shows "Free" on UI badges since they haven't paid) OR add `'Trial'` label — your call. Default to `'Trial'` so users see what they're on.
 
-CORS is also `Access-Control-Allow-Origin: *`, so this can be called from any website, not just yours.
+### 2. Tier resolution logic
+- **`src/contexts/UsageLimitContext.tsx`** `fetchAll`: when `plan_status === 'trial'` and `trial_end > now()`, set `resolvedTier = 'trial'` (was `'elite'`).
+- **`supabase/functions/_shared/requireUser.ts`**: same change — active trial → `tier = 'trial'` (was `'elite'`).
+- Expired trial behavior stays the same: → `'free'` (paywall).
 
-### Why this is the #1 scaling blocker
+### 3. Database
+- Insert `trial` rows into `plan_feature_limits` (one row per feature with the limits above).
+- Update `increment_usage` function: when `plan_status = 'trial'` and `NOW() < trial_end`, set `user_tier := 'trial'` (was `'elite'`). Lookup against `plan_feature_limits` continues to work since we're adding the rows.
 
-- **Cost runaway**: each `apply-bundle` call = ~3 GPT-4o-mini completions. A trivial script in a loop = hundreds of dollars/hour to OpenAI on your card.
-- **No attribution**: even if you notice the bill, you cannot tell which user did it because the function doesn't know who the caller is.
-- **`TIER_LIMITS` in `UsageLimitContext.tsx` are client-side only** — they gate the UI button but do nothing server-side. Anyone calling the function directly bypasses them entirely.
-- **`spend_credit` RPC exists but is never called** by any AI function. Same for `increment_feature_usage`. The whole monetization layer is decorative.
+### 4. UI copy (optional polish)
+- `PricingCards.tsx` `FREE_FEATURES`: update counts so they match the new trial limits exactly (3 resumes, 3 cover letters, 3 LinkedIn, 5 interviews, 3 radar scans, 3 skill gaps, etc.) so the pricing card and runtime limits agree.
+- `UsageHeader` / badges: optionally show "Trial — X days left" when `tier === 'trial'`.
 
-### The fix (to implement after approval)
+## Out of Scope
+- No Stripe/billing changes.
+- No new tables.
+- Pro/Elite limits unchanged.
 
-For every AI/expensive edge function (`apply-bundle`, `optimize-linkedin`, `analyze-resume-ats`, `analyze-resume-match`, `analyze-skill-gap`, `generate-cover-letter`, `generate-resume-content`, `rewrite-bullet`, `salary-intel`, `vaylance-chat`, `parse-resume-ai`, `parse-resume-file`, `radar-scan`, `interview-feedback`):
+## Why This Is Better Than "Trial = Elite"
+- **API cost control:** trial caps ~80% lower than Elite ceiling → predictable spend per signup.
+- **Preserves Elite's reason to exist:** Elite still feels like a meaningful upgrade.
+- **Clear conversion signal:** when a trial user hits the cap, you know they're engaged → that's your upgrade trigger.
+- **Honest pricing card:** the numbers shown on the pricing card become the actual enforced limits.
 
-1. **Require auth in code**. Read `Authorization` header, call `supabase.auth.getUser(token)` with the anon-key client, reject with 401 if missing/invalid. (Keep `verify_jwt = false` since Lovable's signing-keys system needs in-code validation.)
-
-2. **Enforce server-side usage limits**. Before calling OpenAI:
-   - Look up the user's tier from `user_subscriptions`.
-   - Look up current `feature_usage.count` for the action this month.
-   - Compare against the same `TIER_LIMITS` table (move it to a shared file `supabase/functions/_shared/tierLimits.ts` so client and server agree).
-   - Reject with 429 if over limit.
-
-3. **Record usage AFTER success only**. Call `increment_feature_usage(p_user_id, p_action)` only when the OpenAI call returned a usable result, so failed calls don't burn quota.
-
-4. **Add a per-user rate limit** (e.g. max 5 requests / 10 seconds per user per function) using a small `rate_limits` table or an in-memory token bucket keyed by `user.id`. Stops scripted abuse even within quota.
-
-5. **Tighten CORS** to your production origin(s) instead of `*` for these functions.
-
-6. **Delete the dead `CreditsContext` references**. `CreditGate.tsx` still imports and calls `useCredits().spendCredit()` from a stub that always returns `false` — meaning the "1 credit" buttons in the UI are silently broken. Either wire `CreditGate` to `useUsageLimit` or remove the component and its callers.
-
-### Out of scope for this plan
-- Migrating to Lovable AI Gateway (you're on direct OpenAI; same fix applies either way).
-- Changing pricing tiers or limits.
-- Frontend redesign.
-
-### Files that will change
-- `supabase/functions/_shared/tierLimits.ts` (new)
-- `supabase/functions/_shared/requireUser.ts` (new — auth + usage gate helper)
-- All 14 edge functions listed above (add 5–10 lines at the top of each `serve` handler)
-- `src/components/dashboard/CreditGate.tsx` (rewire to `useUsageLimit` or remove)
-- `supabase/config.toml` — no change (keep `verify_jwt = false`, validate in code)
-
-### Result
-After the fix: an unauthenticated request to any AI function returns `401` instantly with zero OpenAI cost. An authenticated user over their monthly quota returns `429`. Every successful call is attributed to a `user_id` in `feature_usage`, which means you can actually scale, bill, and debug.
+## Confirm Before I Build
+1. Are the proposed trial limits good, or do you want different numbers?
+2. Should the UI badge say **"Trial"** or keep showing **"Free"** during the trial?

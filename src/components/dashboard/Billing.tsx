@@ -15,7 +15,7 @@ const Billing = ({ setActiveTab }: BillingProps) => {
   const isPaid = tier === 'pro' || tier === 'elite';
   
   // FIXED: Show PaidManagement for paid users OR trial users (free with subscriptionEnd)
-  const showPaidManagement = isPaid || (tier === 'free' && subscriptionEnd);
+  const showPaidManagement = isPaid || tier === 'trial' || (tier === 'free' && subscriptionEnd);
   
   if (loading) {
     return (

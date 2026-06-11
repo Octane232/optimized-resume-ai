@@ -59,16 +59,13 @@ export async function requireUser(req: Request): Promise<AuthedUser | Response> 
     if (subData?.plan_status === 'trial' && subData?.trial_end) {
       const trialEnd = new Date(subData.trial_end);
       if (new Date() > trialEnd) {
-        // Trial expired, downgrade to free
         tier = 'free';
         console.log(`Trial expired for user ${data.user.id}, downgraded to free`);
       } else {
-        // Active trial: grant elite access (full features)
-        tier = 'elite';
-        console.log(`Active trial for user ${data.user.id}, granting elite access until ${subData.trial_end}`);
+        tier = 'trial';
+        console.log(`Active trial for user ${data.user.id} until ${subData.trial_end}`);
       }
     } else {
-      // Regular active subscription
       tier = subData.tier as SubscriptionTier;
     }
   }

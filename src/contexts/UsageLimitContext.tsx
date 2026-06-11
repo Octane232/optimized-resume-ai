@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, Rea
 import { supabase } from '@/integrations/supabase/client';
 
 // ===== STEP 1: Fix Types =====
-export type SubscriptionTier = 'free' | 'pro' | 'elite';
+export type SubscriptionTier = 'free' | 'trial' | 'pro' | 'elite';
 export type UsageAction =
   | 'resume_ats'
   | 'cover_letter'
@@ -26,6 +26,17 @@ export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> 
     radar_alert: 0,
     docx_rewrite: 0,
     resume_parse: 0,
+  },
+  trial: {
+    resume_ats: 3,
+    cover_letter: 3,
+    linkedin: 3,
+    skill_gap: 3,
+    interview_prep: 5,
+    salary_intel: 2,
+    radar_alert: 3,
+    docx_rewrite: 2,
+    resume_parse: 10,
   },
   pro: {
     resume_ats: 15,
@@ -66,7 +77,7 @@ export const ACTION_LABELS: Record<UsageAction, string> = {
 
 interface UsageLimitContextType {
   tier: SubscriptionTier;
-  displayTier: 'Free' | 'Pro' | 'Elite';
+  displayTier: 'Free' | 'Trial' | 'Pro' | 'Elite';
   subscriptionEnd: string | null;
   loading: boolean;
   /** Can the user perform this action? */
@@ -85,7 +96,7 @@ interface UsageLimitContextType {
 // Separate interface for subscription-only data
 interface SubscriptionContextType {
   tier: SubscriptionTier;
-  displayTier: 'Free' | 'Pro' | 'Elite';
+  displayTier: 'Free' | 'Trial' | 'Pro' | 'Elite';
   subscriptionEnd: string | null;
   loading: boolean;
   refresh: () => Promise<void>;
@@ -136,14 +147,13 @@ export const UsageLimitProvider = ({ children }: { children: ReactNode }) => {
         else resolvedTier = 'free';
         setSubscriptionEnd(subData.current_period_end ?? null);
       } else if (subData?.plan_status === 'trial') {
-        // Trial user - grant elite access if trial hasn't expired
         const trialEnd = subData?.trial_end ? new Date(subData.trial_end) : null;
         if (trialEnd && new Date() < trialEnd) {
-          resolvedTier = 'elite';
-          console.log(`[UsageLimit] Active trial for user, granting elite access until ${subData.trial_end}`);
+          resolvedTier = 'trial';
+          console.log(`[UsageLimit] Active trial until ${subData.trial_end}`);
         } else {
           resolvedTier = 'free';
-          console.log(`[UsageLimit] Trial expired for user, downgraded to free`);
+          console.log(`[UsageLimit] Trial expired, downgraded to free`);
         }
         setSubscriptionEnd(subData.trial_end ?? null);
       } else {
@@ -247,8 +257,8 @@ export const UsageLimitProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [loading, initialFetchDone]);
 
-  const displayTier: 'Free' | 'Pro' | 'Elite' = 
-    tier === 'free' ? 'Free' : tier === 'pro' ? 'Pro' : 'Elite';
+  const displayTier: 'Free' | 'Trial' | 'Pro' | 'Elite' = 
+    tier === 'free' ? 'Free' : tier === 'trial' ? 'Trial' : tier === 'pro' ? 'Pro' : 'Elite';
 
   const usageLimitValue: UsageLimitContextType = {
     tier,
