@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, Rea
 import { supabase } from '@/integrations/supabase/client';
 
 // ===== STEP 1: Fix Types =====
-export type SubscriptionTier = 'free' | 'pro' | 'elite';
+export type SubscriptionTier = 'free' | 'trial' | 'pro' | 'elite';
 export type UsageAction =
   | 'resume_ats'
   | 'cover_letter'
