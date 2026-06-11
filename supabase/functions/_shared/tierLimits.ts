@@ -1,5 +1,5 @@
 // Shared feature limits (server-side mirror of usage limits)
-export type SubscriptionTier = "free" | "pro" | "elite";
+export type SubscriptionTier = "free" | "trial" | "pro" | "elite";
 
 export type UsageAction =
   | "resume_ats"
