@@ -48,12 +48,8 @@ const UsageHeader = ({ setActiveTab }: { setActiveTab?: (tab: string) => void })
   const isEmpty = totalUsed >= totalLimit && totalLimit > 0;
   const isLow = pct >= 70 && !isEmpty;
 
-  // FIXED: Get display name for tier - show "Trial" for free users with active trial
   const getDisplayTierName = () => {
-    // Trial user: free tier but has subscriptionEnd (active trial)
-    if (tier === 'free' && subscriptionEnd) {
-      return 'Trial';
-    }
+    if (tier === 'trial' || (tier === 'free' && subscriptionEnd)) return 'Trial';
     if (displayTier === 'Free') return 'Free';
     if (displayTier === 'Pro') return 'Pro';
     return 'Elite';
