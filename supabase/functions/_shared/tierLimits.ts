@@ -63,6 +63,7 @@ export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> 
 // ===== Total Monthly Pool Per Tier (for backward compatibility) =====
 export const TIER_POOL: Record<SubscriptionTier, number> = {
   free: 25,
+  trial: 50,
   pro: 250,
   elite: 600,
 };
