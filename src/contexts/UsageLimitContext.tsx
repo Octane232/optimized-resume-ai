@@ -147,14 +147,13 @@ export const UsageLimitProvider = ({ children }: { children: ReactNode }) => {
         else resolvedTier = 'free';
         setSubscriptionEnd(subData.current_period_end ?? null);
       } else if (subData?.plan_status === 'trial') {
-        // Trial user - grant elite access if trial hasn't expired
         const trialEnd = subData?.trial_end ? new Date(subData.trial_end) : null;
         if (trialEnd && new Date() < trialEnd) {
-          resolvedTier = 'elite';
-          console.log(`[UsageLimit] Active trial for user, granting elite access until ${subData.trial_end}`);
+          resolvedTier = 'trial';
+          console.log(`[UsageLimit] Active trial until ${subData.trial_end}`);
         } else {
           resolvedTier = 'free';
-          console.log(`[UsageLimit] Trial expired for user, downgraded to free`);
+          console.log(`[UsageLimit] Trial expired, downgraded to free`);
         }
         setSubscriptionEnd(subData.trial_end ?? null);
       } else {
