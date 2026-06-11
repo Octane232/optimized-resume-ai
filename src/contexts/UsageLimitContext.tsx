@@ -96,7 +96,7 @@ interface UsageLimitContextType {
 // Separate interface for subscription-only data
 interface SubscriptionContextType {
   tier: SubscriptionTier;
-  displayTier: 'Free' | 'Pro' | 'Elite';
+  displayTier: 'Free' | 'Trial' | 'Pro' | 'Elite';
   subscriptionEnd: string | null;
   loading: boolean;
   refresh: () => Promise<void>;
