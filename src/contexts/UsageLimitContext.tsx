@@ -77,7 +77,7 @@ export const ACTION_LABELS: Record<UsageAction, string> = {
 
 interface UsageLimitContextType {
   tier: SubscriptionTier;
-  displayTier: 'Free' | 'Pro' | 'Elite';
+  displayTier: 'Free' | 'Trial' | 'Pro' | 'Elite';
   subscriptionEnd: string | null;
   loading: boolean;
   /** Can the user perform this action? */
