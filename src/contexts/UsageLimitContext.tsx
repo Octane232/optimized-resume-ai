@@ -257,8 +257,8 @@ export const UsageLimitProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [loading, initialFetchDone]);
 
-  const displayTier: 'Free' | 'Pro' | 'Elite' = 
-    tier === 'free' ? 'Free' : tier === 'pro' ? 'Pro' : 'Elite';
+  const displayTier: 'Free' | 'Trial' | 'Pro' | 'Elite' = 
+    tier === 'free' ? 'Free' : tier === 'trial' ? 'Trial' : tier === 'pro' ? 'Pro' : 'Elite';
 
   const usageLimitValue: UsageLimitContextType = {
     tier,
