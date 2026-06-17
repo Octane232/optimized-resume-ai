@@ -9,21 +9,19 @@ import { useToast } from '@/hooks/use-toast';
 type PlanId = 'pro' | 'elite';
 type Billing = 'monthly' | 'yearly';
 
-// FIXED: Updated FREE_FEATURES for 3-day trial (all features, no free tier after)
 const FREE_FEATURES = [
-  '✅ Full access to ALL features for 3 days',
-  '✅ Resume Engine + ATS Score',
-  '✅ Cover Letter Generation',
-  '✅ LinkedIn Optimizer',
-  '✅ Interview Coach',
-  '✅ Job Radar Alerts',
-  '✅ Skill Gap Analyzer',
-  '✅ Application Tracker',
   '✅ No credit card required',
+  '✅ 3 Resume + ATS runs',
+  '✅ 3 Cover Letters',
+  '✅ 3 LinkedIn Optimizations',
+  '✅ 3 Skill Gap Analyses',
+  '✅ 5 Interview Prep sessions',
+  '✅ 2 Salary Insights',
+  '✅ 3 Job Radar Alerts',
+  '✅ 2 DOCX Rewrites',
   '⏰ Trial ends after 3 days — upgrade to continue',
 ];
 
-// FIXED: Updated PLANS array for Pro and Elite
 const PLANS = [
   {
     id: 'pro' as PlanId,
@@ -112,7 +110,7 @@ const PricingCards = () => {
             </p>
             <p className="text-xs text-muted-foreground mt-0.5">
               {isTrialActive 
-                ? `Full access to all Elite features until ${new Date(subscriptionEnd).toLocaleDateString()}`
+                ? `Try all features free until ${new Date(subscriptionEnd).toLocaleDateString()}`
                 : 'Try it out — no card needed'}
             </p>
           </div>
@@ -129,12 +127,12 @@ const PricingCards = () => {
         </div>
         {isTrialActive && (
           <p className="text-xs text-center mt-3 pt-2 border-t border-emerald-200 text-emerald-700">
-            ⚡ Your trial includes all Elite features. No charges until trial ends.
+            ⚡ Your trial is active. No charges until trial ends. Upgrade anytime for full access.
           </p>
         )}
       </div>
 
-      {/* Billing toggle - hide for trial users? Show but they can still upgrade */}
+      {/* Billing toggle */}
       <div className="flex justify-center">
         <div className="bg-muted/50 rounded-full p-1 border border-border/60 flex gap-1">
           {(['monthly', 'yearly'] as Billing[]).map((p) => (
