@@ -1,5 +1,4 @@
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
-// PROBLEM 1 FIXED: Updated imports to use PLAN_LIMITS instead of ACTION_COSTS
 import { SubscriptionTier, UsageAction, PLAN_LIMITS, getFeatureLimit, getRemainingUses } from "./tierLimits.ts";
 
 export const corsHeaders = {
@@ -53,7 +52,7 @@ export async function requireUser(req: Request): Promise<AuthedUser | Response> 
     .eq("user_id", data.user.id)
     .maybeSingle();
   
-  // Updated: Now includes 'trial' as a valid status
+  // Handle trial status properly
   if ((subData?.plan_status === 'active' || subData?.plan_status === 'trial') && subData?.tier) {
     // Check if trial has expired
     if (subData?.plan_status === 'trial' && subData?.trial_end) {
@@ -66,7 +65,13 @@ export async function requireUser(req: Request): Promise<AuthedUser | Response> 
         console.log(`Active trial for user ${data.user.id} until ${subData.trial_end}`);
       }
     } else {
-      tier = subData.tier as SubscriptionTier;
+      const rawTier = subData.tier as string;
+      // Map old tier names to new ones
+      if (rawTier === 'starter') tier = 'pro';
+      else if (rawTier === 'premium') tier = 'elite';
+      else if (rawTier === 'pro') tier = 'pro';
+      else if (rawTier === 'elite') tier = 'elite';
+      else tier = 'free';
     }
   }
 
@@ -78,7 +83,10 @@ export async function requireUser(req: Request): Promise<AuthedUser | Response> 
   };
 }
 
-// ===== PROBLEM 4: Add checkFeatureLimit function =====
+/**
+ * Check if user has remaining quota for a feature
+ * Returns null if allowed, or a Response if blocked
+ */
 export async function checkFeatureLimit(
   user: AuthedUser,
   action: UsageAction
@@ -86,8 +94,14 @@ export async function checkFeatureLimit(
   const limit = getFeatureLimit(user.tier, action);
 
   if (limit === 0) {
+    const tierNames = {
+      free: "Free",
+      trial: "Trial",
+      pro: "Pro",
+      elite: "Elite"
+    };
     return jsonResponse({
-      error: `This feature is not available on your ${user.tier} plan. Upgrade to access it.`,
+      error: `${tierNames[user.tier] || user.tier} plan does not include ${action}. Upgrade to access it.`,
       action,
       tier: user.tier,
       limit: 0,
@@ -106,8 +120,29 @@ export async function checkFeatureLimit(
   const remaining = Math.max(0, limit - used);
 
   if (remaining <= 0) {
+    const featureNames: Record<UsageAction, string> = {
+      resume_ats: "Resume + ATS runs",
+      cover_letter: "Cover Letters",
+      linkedin: "LinkedIn Optimizations",
+      skill_gap: "Skill Gap Analyses",
+      interview_prep: "Interview Prep sessions",
+      salary_intel: "Salary Insights",
+      radar_alert: "Radar Alerts",
+      docx_rewrite: "DOCX Rewrites",
+      resume_parse: "Resume Uploads",
+      job_search: "Job Searches",
+      bullet_rewrite: "Bullet Rewrites",
+    };
+    const tierNames = {
+      free: "Free",
+      trial: "Trial",
+      pro: "Pro",
+      elite: "Elite"
+    };
     return jsonResponse({
-      error: `You've reached your monthly limit for ${action}. Upgrade to get more uses.`,
+      error: `Monthly ${featureNames[action] || action} limit reached (${used}/${limit}). ` +
+             `Your ${tierNames[user.tier] || user.tier} plan includes ${limit} per month. ` +
+             `${user.tier === 'free' || user.tier === 'trial' ? 'Upgrade to Pro or Elite' : user.tier === 'pro' ? 'Upgrade to Elite' : 'Contact support'} for more.`,
       action,
       tier: user.tier,
       limit,
@@ -119,7 +154,9 @@ export async function checkFeatureLimit(
   return null;
 }
 
-// ===== PROBLEM 4: Add incrementFeatureUsage function =====
+/**
+ * Increment usage for a feature
+ */
 export async function incrementFeatureUsage(
   user: AuthedUser,
   action: UsageAction
@@ -152,7 +189,10 @@ export async function incrementFeatureUsage(
   return true;
 }
 
-// ===== PROBLEM 2 FIXED: enforceQuota now uses checkFeatureLimit =====
+/**
+ * Check quota and return null if allowed, or Response if blocked
+ * @deprecated Use checkFeatureLimit instead
+ */
 export async function enforceQuota(
   user: AuthedUser,
   action: UsageAction,
@@ -160,7 +200,48 @@ export async function enforceQuota(
   return checkFeatureLimit(user, action);
 }
 
-// ===== PROBLEM 3 FIXED: recordUsage now uses incrementFeatureUsage =====
+/**
+ * Record usage for a feature
+ * @deprecated Use incrementFeatureUsage instead
+ */
 export async function recordUsage(user: AuthedUser, action: UsageAction): Promise<void> {
   await incrementFeatureUsage(user, action);
+}
+
+/**
+ * Get remaining uses for a feature
+ */
+export async function getRemainingUsesForUser(
+  user: AuthedUser,
+  action: UsageAction
+): Promise<number> {
+  const limit = getFeatureLimit(user.tier, action);
+  if (limit === 0) return 0;
+
+  const { data } = await user.serviceClient
+    .from("user_usage")
+    .select("used")
+    .eq("user_id", user.id)
+    .eq("feature", action)
+    .maybeSingle();
+
+  const used = data?.used ?? 0;
+  return Math.max(0, limit - used);
+}
+
+/**
+ * Get current usage for a feature
+ */
+export async function getCurrentUsageForUser(
+  user: AuthedUser,
+  action: UsageAction
+): Promise<number> {
+  const { data } = await user.serviceClient
+    .from("user_usage")
+    .select("used")
+    .eq("user_id", user.id)
+    .eq("feature", action)
+    .maybeSingle();
+
+  return data?.used ?? 0;
 }
