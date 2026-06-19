@@ -68,8 +68,8 @@ const plans = [
       '✅ 500 Resume Uploads',
       '✅ Priority Support',
       '✅ ATS Resume Review',
-      '✅ Job Application Automation',
-      '✅ 1-on-1 Career Coaching (2x/month)'
+      '✅ Live Coach Mode',
+      '✅ Job Application Automation — Coming Soon 🚀'
     ],
     cta: 'Upgrade to Elite',
     popular: false,
