@@ -70,8 +70,7 @@ const PLANS = [
       '500 Resume Uploads / month',
       'Priority Support + Early Access',
       'ATS Resume Review',
-      'Job Application Automation',
-      '1-on-1 Career Coaching (2x/month)',
+      'Job Application Automation — Coming Soon 🚀'
     ],
     locked: [],
   },
@@ -86,6 +85,13 @@ const PricingCards = () => {
 
   const isTrial = tier === 'trial' || (tier === 'free' && subscriptionEnd);
   const isTrialActive = isTrial && subscriptionEnd && new Date(subscriptionEnd) > new Date();
+
+  // FIXED: Determine the display name for the current plan
+  const getPlanDisplayName = () => {
+    if (isTrialActive) return 'Free Trial';
+    if (tier === 'free') return 'Free';
+    return displayTier;
+  };
 
   const handleUpgrade = async (planId: PlanId) => {
     setLoading(planId);
