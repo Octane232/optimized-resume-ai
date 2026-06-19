@@ -8,19 +8,45 @@ const plans = [
     name: 'Free Trial',
     price: 0,
     trial: true,
-    description: 'Try Vaylance free for 3 days.',
-    features: ['Full access for 3 days', '5 Job Matches / day', '1 Resume', 'AI Cover Letter (3 / month)', 'Application Tracker'],
+    description: 'Experience Vaylance free for 3 days.',
+    features: [
+      '✅ Full access to all features for 3 days',
+      '✅ 10 Resume + ATS runs',
+      '✅ 10 Cover Letters',
+      '✅ 10 Job Searches',
+      '✅ 20 Bullet Rewrites',
+      '✅ 5 LinkedIn Optimizations',
+      '✅ 5 Skill Gap Analyses',
+      '✅ 10 Interview Prep sessions',
+      '✅ 5 Salary Insights',
+      '✅ 5 Job Radar Alerts',
+      '✅ 5 DOCX Rewrites',
+      '✅ 20 Resume Uploads',
+      '⏰ Trial ends after 3 days — upgrade to continue'
+    ],
     cta: 'Start Free Trial',
     popular: false,
   },
-
   {
     name: 'Pro',
     price: 15,
     trial: false,
     description: 'Everything you need to get hired.',
-    features: ['Unlimited Job Matches', 'Unlimited Resumes', 'AI Cover Letters (Unlimited)', 'Interview Coach', 'Salary Insights'],
-    cta: 'Start Free Trial',
+    features: [
+      '✅ 50 Job Searches / month',
+      '✅ 75 Bullet Rewrites / month',
+      '✅ 30 Resume + ATS runs',
+      '✅ 30 Cover Letters',
+      '✅ 15 LinkedIn Optimizations',
+      '✅ 15 Skill Gap Analyses',
+      '✅ 30 Interview Prep sessions',
+      '✅ 10 Salary Insights',
+      '✅ 15 Job Radar Alerts',
+      '✅ 10 DOCX Rewrites',
+      '✅ 100 Resume Uploads',
+      '✅ Priority Support'
+    ],
+    cta: 'Upgrade to Pro',
     popular: true,
   },
   {
@@ -28,11 +54,26 @@ const plans = [
     price: 29,
     trial: false,
     description: 'For serious job seekers.',
-    features: ['Everything in Pro', 'Priority Support', 'ATS Resume Review', 'Job Application Automation'],
-    cta: 'Start Free Trial',
+    features: [
+      '✅ 120 Job Searches / month',
+      '✅ 300 Bullet Rewrites / month',
+      '✅ 100 Resume + ATS runs',
+      '✅ 100 Cover Letters',
+      '✅ 50 LinkedIn Optimizations',
+      '✅ 50 Skill Gap Analyses',
+      '✅ 100 Interview Prep sessions',
+      '✅ 30 Salary Insights',
+      '✅ 50 Job Radar Alerts',
+      '✅ 50 DOCX Rewrites',
+      '✅ 500 Resume Uploads',
+      '✅ Priority Support',
+      '✅ ATS Resume Review',
+      '✅ Job Application Automation',
+      '✅ 1-on-1 Career Coaching (2x/month)'
+    ],
+    cta: 'Upgrade to Elite',
     popular: false,
   },
-
 ];
 
 const PricingSection = () => (
@@ -52,7 +93,7 @@ const PricingSection = () => (
             key={i}
             className={`relative p-7 rounded-2xl border bg-card transition-all flex flex-col ${
               plan.popular
-                ? 'border-violet-500/50 shadow-2xl shadow-violet-600/20 ring-1 ring-violet-500/30 scale-[1.02]'
+                ? 'border-violet-500/50 shadow-2xl shadow-violet-600/20 ring-1 ring-violet-500/30 scale-[1.02] z-10'
                 : 'border-border hover:border-primary/30'
             }`}
           >
@@ -82,15 +123,12 @@ const PricingSection = () => (
               </div>
             </div>
 
-
-
-
             <Button
               asChild
               size="lg"
               className={`w-full h-11 font-semibold gap-2 mb-6 ${
                 plan.popular
-                  ? 'bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white'
+                  ? 'bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white shadow-lg shadow-blue-600/20'
                   : 'bg-card border border-border text-foreground hover:bg-muted'
               }`}
             >
