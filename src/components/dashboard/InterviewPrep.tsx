@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Brain, Mic, RotateCcw, ArrowRight, Loader2,
+  Brain, Mic, MicOff, RotateCcw, ArrowRight, Loader2,
   CheckCircle2, AlertCircle, Sparkles, Radio, Send, Lock,
   BarChart3, BookOpen, Trophy, Shield
 } from 'lucide-react';
@@ -503,7 +503,9 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
     }
 
     if (isListening) {
-      recognitionRef.current?.stop();
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
       setIsListening(false);
       toast({ title: '🎙️ Listening paused' });
     } else {
@@ -511,7 +513,9 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         stream.getTracks().forEach(track => track.stop());
         
-        recognitionRef.current?.start();
+        if (recognitionRef.current) {
+          recognitionRef.current.start();
+        }
         setIsListening(true);
         toast({ title: '🎙️ Listening to interviewer...' });
       } catch (err) {
