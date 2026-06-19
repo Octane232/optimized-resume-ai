@@ -1,13 +1,17 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders, jsonResponse, requireUser } from "../_shared/requireUser.ts";
+import { enforceQuota, recordUsage } from "../_shared/quota.ts";
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
-    // Auth required (no per-action quota — bullet rewrites are part of resume editing).
+    // 1. Auth required
     const auth = await requireUser(req);
     if (auth instanceof Response) return auth;
+
+    // 2. Enforce quota for bullet rewrites
+    const { remaining, tier, tierLimit } = await enforceQuota(auth.user.id, "bullet_rewrite");
 
     const { bullet, jobContext, targetRole } = await req.json();
     if (!bullet) throw new Error("Bullet point text is required");
@@ -35,9 +39,24 @@ serve(async (req) => {
 
     const data = await response.json();
     const result = JSON.parse(data.choices?.[0]?.message?.content || "{}");
-    return jsonResponse(result);
+
+    // 3. Record usage after successful rewrite
+    await recordUsage(auth.user.id, "bullet_rewrite");
+
+    return jsonResponse({ 
+      ...result,
+      usage: {
+        remaining,
+        limit: tierLimit,
+        tier
+      }
+    });
   } catch (error) {
     console.error("Error in rewrite-bullet:", error);
-    return jsonResponse({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    const status = message.includes("limit reached") || message.includes("expired") || message.includes("does not include") 
+      ? 429 
+      : 500;
+    return jsonResponse({ error: message }, status);
   }
 });
