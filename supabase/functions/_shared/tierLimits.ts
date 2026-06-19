@@ -10,7 +10,9 @@ export type UsageAction =
   | "skill_gap"
   | "radar_alert"
   | "docx_rewrite"
-  | "resume_parse";
+  | "resume_parse"
+  | "job_search"
+  | "bullet_rewrite";
 
 // ===== Monthly Limits Per Feature Per Tier =====
 export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> = {
@@ -24,6 +26,8 @@ export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> 
     radar_alert: 0,
     docx_rewrite: 0,
     resume_parse: 0,
+    job_search: 0,
+    bullet_rewrite: 0,
   },
   trial: {
     resume_ats: 3,
@@ -35,6 +39,8 @@ export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> 
     radar_alert: 3,
     docx_rewrite: 2,
     resume_parse: 10,
+    job_search: 5,
+    bullet_rewrite: 10,
   },
   pro: {
     resume_ats: 15,
@@ -46,6 +52,8 @@ export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> 
     radar_alert: 10,
     docx_rewrite: 5,
     resume_parse: 50,
+    job_search: 50,
+    bullet_rewrite: 50,
   },
   elite: {
     resume_ats: 40,
@@ -57,6 +65,8 @@ export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> 
     radar_alert: 30,
     docx_rewrite: 20,
     resume_parse: 200,
+    job_search: 120,
+    bullet_rewrite: 200,
   },
 };
 
@@ -104,6 +114,8 @@ export const FEATURE_NAMES: Record<UsageAction, string> = {
   radar_alert: "Job Radar Alerts",
   docx_rewrite: "DOCX Resume Rewrite",
   resume_parse: "Resume File Upload",
+  job_search: "Job Search",
+  bullet_rewrite: "Bullet Point Rewrite",
 };
 
 // ===== Feature Descriptions =====
@@ -117,6 +129,8 @@ export const FEATURE_DESCRIPTIONS: Record<UsageAction, string> = {
   radar_alert: "Discover hidden job opportunities before they're posted",
   docx_rewrite: "AI-powered DOCX resume rewriting",
   resume_parse: "Upload and parse PDF/DOCX resume files",
+  job_search: "Search for jobs across multiple platforms",
+  bullet_rewrite: "AI-powered bullet point rewriting for resumes",
 };
 
 // ===== Deprecated (kept for backward compatibility) =====
@@ -131,4 +145,6 @@ export const ACTION_COSTS: Record<UsageAction, number> = {
   radar_alert: 2,
   docx_rewrite: 3,
   resume_parse: 0,
+  job_search: 1,
+  bullet_rewrite: 1,
 };
