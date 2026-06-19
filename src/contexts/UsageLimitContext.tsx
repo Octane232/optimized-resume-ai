@@ -12,7 +12,9 @@ export type UsageAction =
   | 'skill_gap'
   | 'radar_alert'
   | 'docx_rewrite'
-  | 'resume_parse';
+  | 'resume_parse'
+  | 'job_search'
+  | 'bullet_rewrite';
 
 // ===== STEP 4: Add PLAN_LIMITS Constant - MUST BE EXPORTED =====
 export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> = {
@@ -26,6 +28,8 @@ export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> 
     radar_alert: 0,
     docx_rewrite: 0,
     resume_parse: 0,
+    job_search: 0,
+    bullet_rewrite: 0,
   },
   trial: {
     resume_ats: 3,
@@ -37,6 +41,8 @@ export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> 
     radar_alert: 3,
     docx_rewrite: 2,
     resume_parse: 10,
+    job_search: 5,
+    bullet_rewrite: 10,
   },
   pro: {
     resume_ats: 15,
@@ -48,6 +54,8 @@ export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> 
     radar_alert: 10,
     docx_rewrite: 5,
     resume_parse: 50,
+    job_search: 50,
+    bullet_rewrite: 50,
   },
   elite: {
     resume_ats: 40,
@@ -59,6 +67,8 @@ export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> 
     radar_alert: 30,
     docx_rewrite: 20,
     resume_parse: 200,
+    job_search: 120,
+    bullet_rewrite: 200,
   },
 };
 
@@ -73,6 +83,38 @@ export const ACTION_LABELS: Record<UsageAction, string> = {
   radar_alert: 'Job Radar scan',
   docx_rewrite: 'AI DOCX rewrite',
   resume_parse: 'Resume upload',
+  job_search: 'Job search',
+  bullet_rewrite: 'Bullet rewrite',
+};
+
+// ===== Feature Display Names (for UI) =====
+export const FEATURE_NAMES: Record<UsageAction, string> = {
+  resume_ats: "Resume + ATS Optimization",
+  cover_letter: "Cover Letter Generation",
+  linkedin: "LinkedIn Optimizer",
+  skill_gap: "Skill Gap Analyzer",
+  interview_prep: "Interview Practice",
+  salary_intel: "Salary Intelligence",
+  radar_alert: "Job Radar Alerts",
+  docx_rewrite: "DOCX Resume Rewrite",
+  resume_parse: "Resume File Upload",
+  job_search: "Job Search",
+  bullet_rewrite: "Bullet Point Rewrite",
+};
+
+// ===== Feature Descriptions =====
+export const FEATURE_DESCRIPTIONS: Record<UsageAction, string> = {
+  resume_ats: "Tailored resume + cover letter + ATS score in one click",
+  cover_letter: "AI-generated cover letters tailored to each job",
+  linkedin: "Optimize your LinkedIn profile for recruiters",
+  skill_gap: "Identify missing skills and get learning recommendations",
+  interview_prep: "Practice with AI interview coach and get feedback",
+  salary_intel: "Real-time salary data and negotiation tips",
+  radar_alert: "Discover hidden job opportunities before they're posted",
+  docx_rewrite: "AI-powered DOCX resume rewriting",
+  resume_parse: "Upload and parse PDF/DOCX resume files",
+  job_search: "Search for jobs across multiple platforms",
+  bullet_rewrite: "AI-powered bullet point rewriting for resumes",
 };
 
 interface UsageLimitContextType {
