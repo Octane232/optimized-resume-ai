@@ -6,6 +6,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-cron-secret",
 };
 
+function jsonResponse(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
 const clampMatch = (value: unknown) => {
   const n = Number(value);
   if (!Number.isFinite(n)) return 0;
@@ -85,22 +92,169 @@ Funding signal:
   }
 }
 
+// ===== Auth & Quota Helpers =====
+
+async function requireUser(authHeader: string | null) {
+  if (!authHeader) {
+    throw new Error("Unauthorized - No authorization header");
+  }
+
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+  const authClient = createClient(supabaseUrl, anonKey);
+
+  const token = authHeader.replace(/^Bearer\s+/i, "");
+  const { data, error } = await authClient.auth.getUser(token);
+  
+  if (error || !data?.user) {
+    throw new Error("Unauthorized - Invalid token");
+  }
+
+  return data.user;
+}
+
+async function getUserTier(userId: string) {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  const adminClient = createClient(supabaseUrl, serviceKey);
+
+  const { data: profile, error } = await adminClient
+    .from("profiles")
+    .select("subscription_tier, subscription_end")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Error fetching user tier:", error);
+    throw new Error("Failed to fetch user tier");
+  }
+
+  const tier = profile?.subscription_tier || "free";
+  const subscriptionEnd = profile?.subscription_end 
+    ? new Date(profile.subscription_end) 
+    : null;
+
+  // Check if subscription has expired
+  if (subscriptionEnd && subscriptionEnd < new Date()) {
+    return { tier: "expired", isExpired: true };
+  }
+
+  return { tier, isExpired: false };
+}
+
+async function enforceQuota(userId: string, feature: string) {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  const adminClient = createClient(supabaseUrl, serviceKey);
+
+  const { tier, isExpired } = await getUserTier(userId);
+
+  if (isExpired) {
+    throw new Error("Subscription expired - Please upgrade to continue using this feature");
+  }
+
+  // Radar alert limits per tier
+  const limits = {
+    free: {
+      radar_alert: 0, // Free users cannot trigger manual scans
+    },
+    pro: {
+      radar_alert: 10, // 10 manual scans per month
+    },
+    elite: {
+      radar_alert: 30, // 30 manual scans per month
+    },
+  };
+
+  const tierLimit = limits[tier as keyof typeof limits]?.radar_alert || 0;
+  
+  // Count usage for this month
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  
+  const { count: usageCount, error: countError } = await adminClient
+    .from("usage_events")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("feature", feature)
+    .gte("created_at", startOfMonth.toISOString());
+
+  if (countError) {
+    console.error("Error counting usage:", countError);
+    throw new Error("Failed to check usage limits");
+  }
+
+  const currentUsage = usageCount || 0;
+  const remaining = tierLimit - currentUsage;
+
+  if (tierLimit === 0) {
+    throw new Error("Your current plan does not include manual radar scans. Upgrade to Pro or Elite to use this feature.");
+  }
+
+  if (currentUsage >= tierLimit) {
+    const tierNames = {
+      free: "Free",
+      pro: "Pro",
+      elite: "Elite"
+    };
+    throw new Error(
+      `Monthly ${feature} limit reached (${currentUsage}/${tierLimit}). ` +
+      `Your ${tierNames[tier as keyof typeof tierNames] || tier} plan includes ${tierLimit} scans per month. ` +
+      `${tier === 'free' ? 'Upgrade to Pro or Elite' : tier === 'pro' ? 'Upgrade to Elite' : 'Contact support'} for more.`
+    );
+  }
+
+  return { tier, currentUsage, tierLimit, remaining };
+}
+
+async function recordUsage(userId: string, feature: string) {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  const adminClient = createClient(supabaseUrl, serviceKey);
+
+  const { error } = await adminClient
+    .from("usage_events")
+    .insert({
+      user_id: userId,
+      feature: feature,
+      created_at: new Date().toISOString(),
+    });
+
+  if (error) {
+    console.error("Error recording usage:", error);
+    // Don't throw - we don't want to fail the request if usage recording fails
+  }
+}
+
+// ===== Main Handler =====
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
   try {
-    // Allow either: (a) cron call with shared secret, or (b) authenticated user from the app.
+    // Allow cron calls with shared secret (no quota check)
     const SEED_SECRET = Deno.env.get("SEED_SECRET");
     const providedSecret = req.headers.get("x-cron-secret");
-    const authHeader = req.headers.get("Authorization") || req.headers.get("authorization");
     const isCron = !!SEED_SECRET && providedSecret === SEED_SECRET;
+
+    const authHeader = req.headers.get("Authorization") || req.headers.get("authorization");
     const hasUserJwt = !!authHeader && authHeader.toLowerCase().startsWith("bearer ");
+
+    // If not cron and not user, reject
     if (!isCron && !hasUserJwt) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse({ error: "Unauthorized" }, 401);
+    }
+
+    // If user request, enforce quota
+    let requestingUserId: string | null = null;
+    if (hasUserJwt) {
+      const user = await requireUser(authHeader);
+      requestingUserId = user.id;
+      
+      // ENFORCE QUOTA for user-initiated radar scans
+      await enforceQuota(user.id, "radar_alert");
     }
 
     const NEWS_API_KEY = Deno.env.get("NEWS_API_KEY");
@@ -113,18 +267,6 @@ serve(async (req) => {
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) throw new Error("Supabase not configured");
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    let requestingUserId: string | null = null;
-    if (hasUserJwt && authHeader) {
-      const token = authHeader.replace(/^Bearer\s+/i, "");
-      const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-      if (authError || !user) {
-        return new Response(JSON.stringify({ error: "Unauthorized" }), {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      requestingUserId = user.id;
-    }
     const allArticles: any[] = [];
     const seenUrls = new Set<string>();
 
@@ -263,9 +405,29 @@ serve(async (req) => {
       }
     }
 
-    return new Response(JSON.stringify({ success: true, articlesFound: allArticles.length, signalsExtracted: signals.length, signalsMatched: storedSignals.length, signalsStored: storedSignals.length, alertsCreated, alertsUpdated }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    // RECORD USAGE for user-initiated scans (after successful completion)
+    if (requestingUserId) {
+      await recordUsage(requestingUserId, "radar_alert");
+    }
+
+    return jsonResponse({ 
+      success: true, 
+      articlesFound: allArticles.length, 
+      signalsExtracted: signals.length, 
+      signalsMatched: storedSignals.length, 
+      signalsStored: storedSignals.length, 
+      alertsCreated, 
+      alertsUpdated 
+    });
+
   } catch (error) {
     console.error("Radar scan error:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const message = error instanceof Error ? error.message : "Unknown error";
+    const status = message.includes("limit reached") || message.includes("expired") || message.includes("does not include") 
+      ? 429 
+      : message.includes("Unauthorized") 
+        ? 401 
+        : 500;
+    return jsonResponse({ error: message }, status);
   }
 });
