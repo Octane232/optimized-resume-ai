@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Brain, Mic, RotateCcw, ArrowRight, Loader2,
   CheckCircle2, AlertCircle, Sparkles, Radio, Send, Lock,
-  BarChart3, BookOpen, Trophy, Shield, EyeOff, AlertTriangle, X
+  BarChart3, BookOpen, Trophy, Shield
 } from 'lucide-react';
 
 import { Card, CardContent } from '@/components/ui/card';
@@ -197,16 +197,9 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
   const [copilotEntries, setCopilotEntries] = useState<CopilotEntry[]>([]);
   const [copilotLoading, setCopilotLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [showOverlay, setShowOverlay] = useState(false);
   const [transcript, setTranscript] = useState('');
-  const [overlayContent, setOverlayContent] = useState<{
-    title: string;
-    message: string;
-    type: 'warning' | 'blocked' | 'recording';
-  } | null>(null);
   const copilotBottomRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
-  const overlayRef = useRef<HTMLDivElement | null>(null);
 
   // History State
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -222,7 +215,6 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
     : 0;
   
   const wordCount = userAnswer.split(/\s+/).filter(Boolean).length;
-  const remainingLive = getRemaining('interview_prep');
   const isElite = tier === 'elite';
 
   // ===== Effects =====
@@ -233,172 +225,6 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
   useEffect(() => {
     copilotBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [copilotEntries]);
-
-  // ===== Invisible Shield Overlay =====
-  const createInvisibleShield = () => {
-    const existingOverlay = document.getElementById('invisible-shield-overlay');
-    if (existingOverlay) {
-      existingOverlay.remove();
-    }
-
-    const overlay = document.createElement('div');
-    overlay.id = 'invisible-shield-overlay';
-    overlay.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 999999;
-      pointer-events: none;
-      background: rgba(0, 0, 0, 0.001);
-      mix-blend-mode: multiply;
-      backdrop-filter: blur(0px);
-      -webkit-backdrop-filter: blur(0px);
-    `;
-
-    const canvas = document.createElement('canvas');
-    canvas.width = 100;
-    canvas.height = 100;
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0)';
-      ctx.fillRect(0, 0, 100, 100);
-      
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.002)';
-      for (let i = 0; i < 1000; i++) {
-        ctx.fillRect(Math.random() * 100, Math.random() * 100, 1, 1);
-      }
-      
-      ctx.strokeStyle = 'rgba(255, 0, 0, 0.001)';
-      ctx.lineWidth = 0.5;
-      for (let i = -100; i < 200; i += 5) {
-        ctx.beginPath();
-        ctx.moveTo(i, 0);
-        ctx.lineTo(i + 100, 100);
-        ctx.stroke();
-      }
-    }
-    
-    overlay.style.backgroundImage = `url(${canvas.toDataURL()})`;
-    overlay.style.backgroundRepeat = 'repeat';
-    overlay.style.backgroundSize = '100px 100px';
-
-    document.body.appendChild(overlay);
-    overlayRef.current = overlay;
-
-    const observer = new MutationObserver(() => {
-      if (!document.getElementById('invisible-shield-overlay')) {
-        createInvisibleShield();
-      }
-    });
-    observer.observe(document.body, { childList: true });
-    
-    return () => observer.disconnect();
-  };
-
-  const removeInvisibleShield = () => {
-    const overlay = document.getElementById('invisible-shield-overlay');
-    if (overlay) {
-      overlay.remove();
-    }
-    overlayRef.current = null;
-  };
-
-  // ===== Anti-Recording Protection =====
-  useEffect(() => {
-    if (!showOverlay) return;
-
-    const preventShortcuts = (e: KeyboardEvent) => {
-      const blockedKeys = ['PrintScreen', 'F12', 'Insert', 'Pause'];
-      if (blockedKeys.includes(e.key)) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      }
-
-      if (e.ctrlKey && e.shiftKey) {
-        const blockedCombos = ['S', 'R', 'I', 'P', 'F'];
-        if (blockedCombos.includes(e.key.toUpperCase())) {
-          e.preventDefault();
-          e.stopPropagation();
-          return false;
-        }
-      }
-
-      if (e.metaKey && e.shiftKey) {
-        const blockedCombos = ['S', 'R', '4', '5'];
-        if (blockedCombos.includes(e.key)) {
-          e.preventDefault();
-          e.stopPropagation();
-          return false;
-        }
-      }
-
-      if (e.ctrlKey && e.shiftKey && e.key === 'Escape') {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      }
-
-      return true;
-    };
-
-    const preventContextMenu = (e: MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      return false;
-    };
-
-    document.addEventListener('keydown', preventShortcuts);
-    document.addEventListener('contextmenu', preventContextMenu);
-    document.addEventListener('beforeprint', (e) => e.preventDefault());
-
-    return () => {
-      document.removeEventListener('keydown', preventShortcuts);
-      document.removeEventListener('contextmenu', preventContextMenu);
-    };
-  }, [showOverlay]);
-
-  // ===== Detect Screen Recording =====
-  useEffect(() => {
-    if (!showOverlay) return;
-
-    const detectRecording = () => {
-      const mediaDevices = navigator.mediaDevices;
-      if (mediaDevices && 'getDisplayMedia' in mediaDevices) {
-        const videos = document.querySelectorAll('video');
-        for (const video of videos) {
-          if (video.srcObject) {
-            const stream = video.srcObject as MediaStream;
-            const tracks = stream.getTracks();
-            for (const track of tracks) {
-              if (track.kind === 'video' && track.readyState === 'live') {
-                setOverlayContent({
-                  title: '🔴 Recording Detected',
-                  message: 'Screen recording is not permitted during coaching sessions.',
-                  type: 'recording'
-                });
-                return;
-              }
-            }
-          }
-        }
-      }
-
-      const recordingIndicators = document.querySelectorAll('[aria-label*="recording"], [aria-label*="Recording"]');
-      if (recordingIndicators.length > 0) {
-        setOverlayContent({
-          title: '🔴 Recording Active',
-          message: 'Please disable screen recording to continue.',
-          type: 'recording'
-        });
-      }
-    };
-
-    const interval = setInterval(detectRecording, 1000);
-    return () => clearInterval(interval);
-  }, [showOverlay]);
 
   // ===== Data Fetching =====
   const loadHistory = async () => {
@@ -679,10 +505,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
     if (isListening) {
       recognitionRef.current?.stop();
       setIsListening(false);
-      setShowOverlay(false);
-      removeInvisibleShield();
-      setOverlayContent(null);
-      toast({ title: 'Listening paused' });
+      toast({ title: '🎙️ Listening paused' });
     } else {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -690,8 +513,6 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
         
         recognitionRef.current?.start();
         setIsListening(true);
-        setShowOverlay(true);
-        createInvisibleShield();
         toast({ title: '🎙️ Listening to interviewer...' });
       } catch (err) {
         toast({ title: 'Failed to access microphone', variant: 'destructive' });
@@ -757,9 +578,6 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
     setCopilotActive(false);
     setCopilotEntries([]);
     setIsListening(false);
-    setShowOverlay(false);
-    removeInvisibleShield();
-    setOverlayContent(null);
     if (recognitionRef.current) {
       recognitionRef.current.stop();
     }
@@ -919,7 +737,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
           </motion.div>
         )}
 
-        {/* ===== INTERVIEW COPILOT (Replaces Live Mode) ===== */}
+        {/* ===== INTERVIEW COPILOT (Elite Only) ===== */}
         {tab === 'copilot' && (
           <motion.div key="copilot" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             {!isElite ? (
@@ -973,7 +791,9 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                       <div className="flex items-center gap-2 p-3 bg-primary/5 rounded-lg border border-primary/10">
                         <Shield className="w-4 h-4 text-primary" />
                         <p className="text-xs text-muted-foreground">
-                          <strong>Protected:</strong> Your session is encrypted and cannot be screen recorded.
+                          <strong>AI-Powered:</strong> Get real-time suggestions for interview questions.
+                          <br />
+                          <span className="text-primary/60">🎙️ Use the mic to auto-detect questions.</span>
                         </p>
                       </div>
                     </div>
@@ -983,9 +803,6 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                         <div className="flex items-center gap-2">
                           <Badge variant="destructive" className="animate-pulse">
                             <Radio className="w-3 h-3 mr-1" />Live
-                          </Badge>
-                          <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
-                            <Shield className="w-3 h-3 mr-1" />Protected
                           </Badge>
                           {isListening && (
                             <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">
@@ -1061,7 +878,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
 
                       <div className="text-xs text-muted-foreground flex items-center gap-2">
                         <Shield className="w-3 h-3 text-emerald-500" />
-                        <span>This session is protected. Screen recording is blocked.</span>
+                        <span>AI suggestions appear instantly. Use them as talking points, not a script.</span>
                       </div>
                     </div>
                   )}
@@ -1130,26 +947,6 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Recording Detected Overlay */}
-      {overlayContent && (
-        <div className="fixed inset-0 z-[999999] bg-black/50 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-red-50 border-2 border-red-500 rounded-2xl p-8 max-w-md mx-4 text-center">
-            <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4 animate-pulse" />
-            <h3 className="text-xl font-bold text-red-700">{overlayContent.title}</h3>
-            <p className="text-red-600 mt-2">{overlayContent.message}</p>
-            <Button 
-              className="mt-4 bg-red-600 hover:bg-red-700 text-white"
-              onClick={() => {
-                setOverlayContent(null);
-                toggleListening();
-              }}
-            >
-              Disable Recording & Continue
-            </Button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
