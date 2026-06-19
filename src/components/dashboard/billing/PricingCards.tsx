@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 type PlanId = 'pro' | 'elite';
 type Billing = 'monthly' | 'yearly';
 
+// FIXED: Updated FREE_FEATURES to match actual trial limits
 const FREE_FEATURES = [
   '✅ No credit card required',
   '✅ 10 Resume + ATS runs',
@@ -86,13 +87,6 @@ const PricingCards = () => {
   const isTrial = tier === 'trial' || (tier === 'free' && subscriptionEnd);
   const isTrialActive = isTrial && subscriptionEnd && new Date(subscriptionEnd) > new Date();
 
-  // FIXED: Determine the display name for the current plan
-  const getPlanDisplayName = () => {
-    if (isTrialActive) return 'Free Trial';
-    if (tier === 'free') return 'Free';
-    return displayTier;
-  };
-
   const handleUpgrade = async (planId: PlanId) => {
     setLoading(planId);
     try {
@@ -130,8 +124,9 @@ const PricingCards = () => {
                 : 'Try it out — no card needed'}
             </p>
           </div>
+          {/* FIXED: Shows "Free Trial" badge when trial is active */}
           <Badge variant="outline" className="text-xs">
-            {isTrialActive ? 'Trial Active' : (tier === 'free' ? 'Your Plan' : 'Free')}
+            {isTrialActive ? 'Free Trial' : (tier === 'free' ? 'Your Plan' : 'Free')}
           </Badge>
         </div>
         <div className="grid grid-cols-2 gap-1.5">
