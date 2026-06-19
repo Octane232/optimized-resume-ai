@@ -9,7 +9,6 @@ import { useToast } from '@/hooks/use-toast';
 type PlanId = 'pro' | 'elite';
 type Billing = 'monthly' | 'yearly';
 
-// FIXED: Updated FREE_FEATURES to match actual trial limits
 const FREE_FEATURES = [
   '✅ No credit card required',
   '✅ 10 Resume + ATS runs',
@@ -71,6 +70,7 @@ const PLANS = [
       '500 Resume Uploads / month',
       'Priority Support + Early Access',
       'ATS Resume Review',
+      'Live Coach Mode',  // ← Added here
       'Job Application Automation — Coming Soon 🚀'
     ],
     locked: [],
@@ -124,7 +124,6 @@ const PricingCards = () => {
                 : 'Try it out — no card needed'}
             </p>
           </div>
-          {/* FIXED: Shows "Free Trial" badge when trial is active */}
           <Badge variant="outline" className="text-xs">
             {isTrialActive ? 'Free Trial' : (tier === 'free' ? 'Your Plan' : 'Free')}
           </Badge>
