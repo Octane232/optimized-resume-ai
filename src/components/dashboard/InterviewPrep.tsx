@@ -200,6 +200,15 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
   const [transcript, setTranscript] = useState('');
   const copilotBottomRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
+  // Live mode reliability refs:
+  // isListeningRef mirrors isListening so the onend handler (a stale closure)
+  // always knows whether a restart was actually requested by the user.
+  const isListeningRef = useRef(false);
+  // Buffers spoken fragments until a pause is detected, so we send full
+  // questions to the AI instead of mid-sentence chunks.
+  const transcriptBufferRef = useRef('');
+  const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const SILENCE_WINDOW_MS = 1200;
 
   // History State
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -462,33 +471,87 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
       recognitionRef.current.interimResults = true;
       recognitionRef.current.lang = 'en-US';
 
-      recognitionRef.current.onresult = async (event: any) => {
-        let finalTranscript = '';
+      recognitionRef.current.onresult = (event: any) => {
+        let finalChunk = '';
+        let interimChunk = '';
         for (let i = event.resultIndex; i < event.results.length; i++) {
           if (event.results[i].isFinal) {
-            finalTranscript += event.results[i][0].transcript;
+            finalChunk += event.results[i][0].transcript;
+          } else {
+            interimChunk += event.results[i][0].transcript;
           }
         }
-        
-        if (finalTranscript && finalTranscript.length > 5) {
-          setTranscript(finalTranscript);
-          // Auto-ask the question when speech is detected
-          if (copilotActive && !copilotLoading) {
-            setCopilotQuestion(finalTranscript);
-            await askCopilot(finalTranscript);
+
+        // Show live partial text immediately so the UI feels real-time,
+        // even though we wait to actually ask the AI.
+        if (finalChunk || interimChunk) {
+          setTranscript((transcriptBufferRef.current + ' ' + finalChunk + interimChunk).trim());
+        }
+
+        if (finalChunk) {
+          // Accumulate finalized fragments instead of treating each one
+          // as a complete question on its own.
+          transcriptBufferRef.current = (transcriptBufferRef.current + ' ' + finalChunk).trim();
+
+          // Reset the silence timer every time new speech arrives.
+          if (silenceTimerRef.current) {
+            clearTimeout(silenceTimerRef.current);
           }
+          silenceTimerRef.current = setTimeout(() => {
+            const fullQuestion = transcriptBufferRef.current.trim();
+            transcriptBufferRef.current = '';
+            silenceTimerRef.current = null;
+
+            if (fullQuestion.length > 5 && copilotActive) {
+              setCopilotQuestion(fullQuestion);
+              askCopilot(fullQuestion);
+            }
+          }, SILENCE_WINDOW_MS);
         }
       };
 
       recognitionRef.current.onerror = (event: any) => {
         if (event.error === 'not-allowed') {
           toast({ title: 'Microphone access denied', variant: 'destructive' });
+          isListeningRef.current = false;
+          setIsListening(false);
+          return;
         }
-        setIsListening(false);
+        // For transient errors (e.g. 'no-speech', 'network'), swallow it —
+        // onend will fire next and the restart logic below takes over.
+      };
+
+      // The browser's recognizer stops itself after pauses, timeouts, or
+      // transient errors even with continuous = true. Restart it
+      // automatically as long as the user hasn't explicitly stopped listening.
+      recognitionRef.current.onend = () => {
+        if (isListeningRef.current) {
+          try {
+            recognitionRef.current.start();
+          } catch {
+            // start() can throw if called too soon after stop(); retry shortly.
+            setTimeout(() => {
+              if (isListeningRef.current && recognitionRef.current) {
+                recognitionRef.current.start();
+              }
+            }, 250);
+          }
+        }
       };
     } else {
       toast({ title: 'Speech recognition not supported', variant: 'destructive' });
     }
+
+    return () => {
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
+      if (recognitionRef.current) {
+        recognitionRef.current.onend = null;
+        recognitionRef.current.stop();
+      }
+    };
   }, [isElite, copilotActive]);
 
   const toggleListening = async () => {
@@ -503,16 +566,23 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
     }
 
     if (isListening) {
+      isListeningRef.current = false;
       if (recognitionRef.current) {
         recognitionRef.current.stop();
       }
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
+      transcriptBufferRef.current = '';
       setIsListening(false);
       toast({ title: '🎙️ Listening paused' });
     } else {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         stream.getTracks().forEach(track => track.stop());
-        
+
+        isListeningRef.current = true;
         if (recognitionRef.current) {
           recognitionRef.current.start();
         }
@@ -582,7 +652,15 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
     setCopilotActive(false);
     setCopilotEntries([]);
     setIsListening(false);
+    isListeningRef.current = false;
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
+    transcriptBufferRef.current = '';
+    setTranscript('');
     if (recognitionRef.current) {
+      recognitionRef.current.onend = null;
       recognitionRef.current.stop();
     }
   };
