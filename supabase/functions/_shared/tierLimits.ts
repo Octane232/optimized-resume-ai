@@ -12,7 +12,6 @@ export type UsageAction =
   | "resume_parse"
   | "job_search"
   | "bullet_rewrite";
-
 // ===== Monthly Limits Per Feature Per Tier =====
 export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> = {
   free: {
@@ -68,23 +67,12 @@ export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> 
     bullet_rewrite: 300,
   },
 };
-
-// ===== Total Monthly Pool Per Tier (for backward compatibility) =====
-export const TIER_POOL: Record<SubscriptionTier, number> = {
-  free: 25,
-  trial: 100,
-  pro: 500,
-  elite: 1500,
-};
-
 // ===== Reset Days =====
 export const RESET_DAYS = 30;
-
 // ===== Helper Functions =====
 export function getFeatureLimit(tier: SubscriptionTier, action: UsageAction): number {
   return PLAN_LIMITS[tier]?.[action] ?? 0;
 }
-
 export function hasRemainingUses(
   tier: SubscriptionTier,
   action: UsageAction,
@@ -93,7 +81,6 @@ export function hasRemainingUses(
   const limit = getFeatureLimit(tier, action);
   return currentUsage < limit;
 }
-
 export function getRemainingUses(
   tier: SubscriptionTier,
   action: UsageAction,
@@ -102,7 +89,6 @@ export function getRemainingUses(
   const limit = getFeatureLimit(tier, action);
   return Math.max(0, limit - currentUsage);
 }
-
 // ===== Feature Display Names =====
 export const FEATURE_NAMES: Record<UsageAction, string> = {
   resume_ats: "Resume + ATS Optimization",
@@ -117,7 +103,6 @@ export const FEATURE_NAMES: Record<UsageAction, string> = {
   job_search: "Job Search",
   bullet_rewrite: "Bullet Point Rewrite",
 };
-
 // ===== Feature Descriptions =====
 export const FEATURE_DESCRIPTIONS: Record<UsageAction, string> = {
   resume_ats: "Tailored resume + cover letter + ATS score in one click",
@@ -132,7 +117,6 @@ export const FEATURE_DESCRIPTIONS: Record<UsageAction, string> = {
   job_search: "Search for jobs across multiple platforms",
   bullet_rewrite: "AI-powered bullet point rewriting for resumes",
 };
-
 // ===== Deprecated Action Costs (kept for backward compatibility) =====
 // @deprecated - Use PLAN_LIMITS and getFeatureLimit() instead
 export const ACTION_COSTS: Record<UsageAction, number> = {
