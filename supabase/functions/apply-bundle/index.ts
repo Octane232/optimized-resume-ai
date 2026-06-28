@@ -70,17 +70,18 @@ const callOpenAIWithRetry = async (
 const buildResumePrompt = (userResume: string, jobDescription: string): string => {
   return `You are an expert resume writer and career coach.
 
-Your job is to COMPLETELY rewrite the resume below to strongly match the job description. This is not a light edit — restructure, reorder, and rewrite aggressively.
+Your job is to COMPLETELY rewrite the resume below to strongly match the job description. This is not a light edit — restructure, reorder, and rewrite aggressively in tone, structure, and language.
 
 RULES:
-1. Rewrite EVERY bullet point using strong action verbs and quantifiable achievements
-2. Reorder sections and experience to prioritize what matters most for THIS role
-3. Mirror the exact language and keywords from the job description naturally throughout
-4. Rewrite the professional summary to speak directly to this specific role
-5. Remove or de-emphasize experience irrelevant to this job
-6. Add missing keywords from the job description where experience supports it
-7. Do NOT fabricate experience, titles, companies or dates
-8. Output ONLY the rewritten resume — no explanations, no commentary, no preamble
+1. Rewrite EVERY bullet point using strong, specific action verbs. Make each one sound impactful and professional.
+2. If — and only if — the original resume already states or clearly implies a number, metric, or quantity (e.g. "served 50 customers a day", "managed a team of 5"), you may rephrase it more impressively. NEVER invent a number, percentage, or statistic that is not present or directly implied in the original resume. If there is no real number to work with, write a strong qualitative bullet instead (e.g. "consistently" / "regularly" / "significantly") rather than fabricating one.
+3. Reorder sections and experience to prioritize what matters most for THIS role
+4. Mirror the exact language and keywords from the job description naturally throughout
+5. Rewrite the professional summary to speak directly to this specific role
+6. Remove or de-emphasize experience irrelevant to this job
+7. Add missing keywords from the job description where experience supports it
+8. Do NOT fabricate experience, titles, companies, dates, metrics, percentages, or any other facts not present in the original
+9. Output ONLY the rewritten resume — no explanations, no commentary, no preamble
 
 FORMAT:
 - Use clean markdown formatting
@@ -102,11 +103,11 @@ Write a compelling, concise 3-paragraph cover letter for this role. Use real exp
 
 STRUCTURE:
 - Paragraph 1: Hook + why you're excited about THIS specific role and company
-- Paragraph 2: Your relevant achievements and skills that match their needs (use numbers!)
+- Paragraph 2: Your relevant achievements and skills that match their needs. If the resume already contains real numbers or metrics, highlight them. If it does not, describe the achievement strongly and specifically without inventing a number.
 - Paragraph 3: Call to action + enthusiasm for next steps
 
 RULES:
-- Do NOT fabricate experience
+- Do NOT fabricate experience, employers, titles, dates, or any numbers/percentages/metrics that are not present or clearly implied in the original resume
 - Keep to 250-350 words
 - Address the hiring manager directly
 - Use specific details from the job description
