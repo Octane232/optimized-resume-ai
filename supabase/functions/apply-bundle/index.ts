@@ -99,26 +99,33 @@ ${jobDescription}`;
 const buildCoverLetterPrompt = (userResume: string, jobDescription: string, userName?: string): string => {
   return `You are a professional cover letter writer.
 
-Write a compelling, concise 3-paragraph cover letter for this role. Use real experience from the resume. Be professional but personable.
+Write a compelling, concise 3-paragraph cover letter for the NEW role described in the JOB DESCRIPTION below. The candidate is applying TO the company named or implied in the JOB DESCRIPTION — that is the target company this letter is addressed to and excited about.
+
+The RESUME below describes the candidate's PAST or CURRENT work history. Any company named inside the RESUME (e.g. a current or former employer) is NOT the company being applied to — it is only a source of relevant experience to draw from. Do not confuse the candidate's past/current employer with the company they are applying to. Do not praise, address, or express excitement about the candidate's past/current employer as if it were the target company.
+
+If the job description does not clearly name the target company, write the letter addressed generically to "the Hiring Manager" and refer to "your team" / "your company" rather than guessing or substituting a company name from the resume.
 
 STRUCTURE:
-- Paragraph 1: Hook + why you're excited about THIS specific role and company
-- Paragraph 2: Your relevant achievements and skills that match their needs. If the resume already contains real numbers or metrics, highlight them. If it does not, describe the achievement strongly and specifically without inventing a number.
+- Paragraph 1: Hook + why you're excited about THIS specific role and the company named in the JOB DESCRIPTION (not the resume's employer)
+- Paragraph 2: Your relevant achievements and skills from the RESUME that match the JOB DESCRIPTION's needs. If the resume already contains real numbers or metrics, highlight them. If it does not, describe the achievement strongly and specifically without inventing a number.
 - Paragraph 3: Call to action + enthusiasm for next steps
 
 RULES:
 - Do NOT fabricate experience, employers, titles, dates, or any numbers/percentages/metrics that are not present or clearly implied in the original resume
+- Do NOT fabricate claims of having researched or followed the target company unless the job description provides specific detail to reference
 - Keep to 250-350 words
-- Address the hiring manager directly
+- Address the hiring manager directly (use "Dear Hiring Manager," if no name is available — do not output a literal placeholder like "[Hiring Manager's Name]")
+- Sign off using the applicant name provided below. If no applicant name is provided, sign off as "Sincerely," with no name rather than inventing one or leaving a placeholder.
+- Do NOT include letterhead placeholder fields such as [Your Address], [City, State, Zip], [Company Address], or [Your Contact Information]. Omit address blocks entirely and go straight to the date-less greeting and body.
 - Use specific details from the job description
 - Output ONLY the cover letter — no explanations, no preamble
 
-${userName ? `\nApplicant name: ${userName}` : ""}
+${userName ? `Applicant name (use this exact name in the sign-off): ${userName}` : "No applicant name was provided — sign off as \"Sincerely,\" with no name."}
 
-RESUME:
+RESUME (background/experience only — NOT the company being applied to):
 ${userResume}
 
-JOB DESCRIPTION:
+JOB DESCRIPTION (this defines the target role and target company):
 ${jobDescription}`;
 };
 
