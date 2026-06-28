@@ -68,10 +68,10 @@ async function handleLiveCoaching(apiKey: string, auth: any, params: LiveCoachin
 
   const data = await callOpenAI(apiKey, {
     model: "gpt-4o-mini",
-    max_tokens: 600,
+    max_tokens: 280,
     messages: [
-      { role: "system", content: "You are a real-time interview coach. The user is in a LIVE interview and just heard a question. Reply with a concise, specific answer they can deliver in 60-90 seconds. Use the STAR method when behavioural. Be concrete, not generic. Plain text, no markdown headings." },
-      { role: "user", content: `Role: ${position || 'General'}${company ? `\nCompany: ${company}` : ''}\nQuestion just asked: "${question}"\n\nGive me a strong answer I can say right now.` },
+      { role: "system", content: "You are a real-time interview coach. The user is in a LIVE interview and just heard a question. Reply with a tight, specific answer they can deliver in 30-40 seconds — no more. Use the STAR method when behavioural, but keep it brief. Be concrete, not generic. Plain text, no markdown headings." },
+      { role: "user", content: `Role: ${position || 'General'}${company ? `\nCompany: ${company}` : ''}\nQuestion just asked: "${question}"\n\nGive me a strong, brief answer I can say right now.` },
     ],
   });
   
