@@ -37,11 +37,11 @@ Rules: Max 220 characters. Format: [Role] | [Skill 1] | [Skill 2] | [Value prop]
 
     summary: `You are a LinkedIn expert. Write an optimized LinkedIn About/Summary for a ${role} in ${ind}.
 ${hasContent}
-Rules: 150-300 words. Hook first sentence. 3-4 specialties. Quantified achievements. Soft CTA at end. Return ONLY the summary.`,
+Rules: 150-300 words. Hook first sentence. 3-4 specialties. If real numbers or metrics are present in the current content, weave them in naturally — but never invent a statistic that isn't there. Soft CTA at end. Return ONLY the summary.`,
 
     experience: `You are a LinkedIn expert. Rewrite these experience bullets for a ${role} in ${ind} to be more impactful.
 Experience: "${currentContent || "No experience provided."}"
-Rules: Strong action verb each bullet. Quantify results with numbers/percentages. Focus on impact not duties. Max 2 lines per bullet. Return ONLY the bullets, one per line.`,
+Rules: Strong action verb each bullet. Focus on impact, not just duties. If the original content already includes a number, metric, or percentage, you may rephrase it more impressively — but NEVER invent a number, percentage, or statistic that is not present or clearly implied in the original content. If there's no real metric to draw from, write a strong qualitative bullet instead. Max 2 lines per bullet. Return ONLY the bullets, one per line.`,
 
     skills: `You are a LinkedIn expert. Suggest the top 15 LinkedIn skills for a ${role} in ${ind}.
 ${hasContent}
@@ -117,7 +117,7 @@ const handleOptimization = async (
   auth: any,
   apiKey: string,
   body: any
-): Promise<Response> {
+): Promise<Response> => {
   const { type, currentContent, targetRole, industry } = body;
   
   validateRequest(type);
