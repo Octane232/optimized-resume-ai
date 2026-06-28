@@ -62,6 +62,8 @@ const STATUS_COLUMNS = [
   { id: 'applied', label: 'Applied', color: 'bg-blue-500' },
   { id: 'interviewing', label: 'Interview', color: 'bg-amber-500' },
   { id: 'offer', label: 'Offer', color: 'bg-emerald-500' },
+  { id: 'rejected', label: 'Rejected', color: 'bg-red-500' },
+  { id: 'withdrawn', label: 'Withdrawn', color: 'bg-gray-400' },
 ];
 
 const NEW_APP_INITIAL: NewApplication = {
@@ -223,7 +225,7 @@ const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({ columnCount = 4 }) =>
   return (
     <div className="p-6">
       <div className="h-12 bg-muted/50 rounded-lg mb-6 w-48 animate-pulse" />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {skeletons.map((_, i) => (
           <div key={i} className="h-96 bg-muted/50 rounded-xl animate-pulse" />
         ))}
@@ -635,7 +637,7 @@ const MissionControl: React.FC = () => {
       {applications.length === 0 ? (
         <EmptyState onAddClick={() => setIsAddDialogOpen(true)} />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           {STATUS_COLUMNS.map(column => (
             <KanbanColumn
               key={column.id}
