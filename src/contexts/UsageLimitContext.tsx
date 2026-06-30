@@ -170,11 +170,18 @@ export const UsageLimitProvider = ({ children }: { children: ReactNode }) => {
       }
 
       // Get subscription tier - UPDATED to include trial_end
-      const { data: subData } = await supabase
+      // Ordered + limited instead of maybeSingle(): if more than one row
+      // ever exists for a user, maybeSingle() silently returns null and
+      // the code below falls back to 'free' (0 limits on everything).
+      // Taking the most recently updated row avoids that failure mode.
+      const { data: subRows } = await supabase
         .from('user_subscriptions')
         .select('tier, plan_status, current_period_end, trial_end')
         .eq('user_id', session.user.id)
-        .maybeSingle();
+        .order('updated_at', { ascending: false })
+        .limit(1);
+
+      const subData = subRows?.[0] ?? null;
 
       let resolvedTier: SubscriptionTier = 'free';
       
