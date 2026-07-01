@@ -488,8 +488,10 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
     if (!isElite || !copilotActive) return;
 
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
+      const win = window as unknown as { SpeechRecognition?: new () => any; webkitSpeechRecognition?: new () => any };
+      const SpeechRecognitionCtor = win.SpeechRecognition || win.webkitSpeechRecognition;
+      if (!SpeechRecognitionCtor) return;
+      recognitionRef.current = new SpeechRecognitionCtor();
       recognitionRef.current.continuous = true;
       recognitionRef.current.interimResults = true;
       recognitionRef.current.lang = 'en-US';
