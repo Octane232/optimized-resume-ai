@@ -174,13 +174,19 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
       }
 
       if (alerts && alerts.length > 0) {
-        setScoutJobs(alerts.map((alert: any, index: number) => ({
-          company: alert.radar_signals?.company_name || 'New Signal',
-          role: alert.radar_signals?.likely_roles?.[0] || 'Position',
-          match: alert.match_score || 75,
-          color: SCOUT_COLORS[index % SCOUT_COLORS.length],
-          url: alert.radar_signals?.source_url
-        })));
+        setScoutJobs(alerts.map((alert: any, index: number) => {
+          // Supabase may return the related row as an object or a single-element array
+          const signal = Array.isArray(alert.radar_signals)
+            ? alert.radar_signals[0]
+            : alert.radar_signals;
+          return {
+            company: signal?.company_name || 'New Signal',
+            role: signal?.likely_roles?.[0] || 'Hiring soon',
+            match: alert.match_score || 75,
+            color: SCOUT_COLORS[index % SCOUT_COLORS.length],
+            url: signal?.source_url
+          };
+        }));
       } else {
         setScoutJobs([]);
       }
