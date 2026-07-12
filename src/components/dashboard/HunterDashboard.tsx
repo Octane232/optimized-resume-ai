@@ -272,7 +272,7 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
         {/* Scout Report */}
         <ScoutReport
           scoutJobs={scoutJobs}
-          onReviewMatches={() => setActiveTab('job-search')}
+          onReviewMatches={() => setActiveTab('scout')}
         />
 
         {/* Action Required */}
