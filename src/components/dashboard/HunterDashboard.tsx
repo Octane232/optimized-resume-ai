@@ -152,17 +152,9 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // FIXED: Explicitly specify the foreign key column with !signal_id
       const { data: alerts, error } = await supabase
         .from('radar_alerts')
-        .select(`
-          match_score,
-          radar_signals!signal_id(
-            company_name,
-            likely_roles,
-            source_url
-          )
-        `)
+        .select('match_score, signal_id, created_at')
         .eq('user_id', user.id)
         .eq('is_read', false)
         .order('created_at', { ascending: false })
@@ -174,11 +166,16 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
       }
 
       if (alerts && alerts.length > 0) {
+        const signalIds = alerts.map((a: any) => a.signal_id).filter(Boolean);
+        const { data: signals } = await supabase
+          .from('radar_signals')
+          .select('id, company_name, likely_roles, source_url')
+          .in('id', signalIds);
+
+        const signalMap = new Map((signals || []).map((s: any) => [s.id, s]));
+
         setScoutJobs(alerts.map((alert: any, index: number) => {
-          // Supabase may return the related row as an object or a single-element array
-          const signal = Array.isArray(alert.radar_signals)
-            ? alert.radar_signals[0]
-            : alert.radar_signals;
+          const signal: any = signalMap.get(alert.signal_id);
           return {
             company: signal?.company_name || 'New Signal',
             role: signal?.likely_roles?.[0] || 'Hiring soon',
