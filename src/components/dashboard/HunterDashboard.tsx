@@ -174,13 +174,19 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
       }
 
       if (alerts && alerts.length > 0) {
-        setScoutJobs(alerts.map((alert: any, index: number) => ({
-          company: alert.radar_signals?.company_name || 'New Signal',
-          role: alert.radar_signals?.likely_roles?.[0] || 'Position',
-          match: alert.match_score || 75,
-          color: SCOUT_COLORS[index % SCOUT_COLORS.length],
-          url: alert.radar_signals?.source_url
-        })));
+        setScoutJobs(alerts.map((alert: any, index: number) => {
+          // Supabase may return the related row as an object or a single-element array
+          const signal = Array.isArray(alert.radar_signals)
+            ? alert.radar_signals[0]
+            : alert.radar_signals;
+          return {
+            company: signal?.company_name || 'New Signal',
+            role: signal?.likely_roles?.[0] || 'Hiring soon',
+            match: alert.match_score || 75,
+            color: SCOUT_COLORS[index % SCOUT_COLORS.length],
+            url: signal?.source_url
+          };
+        }));
       } else {
         setScoutJobs([]);
       }
@@ -266,7 +272,7 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
         {/* Scout Report */}
         <ScoutReport
           scoutJobs={scoutJobs}
-          onReviewMatches={() => setActiveTab('job-search')}
+          onReviewMatches={() => setActiveTab('scout')}
         />
 
         {/* Action Required */}
@@ -468,6 +474,7 @@ const ScoutJobItem: React.FC<ScoutJobItemProps> = ({ job, index }) => (
     initial={{ opacity: 0, x: -10 }}
     animate={{ opacity: 1, x: 0 }}
     transition={{ delay: 0.3 + index * 0.1 }}
+    onClick={() => job.url && window.open(job.url, '_blank', 'noopener,noreferrer')}
     className="flex items-center justify-between p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer group"
   >
     <div className="flex items-center gap-3">
