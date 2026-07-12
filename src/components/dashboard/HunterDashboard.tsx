@@ -474,6 +474,7 @@ const ScoutJobItem: React.FC<ScoutJobItemProps> = ({ job, index }) => (
     initial={{ opacity: 0, x: -10 }}
     animate={{ opacity: 1, x: 0 }}
     transition={{ delay: 0.3 + index * 0.1 }}
+    onClick={() => job.url && window.open(job.url, '_blank', 'noopener,noreferrer')}
     className="flex items-center justify-between p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer group"
   >
     <div className="flex items-center gap-3">
