@@ -45,14 +45,14 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
   collapsed,
   setCollapsed
 }) => {
-  // Navigation structure per document spec
-  const intelligenceItems = [
-    { id: 'job-search', label: 'Job Search', icon: Search },
-    { id: 'scout', label: 'Job Radar ', icon: Telescope },
-    { id: 'salary-intel', label: 'Salary Intel ', icon: DollarSign },
-  ];
+  const [moreOpen, setMoreOpen] = useState(
+    ['job-search', 'salary-intel', 'resume-engine', 'interview-prep', 'mission-control', 'linkedin', 'skill-gap'].includes(activeTab)
+  );
 
-  const toolsItems = [
+  // Everything except the flagship Job Radar collapses under "More features"
+  const moreItems = [
+    { id: 'job-search', label: 'Job Search', icon: Search },
+    { id: 'salary-intel', label: 'Salary Intel', icon: DollarSign },
     { id: 'resume-engine', label: 'Resume Engine', icon: Stethoscope },
     { id: 'interview-prep', label: 'Interview Coach ', icon: Mic },
     { id: 'mission-control', label: 'App Tracker ', icon: Crosshair },
