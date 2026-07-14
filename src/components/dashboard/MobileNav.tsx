@@ -17,13 +17,11 @@ import { cn } from '@/lib/utils';
 interface MobileNavProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  mode: 'hunter' | 'growth';
+  mode?: 'hunter';
 }
 
-const MobileNav: React.FC<MobileNavProps> = ({ activeTab, setActiveTab, mode }) => {
-  const modeColor = mode === 'hunter' 
-    ? 'hsl(217, 100%, 50%)' 
-    : 'hsl(262, 83%, 58%)';
+const MobileNav: React.FC<MobileNavProps> = ({ activeTab, setActiveTab }) => {
+  const modeColor = 'hsl(217, 100%, 50%)';
 
   const primaryItems = [
     { id: 'briefing', label: 'Home', icon: Home },
