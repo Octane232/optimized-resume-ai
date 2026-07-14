@@ -223,23 +223,76 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
             {collapsed && <TooltipContent side="right">Dashboard</TooltipContent>}
           </Tooltip>
 
-          {/* INTELLIGENCE section */}
-          {!collapsed && (
-            <div className="pt-4 pb-1 px-3">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/40">Intelligence</span>
-            </div>
-          )}
-          {collapsed && <div className="my-2 border-t border-sidebar-border" />}
-          {intelligenceItems.map(renderNavItem)}
+          {/* ===== FLAGSHIP: JOB RADAR ===== */}
+          <div className="pt-3">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setActiveTab('scout')}
+                  className={`
+                    group relative w-full flex items-center gap-3 rounded-xl text-left
+                    transition-all duration-300 overflow-hidden
+                    ${collapsed ? 'p-2.5 justify-center' : 'p-3'}
+                    ${activeTab === 'scout'
+                      ? 'shadow-lg shadow-blue-500/30'
+                      : 'hover:shadow-md hover:shadow-blue-500/20'
+                    }
+                  `}
+                  style={{
+                    background: activeTab === 'scout'
+                      ? 'linear-gradient(135deg, hsl(217, 100%, 50%), hsl(262, 83%, 58%))'
+                      : 'linear-gradient(135deg, hsl(217, 100%, 50% / 0.12), hsl(262, 83%, 58% / 0.12))',
+                    border: activeTab === 'scout' ? 'none' : `1px solid ${modeColor}40`,
+                  }}
+                >
+                  <div className={`shrink-0 rounded-lg p-1.5 ${activeTab === 'scout' ? 'bg-white/20' : ''}`}
+                       style={activeTab !== 'scout' ? { background: `${modeColor}20` } : {}}>
+                    <Telescope className="w-5 h-5" style={{ color: activeTab === 'scout' ? 'white' : modeColor }} />
+                  </div>
+                  {!collapsed && (
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className={`font-bold text-sm ${activeTab === 'scout' ? 'text-white' : 'text-sidebar-foreground'}`}>
+                          Job Radar
+                        </span>
+                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold tracking-wide ${
+                          activeTab === 'scout' ? 'bg-white/25 text-white' : 'bg-amber-500/20 text-amber-600 dark:text-amber-400'
+                        }`}>
+                          FLAGSHIP
+                        </span>
+                      </div>
+                      <p className={`text-[10px] mt-0.5 ${activeTab === 'scout' ? 'text-white/80' : 'text-sidebar-foreground/60'}`}>
+                        Hidden jobs, 14 days early
+                      </p>
+                    </div>
+                  )}
+                </button>
+              </TooltipTrigger>
+              {collapsed && <TooltipContent side="right">Job Radar — Flagship</TooltipContent>}
+            </Tooltip>
+          </div>
 
-          {/* TOOLS section */}
-          {!collapsed && (
-            <div className="pt-4 pb-1 px-3">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/40">Tools</span>
-            </div>
-          )}
-          {collapsed && <div className="my-2 border-t border-sidebar-border" />}
-          {toolsItems.map(renderNavItem)}
+          {/* ===== MORE FEATURES (collapsible) ===== */}
+          <div className="pt-4">
+            {!collapsed ? (
+              <button
+                onClick={() => setMoreOpen(!moreOpen)}
+                className="w-full flex items-center justify-between px-3 py-1.5 rounded-lg hover:bg-sidebar-accent/50 transition-colors"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/40">
+                  More features
+                </span>
+                <ChevronDown className={`w-3.5 h-3.5 text-sidebar-foreground/40 transition-transform ${moreOpen ? '' : '-rotate-90'}`} />
+              </button>
+            ) : (
+              <div className="my-2 border-t border-sidebar-border" />
+            )}
+            {(moreOpen || collapsed) && (
+              <div className="mt-1 space-y-1">
+                {moreItems.map(renderNavItem)}
+              </div>
+            )}
+          </div>
         </TooltipProvider>
       </nav>
 
