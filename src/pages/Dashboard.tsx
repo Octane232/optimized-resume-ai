@@ -30,6 +30,7 @@ import LinkedInOptimizer from '@/components/dashboard/LinkedInOptimizer';
 import SalaryIntel from '@/components/dashboard/SalaryIntel';
 import JobSearch from '@/components/dashboard/JobSearch';
 import WalkthroughGuide from '@/components/dashboard/WalkthroughGuide';
+import PaywallGate from '@/components/dashboard/PaywallGate';
 
 import {
   DropdownMenu,
