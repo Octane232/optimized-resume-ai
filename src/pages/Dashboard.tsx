@@ -256,9 +256,17 @@ const Dashboard = () => {
       case 'briefing':
         return <HunterDashboard setActiveTab={handleSetActiveTab} />;
       case 'job-search':
-        return <JobSearch />;
+        return (
+          <PaywallGate feature="job-search" onUpgrade={() => handleSetActiveTab('billing')}>
+            <JobSearch />
+          </PaywallGate>
+        );
       case 'scout':
-        return <Scout />;
+        return (
+          <PaywallGate feature="radar" onUpgrade={() => handleSetActiveTab('billing')}>
+            <Scout />
+          </PaywallGate>
+        );
       case 'salary-intel':
         return <SalaryIntel />;
       case 'resume-engine':
