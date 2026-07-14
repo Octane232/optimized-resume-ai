@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import VaylanceLogo from '@/components/VaylanceLogo';
 import { 
   Home, 
@@ -6,6 +6,7 @@ import {
   Crosshair,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Stethoscope,
   Sparkles,
   Telescope,
