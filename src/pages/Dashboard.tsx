@@ -30,6 +30,7 @@ import LinkedInOptimizer from '@/components/dashboard/LinkedInOptimizer';
 import SalaryIntel from '@/components/dashboard/SalaryIntel';
 import JobSearch from '@/components/dashboard/JobSearch';
 import WalkthroughGuide from '@/components/dashboard/WalkthroughGuide';
+import PaywallGate from '@/components/dashboard/PaywallGate';
 
 import {
   DropdownMenu,
@@ -256,9 +257,17 @@ const Dashboard = () => {
       case 'briefing':
         return <HunterDashboard setActiveTab={handleSetActiveTab} />;
       case 'job-search':
-        return <JobSearch />;
+        return (
+          <PaywallGate feature="job-search" onUpgrade={() => handleSetActiveTab('billing')}>
+            <JobSearch />
+          </PaywallGate>
+        );
       case 'scout':
-        return <Scout />;
+        return (
+          <PaywallGate feature="radar" onUpgrade={() => handleSetActiveTab('billing')}>
+            <Scout />
+          </PaywallGate>
+        );
       case 'salary-intel':
         return <SalaryIntel />;
       case 'resume-engine':
