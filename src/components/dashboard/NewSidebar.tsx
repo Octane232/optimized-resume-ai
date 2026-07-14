@@ -31,8 +31,8 @@ import ThemeToggle from '@/components/ThemeToggle';
 interface NewSidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  mode: 'hunter' | 'growth';
-  setMode: (mode: 'hunter' | 'growth') => void;
+  mode?: 'hunter';
+  setMode?: (mode: 'hunter') => void;
   collapsed: boolean;
   setCollapsed: (collapsed: boolean) => void;
 }
@@ -40,11 +40,10 @@ interface NewSidebarProps {
 const NewSidebar: React.FC<NewSidebarProps> = ({ 
   activeTab, 
   setActiveTab, 
-  mode, 
-  setMode,
   collapsed,
   setCollapsed
 }) => {
+  const mode: 'hunter' = 'hunter';
   const [moreOpen, setMoreOpen] = useState(
     ['job-search', 'salary-intel', 'resume-engine', 'interview-prep', 'mission-control', 'linkedin', 'skill-gap'].includes(activeTab)
   );
@@ -60,9 +59,7 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
     { id: 'skill-gap', label: 'Skill Gap', icon: TrendingUp },
   ];
 
-  const modeColor = mode === 'hunter' 
-    ? 'hsl(217, 100%, 50%)' 
-    : 'hsl(262, 83%, 58%)';
+  const modeColor = 'hsl(217, 100%, 50%)';
 
   const renderNavItem = (item: { id: string; label: string; icon: any; comingSoon?: boolean }) => {
     const Icon = item.icon;
@@ -136,68 +133,6 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
         </Button>
       </div>
 
-      {/* Mode Toggle */}
-      <div className="p-3">
-        <div 
-          className={`
-            relative flex rounded-xl p-1 
-            ${collapsed ? 'flex-col gap-1' : 'bg-sidebar-accent'}
-          `}
-        >
-          <button
-            onClick={() => setMode('hunter')}
-            className={`
-              relative flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg
-              font-medium text-sm transition-all duration-300
-              ${mode === 'hunter' 
-                ? 'text-white' 
-                : 'text-sidebar-foreground/60 hover:text-sidebar-foreground'
-              }
-            `}
-          >
-            {mode === 'hunter' && (
-              <div 
-                className="absolute inset-0 rounded-lg"
-                style={{ background: 'linear-gradient(135deg, hsl(217, 100%, 50%), hsl(230, 80%, 45%))' }}
-              />
-            )}
-            <Target className="w-4 h-4 relative z-10" />
-            {!collapsed && <span className="relative z-10">Hunter</span>}
-          </button>
-          
-          <button
-            onClick={() => setMode('growth')}
-            className={`
-              relative flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg
-              font-medium text-sm transition-all duration-300
-              ${mode === 'growth' 
-                ? 'text-white' 
-                : 'text-sidebar-foreground/40 hover:text-sidebar-foreground/60'
-              }
-            `}
-          >
-            {mode === 'growth' && (
-              <div 
-                className="absolute inset-0 rounded-lg"
-                style={{ background: 'linear-gradient(135deg, hsl(262, 83%, 58%), hsl(280, 70%, 45%))' }}
-              />
-            )}
-            <Target className="w-4 h-4 relative z-10 rotate-45" />
-            {!collapsed && (
-              <span className="relative z-10 flex items-center gap-1.5">
-                Growth
-                <span className="flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-[hsl(262,83%,58%)]/20 text-[hsl(262,83%,58%)]">
-                  <Sparkles className="w-2.5 h-2.5" />
-                  Soon
-                </span>
-              </span>
-            )}
-            {collapsed && (
-              <Lock className="w-3 h-3 absolute -top-1 -right-1 text-[hsl(262,83%,58%)]" />
-            )}
-          </button>
-        </div>
-      </div>
 
       {/* Navigation with sections */}
       <nav className="flex-1 p-3 space-y-1 overflow-hidden">
