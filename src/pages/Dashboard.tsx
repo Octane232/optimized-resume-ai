@@ -18,7 +18,7 @@ import { useUsageLimit } from '@/contexts/UsageLimitContext';
 import NewSidebar from '@/components/dashboard/NewSidebar';
 import MobileNav from '@/components/dashboard/MobileNav';
 import HunterDashboard from '@/components/dashboard/HunterDashboard';
-import GrowthTeaser from '@/components/dashboard/GrowthTeaser';
+
 import MissionControl from '@/components/dashboard/MissionControl';
 import Settings from '@/components/dashboard/Settings';
 import Billing from '@/components/dashboard/Billing';
@@ -44,7 +44,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 // ===== Type Definitions =====
-type Mode = 'hunter' | 'growth';
+type Mode = 'hunter';
 type Tab = 
   | 'briefing'
   | 'job-search'
@@ -196,9 +196,6 @@ const Dashboard = () => {
         .eq('user_id', user.id)
         .maybeSingle();
 
-      if (preferences?.work_style) {
-        setMode(preferences.work_style as Mode);
-      }
 
       if (!preferences?.walkthrough_completed) {
         setShowWalkthrough(true);
@@ -249,9 +246,7 @@ const Dashboard = () => {
 
   // ===== Render Helpers =====
   const renderContent = () => {
-    if (mode === 'growth') {
-      return <GrowthTeaser setMode={setMode} />;
-    }
+
 
     switch (activeTab) {
       case 'briefing':
@@ -365,9 +360,6 @@ const Dashboard = () => {
             {/* Title */}
             <div className="flex items-center gap-2">
               <h1 className="text-lg font-semibold">{getTabTitle()}</h1>
-              <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                {mode === 'hunter' ? 'Hunter Mode' : 'Growth Mode'}
-              </span>
             </div>
 
             {/* Actions */}
@@ -419,7 +411,6 @@ const Dashboard = () => {
 
                     <div className="hidden md:flex flex-col items-start text-sm">
                       <span className="font-medium">{userEmail}</span>
-                      <span className="text-xs text-muted-foreground capitalize">{mode} Mode</span>
                     </div>
 
                     <ChevronDown className="h-4 w-4 text-muted-foreground" />
