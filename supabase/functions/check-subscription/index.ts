@@ -8,10 +8,10 @@ const corsHeaders = {
 };
 
 const PRICE_TO_TIER: Record<string, string> = {
-  "price_1TLYd5R3o3XGOyJGOpBbc7UF": "starter",
-  "price_1TLYdMR3o3XGOyJGKSV1Nfgv": "starter",
-  "price_1TLYdcR3o3XGOyJG0Jb5w4ed": "pro",
-  "price_1TLYdqR3o3XGOyJGVnkazUUi": "pro",
+  "price_1TubObJWRvoiSBe022Vai2lg": "pro",
+  "price_1TubdJJWRvoiSBe0t7LFroSD": "pro",
+  "price_1TubbmJWRvoiSBe0pbGLrU1I": "elite",
+  "price_1TubeGJWRvoiSBe04wrFEQCC": "elite",
 };
 
 const logStep = (step: string, details?: any) => {
