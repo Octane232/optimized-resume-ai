@@ -9,10 +9,10 @@ const corsHeaders = {
 
 // CHANGE 1: Replaced PRICE_IDS with Pro and Elite prices
 const PRICE_IDS = {
-  pro_monthly: "price_1TbqEhR3o3XGOyJGaJdIHMBw",
-  pro_yearly: "price_1TbqHXR3o3XGOyJGWAkkq3pe",
-  elite_monthly: "price_1TbqFjR3o3XGOyJGwMAz2cEo",
-  elite_yearly: "price_1TbqIkR3o3XGOyJGywzYOhwm",
+  pro_monthly: "price_1TubObJWRvoiSBe022Vai2lg",
+  pro_yearly: "price_1TubdJJWRvoiSBe0t7LFroSD",
+  elite_monthly: "price_1TubbmJWRvoiSBe0pbGLrU1I",
+  elite_yearly: "price_1TubeGJWRvoiSBe04wrFEQCC",
 };
 
 serve(async (req) => {
