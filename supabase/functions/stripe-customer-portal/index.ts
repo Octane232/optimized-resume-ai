@@ -88,22 +88,46 @@ serve(async (req: Request) => {
       return createErrorResponse("Failed to fetch customer profile", 500);
     }
 
-    if (!profile?.stripe_customer_id) {
+    let customerId = profile?.stripe_customer_id as string | null | undefined;
+
+    // Stored ids from test mode don't exist under live keys — fall back to email lookup.
+    if (customerId) {
+      try {
+        const existing = await stripe.customers.retrieve(customerId);
+        if ((existing as any)?.deleted) customerId = null;
+      } catch (_e) {
+        console.log("Stale stripe customer id, ignoring:", customerId);
+        customerId = null;
+      }
+    }
+
+    if (!customerId && user.email) {
+      const found = await stripe.customers.list({ email: user.email, limit: 1 });
+      if (found.data.length > 0) {
+        customerId = found.data[0].id;
+        await supabase
+          .from("profiles")
+          .upsert({ user_id: user.id, stripe_customer_id: customerId }, { onConflict: "user_id" });
+      }
+    }
+
+    if (!customerId) {
       console.error(`No Stripe customer found for user: ${user.id}`);
-      return createErrorResponse("No Stripe customer found. Please contact support.", 404);
+      return createErrorResponse("No billing account found yet. Subscribe first, then manage your plan here.", 404);
     }
 
     // ===== Create Customer Portal Session =====
     let portalSession;
     try {
       portalSession = await stripe.billingPortal.sessions.create({
-        customer: profile.stripe_customer_id,
+        customer: customerId,
         return_url: RETURN_URL,
       });
     } catch (stripeError) {
       console.error("Stripe portal session error:", stripeError);
       return createErrorResponse("Failed to create billing portal session", 500);
     }
+
 
     // ===== Return Success Response =====
     return createSuccessResponse({ url: portalSession.url });
