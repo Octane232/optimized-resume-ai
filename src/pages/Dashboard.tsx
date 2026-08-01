@@ -207,10 +207,14 @@ const Dashboard = () => {
   };
 
   // ===== Authentication =====
+  const authRunRef = useRef(false);
   const checkAuth = async () => {
+    if (authRunRef.current) return;
+    authRunRef.current = true;
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
+
         navigate('/auth');
         return;
       }
