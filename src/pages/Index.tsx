@@ -69,7 +69,34 @@ const DashboardMockup = () => {
 
 const Index = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  // If Supabase sends the OAuth callback to the site root, forward the
+  // signed-in user straight to the dashboard instead of stranding them here.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const isOAuthReturn =
+      url.searchParams.has('code') || url.hash.includes('access_token');
+    if (!isOAuthReturn) return;
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      if (session) {
+        window.history.replaceState({}, '', '/');
+        navigate('/dashboard', { replace: true });
+      }
+    });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        window.history.replaceState({}, '', '/');
+        navigate('/dashboard', { replace: true });
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
 
   useEffect(() => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
