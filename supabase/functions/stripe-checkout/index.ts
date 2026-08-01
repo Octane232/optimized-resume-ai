@@ -53,7 +53,25 @@ serve(async (req) => {
       .eq("user_id", user.id)
       .maybeSingle();
 
-    let customerId = profile?.stripe_customer_id;
+    let customerId = profile?.stripe_customer_id as string | null | undefined;
+
+    // Validate the stored customer still exists in THIS Stripe mode (test ids
+    // are invalid after switching to live keys).
+    if (customerId) {
+      try {
+        const existing = await stripe.customers.retrieve(customerId);
+        if ((existing as any)?.deleted) customerId = null;
+      } catch (_e) {
+        console.log("Stale stripe customer, recreating:", customerId);
+        customerId = null;
+      }
+    }
+
+    if (!customerId && user.email) {
+      // Reuse a live customer with the same email if one exists
+      const found = await stripe.customers.list({ email: user.email, limit: 1 });
+      if (found.data.length > 0) customerId = found.data[0].id;
+    }
 
     if (!customerId) {
       // Create new Stripe customer
@@ -62,12 +80,14 @@ serve(async (req) => {
         metadata: { supabase_user_id: user.id },
       });
       customerId = customer.id;
+    }
 
-      // Save customer ID to profile
+    if (customerId !== profile?.stripe_customer_id) {
       await supabase
         .from("profiles")
         .upsert({ user_id: user.id, stripe_customer_id: customerId }, { onConflict: "user_id" });
     }
+
 
     // Create checkout session
     const session = await stripe.checkout.sessions.create({
