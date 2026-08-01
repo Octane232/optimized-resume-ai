@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Settings as SettingsIcon,
@@ -129,8 +129,43 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    checkAuth();
+    let cancelled = false;
+
+    // If we just came back from an OAuth redirect, Supabase needs a moment to
+    // exchange the code/hash for a session. Wait for that before deciding.
+    const url = new URL(window.location.href);
+    const isOAuthReturn =
+      url.searchParams.has('code') ||
+      url.hash.includes('access_token') ||
+      url.hash.includes('error');
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (cancelled) return;
+      if (session) {
+        // Clean OAuth params out of the URL
+        if (isOAuthReturn) window.history.replaceState({}, '', '/dashboard');
+        checkAuth();
+      } else if (event === 'SIGNED_OUT') {
+        navigate('/auth');
+      }
+    });
+
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (cancelled) return;
+      if (session) {
+        checkAuth();
+      } else if (!isOAuthReturn) {
+        navigate('/auth');
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
   }, []);
+
 
   useEffect(() => {
     localStorage.setItem('dashboard-active-tab', activeTab);
@@ -172,10 +207,14 @@ const Dashboard = () => {
   };
 
   // ===== Authentication =====
+  const authRunRef = useRef(false);
   const checkAuth = async () => {
+    if (authRunRef.current) return;
+    authRunRef.current = true;
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
+
         navigate('/auth');
         return;
       }
