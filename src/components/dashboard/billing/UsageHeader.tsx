@@ -48,15 +48,7 @@ const UsageHeader = ({ setActiveTab }: { setActiveTab?: (tab: string) => void })
   const isEmpty = totalUsed >= totalLimit && totalLimit > 0;
   const isLow = pct >= 70 && !isEmpty;
 
-  const getDisplayTierName = () => {
-    if (tier === 'trial' || (tier === 'free' && subscriptionEnd)) return 'Trial';
-    if (displayTier === 'Free') return 'Free';
-    if (displayTier === 'Pro') return 'Pro';
-    return 'Elite';
-  };
-
-  const displayName = getDisplayTierName();
-  const isTrial = displayName === 'Trial';
+  const displayName = displayTier;
 
   return (
     <div className="rounded-xl border border-border/60 bg-card p-6 space-y-5">
@@ -70,12 +62,12 @@ const UsageHeader = ({ setActiveTab }: { setActiveTab?: (tab: string) => void })
             <div className="flex items-center gap-2">
               <h3 className="text-lg font-bold text-foreground">{displayName}</h3>
               <Badge className={`text-xs border ${tierBadgeClass}`}>
-                {isTrial ? 'Trial' : displayName}
+                {displayName}
               </Badge>
             </div>
-            {isTrial && subscriptionEnd && (
+            {subscriptionEnd && (
               <p className="text-xs text-muted-foreground mt-1">
-                Trial ends {new Date(subscriptionEnd).toLocaleDateString()}
+                Renews {new Date(subscriptionEnd).toLocaleDateString()}
               </p>
             )}
           </div>
@@ -96,9 +88,7 @@ const UsageHeader = ({ setActiveTab }: { setActiveTab?: (tab: string) => void })
           />
         </div>
         <p className="text-[11px] text-muted-foreground">
-          {isTrial 
-            ? 'Full access during your trial. Upgrade to continue after trial ends.'
-            : 'Each feature has a monthly limit. Upgrade to get more uses.'}
+          Each feature has a monthly limit. Upgrade to get more uses.
         </p>
       </div>
 
@@ -112,8 +102,7 @@ const UsageHeader = ({ setActiveTab }: { setActiveTab?: (tab: string) => void })
             const label = ACTION_LABELS[action];
             
             // Skip actions with 0 limit for free tier to reduce clutter
-            // For trial users, show all limits since they have elite access
-            if (limit === 0 && !isTrial) return null;
+            if (limit === 0) return null;
             
             return (
               <div key={action} className="flex items-center justify-between rounded-md bg-muted/40 px-2.5 py-1.5">

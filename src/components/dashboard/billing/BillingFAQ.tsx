@@ -5,19 +5,15 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 
-// FIXED: Updated FAQ data to match Pro/Elite tiers and trial system
+// FAQ data for Pro/Elite tiers
 const faqs = [
   {
     q: 'What is included in a resume engine run?',
     a: 'One resume engine run gives you a tailored resume optimized for a specific job description, a matching cover letter, and a detailed ATS score analysis — all generated together. Pro users get 15 runs/month. Elite users get 40 runs/month.',
   },
   {
-    q: 'How does the 3-day free trial work?',
-    a: 'When you sign up, you get full access to all Elite features for 3 days — no credit card required. During your trial, you can use the resume engine, interview coach, LinkedIn optimizer, Job Radar, and every other feature at the Elite level. After 3 days, you can choose a paid plan to continue or your account will revert to free limits.',
-  },
-  {
     q: 'When do my monthly limits reset?',
-    a: 'For paid plans (Pro and Elite), limits reset on your monthly billing date — the same day each month that you subscribed. For example, if you subscribed on the 15th, your limits reset on the 15th of each month. The free plan is a 3-day trial only and does not have recurring monthly limits.',
+    a: 'For paid plans (Pro and Elite), limits reset on your monthly billing date — the same day each month that you subscribed. For example, if you subscribed on the 15th, your limits reset on the 15th of each month.',
   },
   {
     q: 'Can I cancel anytime?',
