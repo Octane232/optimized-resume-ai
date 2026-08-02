@@ -1,5 +1,5 @@
 // ===== Types =====
-export type SubscriptionTier = "free" | "trial" | "pro" | "elite";
+export type SubscriptionTier = "free" | "pro" | "elite";
 export type UsageAction =
   | "resume_ats"
   | "cover_letter"
@@ -26,19 +26,6 @@ export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> 
     resume_parse: 0,
     job_search: 0,
     bullet_rewrite: 0,
-  },
-  trial: {
-    resume_ats: 10,
-    cover_letter: 10,
-    linkedin: 5,
-    skill_gap: 5,
-    interview_prep: 10,
-    salary_intel: 5,
-    radar_alert: 5,
-    docx_rewrite: 5,
-    resume_parse: 20,
-    job_search: 10,
-    bullet_rewrite: 20,
   },
   pro: {
     resume_ats: 30,

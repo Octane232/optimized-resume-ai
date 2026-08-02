@@ -5,32 +5,8 @@ import { Link } from 'react-router-dom';
 
 const plans = [
   {
-    name: 'Free Trial',
-    price: 0,
-    trial: true,
-    description: 'Experience Vaylance free for 3 days.',
-    features: [
-      '✅ Full access to all features for 3 days',
-      '✅ 10 Resume + ATS runs',
-      '✅ 10 Cover Letters',
-      '✅ 10 Job Searches',
-      '✅ 20 Bullet Rewrites',
-      '✅ 5 LinkedIn Optimizations',
-      '✅ 5 Skill Gap Analyses',
-      '✅ 10 Interview Prep sessions',
-      '✅ 5 Salary Insights',
-      '✅ 5 Job Radar Alerts',
-      '✅ 5 DOCX Rewrites',
-      '✅ 20 Resume Uploads',
-      '⏰ Trial ends after 3 days — upgrade to continue'
-    ],
-    cta: 'Start Free Trial',
-    popular: false,
-  },
-  {
     name: 'Pro',
     price: 15,
-    trial: false,
     description: 'Everything you need to get hired.',
     features: [
       '✅ 50 Job Searches / month',
@@ -52,7 +28,6 @@ const plans = [
   {
     name: 'Elite',
     price: 29,
-    trial: false,
     description: 'For serious job seekers.',
     features: [
       '✅ 120 Job Searches / month',
@@ -84,10 +59,10 @@ const PricingSection = () => (
         <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight mb-3">
           Choose the perfect plan for you
         </h2>
-        <p className="text-muted-foreground">Start free and upgrade anytime.</p>
+        <p className="text-muted-foreground">Pick a plan and cancel anytime.</p>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-5 max-w-5xl mx-auto">
+      <div className="grid md:grid-cols-2 gap-5 max-w-3xl mx-auto">
         {plans.map((plan, i) => (
           <div
             key={i}
@@ -109,17 +84,8 @@ const PricingSection = () => (
               <h3 className="text-lg font-bold text-foreground mb-1">{plan.name}</h3>
               <p className="text-xs text-muted-foreground mb-4">{plan.description}</p>
               <div className="flex items-baseline gap-1">
-                {plan.trial ? (
-                  <>
-                    <span className="text-4xl font-black text-foreground">3 days</span>
-                    <span className="text-muted-foreground text-sm">free</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-4xl font-black text-foreground">${plan.price}</span>
-                    <span className="text-muted-foreground text-sm">/month</span>
-                  </>
-                )}
+                <span className="text-4xl font-black text-foreground">${plan.price}</span>
+                <span className="text-muted-foreground text-sm">/month</span>
               </div>
             </div>
 

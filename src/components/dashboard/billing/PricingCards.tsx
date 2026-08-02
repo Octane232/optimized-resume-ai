@@ -1,29 +1,13 @@
-import { Check, Lock, Star, Zap, Crown, Sparkles, Loader2 } from 'lucide-react';
+import { Check, Star, Zap, Crown, Sparkles, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useUsageLimit, useSubscription } from '@/contexts/UsageLimitContext';
+import { useUsageLimit } from '@/contexts/UsageLimitContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 type PlanId = 'pro' | 'elite';
 type Billing = 'monthly' | 'yearly';
-
-const FREE_FEATURES = [
-  '✅ No credit card required',
-  '✅ 10 Resume + ATS runs',
-  '✅ 10 Cover Letters',
-  '✅ 10 Job Searches',
-  '✅ 20 Bullet Rewrites',
-  '✅ 5 LinkedIn Optimizations',
-  '✅ 5 Skill Gap Analyses',
-  '✅ 10 Interview Prep sessions',
-  '✅ 5 Salary Insights',
-  '✅ 5 Job Radar Alerts',
-  '✅ 5 DOCX Rewrites',
-  '✅ 20 Resume Uploads',
-  '⏰ Trial ends after 3 days — upgrade to continue',
-];
 
 const PLANS = [
   {
@@ -79,13 +63,10 @@ const PLANS = [
 
 const PricingCards = () => {
   const { tier, displayTier } = useUsageLimit();
-  const { subscriptionEnd } = useSubscription();
   const { toast } = useToast();
   const [billing, setBilling] = useState<Billing>('monthly');
   const [loading, setLoading] = useState<PlanId | null>(null);
 
-  const isTrial = tier === 'trial' || (tier === 'free' && subscriptionEnd);
-  const isTrialActive = isTrial && subscriptionEnd && new Date(subscriptionEnd) > new Date();
 
   const handleUpgrade = async (planId: PlanId) => {
     setLoading(planId);
@@ -110,37 +91,6 @@ const PricingCards = () => {
 
   return (
     <div className="space-y-6">
-
-      {/* Free tier / Trial summary */}
-      <div className={`rounded-xl border p-5 ${isTrialActive ? 'bg-gradient-to-r from-emerald-50 to-blue-50 border-emerald-200' : 'border-border bg-muted/30'}`}>
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <p className="text-sm font-bold text-foreground">
-              {isTrialActive ? '✨ 3-Day Free Trial' : 'Free Plan'}
-            </p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {isTrialActive 
-                ? `Try all features free until ${new Date(subscriptionEnd).toLocaleDateString()}`
-                : 'Try it out — no card needed'}
-            </p>
-          </div>
-          <Badge variant="outline" className="text-xs">
-            {isTrialActive ? 'Free Trial' : (tier === 'free' ? 'Your Plan' : 'Free')}
-          </Badge>
-        </div>
-        <div className="grid grid-cols-2 gap-1.5">
-          {FREE_FEATURES.map((f, i) => (
-            <div key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Check className="w-3 h-3 text-emerald-500 shrink-0" />{f}
-            </div>
-          ))}
-        </div>
-        {isTrialActive && (
-          <p className="text-xs text-center mt-3 pt-2 border-t border-emerald-200 text-emerald-700">
-            ⚡ Your trial is active. No charges until trial ends. Upgrade anytime for full access.
-          </p>
-        )}
-      </div>
 
       {/* Billing toggle */}
       <div className="flex justify-center">
@@ -170,12 +120,12 @@ const PricingCards = () => {
               isCurrent ? 'border-emerald-500 ring-2 ring-emerald-500/10' :
               plan.popular ? 'border-primary ring-2 ring-primary/10' : 'border-border'
             }`}>
-              {isCurrent && !isTrialActive && (
+              {isCurrent && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                   <Badge className="bg-emerald-500 text-white px-3 py-1 text-xs font-semibold border-0">Your Plan</Badge>
                 </div>
               )}
-              {plan.popular && !isCurrent && !isTrialActive && (
+              {plan.popular && !isCurrent && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                   <Badge className="bg-primary text-primary-foreground px-3 py-1 text-xs font-semibold border-0">
                     <Star className="w-3 h-3 mr-1" />Most Popular
@@ -214,15 +164,14 @@ const PricingCards = () => {
 
               <Button
                 className={`w-full h-11 font-semibold gap-2 rounded-xl ${
-                  isCurrent && !isTrialActive ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/30 hover:bg-emerald-500/20' :
+                  isCurrent ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/30 hover:bg-emerald-500/20' :
                   plan.popular ? 'bg-primary text-primary-foreground hover:bg-primary/90' :
                   'bg-foreground text-background hover:bg-foreground/90'
                 }`}
-                disabled={(isCurrent && !isTrialActive) || loading === plan.id}
+                disabled={isCurrent || loading === plan.id}
                 onClick={() => !isCurrent && handleUpgrade(plan.id)}
               >
-                {isCurrent && !isTrialActive ? 'Current Plan' :
-                 isTrialActive ? 'Upgrade Now' :
+                {isCurrent ? 'Current Plan' :
                  loading === plan.id ? <><Loader2 className="w-4 h-4 animate-spin" />Redirecting…</> :
                  <><Zap className="w-4 h-4" />Get {plan.label}</>}
               </Button>

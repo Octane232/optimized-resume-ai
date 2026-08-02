@@ -56,7 +56,7 @@ async function getUserTier(userId: string) {
     ? new Date(profile.subscription_end) 
     : null;
 
-  // Check if trial has expired (free tier with expired subscription)
+  // Check if the subscription period has lapsed
   if (tier === "free" && subscriptionEnd && subscriptionEnd < new Date()) {
     return { tier: "expired", isExpired: true };
   }
@@ -73,7 +73,7 @@ async function enforceQuota(userId: string, feature: string) {
   const { tier, isExpired } = await getUserTier(userId);
 
   if (isExpired) {
-    throw new Error("Trial expired - Please upgrade to continue using this feature");
+    throw new Error("Subscription expired - Please upgrade to continue using this feature");
   }
 
   // Monthly limits per tier

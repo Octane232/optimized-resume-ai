@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, Rea
 import { supabase } from '@/integrations/supabase/client';
 
 // ===== STEP 1: Fix Types =====
-export type SubscriptionTier = 'free' | 'trial' | 'pro' | 'elite';
+export type SubscriptionTier = 'free' | 'pro' | 'elite';
 export type UsageAction =
   | 'resume_ats'
   | 'cover_letter'
@@ -30,19 +30,6 @@ export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> 
     resume_parse: 0,
     job_search: 0,
     bullet_rewrite: 0,
-  },
-  trial: {
-    resume_ats: 10,
-    cover_letter: 10,
-    linkedin: 5,
-    skill_gap: 5,
-    interview_prep: 10,
-    salary_intel: 5,
-    radar_alert: 5,
-    docx_rewrite: 5,
-    resume_parse: 20,
-    job_search: 10,
-    bullet_rewrite: 20,
   },
   pro: {
     resume_ats: 30,
@@ -119,7 +106,7 @@ export const FEATURE_DESCRIPTIONS: Record<UsageAction, string> = {
 
 interface UsageLimitContextType {
   tier: SubscriptionTier;
-  displayTier: 'Free' | 'Trial' | 'Pro' | 'Elite';
+  displayTier: 'Free' | 'Pro' | 'Elite';
   subscriptionEnd: string | null;
   loading: boolean;
   /** Can the user perform this action? */
@@ -138,7 +125,7 @@ interface UsageLimitContextType {
 // Separate interface for subscription-only data
 interface SubscriptionContextType {
   tier: SubscriptionTier;
-  displayTier: 'Free' | 'Trial' | 'Pro' | 'Elite';
+  displayTier: 'Free' | 'Pro' | 'Elite';
   subscriptionEnd: string | null;
   loading: boolean;
   refresh: () => Promise<void>;
@@ -169,14 +156,14 @@ export const UsageLimitProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      // Get subscription tier - UPDATED to include trial_end
+      // Get subscription tier
       // Ordered + limited instead of maybeSingle(): if more than one row
       // ever exists for a user, maybeSingle() silently returns null and
       // the code below falls back to 'free' (0 limits on everything).
       // Taking the most recently updated row avoids that failure mode.
       const { data: subRows } = await supabase
         .from('user_subscriptions')
-        .select('tier, plan_status, current_period_end, trial_end')
+        .select('tier, plan_status, current_period_end')
         .eq('user_id', session.user.id)
         .order('updated_at', { ascending: false })
         .limit(1);
@@ -184,31 +171,19 @@ export const UsageLimitProvider = ({ children }: { children: ReactNode }) => {
       const subData = subRows?.[0] ?? null;
 
       let resolvedTier: SubscriptionTier = 'free';
-      
-      // FIXED: Handle trial status properly
+
       if (subData?.plan_status === 'active' && subData?.tier) {
         const raw = subData.tier as string;
-        // Map old tier names to new ones
         if (raw === 'starter') resolvedTier = 'pro';
         else if (raw === 'premium') resolvedTier = 'elite';
         else if (raw === 'pro') resolvedTier = 'pro';
         else if (raw === 'elite') resolvedTier = 'elite';
         else resolvedTier = 'free';
         setSubscriptionEnd(subData.current_period_end ?? null);
-      } else if (subData?.plan_status === 'trial') {
-        const trialEnd = subData?.trial_end ? new Date(subData.trial_end) : null;
-        if (trialEnd && new Date() < trialEnd) {
-          resolvedTier = 'trial';
-          console.log(`[UsageLimit] Active trial until ${subData.trial_end}`);
-        } else {
-          resolvedTier = 'free';
-          console.log(`[UsageLimit] Trial expired, downgraded to free`);
-        }
-        setSubscriptionEnd(subData.trial_end ?? null);
       } else {
         setSubscriptionEnd(null);
       }
-      
+
       setTier(resolvedTier);
 
       // ===== STEP 5: Replace user_credits Query =====
@@ -306,8 +281,8 @@ export const UsageLimitProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [loading, initialFetchDone]);
 
-  const displayTier: 'Free' | 'Trial' | 'Pro' | 'Elite' = 
-    tier === 'free' ? 'Free' : tier === 'trial' ? 'Trial' : tier === 'pro' ? 'Pro' : 'Elite';
+  const displayTier: 'Free' | 'Pro' | 'Elite' =
+    tier === 'free' ? 'Free' : tier === 'pro' ? 'Pro' : 'Elite';
 
   const usageLimitValue: UsageLimitContextType = {
     tier,

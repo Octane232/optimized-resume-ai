@@ -48,31 +48,17 @@ export async function requireUser(req: Request): Promise<AuthedUser | Response> 
   let tier: SubscriptionTier = "free";
   const { data: subData } = await serviceClient
     .from("user_subscriptions")
-    .select("tier, plan_status, trial_end")
+    .select("tier, plan_status")
     .eq("user_id", data.user.id)
     .maybeSingle();
-  
-  // Handle trial status properly
-  if ((subData?.plan_status === 'active' || subData?.plan_status === 'trial') && subData?.tier) {
-    // Check if trial has expired
-    if (subData?.plan_status === 'trial' && subData?.trial_end) {
-      const trialEnd = new Date(subData.trial_end);
-      if (new Date() > trialEnd) {
-        tier = 'free';
-        console.log(`Trial expired for user ${data.user.id}, downgraded to free`);
-      } else {
-        tier = 'trial';
-        console.log(`Active trial for user ${data.user.id} until ${subData.trial_end}`);
-      }
-    } else {
-      const rawTier = subData.tier as string;
-      // Map old tier names to new ones
-      if (rawTier === 'starter') tier = 'pro';
-      else if (rawTier === 'premium') tier = 'elite';
-      else if (rawTier === 'pro') tier = 'pro';
-      else if (rawTier === 'elite') tier = 'elite';
-      else tier = 'free';
-    }
+
+  if (subData?.plan_status === 'active' && subData?.tier) {
+    const rawTier = subData.tier as string;
+    if (rawTier === 'starter') tier = 'pro';
+    else if (rawTier === 'premium') tier = 'elite';
+    else if (rawTier === 'pro') tier = 'pro';
+    else if (rawTier === 'elite') tier = 'elite';
+    else tier = 'free';
   }
 
   return {
@@ -96,7 +82,6 @@ export async function checkFeatureLimit(
   if (limit === 0) {
     const tierNames = {
       free: "Free",
-      trial: "Trial",
       pro: "Pro",
       elite: "Elite"
     };
@@ -135,14 +120,13 @@ export async function checkFeatureLimit(
     };
     const tierNames = {
       free: "Free",
-      trial: "Trial",
       pro: "Pro",
       elite: "Elite"
     };
     return jsonResponse({
       error: `Monthly ${featureNames[action] || action} limit reached (${used}/${limit}). ` +
              `Your ${tierNames[user.tier] || user.tier} plan includes ${limit} per month. ` +
-             `${user.tier === 'free' || user.tier === 'trial' ? 'Upgrade to Pro or Elite' : user.tier === 'pro' ? 'Upgrade to Elite' : 'Contact support'} for more.`,
+             `${user.tier === 'free' ? 'Upgrade to Pro or Elite' : user.tier === 'pro' ? 'Upgrade to Elite' : 'Contact support'} for more.`,
       action,
       tier: user.tier,
       limit,
