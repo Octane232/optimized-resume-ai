@@ -115,14 +115,6 @@ const Dashboard = () => {
   const [userInitials, setUserInitials] = useState<string>('U');
   const [unreadAlerts, setUnreadAlerts] = useState(0);
 
-  // ===== Trial Status Calculations =====
-  const isTrialExpired = tier === 'free' && subscriptionEnd && 
-    new Date(subscriptionEnd) < new Date();
-  const isTrialActive = tier === 'elite' && subscriptionEnd && 
-    new Date(subscriptionEnd) > new Date();
-  const isTrialEndingSoon = isTrialActive && subscriptionEnd &&
-    (new Date(subscriptionEnd).getTime() - new Date().getTime()) < 24 * 60 * 60 * 1000;
-
   // ===== Effects =====
   useEffect(() => {
     handleStripeRedirect();
@@ -499,45 +491,8 @@ const Dashboard = () => {
           </div>
         </header>
 
-        {/* Content Area with Trial Banners */}
+        {/* Content Area */}
         <div className="p-4 md:p-6">
-          {/* Trial Ending Soon Banner */}
-          {!usageLoading && isTrialEndingSoon && (
-            <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center justify-between">
-              <p className="text-sm text-amber-700 dark:text-amber-400">
-                ⏰ Your trial ends today — upgrade to keep full access.
-              </p>
-              <Button
-                size="sm"
-                className="bg-amber-500 hover:bg-amber-600 text-white"
-                onClick={() => handleSetActiveTab('billing')}
-              >
-                Upgrade Now
-              </Button>
-            </div>
-          )}
-
-          {/* Trial Expired Banner */}
-          {!usageLoading && isTrialExpired && (
-            <div className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-xl flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold text-destructive">
-                  Your free trial has ended
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Upgrade to Pro or Elite to continue using all features.
-                </p>
-              </div>
-              <Button
-                size="sm"
-                className="bg-primary hover:bg-primary/90"
-                onClick={() => handleSetActiveTab('billing')}
-              >
-                Choose a Plan
-              </Button>
-            </div>
-          )}
-
           {renderContent()}
         </div>
       </main>

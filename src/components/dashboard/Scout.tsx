@@ -470,7 +470,6 @@ const SignalsList: React.FC<SignalsListProps> = ({
   tier,
   onUpgradeClick 
 }) => {
-  // PROBLEM 1 FIXED: Correct tier check (pro or elite, and trial users get full access)
   const hasFullAccess = tier === 'pro' || tier === 'elite';
   const visibleSignals = hasFullAccess ? signals : signals.slice(0, 3);
   const lockedCount = signals.length - visibleSignals.length;

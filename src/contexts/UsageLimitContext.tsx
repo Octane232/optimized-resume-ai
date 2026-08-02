@@ -156,7 +156,7 @@ export const UsageLimitProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      // Get subscription tier - UPDATED to include trial_end
+      // Get subscription tier
       // Ordered + limited instead of maybeSingle(): if more than one row
       // ever exists for a user, maybeSingle() silently returns null and
       // the code below falls back to 'free' (0 limits on everything).

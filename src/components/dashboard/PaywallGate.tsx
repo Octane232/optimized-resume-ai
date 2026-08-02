@@ -45,7 +45,7 @@ const PaywallGate: React.FC<PaywallGateProps> = ({ feature, onUpgrade, children 
     );
   }
 
-  const isPaid = tier === 'trial' || tier === 'pro' || tier === 'elite';
+  const isPaid = tier === 'pro' || tier === 'elite';
   if (isPaid) return <>{children}</>;
 
   const copy = COPY[feature];
@@ -105,7 +105,7 @@ const PaywallGate: React.FC<PaywallGateProps> = ({ feature, onUpgrade, children 
           </Button>
 
           <p className="text-xs text-muted-foreground mt-4">
-            Starts with a free trial · Cancel anytime
+            Cancel anytime · Secure payment via Stripe
           </p>
         </div>
       </Card>
