@@ -118,7 +118,7 @@ const ForIndividuals = () => {
           <div className="container mx-auto px-4 lg:px-8 max-w-7xl text-center">
             <h2 className="text-4xl font-bold mb-6">Ready to Accelerate Your Career?</h2>
             <p className="text-xl text-white/80 mb-8 max-w-2xl mx-auto">
-              Start building your professional resume and applying to jobs today. No credit card required.
+              Start building your professional resume and applying to jobs today. Cancel anytime.
             </p>
             <div className="flex justify-center gap-4">
               <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 px-8 py-4">
