@@ -552,41 +552,65 @@ export type Database = {
         Row: {
           amount: string | null
           company_name: string
+          company_size: string | null
+          confidence: number | null
           created_at: string | null
+          departments: string[] | null
           description: string | null
           funding_stage: string | null
           hiring_window: string | null
           id: string
           industry: string | null
           likely_roles: string[] | null
+          location: string | null
+          outreach_angle: string | null
           published_at: string | null
+          signal_type: string | null
+          source_name: string | null
           source_url: string
+          why_now: string | null
         }
         Insert: {
           amount?: string | null
           company_name: string
+          company_size?: string | null
+          confidence?: number | null
           created_at?: string | null
+          departments?: string[] | null
           description?: string | null
           funding_stage?: string | null
           hiring_window?: string | null
           id?: string
           industry?: string | null
           likely_roles?: string[] | null
+          location?: string | null
+          outreach_angle?: string | null
           published_at?: string | null
+          signal_type?: string | null
+          source_name?: string | null
           source_url: string
+          why_now?: string | null
         }
         Update: {
           amount?: string | null
           company_name?: string
+          company_size?: string | null
+          confidence?: number | null
           created_at?: string | null
+          departments?: string[] | null
           description?: string | null
           funding_stage?: string | null
           hiring_window?: string | null
           id?: string
           industry?: string | null
           likely_roles?: string[] | null
+          location?: string | null
+          outreach_angle?: string | null
           published_at?: string | null
+          signal_type?: string | null
+          source_name?: string | null
           source_url?: string
+          why_now?: string | null
         }
         Relationships: []
       }

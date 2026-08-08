@@ -84,7 +84,7 @@ const fetchSignalsByIds = async (supabase: any, signalIds: string[]) => {
   
   const { data, error } = await supabase
     .from("radar_signals")
-    .select("id, company_name, amount, funding_stage, industry, description, likely_roles, hiring_window, source_url, published_at, created_at")
+    .select("id, company_name, amount, funding_stage, industry, description, likely_roles, hiring_window, source_url, published_at, created_at, signal_type, location, company_size, why_now, outreach_angle, departments, confidence, source_name")
     .in("id", signalIds);
   
   if (error) throw error;
@@ -94,7 +94,7 @@ const fetchSignalsByIds = async (supabase: any, signalIds: string[]) => {
 const fetchAllSignals = async (supabase: any, limit: number) => {
   const { data, error } = await supabase
     .from("radar_signals")
-    .select("id, company_name, amount, funding_stage, industry, description, likely_roles, hiring_window, source_url, published_at, created_at")
+    .select("id, company_name, amount, funding_stage, industry, description, likely_roles, hiring_window, source_url, published_at, created_at, signal_type, location, company_size, why_now, outreach_angle, departments, confidence, source_name")
     .order("created_at", { ascending: false })
     .limit(limit);
   

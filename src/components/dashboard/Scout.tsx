@@ -27,6 +27,14 @@ interface RadarSignal {
   hiring_window: string | null;
   published_at: string | null;
   created_at: string | null;
+  signal_type?: string | null;
+  location?: string | null;
+  company_size?: string | null;
+  why_now?: string | null;
+  outreach_angle?: string | null;
+  departments?: string[] | null;
+  confidence?: number | null;
+  source_name?: string | null;
 }
 
 interface RadarAlert {
@@ -62,12 +70,17 @@ const getMatchColor = (score: number): string => {
 const filterSignals = (signals: any[], searchQuery: string): any[] => {
   if (!searchQuery) return signals;
   const q = searchQuery.toLowerCase();
-  return signals.filter(s => 
+  return signals.filter(s =>
     s.company_name?.toLowerCase().includes(q) ||
     s.industry?.toLowerCase().includes(q) ||
+    s.location?.toLowerCase().includes(q) ||
+    s.signal_type?.toLowerCase().includes(q) ||
+    s.description?.toLowerCase().includes(q) ||
+    s.departments?.some((d: string) => d.toLowerCase().includes(q)) ||
     s.likely_roles?.some((r: string) => r.toLowerCase().includes(q))
   );
 };
+
 
 // ===== Custom Hooks =====
 const useRadarData = () => {
@@ -170,7 +183,7 @@ const HeaderSection: React.FC<{
       </div>
       <div>
         <h1 className="text-2xl font-bold text-foreground">Hidden Job Radar</h1>
-        <p className="text-sm text-muted-foreground">Companies raising funding = companies about to hire</p>
+        <p className="text-sm text-muted-foreground">Every industry. Every hiring signal. Before the job is posted.</p>
       </div>
     </div>
     
@@ -197,11 +210,13 @@ const ExplainerBanner: React.FC = () => (
           <div>
             <p className="text-sm font-medium text-foreground">How it works</p>
             <p className="text-xs text-muted-foreground mt-1">
-              When a company raises funding, they hire aggressively in the next 30–90 days. 
-              The Radar finds these signals <strong>before</strong> jobs are posted — giving you a 14-day head start 
-              over 250+ other applicants.
+              The Radar scans news across <strong>every sector</strong> — healthcare, retail, construction, logistics,
+              hospitality, manufacturing, energy, education, finance, public sector and tech — for events that create
+              jobs: funding, expansions, new sites, contract wins, acquisitions and hiring announcements. You see who is
+              about to hire, why, and what to say — <strong>before</strong> the role is advertised.
             </p>
           </div>
+
         </div>
       </CardContent>
     </Card>
@@ -311,6 +326,18 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
           {s.industry}
         </span>
       )}
+      {s.location && (
+        <span className="flex items-center gap-1">
+          <MapPin className="w-3 h-3" />
+          {s.location}
+        </span>
+      )}
+      {s.company_size && (
+        <span className="flex items-center gap-1">
+          <Users className="w-3 h-3" />
+          {s.company_size}
+        </span>
+      )}
       {s.hiring_window && (
         <span className="flex items-center gap-1">
           <Clock className="w-3 h-3" />
@@ -321,10 +348,49 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
         <span className="flex items-center gap-1">
           <TrendingUp className="w-3 h-3" />
           {new Date(s.published_at).toLocaleDateString()}
+          {s.source_name ? ` · ${s.source_name}` : ''}
         </span>
       )}
     </div>
   );
+
+  const WhyNow = () => {
+    if (!s.why_now) return null;
+    return (
+      <div className="mb-3 p-3 rounded-lg bg-amber-500/5 border border-amber-500/20">
+        <p className="text-xs font-semibold text-amber-600 mb-0.5 flex items-center gap-1">
+          <Zap className="w-3 h-3" /> Why they're hiring now
+        </p>
+        <p className="text-sm text-foreground">{s.why_now}</p>
+      </div>
+    );
+  };
+
+  const Departments = () => {
+    if (!s.departments?.length) return null;
+    return (
+      <div className="flex flex-wrap gap-1.5 mb-2">
+        <span className="text-xs text-muted-foreground mr-1 py-0.5">Departments:</span>
+        {s.departments.map((d: string, i: number) => (
+          <Badge key={i} variant="outline" className="text-xs font-normal">
+            {d}
+          </Badge>
+        ))}
+      </div>
+    );
+  };
+
+  const OutreachAngle = () => {
+    if (!s.outreach_angle) return null;
+    return (
+      <div className="mt-3 p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/20">
+        <p className="text-xs font-semibold text-emerald-600 mb-0.5 flex items-center gap-1">
+          <Rocket className="w-3 h-3" /> Your outreach angle
+        </p>
+        <p className="text-sm text-foreground">{s.outreach_angle}</p>
+      </div>
+    );
+  };
 
   const LikelyRoles = () => {
     if (!s.likely_roles?.length) return null;
@@ -339,6 +405,7 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
       </div>
     );
   };
+
 
   const AlertInsight = () => {
     if (!alert?.insight) return null;
@@ -380,11 +447,16 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-3 mb-2">
                 <div>
-                  <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
+                  <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors flex flex-wrap items-center gap-2">
                     {s.company_name}
+                    {s.signal_type && (
+                      <Badge variant="outline" className="text-xs bg-primary/5 text-primary border-primary/20">
+                        {s.signal_type}
+                      </Badge>
+                    )}
                     {s.amount && (
                       <Badge variant="outline" className={`${getStageColor(s.funding_stage)} text-xs`}>
-                        {s.funding_stage} · {s.amount}
+                        {[s.funding_stage, s.amount].filter(Boolean).join(' · ')}
                       </Badge>
                     )}
                   </h3>
@@ -400,11 +472,14 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
               </div>
 
               <MetaInfo />
+              <WhyNow />
               <LikelyRoles />
+              <Departments />
               <AlertInsight />
               <MatchReasons />
+              <OutreachAngle />
 
-              <div className="mt-3">
+              <div className="mt-3 flex flex-wrap items-center gap-2">
                 <Button
                   variant="outline"
                   size="sm"
@@ -412,9 +487,24 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
                   onClick={() => window.open(s.source_url, '_blank')}
                 >
                   <ArrowUpRight className="w-3.5 h-3.5" />
-                  View Article
+                  View Source
                 </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => window.open(`https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${s.company_name} recruiter`)}`, '_blank')}
+                >
+                  <Users className="w-3.5 h-3.5" />
+                  Find Hiring Contact
+                </Button>
+                {typeof s.confidence === 'number' && (
+                  <Badge variant="secondary" className="text-xs">
+                    {s.confidence}% signal confidence
+                  </Badge>
+                )}
               </div>
+
             </div>
           </div>
         </CardContent>
