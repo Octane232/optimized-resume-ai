@@ -27,6 +27,14 @@ interface RadarSignal {
   hiring_window: string | null;
   published_at: string | null;
   created_at: string | null;
+  signal_type?: string | null;
+  location?: string | null;
+  company_size?: string | null;
+  why_now?: string | null;
+  outreach_angle?: string | null;
+  departments?: string[] | null;
+  confidence?: number | null;
+  source_name?: string | null;
 }
 
 interface RadarAlert {
@@ -62,12 +70,17 @@ const getMatchColor = (score: number): string => {
 const filterSignals = (signals: any[], searchQuery: string): any[] => {
   if (!searchQuery) return signals;
   const q = searchQuery.toLowerCase();
-  return signals.filter(s => 
+  return signals.filter(s =>
     s.company_name?.toLowerCase().includes(q) ||
     s.industry?.toLowerCase().includes(q) ||
+    s.location?.toLowerCase().includes(q) ||
+    s.signal_type?.toLowerCase().includes(q) ||
+    s.description?.toLowerCase().includes(q) ||
+    s.departments?.some((d: string) => d.toLowerCase().includes(q)) ||
     s.likely_roles?.some((r: string) => r.toLowerCase().includes(q))
   );
 };
+
 
 // ===== Custom Hooks =====
 const useRadarData = () => {
