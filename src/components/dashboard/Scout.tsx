@@ -447,11 +447,16 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-3 mb-2">
                 <div>
-                  <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
+                  <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors flex flex-wrap items-center gap-2">
                     {s.company_name}
+                    {s.signal_type && (
+                      <Badge variant="outline" className="text-xs bg-primary/5 text-primary border-primary/20">
+                        {s.signal_type}
+                      </Badge>
+                    )}
                     {s.amount && (
                       <Badge variant="outline" className={`${getStageColor(s.funding_stage)} text-xs`}>
-                        {s.funding_stage} · {s.amount}
+                        {[s.funding_stage, s.amount].filter(Boolean).join(' · ')}
                       </Badge>
                     )}
                   </h3>
@@ -467,11 +472,14 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
               </div>
 
               <MetaInfo />
+              <WhyNow />
               <LikelyRoles />
+              <Departments />
               <AlertInsight />
               <MatchReasons />
+              <OutreachAngle />
 
-              <div className="mt-3">
+              <div className="mt-3 flex flex-wrap items-center gap-2">
                 <Button
                   variant="outline"
                   size="sm"
@@ -479,9 +487,24 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
                   onClick={() => window.open(s.source_url, '_blank')}
                 >
                   <ArrowUpRight className="w-3.5 h-3.5" />
-                  View Article
+                  View Source
                 </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => window.open(`https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${s.company_name} recruiter`)}`, '_blank')}
+                >
+                  <Users className="w-3.5 h-3.5" />
+                  Find Hiring Contact
+                </Button>
+                {typeof s.confidence === 'number' && (
+                  <Badge variant="secondary" className="text-xs">
+                    {s.confidence}% signal confidence
+                  </Badge>
+                )}
               </div>
+
             </div>
           </div>
         </CardContent>
