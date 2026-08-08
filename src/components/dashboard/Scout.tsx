@@ -210,11 +210,13 @@ const ExplainerBanner: React.FC = () => (
           <div>
             <p className="text-sm font-medium text-foreground">How it works</p>
             <p className="text-xs text-muted-foreground mt-1">
-              When a company raises funding, they hire aggressively in the next 30–90 days. 
-              The Radar finds these signals <strong>before</strong> jobs are posted — giving you a 14-day head start 
-              over 250+ other applicants.
+              The Radar scans news across <strong>every sector</strong> — healthcare, retail, construction, logistics,
+              hospitality, manufacturing, energy, education, finance, public sector and tech — for events that create
+              jobs: funding, expansions, new sites, contract wins, acquisitions and hiring announcements. You see who is
+              about to hire, why, and what to say — <strong>before</strong> the role is advertised.
             </p>
           </div>
+
         </div>
       </CardContent>
     </Card>
