@@ -183,7 +183,7 @@ const HeaderSection: React.FC<{
       </div>
       <div>
         <h1 className="text-2xl font-bold text-foreground">Hidden Job Radar</h1>
-        <p className="text-sm text-muted-foreground">Companies raising funding = companies about to hire</p>
+        <p className="text-sm text-muted-foreground">Every industry. Every hiring signal. Before the job is posted.</p>
       </div>
     </div>
     
