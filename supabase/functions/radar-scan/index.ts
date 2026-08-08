@@ -343,13 +343,15 @@ serve(async (req) => {
     const RSS_FEEDS: { url: string; name: string }[] = [
       { url: "https://techcrunch.com/category/venture/feed/", name: "TechCrunch" },
       { url: "https://venturebeat.com/feed/", name: "VentureBeat" },
-      { url: "https://www.prnewswire.com/rss/business-technology-latest-news.rss", name: "PR Newswire" },
-      { url: "https://www.businesswire.com/portal/site/home/news/", name: "Business Wire" },
       { url: "https://feeds.bbci.co.uk/news/business/rss.xml", name: "BBC Business" },
       { url: "https://www.retaildive.com/feeds/news/", name: "Retail Dive" },
       { url: "https://www.healthcaredive.com/feeds/news/", name: "Healthcare Dive" },
       { url: "https://www.constructiondive.com/feeds/news/", name: "Construction Dive" },
       { url: "https://www.supplychaindive.com/feeds/news/", name: "Supply Chain Dive" },
+      { url: "https://www.manufacturingdive.com/feeds/news/", name: "Manufacturing Dive" },
+      { url: "https://www.restaurantdive.com/feeds/news/", name: "Restaurant Dive" },
+      { url: "https://www.bankingdive.com/feeds/news/", name: "Banking Dive" },
+      { url: "https://www.hrdive.com/feeds/news/", name: "HR Dive" },
       { url: "https://www.hotelmanagement.net/rss.xml", name: "Hotel Management" },
       { url: "https://www.utilitydive.com/feeds/news/", name: "Utility Dive" },
       { url: "https://www.k12dive.com/feeds/news/", name: "K-12 Dive" },
@@ -358,11 +360,15 @@ serve(async (req) => {
       const before = allArticles.length;
       const results = await Promise.allSettled(
         RSS_FEEDS.map((f) =>
-          fetch(f.url, { headers: { "User-Agent": "Mozilla/5.0 (compatible; VaylanceRadar/1.0)" } })
+          fetch(f.url, {
+            headers: { "User-Agent": "Mozilla/5.0 (compatible; VaylanceRadar/1.0)" },
+            signal: AbortSignal.timeout(12000),
+          })
             .then((r) => r.text())
             .then((xml) => ({ xml, name: f.name }))
         )
       );
+
       for (const r of results) {
         if (r.status === "fulfilled") {
           for (const item of parseRssItems(r.value.xml, r.value.name, true)) pushArticle(item);
