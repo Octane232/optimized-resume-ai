@@ -326,6 +326,18 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
           {s.industry}
         </span>
       )}
+      {s.location && (
+        <span className="flex items-center gap-1">
+          <MapPin className="w-3 h-3" />
+          {s.location}
+        </span>
+      )}
+      {s.company_size && (
+        <span className="flex items-center gap-1">
+          <Users className="w-3 h-3" />
+          {s.company_size}
+        </span>
+      )}
       {s.hiring_window && (
         <span className="flex items-center gap-1">
           <Clock className="w-3 h-3" />
@@ -336,10 +348,49 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
         <span className="flex items-center gap-1">
           <TrendingUp className="w-3 h-3" />
           {new Date(s.published_at).toLocaleDateString()}
+          {s.source_name ? ` · ${s.source_name}` : ''}
         </span>
       )}
     </div>
   );
+
+  const WhyNow = () => {
+    if (!s.why_now) return null;
+    return (
+      <div className="mb-3 p-3 rounded-lg bg-amber-500/5 border border-amber-500/20">
+        <p className="text-xs font-semibold text-amber-600 mb-0.5 flex items-center gap-1">
+          <Zap className="w-3 h-3" /> Why they're hiring now
+        </p>
+        <p className="text-sm text-foreground">{s.why_now}</p>
+      </div>
+    );
+  };
+
+  const Departments = () => {
+    if (!s.departments?.length) return null;
+    return (
+      <div className="flex flex-wrap gap-1.5 mb-2">
+        <span className="text-xs text-muted-foreground mr-1 py-0.5">Departments:</span>
+        {s.departments.map((d: string, i: number) => (
+          <Badge key={i} variant="outline" className="text-xs font-normal">
+            {d}
+          </Badge>
+        ))}
+      </div>
+    );
+  };
+
+  const OutreachAngle = () => {
+    if (!s.outreach_angle) return null;
+    return (
+      <div className="mt-3 p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/20">
+        <p className="text-xs font-semibold text-emerald-600 mb-0.5 flex items-center gap-1">
+          <Rocket className="w-3 h-3" /> Your outreach angle
+        </p>
+        <p className="text-sm text-foreground">{s.outreach_angle}</p>
+      </div>
+    );
+  };
 
   const LikelyRoles = () => {
     if (!s.likely_roles?.length) return null;
@@ -354,6 +405,7 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
       </div>
     );
   };
+
 
   const AlertInsight = () => {
     if (!alert?.insight) return null;
