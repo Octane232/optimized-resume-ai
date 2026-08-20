@@ -46,11 +46,18 @@ export async function requireUser(req: Request): Promise<AuthedUser | Response> 
   });
 
   let tier: SubscriptionTier = "free";
-  const { data: subData } = await serviceClient
+  // Ordered + limited instead of maybeSingle(): duplicate subscription rows
+  // would otherwise make maybeSingle() return null and silently downgrade
+  // a paying user to the free tier (0 quota on everything).
+  const { data: subRows } = await serviceClient
     .from("user_subscriptions")
-    .select("tier, plan_status")
+    .select("tier, plan_status, updated_at")
     .eq("user_id", data.user.id)
-    .maybeSingle();
+    .order("updated_at", { ascending: false })
+    .limit(1);
+
+  const subData = subRows?.[0] ?? null;
+
 
   if (subData?.plan_status === 'active' && subData?.tier) {
     const rawTier = subData.tier as string;
