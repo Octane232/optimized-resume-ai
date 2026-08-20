@@ -46,11 +46,18 @@ export async function requireUser(req: Request): Promise<AuthedUser | Response> 
   });
 
   let tier: SubscriptionTier = "free";
-  const { data: subData } = await serviceClient
+  // Ordered + limited instead of maybeSingle(): duplicate subscription rows
+  // would otherwise make maybeSingle() return null and silently downgrade
+  // a paying user to the free tier (0 quota on everything).
+  const { data: subRows } = await serviceClient
     .from("user_subscriptions")
-    .select("tier, plan_status")
+    .select("tier, plan_status, updated_at")
     .eq("user_id", data.user.id)
-    .maybeSingle();
+    .order("updated_at", { ascending: false })
+    .limit(1);
+
+  const subData = subRows?.[0] ?? null;
+
 
   if (subData?.plan_status === 'active' && subData?.tier) {
     const rawTier = subData.tier as string;
@@ -67,6 +74,28 @@ export async function requireUser(req: Request): Promise<AuthedUser | Response> 
     tier,
     serviceClient,
   };
+}
+
+/**
+ * Read the effective usage for a feature.
+ * If the 30-day window has elapsed, usage counts as 0 (a fresh cycle),
+ * so allowances actually reset each month instead of accumulating forever.
+ */
+export async function getEffectiveUsage(
+  user: AuthedUser,
+  action: UsageAction,
+): Promise<{ used: number; expired: boolean }> {
+  const { data } = await user.serviceClient
+    .from("user_usage")
+    .select("used, reset_date")
+    .eq("user_id", user.id)
+    .eq("feature", action)
+    .maybeSingle();
+
+  if (!data) return { used: 0, expired: false };
+
+  const expired = !!data.reset_date && new Date(data.reset_date).getTime() <= Date.now();
+  return { used: expired ? 0 : (data.used ?? 0), expired };
 }
 
 /**
@@ -94,14 +123,7 @@ export async function checkFeatureLimit(
     }, 402);
   }
 
-  const { data } = await user.serviceClient
-    .from("user_usage")
-    .select("used")
-    .eq("user_id", user.id)
-    .eq("feature", action)
-    .maybeSingle();
-
-  const used = data?.used ?? 0;
+  const { used } = await getEffectiveUsage(user, action);
   const remaining = Math.max(0, limit - used);
 
   if (remaining <= 0) {
@@ -139,32 +161,32 @@ export async function checkFeatureLimit(
 }
 
 /**
- * Increment usage for a feature
+ * Increment usage for a feature (starts a new 30-day window when the old one lapsed)
  */
 export async function incrementFeatureUsage(
   user: AuthedUser,
   action: UsageAction
 ): Promise<boolean> {
-  const { data: existing } = await user.serviceClient
-    .from("user_usage")
-    .select("used")
-    .eq("user_id", user.id)
-    .eq("feature", action)
-    .maybeSingle();
+  const { used, expired } = await getEffectiveUsage(user, action);
 
-  const currentUsed = existing?.used ?? 0;
-  const resetDate = new Date();
-  resetDate.setDate(resetDate.getDate() + 30);
+  const payload: Record<string, unknown> = {
+    user_id: user.id,
+    feature: action,
+    used: used + 1,
+    updated_at: new Date().toISOString(),
+  };
+
+  // Only move the reset date when opening a fresh cycle — otherwise every
+  // action would push the window forward and the quota would never reset.
+  if (expired || used === 0) {
+    const resetDate = new Date();
+    resetDate.setDate(resetDate.getDate() + 30);
+    payload.reset_date = resetDate.toISOString();
+  }
 
   const { error } = await user.serviceClient
     .from("user_usage")
-    .upsert({
-      user_id: user.id,
-      feature: action,
-      used: currentUsed + 1,
-      reset_date: resetDate.toISOString(),
-      updated_at: new Date().toISOString(),
-    }, { onConflict: "user_id,feature" });
+    .upsert(payload, { onConflict: "user_id,feature" });
 
   if (error) {
     console.error("[incrementFeatureUsage] error:", error.message);
@@ -172,6 +194,7 @@ export async function incrementFeatureUsage(
   }
   return true;
 }
+
 
 /**
  * Check quota and return null if allowed, or Response if blocked
@@ -201,15 +224,7 @@ export async function getRemainingUsesForUser(
 ): Promise<number> {
   const limit = getFeatureLimit(user.tier, action);
   if (limit === 0) return 0;
-
-  const { data } = await user.serviceClient
-    .from("user_usage")
-    .select("used")
-    .eq("user_id", user.id)
-    .eq("feature", action)
-    .maybeSingle();
-
-  const used = data?.used ?? 0;
+  const { used } = await getEffectiveUsage(user, action);
   return Math.max(0, limit - used);
 }
 
@@ -220,12 +235,7 @@ export async function getCurrentUsageForUser(
   user: AuthedUser,
   action: UsageAction
 ): Promise<number> {
-  const { data } = await user.serviceClient
-    .from("user_usage")
-    .select("used")
-    .eq("user_id", user.id)
-    .eq("feature", action)
-    .maybeSingle();
-
-  return data?.used ?? 0;
+  const { used } = await getEffectiveUsage(user, action);
+  return used;
 }
+
