@@ -224,15 +224,7 @@ export async function getRemainingUsesForUser(
 ): Promise<number> {
   const limit = getFeatureLimit(user.tier, action);
   if (limit === 0) return 0;
-
-  const { data } = await user.serviceClient
-    .from("user_usage")
-    .select("used")
-    .eq("user_id", user.id)
-    .eq("feature", action)
-    .maybeSingle();
-
-  const used = data?.used ?? 0;
+  const { used } = await getEffectiveUsage(user, action);
   return Math.max(0, limit - used);
 }
 
@@ -243,12 +235,7 @@ export async function getCurrentUsageForUser(
   user: AuthedUser,
   action: UsageAction
 ): Promise<number> {
-  const { data } = await user.serviceClient
-    .from("user_usage")
-    .select("used")
-    .eq("user_id", user.id)
-    .eq("feature", action)
-    .maybeSingle();
-
-  return data?.used ?? 0;
+  const { used } = await getEffectiveUsage(user, action);
+  return used;
 }
+
