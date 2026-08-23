@@ -7,7 +7,7 @@ const sidebarItems = [
   { icon: Layers, label: 'Dashboard', active: true },
   { icon: Briefcase, label: 'Job Matches' },
   { icon: FileText, label: 'Applications' },
-  { icon: PenTool, label: 'Resume Builder' },
+  { icon: PenTool, label: 'Resume + ATS' },
   { icon: FileText, label: 'AI Cover Letter' },
   { icon: Mic, label: 'Interview Coach' },
   { icon: BarChart3, label: 'Analytics' },

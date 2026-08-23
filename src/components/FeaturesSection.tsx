@@ -2,7 +2,7 @@ import React from 'react';
 import { FileText, Target, PenTool, Mic, BarChart3, DollarSign } from 'lucide-react';
 
 const features = [
-  { icon: FileText, title: 'AI Resume Builder', desc: 'Create a professional, ATS-friendly resume in minutes with AI.', tone: 'from-blue-500/20 to-blue-500/5', iconColor: 'text-blue-400' },
+  { icon: FileText, title: 'ATS Resume Scanner', desc: 'Upload your resume and get an AI ATS score plus missing-keyword fixes.', tone: 'from-blue-500/20 to-blue-500/5', iconColor: 'text-blue-400' },
   { icon: Target, title: 'Smart Job Matching', desc: 'Get matched with jobs that fit your skills and experience.', tone: 'from-violet-500/20 to-violet-500/5', iconColor: 'text-violet-400' },
   { icon: PenTool, title: 'AI Cover Letter', desc: 'Generate personalized cover letters that impress recruiters.', tone: 'from-emerald-500/20 to-emerald-500/5', iconColor: 'text-emerald-400' },
   { icon: Mic, title: 'Interview Coach', desc: 'Practice with AI and get real-time feedback to boost your confidence.', tone: 'from-amber-500/20 to-amber-500/5', iconColor: 'text-amber-400' },
