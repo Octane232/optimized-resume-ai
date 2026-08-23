@@ -172,7 +172,11 @@ export const UsageLimitProvider = ({ children }: { children: ReactNode }) => {
 
       let resolvedTier: SubscriptionTier = 'free';
 
-      if (subData?.plan_status === 'active' && subData?.tier) {
+      const notExpired =
+        !subData?.current_period_end ||
+        new Date(subData.current_period_end).getTime() > Date.now();
+
+      if (subData?.plan_status === 'active' && subData?.tier && notExpired) {
         const raw = subData.tier as string;
         if (raw === 'starter') resolvedTier = 'pro';
         else if (raw === 'premium') resolvedTier = 'elite';
@@ -183,6 +187,7 @@ export const UsageLimitProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setSubscriptionEnd(null);
       }
+
 
       setTier(resolvedTier);
 

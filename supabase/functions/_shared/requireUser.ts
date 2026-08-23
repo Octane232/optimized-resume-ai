@@ -51,15 +51,18 @@ export async function requireUser(req: Request): Promise<AuthedUser | Response> 
   // a paying user to the free tier (0 quota on everything).
   const { data: subRows } = await serviceClient
     .from("user_subscriptions")
-    .select("tier, plan_status, updated_at")
+    .select("tier, plan_status, updated_at, current_period_end")
     .eq("user_id", data.user.id)
     .order("updated_at", { ascending: false })
     .limit(1);
 
   const subData = subRows?.[0] ?? null;
 
+  const notExpired =
+    !subData?.current_period_end ||
+    new Date(subData.current_period_end as string).getTime() > Date.now();
 
-  if (subData?.plan_status === 'active' && subData?.tier) {
+  if (subData?.plan_status === 'active' && subData?.tier && notExpired) {
     const rawTier = subData.tier as string;
     if (rawTier === 'starter') tier = 'pro';
     else if (rawTier === 'premium') tier = 'elite';
@@ -67,6 +70,7 @@ export async function requireUser(req: Request): Promise<AuthedUser | Response> 
     else if (rawTier === 'elite') tier = 'elite';
     else tier = 'free';
   }
+
 
   return {
     id: data.user.id,
