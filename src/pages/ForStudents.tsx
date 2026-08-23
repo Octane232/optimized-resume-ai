@@ -11,9 +11,9 @@ const ForStudents = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Free AI Resume Builder for Students & Graduates | Vaylance"
-        description="Build your first professional resume with Vaylance's free AI tools designed for students and recent graduates. Stand out to employers with ATS-optimized resumes."
-        keywords="student resume builder, resume for graduates, first job resume, college student resume template, entry-level resume, internship resume"
+        title="Free ATS Resume Scanner for Students & Graduates | Vaylance"
+        description="Check your resume against job descriptions with Vaylance's free ATS scanner for students and recent graduates. Get an AI score and missing-keyword fixes."
+        keywords="ats resume scanner for students, resume checker for graduates, ats resume checker, student resume checker, first job resume check, internship resume check"
         canonical="https://vaylance.com/for-students"
       />
       <Header />
@@ -23,10 +23,10 @@ const ForStudents = () => {
             <div className="text-center max-w-4xl mx-auto">
               <GraduationCap className="w-16 h-16 text-emerald-500 mx-auto mb-6" />
               <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
-                Resume Builder for Students & Graduates
+                ATS Resume Scanner for Students & Graduates
               </h1>
               <p className="text-xl text-muted-foreground mb-8">
-                Launch your career with confidence. Get student-friendly resume templates and entry-level job opportunities.
+                Launch your career with confidence. Check your resume against real job descriptions and get AI feedback before you apply.
               </p>
               <Button asChild size="lg" className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-4">
                 <Link to="/auth">Start Your Career Journey</Link>
@@ -43,8 +43,8 @@ const ForStudents = () => {
               {[
                 {
                   icon: <FileText className="w-8 h-8" />,
-                  title: "Entry-Level Templates",
-                  description: "Student-friendly resume templates designed to highlight your education, projects, and potential"
+                  title: "ATS Resume Scan",
+                  description: "Compare your resume against job descriptions and get an AI score with missing keyword suggestions"
                 },
                 {
                   icon: <Briefcase className="w-8 h-8" />,
