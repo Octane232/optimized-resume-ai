@@ -42,8 +42,8 @@ const ForIndividuals = () => {
               {[
                 {
                   icon: <FileText className="w-8 h-8" />,
-                  title: "Professional Resume Builder",
-                  description: "Create ATS-optimized resumes with AI-powered suggestions and industry-specific templates"
+                  title: "ATS Resume Scanner",
+                  description: "Upload your resume and get an AI ATS score plus keyword fixes tailored to your target role"
                 },
                 {
                   icon: <Search className="w-8 h-8" />,

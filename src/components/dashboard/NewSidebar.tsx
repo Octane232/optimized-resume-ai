@@ -52,7 +52,7 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
   const moreItems = [
     { id: 'job-search', label: 'Job Search', icon: Search },
     { id: 'salary-intel', label: 'Salary Intel', icon: DollarSign },
-    { id: 'resume-engine', label: 'Resume Engine', icon: Stethoscope },
+    { id: 'resume-engine', label: 'Resume + ATS', icon: Stethoscope },
     { id: 'interview-prep', label: 'Interview Coach ', icon: Mic },
     { id: 'mission-control', label: 'App Tracker ', icon: Crosshair },
     { id: 'linkedin', label: 'LinkedIn', icon: Sparkles },

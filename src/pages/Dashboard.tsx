@@ -65,7 +65,7 @@ const TAB_TITLES: Record<Tab, string> = {
   'job-search': 'Job Search',
   scout: 'Job Radar',
   'salary-intel': 'Salary Intelligence',
-  'resume-engine': 'Resume Engine',
+  'resume-engine': 'Resume + ATS',
   'interview-prep': 'Interview Coach',
   'skill-gap': 'Skill Gap Analyzer',
   linkedin: 'LinkedIn Optimizer',

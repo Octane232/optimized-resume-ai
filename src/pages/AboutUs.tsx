@@ -14,7 +14,7 @@ const AboutUs = () => {
       <SEOHead
         title="About Vaylance – AI-Powered Career Platform | Our Mission"
         description="Vaylance is on a mission to make career success accessible to everyone through AI. Learn about our team, values, and the technology behind our career tools."
-        keywords="about Vaylance, AI career platform, career technology company, resume builder company"
+        keywords="about Vaylance, AI career platform, career technology company, ATS resume scanner"
         canonical="https://vaylance.com/about-us"
       />
       <Header />
@@ -42,12 +42,12 @@ const AboutUs = () => {
                   Job hunting is already stressful. Your resume shouldn't add to that stress.
                 </p>
                 <p className="text-lg text-muted-foreground mb-4">
-                  We built Vaylance because we were tired of resume builders that either looked terrible or cost way too much. 
+                  We built Vaylance because we were tired of "resume builders" that either looked terrible or cost way too much. 
                   Most of them make promises they can't keep about "guaranteed interviews" or "AI magic."
                 </p>
                 <p className="text-lg text-muted-foreground">
-                  We focus on what actually matters: clean templates that pass ATS systems, simple editing tools, 
-                  and helpful suggestions when you need them. No BS.
+                  We focus on what actually matters: helping your resume pass ATS systems, giving you honest feedback, 
+                  and tools that make your job search easier. No BS.
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-6">

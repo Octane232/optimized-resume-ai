@@ -8,8 +8,8 @@ import {
 // FAQ data for Pro/Elite tiers
 const faqs = [
   {
-    q: 'What is included in a resume engine run?',
-    a: 'One resume engine run gives you a tailored resume optimized for a specific job description, a matching cover letter, and a detailed ATS score analysis — all generated together. Pro users get 15 runs/month. Elite users get 40 runs/month.',
+    q: 'What is included in a Resume + ATS run?',
+    a: 'One Resume + ATS run gives you a tailored resume optimized for a specific job description, a matching cover letter, and a detailed ATS score analysis — all generated together. Pro users get 15 runs/month. Elite users get 40 runs/month.',
   },
   {
     q: 'When do my monthly limits reset?',
