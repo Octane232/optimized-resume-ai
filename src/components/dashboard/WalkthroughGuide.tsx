@@ -23,7 +23,7 @@ const steps = [
   },
   {
     icon: FileText,
-    title: 'Resume Engine',
+    title: 'Resume + ATS',
     description: 'Build, optimize, and tailor your resume to beat ATS systems and impress recruiters.',
     color: 'from-emerald-500 to-emerald-600'
   },
