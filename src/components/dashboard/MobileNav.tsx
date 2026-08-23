@@ -26,7 +26,7 @@ const MobileNav: React.FC<MobileNavProps> = ({ activeTab, setActiveTab }) => {
   const primaryItems = [
     { id: 'briefing', label: 'Home', icon: Home },
     { id: 'scout', label: 'Radar', icon: Telescope },
-    { id: 'resume-engine', label: 'Resume', icon: Stethoscope },
+    { id: 'resume-engine', label: 'Resume + ATS', icon: Stethoscope },
     { id: 'mission-control', label: 'Tracker', icon: Crosshair },
   ];
 
