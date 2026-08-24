@@ -8,21 +8,21 @@ const steps = [
 ];
 
 const HowItWorksSection = () => (
-  <section className="py-14">
+  <section className="py-12 sm:py-14">
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="text-center mb-16">
-        <p className="text-xs font-bold tracking-[0.25em] mb-3 bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">HOW IT WORKS</p>
-        <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">
+      <div className="text-center mb-8 sm:mb-16">
+        <p className="text-[10px] sm:text-xs font-bold tracking-[0.2em] sm:tracking-[0.25em] mb-3 bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">HOW IT WORKS</p>
+        <h2 className="text-[26px] leading-tight sm:text-4xl font-black text-foreground tracking-tight">
           Get hired in 3 simple steps
         </h2>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-8 relative">
+      <div className="grid md:grid-cols-3 gap-8 sm:gap-8 relative">
         {steps.map((s, i) => {
           const Icon = s.icon;
           return (
             <div key={i} className="relative text-center">
-              <div className="relative inline-flex items-center justify-center mb-5">
+              <div className="relative inline-flex items-center justify-center mb-3 sm:mb-5">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-violet-600 rounded-full blur-xl opacity-50" />
                 <div className="relative w-16 h-16 rounded-full bg-card border border-border flex items-center justify-center">
                   <Icon className="w-7 h-7 text-violet-400" />

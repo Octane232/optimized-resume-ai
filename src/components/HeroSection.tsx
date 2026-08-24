@@ -23,7 +23,7 @@ const jobMatches = [
 
 const HeroSection = () => {
   return (
-    <section className="relative pt-28 pb-16 overflow-hidden">
+    <section className="relative pt-24 sm:pt-28 pb-10 sm:pb-16 overflow-hidden">
       {/* Background glow */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute top-0 left-1/3 w-[700px] h-[700px] bg-violet-600/15 rounded-full blur-[140px]" />
@@ -31,15 +31,15 @@ const HeroSection = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Left: copy */}
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-card/50 backdrop-blur text-xs font-semibold text-muted-foreground mb-6">
+          <div className="text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-card/50 backdrop-blur text-[11px] sm:text-xs font-semibold text-muted-foreground mb-4 sm:mb-6">
               <Sparkles className="w-3.5 h-3.5 text-violet-400" />
               AI-Powered Job Search
             </div>
 
-            <h1 className="text-6xl sm:text-7xl lg:text-7xl font-black text-foreground tracking-tight leading-[1.02] mb-6">
+            <h1 className="text-[2.5rem] leading-[1.06] sm:text-6xl lg:text-7xl font-black text-foreground tracking-tight sm:leading-[1.02] mb-4 sm:mb-6">
               Land your next job{' '}
               <span className="bg-gradient-to-r from-blue-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
                 faster
@@ -47,12 +47,12 @@ const HeroSection = () => {
               {' '}with AI
             </h1>
 
-            <p className="text-lg text-muted-foreground max-w-lg mb-8 leading-relaxed">
+            <p className="text-base sm:text-lg text-muted-foreground max-w-lg mx-auto lg:mx-0 mb-6 sm:mb-8 leading-relaxed">
               Vaylance helps you create the perfect resume, find matching jobs,
               and apply with AI — so you can get hired faster.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 mb-8">
+            <div className="flex flex-col sm:flex-row sm:justify-center lg:justify-start gap-3 mb-6 sm:mb-8">
               <Button asChild size="lg" className="h-12 px-7 font-semibold text-base bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white shadow-xl shadow-blue-600/30">
                 <Link to="/auth">Get Started Free →</Link>
               </Button>
@@ -64,12 +64,13 @@ const HeroSection = () => {
               </Button>
             </div>
 
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-5 gap-y-2 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> Cancel anytime</span>
-              <span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> Cancel anytime</span>
+              <span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> Secure payments</span>
               <span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> Loved by 10,000+ users</span>
             </div>
           </div>
+
 
           {/* Right: dashboard mockup */}
           <div className="relative">
@@ -119,7 +120,7 @@ const HeroSection = () => {
                   </div>
 
                   {/* Stat tiles */}
-                  <div className="grid grid-cols-4 gap-1.5">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                     {[
                       { label: 'Job Matches', value: '128', chg: '+24 this week' },
                       { label: 'Applications', value: '32', chg: '+12 this week' },
@@ -134,9 +135,9 @@ const HeroSection = () => {
                     ))}
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     {/* Top job matches */}
-                    <div className="col-span-2 rounded-md border border-border/60 bg-background/40 p-2">
+                    <div className="sm:col-span-2 rounded-md border border-border/60 bg-background/40 p-2">
                       <p className="text-[9px] font-bold text-foreground mb-1.5">Top Job Matches</p>
                       <div className="space-y-1">
                         {jobMatches.map((j, i) => (
@@ -154,7 +155,7 @@ const HeroSection = () => {
                     </div>
 
                     {/* Profile strength */}
-                    <div className="rounded-md border border-border/60 bg-background/40 p-2">
+                    <div className="hidden sm:block rounded-md border border-border/60 bg-background/40 p-2">
                       <p className="text-[9px] font-bold text-foreground mb-1">Profile Strength</p>
                       <div className="relative w-12 h-12 mx-auto mb-1">
                         <svg viewBox="0 0 36 36" className="w-12 h-12 -rotate-90">

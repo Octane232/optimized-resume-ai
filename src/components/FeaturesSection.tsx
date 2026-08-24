@@ -11,11 +11,11 @@ const features = [
 ];
 
 const FeaturesSection = () => (
-  <section className="py-16">
+  <section className="py-12 sm:py-16">
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="text-center mb-14">
-        <p className="text-xs font-bold tracking-[0.25em] mb-3 bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">POWERFUL FEATURES</p>
-        <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight mb-3">
+      <div className="text-center mb-8 sm:mb-14">
+        <p className="text-[10px] sm:text-xs font-bold tracking-[0.2em] sm:tracking-[0.25em] mb-3 bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">POWERFUL FEATURES</p>
+        <h2 className="text-[26px] leading-tight sm:text-4xl font-black text-foreground tracking-tight mb-3">
           Everything you need to get hired
         </h2>
         <p className="text-muted-foreground text-base max-w-xl mx-auto">
@@ -23,11 +23,11 @@ const FeaturesSection = () => (
         </p>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         {features.map((f, i) => {
           const Icon = f.icon;
           return (
-            <div key={i} className="group p-6 rounded-2xl border border-border bg-card hover:border-primary/40 hover:bg-card/80 transition-all">
+            <div key={i} className="group p-5 sm:p-6 rounded-2xl border border-border bg-card hover:border-primary/40 hover:bg-card/80 transition-all">
               <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${f.tone} flex items-center justify-center mb-4 border border-border/50`}>
                 <Icon className={`w-5 h-5 ${f.iconColor}`} />
               </div>

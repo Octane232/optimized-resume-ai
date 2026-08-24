@@ -9,11 +9,11 @@ const testimonials = [
 
 const TestimonialsSection = () => {
   return (
-    <section className="py-14">
+    <section className="py-12 sm:py-14">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-14">
-          <p className="text-xs font-bold tracking-[0.25em] mb-3 bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">LOVED BY JOB SEEKERS</p>
-          <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">
+        <div className="text-center mb-8 sm:mb-14">
+          <p className="text-[10px] sm:text-xs font-bold tracking-[0.2em] sm:tracking-[0.25em] mb-3 bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">LOVED BY JOB SEEKERS</p>
+          <h2 className="text-[26px] leading-tight sm:text-4xl font-black text-foreground tracking-tight">
             See what our users are saying
           </h2>
         </div>
@@ -26,9 +26,9 @@ const TestimonialsSection = () => {
             <ChevronRight className="w-4 h-4" />
           </button>
 
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-3 gap-3 sm:gap-4">
             {testimonials.map((t, i) => (
-              <div key={i} className="p-6 rounded-2xl border border-border bg-card flex flex-col">
+              <div key={i} className="p-5 sm:p-6 rounded-2xl border border-border bg-card flex flex-col">
                 <div className="flex gap-0.5 mb-3">
                   {[...Array(5)].map((_, s) => (
                     <Star key={s} className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
