@@ -11,8 +11,8 @@ const HowItWorksSection = () => (
   <section className="py-12 sm:py-14">
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="text-center mb-8 sm:mb-16">
-        <p className="text-xs font-bold tracking-[0.25em] mb-3 bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">HOW IT WORKS</p>
-        <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">
+        <p className="text-[10px] sm:text-xs font-bold tracking-[0.2em] sm:tracking-[0.25em] mb-3 bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">HOW IT WORKS</p>
+        <h2 className="text-[26px] leading-tight sm:text-4xl font-black text-foreground tracking-tight">
           Get hired in 3 simple steps
         </h2>
       </div>

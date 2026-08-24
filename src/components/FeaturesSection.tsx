@@ -14,8 +14,8 @@ const FeaturesSection = () => (
   <section className="py-12 sm:py-16">
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="text-center mb-8 sm:mb-14">
-        <p className="text-xs font-bold tracking-[0.25em] mb-3 bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">POWERFUL FEATURES</p>
-        <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight mb-3">
+        <p className="text-[10px] sm:text-xs font-bold tracking-[0.2em] sm:tracking-[0.25em] mb-3 bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">POWERFUL FEATURES</p>
+        <h2 className="text-[26px] leading-tight sm:text-4xl font-black text-foreground tracking-tight mb-3">
           Everything you need to get hired
         </h2>
         <p className="text-muted-foreground text-base max-w-xl mx-auto">
