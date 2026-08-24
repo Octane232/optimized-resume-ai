@@ -9,18 +9,18 @@ const plans = [
     price: 15,
     description: 'Everything you need to get hired.',
     features: [
-      '✅ 50 Job Searches / month',
-      '✅ 75 Bullet Rewrites / month',
-      '✅ 30 Resume + ATS runs',
-      '✅ 30 Cover Letters',
-      '✅ 15 LinkedIn Optimizations',
-      '✅ 15 Skill Gap Analyses',
-      '✅ 30 Interview Prep sessions',
-      '✅ 10 Salary Insights',
-      '✅ 15 Job Radar Alerts',
-      '✅ 10 DOCX Rewrites',
-      '✅ 100 Resume Uploads',
-      '✅ Priority Support'
+      '50 Job Searches / month',
+      '75 Bullet Rewrites / month',
+      '30 Resume + ATS runs',
+      '30 Cover Letters',
+      '15 LinkedIn Optimizations',
+      '15 Skill Gap Analyses',
+      '30 Interview Prep sessions',
+      '10 Salary Insights',
+      '15 Job Radar Alerts',
+      '10 DOCX Rewrites',
+      '100 Resume Uploads',
+      'Priority Support'
     ],
     cta: 'Upgrade to Pro',
     popular: true,
@@ -30,21 +30,21 @@ const plans = [
     price: 29,
     description: 'For serious job seekers.',
     features: [
-      '✅ 120 Job Searches / month',
-      '✅ 300 Bullet Rewrites / month',
-      '✅ 100 Resume + ATS runs',
-      '✅ 100 Cover Letters',
-      '✅ 50 LinkedIn Optimizations',
-      '✅ 50 Skill Gap Analyses',
-      '✅ 100 Interview Prep sessions',
-      '✅ 30 Salary Insights',
-      '✅ 50 Job Radar Alerts',
-      '✅ 50 DOCX Rewrites',
-      '✅ 500 Resume Uploads',
-      '✅ Priority Support',
-      '✅ ATS Resume Review',
-      '✅ Live Coach Mode',
-      '✅ Job Application Automation — Coming Soon 🚀'
+      '120 Job Searches / month',
+      '300 Bullet Rewrites / month',
+      '100 Resume + ATS runs',
+      '100 Cover Letters',
+      '50 LinkedIn Optimizations',
+      '50 Skill Gap Analyses',
+      '100 Interview Prep sessions',
+      '30 Salary Insights',
+      '50 Job Radar Alerts',
+      '50 DOCX Rewrites',
+      '500 Resume Uploads',
+      'Priority Support',
+      'ATS Resume Review',
+      'Live Coach Mode',
+      'Job Application Automation — Coming Soon'
     ],
     cta: 'Upgrade to Elite',
     popular: false,
@@ -52,9 +52,9 @@ const plans = [
 ];
 
 const PricingSection = () => (
-  <section id="pricing" className="py-16">
+  <section id="pricing" className="py-12 sm:py-16">
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="text-center mb-14">
+      <div className="text-center mb-10 sm:mb-14">
         <p className="text-xs font-bold tracking-[0.25em] mb-3 bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">SIMPLE, TRANSPARENT PRICING</p>
         <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight mb-3">
           Choose the perfect plan for you
@@ -62,13 +62,13 @@ const PricingSection = () => (
         <p className="text-muted-foreground">Pick a plan and cancel anytime.</p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-5 max-w-3xl mx-auto">
+      <div className="grid md:grid-cols-2 gap-6 md:gap-5 max-w-3xl mx-auto">
         {plans.map((plan, i) => (
           <div
             key={i}
-            className={`relative p-7 rounded-2xl border bg-card transition-all flex flex-col ${
+            className={`relative p-5 sm:p-7 rounded-2xl border bg-card transition-all flex flex-col ${
               plan.popular
-                ? 'border-violet-500/50 shadow-2xl shadow-violet-600/20 ring-1 ring-violet-500/30 scale-[1.02] z-10'
+                ? 'border-violet-500/50 shadow-2xl shadow-violet-600/20 ring-1 ring-violet-500/30 md:scale-[1.02] z-10'
                 : 'border-border hover:border-primary/30'
             }`}
           >
@@ -104,9 +104,9 @@ const PricingSection = () => (
               </Link>
             </Button>
 
-            <ul className="space-y-3 flex-1">
+            <ul className="space-y-2.5 sm:space-y-3 flex-1">
               {plan.features.map((f, fi) => (
-                <li key={fi} className="flex items-start gap-2 text-sm text-foreground/80">
+                <li key={fi} className="flex items-start gap-2 text-[13px] sm:text-sm text-foreground/80">
                   <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                   <span>{f}</span>
                 </li>

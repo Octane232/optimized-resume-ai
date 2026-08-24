@@ -120,7 +120,7 @@ const HeroSection = () => {
                   </div>
 
                   {/* Stat tiles */}
-                  <div className="grid grid-cols-4 gap-1.5">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                     {[
                       { label: 'Job Matches', value: '128', chg: '+24 this week' },
                       { label: 'Applications', value: '32', chg: '+12 this week' },
@@ -135,9 +135,9 @@ const HeroSection = () => {
                     ))}
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     {/* Top job matches */}
-                    <div className="col-span-2 rounded-md border border-border/60 bg-background/40 p-2">
+                    <div className="sm:col-span-2 rounded-md border border-border/60 bg-background/40 p-2">
                       <p className="text-[9px] font-bold text-foreground mb-1.5">Top Job Matches</p>
                       <div className="space-y-1">
                         {jobMatches.map((j, i) => (
@@ -155,7 +155,7 @@ const HeroSection = () => {
                     </div>
 
                     {/* Profile strength */}
-                    <div className="rounded-md border border-border/60 bg-background/40 p-2">
+                    <div className="hidden sm:block rounded-md border border-border/60 bg-background/40 p-2">
                       <p className="text-[9px] font-bold text-foreground mb-1">Profile Strength</p>
                       <div className="relative w-12 h-12 mx-auto mb-1">
                         <svg viewBox="0 0 36 36" className="w-12 h-12 -rotate-90">
