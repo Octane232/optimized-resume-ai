@@ -235,51 +235,93 @@ export type Database = {
         }
         Relationships: []
       }
+      plan_feature_limits: {
+        Row: {
+          created_at: string
+          feature: string
+          id: string
+          monthly_limit: number
+          tier: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          feature: string
+          id?: string
+          monthly_limit?: number
+          tier: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          feature?: string
+          id?: string
+          monthly_limit?: number
+          tier?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
           created_at: string
           email: string | null
           email_notifications: boolean
           full_name: string | null
           id: string
+          location: string | null
           marketing_emails: boolean
+          phone: string | null
           plan: string
+          profile_completion: number
           push_notifications: boolean
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
           updated_at: string
           user_id: string
+          website: string | null
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           email?: string | null
           email_notifications?: boolean
           full_name?: string | null
           id?: string
+          location?: string | null
           marketing_emails?: boolean
+          phone?: string | null
           plan?: string
+          profile_completion?: number
           push_notifications?: boolean
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           updated_at?: string
           user_id: string
+          website?: string | null
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           email?: string | null
           email_notifications?: boolean
           full_name?: string | null
           id?: string
+          location?: string | null
           marketing_emails?: boolean
+          phone?: string | null
           plan?: string
+          profile_completion?: number
           push_notifications?: boolean
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           updated_at?: string
           user_id?: string
+          website?: string | null
         }
         Relationships: []
       }
@@ -616,7 +658,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_usage: {
+        Args: { p_feature: string; p_user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
