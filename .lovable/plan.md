@@ -1,34 +1,20 @@
-## Scan results
+# Vaylance full visual redesign
 
-### ✅ What's working / ready
-- **TypeScript**: clean compile, zero errors.
-- **Trial tier system**: fully wired end-to-end
-  - `PLAN_LIMITS` includes `trial` in both `src/contexts/UsageLimitContext.tsx` and `supabase/functions/_shared/tierLimits.ts`
-  - `requireUser.ts` resolves active trial → `tier='trial'`, expired trial → `'free'`
-  - `UsageLimitContext.fetchAll` mirrors the same logic client-side
-  - Billing UI (`Billing.tsx`, `PaidManagement.tsx`, `UsageHeader.tsx`, `PricingCards.tsx`) all treat trial as its own display state
-  - DB migration installed `trial` rows in `plan_feature_limits` and updated `increment_usage` to stamp `user_tier='trial'` during the active window
-- **Security scanners** (agent, connector, supabase, supply-chain): no findings.
+## Design read
+A career-intelligence SaaS for job seekers who need a practical advantage, with an editorial intelligence-terminal language rather than generic “AI software” styling.
 
-### ⚠️ Issues found (Supabase linter)
+**Direction:** Overhaul · variance 7/10 · motion 4/10 · density 6/10
 
-| # | Level | Issue |
-|---|-------|-------|
-| 1 | INFO  | Table with RLS enabled but **no policies** (blocks all reads/writes silently) |
-| 2 | INFO  | Second table in the same state |
-| 3 | WARN  | A `SECURITY DEFINER` function is executable by `authenticated` — potential privilege escalation surface |
-| 4 | WARN  | **Leaked-password protection disabled** in Supabase Auth |
-| 5 | WARN  | **Postgres has security patches available** — upgrade recommended |
+## What will change
+- Replace blue-purple gradients, glowing blobs, glass effects, repetitive cards, fake usage claims, and the fake dashboard illustration.
+- Establish one restrained system: graphite surfaces, warm white typography, a single signal-green accent, crisp 4–8px corners, strong type hierarchy, and subtle grid/noise texture.
+- Rebuild the public homepage around real product evidence: Job Radar as the opening visual, a direct Radar → Resume + ATS workflow, concise proof, honest pricing, and a simplified footer.
+- Restyle navigation, buttons, fields, pricing, testimonials, and calls-to-action so they feel consistent rather than assembled from templates.
+- Carry the same system into the authenticated app: sidebar, mobile navigation, dashboard overview, Job Radar, and shared controls. Existing data, payments, authentication, quotas, and feature logic remain unchanged.
+- Keep every layout usable on phones, tablets, and desktop, with keyboard focus states and reduced-motion support.
 
-### Proposed fixes (only if you approve)
-
-1. **Identify the two RLS-no-policy tables** via `supabase--read_query` on `pg_policies` / `pg_tables`, then either add proper policies or drop RLS if the table is service-role-only.
-2. **Lock down the SECURITY DEFINER function**: identify it, then `REVOKE EXECUTE ... FROM authenticated` (keep `service_role`), unless it's intentionally callable (like `has_role` / `increment_usage`) — in which case we confirm its internal checks are safe and leave it.
-3. **Enable leaked-password protection** — dashboard toggle, I'll link you to it (Auth → Providers → Password settings). Not a code change.
-4. **Postgres upgrade** — dashboard action, I'll link you to it. Not a code change.
-
-### Out of scope
-- No changes to trial/pro/elite limits, pricing UI, or Stripe flows.
-- No app feature changes.
-
-Want me to proceed with fixes 1–2 (code/SQL) and hand you links for 3–4?
+## Technical notes
+- Work within the existing React, Tailwind, shadcn, and Framer Motion setup.
+- Express all colors and surfaces through semantic tokens in the global design system.
+- Use existing product data to render the homepage’s Radar demonstration instead of a static fake screenshot.
+- Verify the homepage and core dashboard screens at desktop and mobile widths, then run the project checks.
