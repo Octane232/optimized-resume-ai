@@ -59,12 +59,12 @@ interface NewApplication {
 
 // ===== Constants =====
 const STATUS_COLUMNS = [
-  { id: 'saved', label: 'Saved', color: 'bg-slate-500' },
-  { id: 'applied', label: 'Applied', color: 'bg-blue-500' },
+  { id: 'saved', label: 'Saved', color: 'bg-muted-foreground' },
+  { id: 'applied', label: 'Applied', color: 'bg-primary' },
   { id: 'interviewing', label: 'Interview', color: 'bg-amber-500' },
-  { id: 'offer', label: 'Offer', color: 'bg-emerald-500' },
-  { id: 'rejected', label: 'Rejected', color: 'bg-red-500' },
-  { id: 'withdrawn', label: 'Withdrawn', color: 'bg-gray-400' },
+  { id: 'offer', label: 'Offer', color: 'bg-signal' },
+  { id: 'rejected', label: 'Rejected', color: 'bg-destructive' },
+  { id: 'withdrawn', label: 'Withdrawn', color: 'bg-muted-foreground/60' },
 ];
 
 const NEW_APP_INITIAL: NewApplication = {

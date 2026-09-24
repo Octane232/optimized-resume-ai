@@ -94,16 +94,19 @@ const PricingCards = () => {
 
       {/* Billing toggle */}
       <div className="flex justify-center">
-        <div className="bg-muted/50 rounded-full p-1 border border-border/60 flex gap-1">
+        <div className="bg-muted/50 rounded-md p-1 border border-border flex gap-1">
           {(['monthly', 'yearly'] as Billing[]).map((p) => (
-            <button 
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
               key={p} 
               onClick={() => setBilling(p)}
-              className={`px-5 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${billing === p ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+              className={`px-5 flex items-center gap-2 ${billing === p ? 'bg-card text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
             >
               {p.charAt(0).toUpperCase() + p.slice(1)}
-              {p === 'yearly' && <Badge className="bg-emerald-100 text-emerald-700 border-0 text-[10px] px-1.5">Save ~20%</Badge>}
-            </button>
+              {p === 'yearly' && <Badge className="bg-primary/10 text-primary border-0 text-[10px] px-1.5">Save ~20%</Badge>}
+            </Button>
           ))}
         </div>
       </div>
@@ -117,7 +120,7 @@ const PricingCards = () => {
           
           return (
             <div key={plan.id} className={`relative flex flex-col p-6 rounded-lg border bg-card transition-colors ${
-              isCurrent ? 'border-emerald-500 ring-2 ring-emerald-500/10' :
+              isCurrent ? 'border-primary ring-2 ring-primary/10' :
               plan.popular ? 'border-primary ring-2 ring-primary/10' : 'border-border'
             }`}>
               {isCurrent && (
@@ -156,15 +159,15 @@ const PricingCards = () => {
               <ul className="space-y-2 flex-1 mb-6">
                 {plan.features.map((f, i) => (
                   <li key={i} className="flex items-start gap-2.5 text-sm">
-                    <Check className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+                    <Check className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                     <span className="text-foreground/80">{f}</span>
                   </li>
                 ))}
               </ul>
 
               <Button
-                className={`w-full h-11 font-semibold gap-2 rounded-xl ${
-                  isCurrent ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/30 hover:bg-emerald-500/20' :
+                className={`w-full h-11 font-semibold gap-2 ${
+                  isCurrent ? 'bg-primary/10 text-primary border border-primary/30 hover:bg-primary/15' :
                   plan.popular ? 'bg-primary text-primary-foreground hover:bg-primary/90' :
                   'bg-foreground text-background hover:bg-foreground/90'
                 }`}

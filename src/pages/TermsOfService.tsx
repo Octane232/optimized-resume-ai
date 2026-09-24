@@ -6,16 +6,16 @@ import { Shield, FileText, Users, Lock } from 'lucide-react';
 
 const TermsOfService = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+    <div className="min-h-screen bg-background">
       <Header />
       
       <main className="container mx-auto px-4 lg:px-8 py-24 max-w-5xl">
         {/* Hero Section */}
         <div className="text-center mb-16 space-y-6">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 mb-6">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-lg bg-primary/10 mb-4">
             <Shield className="w-10 h-10 text-primary" />
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold gradient-text">
+          <h1 className="font-display text-4xl md:text-5xl text-foreground">
             Terms of Service
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -24,7 +24,7 @@ const TermsOfService = () => {
         </div>
 
         {/* Content */}
-        <div className="glass-card p-8 md:p-12 space-y-10">
+        <div className="rounded-lg border border-border bg-card p-6 md:p-10 space-y-10">
           <section className="space-y-4">
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -171,7 +171,7 @@ const TermsOfService = () => {
             <p className="text-muted-foreground leading-relaxed">
               If you have any questions about these Terms of Service, please contact us at:
             </p>
-            <div className="bg-primary/5 rounded-xl p-6 space-y-2">
+            <div className="bg-primary/5 rounded-lg p-6 space-y-2">
               <p className="font-semibold text-foreground">Vaylance Support Team</p>
               <p className="text-muted-foreground">Email: contact@vaylance.com</p>
             </div>

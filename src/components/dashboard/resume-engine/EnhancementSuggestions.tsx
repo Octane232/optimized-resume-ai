@@ -236,15 +236,15 @@ const EnhancementSuggestions: React.FC<EnhancementSuggestionsProps> = ({
   const getTypeIcon = (type: Suggestion['type']) => {
     switch (type) {
       case 'keyword':
-        return <Sparkles className="w-4 h-4 text-purple-500" />;
+        return <Sparkles className="w-4 h-4 text-primary" />;
       case 'formatting':
         return <AlertTriangle className="w-4 h-4 text-amber-500" />;
       case 'content':
-        return <Info className="w-4 h-4 text-blue-500" />;
+        return <Info className="w-4 h-4 text-primary" />;
       case 'achievement':
-        return <Lightbulb className="w-4 h-4 text-yellow-500" />;
+        return <Lightbulb className="w-4 h-4 text-amber-500" />;
       case 'structure':
-        return <ChevronRight className="w-4 h-4 text-emerald-500" />;
+        return <ChevronRight className="w-4 h-4 text-signal" />;
     }
   };
 
@@ -255,7 +255,7 @@ const EnhancementSuggestions: React.FC<EnhancementSuggestionsProps> = ({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <Card className="p-5 border-primary/20 bg-gradient-to-r from-primary/5 to-transparent">
+      <Card className="p-5 border-primary/20 bg-primary/5">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
             <Lightbulb className="w-6 h-6 text-primary" />
@@ -273,7 +273,7 @@ const EnhancementSuggestions: React.FC<EnhancementSuggestionsProps> = ({
       {highPriority.length > 0 && (
         <div className="space-y-3">
           <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-red-500" />
+            <AlertTriangle className="w-4 h-4 text-destructive" />
             Critical Improvements ({highPriority.length})
           </h4>
           {highPriority.map((suggestion) => (
@@ -281,7 +281,7 @@ const EnhancementSuggestions: React.FC<EnhancementSuggestionsProps> = ({
               key={suggestion.id}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="command-card p-4 border-l-4 border-red-500"
+              className="command-card p-4 border-l-4 border-destructive"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3 flex-1">
@@ -382,14 +382,14 @@ const EnhancementSuggestions: React.FC<EnhancementSuggestionsProps> = ({
       {appliedSuggestions.length > 0 && (
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-            <Check className="w-4 h-4 text-emerald-500" />
+            <Check className="w-4 h-4 text-signal" />
             Applied ({appliedSuggestions.length})
           </h4>
           <div className="flex flex-wrap gap-2">
             {appliedSuggestions.map((suggestion) => (
               <span
                 key={suggestion.id}
-                className="px-3 py-1 bg-emerald-500/10 text-emerald-600 rounded-full text-xs line-through opacity-60"
+                className="px-3 py-1 bg-signal-soft text-signal rounded-full text-xs line-through opacity-60"
               >
                 {suggestion.title}
               </span>

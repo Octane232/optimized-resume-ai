@@ -53,8 +53,7 @@ const HeroSection = () => {
           </div>
 
           <div className="relative">
-            <div className="absolute -inset-5 bg-primary/5 rounded-full blur-3xl" aria-hidden="true" />
-            <div className="relative overflow-hidden rounded-lg border border-border bg-card shadow-xl">
+            <div className="relative overflow-hidden rounded-lg border border-border bg-card shadow-card">
               <div className="flex h-[440px] sm:h-[480px]">
                 <aside className="hidden sm:flex w-40 shrink-0 flex-col border-r border-border bg-secondary/35 p-3">
                   <div className="flex items-center gap-2 px-2 py-2 mb-5 font-semibold text-sm text-foreground">

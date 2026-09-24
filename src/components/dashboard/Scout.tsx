@@ -54,17 +54,17 @@ interface RadarAlert {
 const getStageColor = (stage: string | null): string => {
   const stageLower = stage?.toLowerCase();
   const colorMap: Record<string, string> = {
-    'seed': 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
-    'series a': 'bg-blue-500/10 text-blue-600 border-blue-500/20',
-    'series b': 'bg-purple-500/10 text-purple-600 border-purple-500/20',
-    'series c': 'bg-amber-500/10 text-amber-600 border-amber-500/20',
+    'seed': 'bg-primary/10 text-primary border-primary/20',
+    'series a': 'bg-signal-soft text-signal border-signal/20',
+    'series b': 'bg-secondary text-secondary-foreground border-border',
+    'series c': 'bg-muted text-muted-foreground border-border',
   };
   return colorMap[stageLower || ''] || 'bg-muted text-muted-foreground';
 };
 
 const getMatchColor = (score: number): string => {
-  if (score >= 90) return 'text-emerald-500';
-  if (score >= 75) return 'text-blue-500';
+  if (score >= 90) return 'text-signal';
+  if (score >= 75) return 'text-primary';
   if (score >= 60) return 'text-amber-500';
   return 'text-muted-foreground';
 };
@@ -180,7 +180,7 @@ const HeaderSection: React.FC<{
     className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
   >
     <div className="flex items-center gap-3">
-      <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground">
+      <div className="p-2.5 rounded-lg bg-primary text-primary-foreground">
         <Telescope className="w-6 h-6" />
       </div>
       <div>
@@ -203,7 +203,7 @@ const HeaderSection: React.FC<{
 
 const ExplainerBanner: React.FC = () => (
   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-    <Card className="border-0 shadow-sm bg-gradient-to-r from-primary/5 to-primary/10">
+    <Card className="border-primary/15 bg-primary/5">
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
           <div className="p-2 rounded-lg bg-primary/10 mt-0.5">
@@ -385,8 +385,8 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
   const OutreachAngle = () => {
     if (!s.outreach_angle) return null;
     return (
-      <div className="mt-3 p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/20">
-        <p className="text-xs font-semibold text-emerald-600 mb-0.5 flex items-center gap-1">
+      <div className="mt-3 p-3 rounded-lg bg-primary/5 border border-primary/20">
+        <p className="text-xs font-semibold text-primary mb-0.5 flex items-center gap-1">
           <Rocket className="w-3 h-3" /> Your outreach angle
         </p>
         <p className="text-sm text-foreground">{s.outreach_angle}</p>
@@ -424,7 +424,7 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
     return (
       <div className="flex flex-wrap gap-1.5 mt-2">
         {alert.match_reasons.map((reason: string, i: number) => (
-          <Badge key={i} variant="outline" className="text-xs bg-emerald-500/5 text-emerald-600 border-emerald-500/20">
+          <Badge key={i} variant="outline" className="text-xs bg-primary/5 text-primary border-primary/20">
             ✓ {reason}
           </Badge>
         ))}
@@ -439,7 +439,7 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 + index * 0.05 }}
     >
-      <Card className="border-0 shadow-sm hover:shadow-md transition-all group">
+      <Card className="border-border transition-colors hover:border-primary/35 group">
         <CardContent className="p-5">
           <div className="flex items-start gap-4">
             <CompanyLogo
@@ -525,13 +525,13 @@ interface LockedTeaserProps {
 
 // PROBLEM 3 FIXED: Added onUpgradeClick prop
 const LockedTeaser: React.FC<LockedTeaserProps> = ({ lockedCount, onUpgradeClick }) => (
-  <Card className="border-dashed border-2 border-amber-500/30 bg-gradient-to-r from-amber-500/5 to-orange-500/5">
+  <Card className="border-dashed border-primary/30 bg-primary/5">
     <CardContent className="p-6 text-center">
-      <Lock className="w-8 h-8 text-amber-500 mx-auto mb-3" />
+      <Lock className="w-8 h-8 text-primary mx-auto mb-3" />
       <h3 className="font-semibold text-lg mb-2">+{lockedCount} More Signals</h3>
       <p className="text-sm text-muted-foreground mb-4">Upgrade to see all funding signals and get matched alerts.</p>
       <Button 
-        className="gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+        className="gap-2"
         onClick={onUpgradeClick}
       >
         <Crown className="w-4 h-4" />

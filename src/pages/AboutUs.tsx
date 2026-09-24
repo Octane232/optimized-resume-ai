@@ -19,7 +19,7 @@ const AboutUs = () => {
       />
       <Header />
       <main className="pt-24">
-        <section className="py-20 bg-gradient-to-br from-primary/5 to-background">
+        <section className="py-20 bg-secondary/40 border-b border-border">
           <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
             <div className="text-center max-w-3xl mx-auto">
               <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
@@ -73,7 +73,7 @@ const AboutUs = () => {
                     description: "Building a supportive network of professionals helping each other succeed"
                   }
                 ].map((value, index) => (
-                  <Card key={index} className="p-6 text-center hover:shadow-lg transition-shadow bg-card border-border">
+                  <Card key={index} className="p-6 text-center bg-card border-border">
                     <CardContent className="p-0">
                       <div className="text-primary mb-4 flex justify-center">{value.icon}</div>
                       <h3 className="text-lg font-bold text-foreground mb-2">{value.title}</h3>
@@ -87,7 +87,7 @@ const AboutUs = () => {
         </section>
 
         {/* Statistics */}
-        <section className="py-20 bg-gradient-to-br from-primary/5 to-purple-500/5">
+        <section className="py-20 bg-secondary/40 border-y border-border">
           <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-bold text-foreground mb-4">Trusted by Professionals Worldwide</h2>
@@ -136,7 +136,7 @@ const AboutUs = () => {
                   }
                 ].map((item, index) => (
                   <div key={index} className="flex items-start p-6 bg-card border border-border rounded-lg hover:shadow-md transition-shadow">
-                    <CheckCircle className="w-6 h-6 text-emerald-500 mr-4 flex-shrink-0 mt-1" />
+                     <CheckCircle className="w-6 h-6 text-primary mr-4 flex-shrink-0 mt-1" />
                     <div>
                       <h3 className="text-xl font-bold text-foreground mb-2">{item.title}</h3>
                       <p className="text-muted-foreground">{item.description}</p>
@@ -149,17 +149,17 @@ const AboutUs = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 bg-gradient-to-r from-primary to-purple-600 text-white">
+        <section className="py-20 bg-primary text-primary-foreground">
           <div className="container mx-auto px-4 lg:px-8 max-w-7xl text-center">
             <h2 className="text-4xl font-bold mb-6">Ready to Transform Your Career?</h2>
-            <p className="text-xl text-white/80 mb-8 max-w-2xl mx-auto">
+            <p className="text-xl text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
               Join our community of professionals and start building your future today.
             </p>
             <div className="flex justify-center gap-4">
-              <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 px-8 py-4">
+              <Button asChild size="lg" variant="secondary" className="px-8 py-4">
                 <Link to="/auth">Get Started Free</Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="border-white text-white hover:bg-white/10 px-8 py-4">
+              <Button asChild size="lg" variant="outline" className="border-primary-foreground/50 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground px-8 py-4">
                 <Link to="/contact">Contact Us</Link>
               </Button>
             </div>

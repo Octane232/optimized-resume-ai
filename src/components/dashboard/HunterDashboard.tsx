@@ -19,6 +19,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useUsageLimit } from '@/contexts/UsageLimitContext';
 import { cn } from '@/lib/utils';
 import { CompanyLogo } from '@/components/dashboard/CompanyLogo';
+import { Button } from '@/components/ui/button';
 
 interface HunterDashboardProps {
   setActiveTab: (tab: string) => void;
@@ -210,10 +211,10 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
     return (
       <div className="p-6 space-y-4">
         <div className="h-10 w-64 rounded-lg bg-muted animate-pulse" />
-        <div className="h-40 rounded-2xl bg-muted animate-pulse" />
+        <div className="h-40 rounded-lg bg-muted animate-pulse" />
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="h-32 rounded-2xl bg-muted animate-pulse" />
+            <div key={i} className="h-32 rounded-lg bg-muted animate-pulse" />
           ))}
         </div>
       </div>
@@ -244,7 +245,7 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
         </div>
 
         {/* Featured Job Radar banner */}
-        <div className="rounded-2xl bg-foreground text-background p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-6">
+        <div className="rounded-lg bg-foreground text-background p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-6">
           <div className="flex-1 min-w-0">
             <span className="inline-block rounded-full bg-background/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider">
               Featured
@@ -253,13 +254,13 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
             <p className="mt-2 text-[15px] text-background/75 max-w-md">
               Discover companies preparing to hire before they post the role publicly.
             </p>
-            <button
+            <Button
               onClick={() => setActiveTab('scout')}
-              className="mt-5 inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+              className="mt-5"
             >
               View radar
               <ArrowRight className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
 
           <div className="w-full md:w-72 space-y-2.5 shrink-0">
@@ -298,7 +299,7 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
           {statCards.map((card) => {
             const Icon = card.icon;
             return (
-              <div key={card.label} className="rounded-2xl border border-border bg-card p-4 flex flex-col">
+              <div key={card.label} className="rounded-lg border border-border bg-card p-4 flex flex-col">
                 <div className="flex items-start gap-3">
                   <div className="rounded-lg bg-primary/10 p-2 shrink-0">
                     <Icon className="w-4 h-4 text-primary" />
@@ -310,13 +311,14 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
                 </div>
                 <p className="mt-4 text-3xl font-bold text-foreground tabular-nums">{card.value}</p>
                 <p className="text-xs text-muted-foreground mt-1">{card.note}</p>
-                <button
+                <Button
+                  variant="link"
                   onClick={card.action}
-                  className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
+                  className="mt-3 h-auto justify-start p-0"
                 >
                   {card.actionLabel}
                   <ArrowRight className="w-3.5 h-3.5" />
-                </button>
+                </Button>
               </div>
             );
           })}
@@ -325,7 +327,7 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
         {/* Opportunities + progress */}
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
           {/* Opportunities */}
-          <div className="rounded-2xl border border-border bg-card overflow-hidden min-w-0">
+          <div className="rounded-lg border border-border bg-card overflow-hidden min-w-0">
             <div className="flex items-center justify-between gap-3 p-4 border-b border-border">
               <h3 className="font-semibold text-foreground">Top Job Radar opportunities</h3>
               <button
@@ -395,7 +397,7 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
           </div>
 
           {/* Career progress */}
-          <div className="rounded-2xl border border-border bg-card p-4 min-w-0">
+          <div className="rounded-lg border border-border bg-card p-4 min-w-0">
             <h3 className="font-semibold text-foreground">Your career progress</h3>
 
             <div className="mt-4 flex items-center gap-4">
@@ -448,7 +450,7 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
 
       {/* ===== Right rail ===== */}
       <aside className="space-y-4 min-w-0">
-        <div className="rounded-2xl border border-border bg-card p-4">
+        <div className="rounded-lg border border-border bg-card p-4">
           <h3 className="font-semibold text-foreground">Quick actions</h3>
           <div className="mt-3 space-y-2">
             {[
@@ -476,7 +478,7 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
         </div>
 
         {!isPaid && (
-          <div className="rounded-2xl bg-foreground text-background p-5">
+          <div className="rounded-lg bg-foreground text-background p-5">
             <span className="inline-block rounded-full bg-background/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider">
               Upgrade
             </span>
@@ -494,7 +496,7 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
           </div>
         )}
 
-        <div className="rounded-2xl border border-border bg-card p-4">
+        <div className="rounded-lg border border-border bg-card p-4">
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-primary" />
             <h3 className="font-semibold text-foreground">Need help?</h3>

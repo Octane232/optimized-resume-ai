@@ -15,13 +15,13 @@ import SEOHead from '@/components/SEOHead';
 // DashboardMockup component with the correct logo
 const DashboardMockup = () => {
   return (
-    <div className="relative w-full max-w-5xl mx-auto mt-12 rounded-xl shadow-2xl border border-border/50 overflow-hidden">
+    <div className="relative w-full max-w-5xl mx-auto mt-12 rounded-lg border border-border overflow-hidden">
       {/* Mockup Header */}
-      <div className="bg-[#0f0f12] px-4 py-3 border-b border-border/50 flex items-center justify-between">
+      <div className="bg-foreground px-4 py-3 border-b border-background/20 flex items-center justify-between">
         <div className="flex items-center gap-3">
           {/* Fixed: Replaced gradient box with SVG logo */}
           <svg width="24" height="24" viewBox="0 0 48 48" fill="none">
-            <rect width="48" height="48" rx="11" fill="#1d4ed8"/>
+            <rect width="48" height="48" rx="11" fill="hsl(var(--primary))"/>
             <circle cx="22" cy="27" r="11" stroke="white" strokeWidth="2.2" fill="none"/>
             <circle cx="22" cy="27" r="6.5" stroke="white" strokeWidth="1.6" strokeOpacity="0.6" fill="none"/>
             <circle cx="22" cy="27" r="2.6" fill="white"/>
@@ -29,7 +29,7 @@ const DashboardMockup = () => {
             <line x1="32.5" y1="13" x2="36" y2="13" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
             <line x1="36" y1="13" x2="36" y2="16.5" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
           </svg>
-          <span style={{ fontSize: 13, fontWeight: 700, color: 'white' }}>Vaylance</span>
+          <span className="text-sm font-bold text-primary-foreground">Vaylance</span>
         </div>
         <div className="flex gap-2">
           <div className="w-2 h-2 rounded-full bg-red-500" />
@@ -39,7 +39,7 @@ const DashboardMockup = () => {
       </div>
       
       {/* Mockup Sidebar + Content */}
-      <div className="flex min-h-[500px] bg-[#0a0a0c]">
+      <div className="flex min-h-[500px] bg-foreground">
         {/* Sidebar */}
         <div className="w-48 border-r border-border/50 p-3 space-y-4">
           <div className="space-y-1">

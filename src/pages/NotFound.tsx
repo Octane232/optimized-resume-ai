@@ -17,7 +17,7 @@ const NotFound = () => {
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="text-center space-y-6 px-6">
         <div className="space-y-2">
-          <h1 className="text-8xl font-bold gradient-text">404</h1>
+          <h1 className="font-display text-8xl text-foreground">404</h1>
           <p className="text-xl text-muted-foreground">
             Oops! This page doesn't exist
           </p>
@@ -33,7 +33,7 @@ const NotFound = () => {
               Go Back
             </Link>
           </Button>
-          <Button asChild size="lg" className="gradient-bg">
+          <Button asChild size="lg">
             <Link to="/" className="flex items-center gap-2">
               <Home className="w-4 h-4" />
               Return Home
