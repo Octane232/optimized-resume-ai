@@ -128,7 +128,7 @@ const Index = () => {
       <div id="features"><FeaturesSection /></div>
       <div id="testimonials"><TestimonialsSection /></div>
       <HowItWorksSection />
-      <div id="pricing"><PricingSection /></div>
+      <PricingSection />
       <CTASection />
       <Footer />
     </div>
