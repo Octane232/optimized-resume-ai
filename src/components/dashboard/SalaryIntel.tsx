@@ -21,6 +21,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useUsageLimit } from '@/contexts/UsageLimitContext';
+import { ToolPageHeader } from './ToolPageHeader';
 
 // ===== Type Definitions =====
 interface SalaryData {
@@ -214,7 +215,7 @@ const SalaryIntel: React.FC = () => {
 
   // ===== Render =====
   return (
-    <div className="p-6 space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-6 max-w-5xl mx-auto">
       {/* Header */}
       <HeaderSection />
 
@@ -255,21 +256,7 @@ const SalaryIntel: React.FC = () => {
 
 // ===== Header Section =====
 const HeaderSection: React.FC = () => (
-  <motion.div
-    initial={{ opacity: 0, y: -10 }}
-    animate={{ opacity: 1, y: 0 }}
-    className="flex items-center gap-3"
-  >
-    <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
-      <DollarSign className="w-6 h-6" />
-    </div>
-    <div>
-      <h1 className="text-2xl font-bold text-foreground">Salary Intelligence</h1>
-      <p className="text-sm text-muted-foreground">
-        Know your worth before the first conversation.
-      </p>
-    </div>
-  </motion.div>
+  <ToolPageHeader title="Salary Intelligence" description="Compare market pay and prepare a stronger negotiation." icon={DollarSign} />
 );
 
 // ===== Input Form Component =====
@@ -315,7 +302,7 @@ const InputForm: React.FC<InputFormProps> = ({
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay: 0.05 }}
   >
-    <Card className="border-0 shadow-sm">
+    <Card className="rounded-lg border-border shadow-none">
       <CardContent className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
           <InputField
@@ -488,7 +475,7 @@ interface UnderpaidAlertProps {
 }
 
 const UnderpaidAlert: React.FC<UnderpaidAlertProps> = ({ underpaidBy }) => (
-  <Card className="border-0 shadow-sm bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-amber-500/20">
+  <Card className="rounded-lg border-destructive/20 bg-destructive/5 shadow-none">
     <CardContent className="p-4 flex items-start gap-3">
       <AlertTriangle className="w-5 h-5 text-amber-500 mt-0.5 shrink-0" />
       <div>
@@ -520,9 +507,7 @@ const SalaryRangeCard: React.FC<SalaryRangeCardProps> = ({
   salaryRanges,
   compensationItems,
 }) => (
-  <Card className="border-0 shadow-lg overflow-hidden">
-    <div className="h-1 bg-gradient-to-r from-red-500 via-amber-500 to-emerald-500" />
-
+  <Card className="rounded-lg border-border shadow-none overflow-hidden">
     <CardContent className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-2">
@@ -537,7 +522,7 @@ const SalaryRangeCard: React.FC<SalaryRangeCardProps> = ({
       {/* Salary Ranges */}
       <div className="grid grid-cols-3 gap-4 text-center">
         {salaryRanges.map((item, index) => (
-          <div key={index} className="p-4 rounded-xl bg-muted/30">
+          <div key={index} className="p-4 rounded-lg bg-muted/50">
             <p className="text-xs text-muted-foreground mb-1">{item.label}</p>
             <p className={`text-2xl font-bold ${item.color}`}>
               {formatCurrency(item.value)}

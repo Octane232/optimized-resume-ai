@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { ToolPageHeader } from './ToolPageHeader';
 
 interface Job {
   id: string;
@@ -95,17 +96,11 @@ const JobSearch = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Job Search</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Find jobs and apply directly — no middleman sites
-        </p>
-      </div>
+    <div className="max-w-5xl mx-auto space-y-6">
+      <ToolPageHeader title="Job Search" description="Find open roles and apply directly to the employer." icon={Briefcase} />
 
       {/* Search Bar */}
-      <div className="p-4 rounded-2xl border border-border bg-card space-y-4">
+      <div className="p-4 rounded-lg border border-border bg-card space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -192,7 +187,7 @@ const JobSearch = () => {
           {jobs.map((job) => (
             <div
               key={job.id}
-              className="p-4 rounded-2xl border border-border bg-card hover:border-primary/50 transition-all"
+               className="p-4 rounded-lg border border-border bg-card hover:border-primary/50 transition-colors"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-4 flex-1 min-w-0">

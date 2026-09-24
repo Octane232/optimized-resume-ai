@@ -10,6 +10,7 @@ import { motion } from 'framer-motion';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useUsageLimit } from '@/contexts/UsageLimitContext';
+import { ToolPageHeader } from './ToolPageHeader';
 
 interface LinkedInOptimization {
   id: string; type: string; original_content: string | null;
@@ -116,24 +117,16 @@ const LinkedInOptimizer: React.FC = () => {
   const activeSection = SECTION_TABS.find(t => t.value === activeTab);
 
   return (
-    <div className="p-6 space-y-6 max-w-5xl mx-auto">
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3">
-        <div className="p-2.5 rounded-xl bg-[#0A66C2] text-white">
-          <Linkedin className="w-6 h-6" aria-hidden="true" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">LinkedIn Optimizer</h1>
-          <p className="text-sm text-muted-foreground">AI-powered enhancement for headline, about, experience, and skills</p>
-        </div>
-      </motion.div>
+    <div className="space-y-6 max-w-5xl mx-auto">
+      <ToolPageHeader title="LinkedIn Optimizer" description="Create a recruiter-ready headline, summary, and experience section." icon={Linkedin} />
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <Card className="border-0 shadow-sm">
+          <Card className="rounded-lg border-border shadow-none">
             <CardHeader className="pb-4">
               <CardTitle className="text-lg flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-[#0A66C2]" aria-hidden="true" />
-                AI Optimizer
+                <Sparkles className="w-5 h-5 text-primary" aria-hidden="true" />
+                Profile workspace
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -205,7 +198,7 @@ const LinkedInOptimizer: React.FC = () => {
               ) : (
                 <div className="space-y-1.5">
                   <Button 
-                    className="w-full gap-2 bg-[#0A66C2] hover:bg-[#004182]" 
+                    className="w-full gap-2" 
                     onClick={handleOptimize} 
                     disabled={isOptimizing}
                     aria-label={`Optimize ${activeSection?.label} section with AI`}
@@ -231,7 +224,7 @@ const LinkedInOptimizer: React.FC = () => {
               {optimizedContent && (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label htmlFor="optimized-result" className="text-sm font-medium text-[#0A66C2]">
+                    <label htmlFor="optimized-result" className="text-sm font-medium text-primary">
                       Optimized {SECTION_TABS.find(t => t.value === optimizedType)?.label}
                     </label>
                     <Button 
@@ -247,7 +240,7 @@ const LinkedInOptimizer: React.FC = () => {
                   </div>
                   <div 
                     id="optimized-result"
-                    className="p-4 rounded-xl bg-[#0A66C2]/5 border border-[#0A66C2]/20"
+                    className="p-4 rounded-lg bg-primary/5 border border-primary/20"
                     role="region"
                     aria-label="Optimized content preview"
                   >
@@ -313,15 +306,15 @@ const LinkedInOptimizer: React.FC = () => {
         </div>
 
         <div>
-          <Card className="border-0 shadow-sm">
+          <Card className="rounded-lg border-border shadow-none">
             <CardHeader className="pb-4">
               <CardTitle className="text-lg">Optimization Tips</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {TIPS.map((tip, i) => (
                 <div key={i} className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-[#0A66C2]/10 shrink-0" aria-hidden="true">
-                    <tip.icon className="w-4 h-4 text-[#0A66C2]" />
+                    <div className="p-2 rounded-lg bg-primary/10 shrink-0" aria-hidden="true">
+                      <tip.icon className="w-4 h-4 text-primary" />
                   </div>
                   <div>
                     <p className="font-medium text-sm">{tip.title}</p>

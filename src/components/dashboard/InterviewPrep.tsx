@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Brain, Mic, MicOff, RotateCcw, ArrowRight, Loader2,
   CheckCircle2, AlertCircle, Sparkles, Radio, Send, Lock,
-  BarChart3, BookOpen, Trophy, Shield, AlertTriangle, Wifi,
+  BarChart3, BookOpen, Trophy, Shield, AlertTriangle, Wifi, Search, Target,
   WifiOff, Clock
 } from 'lucide-react';
 
@@ -60,42 +60,42 @@ const TABS: { id: Tab; label: string; icon: React.FC<any> }[] = [
 
 const tips = [
   { 
-    icon: '⭐', 
+    icon: Trophy, 
     title: 'STAR Method', 
     priority: 'High', 
     time: '2 min', 
     desc: 'Every behavioral answer needs structure: Situation, Task, Action, Result. Without it your answer drifts and interviewers notice immediately.' 
   },
   { 
-    icon: '🔍', 
+    icon: Search, 
     title: 'Research The Company', 
     priority: 'High', 
     time: '3 min', 
     desc: 'Know their mission, recent funding, key products, main competitors. Referencing something specific shows you actually want this role.' 
   },
   { 
-    icon: '🎯', 
+    icon: Target, 
     title: 'Nail Your Pitch', 
     priority: 'High', 
     time: '2 min', 
     desc: 'A crisp 60-second "tell me about yourself" sets the tone for the whole interview. Rehearse it until it sounds natural.' 
   },
   { 
-    icon: '📊', 
+    icon: BarChart3, 
     title: 'Quantify Everything', 
     priority: 'High', 
     time: '1 min', 
     desc: '"Cut load time by 60%" hits differently than "improved performance." Numbers make abstract claims concrete and memorable.' 
   },
   { 
-    icon: '❓', 
+    icon: BookOpen, 
     title: 'Ask Great Questions', 
     priority: 'Medium', 
     time: '2 min', 
     desc: 'Ask about team culture, what success looks like at 90 days, the biggest current challenge. Never say you have no questions.' 
   },
   { 
-    icon: '⏸️', 
+    icon: Clock, 
     title: 'Pause With Confidence', 
     priority: 'Medium', 
     time: '1 min', 
@@ -156,12 +156,6 @@ const getScoreBackground = (score: number): string => {
   if (score >= 8) return 'bg-emerald-500/5 border-emerald-500/20';
   if (score >= 6) return 'bg-amber-500/5 border-amber-500/20';
   return 'bg-red-500/5 border-red-500/20';
-};
-
-const getScoreGradient = (score: number): string => {
-  if (score >= 8) return 'from-emerald-500 to-teal-500';
-  if (score >= 6) return 'from-amber-500 to-orange-400';
-  return 'from-red-500 to-rose-500';
 };
 
 const getScoreLabel = (score: number): string => {
@@ -480,7 +474,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
     setConnectionStatus('idle');
     setErrorCount(0);
     reconnectAttemptsRef.current = 0;
-    toast({ title: '🎯 Copilot session started!' });
+    toast({ title: 'Copilot session started' });
   };
 
   // Speech Recognition for Copilot
@@ -648,7 +642,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
       transcriptBufferRef.current = '';
       setIsListening(false);
       setConnectionStatus('idle');
-      toast({ title: '🎙️ Listening paused' });
+      toast({ title: 'Listening paused' });
     } else {
       setIsMicInitializing(true);
       try {
@@ -662,7 +656,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
           recognitionRef.current.start();
         }
         setIsListening(true);
-        toast({ title: '🎙️ Listening to interviewer...' });
+        toast({ title: 'Listening to interviewer' });
       } catch (err) {
         toast({ 
           title: 'Failed to access microphone', 
@@ -777,7 +771,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
 
   // ===== Render =====
   return (
-    <div className="p-4 md:p-6 max-w-5xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6">
       {/* Header */}
       <HeaderSection 
         avgScore={avgScore} 
@@ -796,7 +790,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
       <AnimatePresence mode="wait">
         {tab === 'practice' && (
           <motion.div key="practice" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <Card className="border-border/60">
+            <Card className="rounded-lg border-border shadow-none">
               <CardContent className="p-6 space-y-4">
                 {stage === 'setup' && (
                   <div className="space-y-4">
@@ -875,7 +869,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                     <div className={`p-4 rounded-xl border ${getScoreBackground(currentFeedback.score)}`}>
                       <div className="flex items-center gap-3 mb-2">
                         <span className={`text-2xl font-bold ${getScoreColor(currentFeedback.score)}`}>{currentFeedback.score}/10</span>
-                        <Badge className={`bg-gradient-to-r ${getScoreGradient(currentFeedback.score)} text-white`}>{getScoreLabel(currentFeedback.score)}</Badge>
+                        <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary">{getScoreLabel(currentFeedback.score)}</Badge>
                       </div>
                       <p className="text-sm text-muted-foreground">{currentFeedback.feedback}</p>
                     </div>
@@ -990,7 +984,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                           <p className="text-xs text-muted-foreground">
                             <strong>AI-Powered:</strong> Get real-time suggestions for interview questions.
                             <br />
-                            <span className="text-primary/60">🎙️ Use the mic to auto-detect questions.</span>
+                            <span className="text-primary">Use the microphone to detect questions automatically.</span>
                           </p>
                         </div>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -1063,7 +1057,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                             ) : entry.suggestion && (
                               <div className="text-sm text-muted-foreground bg-primary/5 p-3 rounded">
                                 <p className="font-medium text-primary/80 text-xs uppercase tracking-wider mb-1">
-                                  💡 Suggested Talking Points
+                                  Suggested talking points
                                 </p>
                                 {entry.suggestion}
                               </div>
@@ -1114,7 +1108,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                 <Card key={i} className="border-border/60">
                   <CardContent className="p-4 space-y-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-lg" aria-hidden="true">{tip.icon}</span>
+                       <tip.icon className="h-4 w-4 text-primary" aria-hidden="true" />
                       <h3 className="font-medium text-foreground text-sm">{tip.title}</h3>
                       <Badge variant="secondary" className="ml-auto text-[10px]">{tip.priority}</Badge>
                     </div>
@@ -1208,15 +1202,15 @@ const HeaderSection: React.FC<{ avgScore: number; sessionsCount: number }> = ({
     <div className="flex items-center gap-3">
       <div className="relative shrink-0">
         <div className="w-11 h-11 rounded-lg bg-primary flex items-center justify-center">
-          <Mic className="w-5 h-5 text-white" aria-hidden="true" />
+           <Mic className="w-5 h-5 text-primary-foreground" aria-hidden="true" />
         </div>
         <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-background flex items-center justify-center">
-          <Sparkles className="w-2 h-2 text-white" aria-hidden="true" />
+          <Sparkles className="w-2 h-2 text-primary-foreground" aria-hidden="true" />
         </div>
       </div>
       <div>
-        <h1 className="text-xl font-bold text-foreground tracking-tight">Interview Coach</h1>
-        <p className="text-xs text-muted-foreground">Practice before. Get help during. Win the offer.</p>
+         <h1 className="font-display text-2xl text-foreground">Interview Coach</h1>
+         <p className="text-sm text-muted-foreground">Practice role-specific questions and review clear feedback.</p>
       </div>
     </div>
 

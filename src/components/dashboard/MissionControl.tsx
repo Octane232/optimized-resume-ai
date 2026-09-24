@@ -36,6 +36,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from '@/hooks/use-toast';
+import { ToolPageHeader } from './ToolPageHeader';
 
 // ===== Types =====
 interface Application {
@@ -250,8 +251,7 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <div className="flex items-center justify-between mb-6">
       <div>
-        <h2 className="text-xl font-bold text-foreground">Mission Control</h2>
-        <p className="text-xs text-muted-foreground">Track all your job applications</p>
+        <ToolPageHeader title="Application Tracker" description="Track every application and keep follow-ups moving." icon={Building2} />
       </div>
       
       <div className="flex items-center gap-3">
@@ -582,7 +582,7 @@ interface EmptyStateProps {
 const EmptyState: React.FC<EmptyStateProps> = ({ onAddClick }) => {
   return (
     <div className="command-card p-12 text-center mt-8">
-      <div className="w-14 h-14 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4">
+      <div className="w-14 h-14 bg-muted rounded-lg flex items-center justify-center mx-auto mb-4">
         <Building2 className="w-7 h-7 text-muted-foreground" aria-hidden="true" />
       </div>
       <h3 className="text-lg font-semibold text-foreground mb-2">No applications yet</h3>
@@ -620,7 +620,7 @@ const MissionControl: React.FC = () => {
   }
 
   return (
-    <div className="p-6">
+    <div className="mx-auto max-w-[1400px]">
       <Header 
         onAddClick={() => setIsAddDialogOpen(true)}
         uniqueCompanies={uniqueCompanies}
@@ -637,7 +637,7 @@ const MissionControl: React.FC = () => {
       {applications.length === 0 ? (
         <EmptyState onAddClick={() => setIsAddDialogOpen(true)} />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
           {STATUS_COLUMNS.map(column => (
             <KanbanColumn
               key={column.id}
