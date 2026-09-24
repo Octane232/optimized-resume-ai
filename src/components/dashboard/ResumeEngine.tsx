@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Sparkles, Clipboard, RefreshCw, CheckCircle2, AlertTriangle, TrendingUp, Copy, Loader2, Upload, Download, Lock, Search, BarChart3, Lightbulb, ArrowRight } from 'lucide-react';
+import { FileText, Sparkles, Clipboard, RefreshCw, CheckCircle2, AlertTriangle, TrendingUp, Copy, Loader2, Upload, Download, Lock, Search, BarChart3, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -599,7 +599,7 @@ const ResumeTabContent: React.FC<{
       </div>
     </CardHeader>
     <CardContent>
-      <div className="bg-muted/30 rounded-xl p-6 whitespace-pre-wrap text-sm leading-relaxed max-h-[600px] overflow-y-auto font-mono">
+      <div className="max-h-[600px] overflow-y-auto rounded-lg bg-muted/50 p-6 font-mono text-sm leading-relaxed whitespace-pre-wrap">
         {resume}
       </div>
     </CardContent>
@@ -619,7 +619,7 @@ const CoverLetterTabContent: React.FC<{
       </Button>
     </CardHeader>
     <CardContent>
-      <div className="bg-muted/30 rounded-xl p-6 whitespace-pre-wrap text-sm leading-relaxed max-h-[600px] overflow-y-auto">
+      <div className="max-h-[600px] overflow-y-auto rounded-lg bg-muted/50 p-6 text-sm leading-relaxed whitespace-pre-wrap">
         {coverLetter}
       </div>
     </CardContent>
@@ -632,7 +632,7 @@ const ATSTabContent: React.FC<{ atsData: BundleResult['atsData'] }> = ({ atsData
       {atsData.missingKeywords?.length > 0 && (
         <KeywordSection
           title="Missing Keywords (Added in Tailored Version)"
-          icon={<AlertTriangle className="w-4 h-4 text-amber-500" />}
+          icon={<AlertTriangle className="h-4 w-4 text-destructive" />}
           keywords={atsData.missingKeywords}
           variant="warning"
         />
@@ -640,7 +640,7 @@ const ATSTabContent: React.FC<{ atsData: BundleResult['atsData'] }> = ({ atsData
       {atsData.foundKeywords?.length > 0 && (
         <KeywordSection
           title="Keywords Already Present"
-          icon={<CheckCircle2 className="w-4 h-4 text-emerald-500" />}
+          icon={<CheckCircle2 className="h-4 w-4 text-primary" />}
           keywords={atsData.foundKeywords}
           variant="success"
           showCheckmark
@@ -661,8 +661,8 @@ const KeywordSection: React.FC<{
   showCheckmark?: boolean;
 }> = ({ title, icon, keywords, variant, showCheckmark }) => {
   const colorClass = variant === 'warning'
-    ? 'bg-amber-500/5 text-amber-600 border-amber-500/20'
-    : 'bg-emerald-500/5 text-emerald-600 border-emerald-500/20';
+    ? 'border-destructive/20 bg-destructive/5 text-destructive'
+    : 'border-primary/20 bg-primary/5 text-primary';
 
   return (
     <div>
@@ -684,13 +684,13 @@ const KeywordSection: React.FC<{
 const ImprovementsSection: React.FC<{ improvements: string[] }> = ({ improvements }) => (
   <div>
     <h4 className="font-semibold mb-3 flex items-center gap-2">
-      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+      <CheckCircle2 className="h-4 w-4 text-primary" />
       Improvements Made
     </h4>
     <ul className="space-y-2">
       {improvements.map((imp, i) => (
         <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-          <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
           {imp}
         </li>
       ))}
@@ -884,7 +884,6 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
     <div className="mx-auto max-w-6xl space-y-6">
       <HeaderSection action={
         <>
-          <input ref={fileInputRef} type="file" accept=".pdf,.docx,.txt" onChange={handleFileUpload} className="hidden" />
           <Button type="button" onClick={() => isPro ? fileInputRef.current?.click() : setActiveTab?.('billing')} disabled={isUploading} className="gap-2">
             {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : isPro ? <Upload className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
             Upload resume
@@ -1117,7 +1116,7 @@ const ActionButtonsSection: React.FC<{
 }> = ({ canGenerate, isProcessing, remaining, tier, hasInputs, onGenerate, onUpgrade }) => {
   if (!canGenerate) {
     return (
-      <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-center space-y-2">
+      <div className="space-y-2 rounded-lg border border-primary/20 bg-primary/5 p-4 text-center">
         <p className="text-sm font-semibold">
           {tier === 'free' ? 'Free Limit Reached' : 'Monthly Limit Reached'}
         </p>
@@ -1137,7 +1136,7 @@ const ActionButtonsSection: React.FC<{
         onClick={onGenerate} 
         disabled={isProcessing || !hasInputs} 
         size="lg" 
-        className="w-full h-14 text-lg font-semibold gap-3 rounded-2xl"
+        className="h-12 w-full gap-3 text-base font-semibold"
       >
         {isProcessing ? (
           <>
