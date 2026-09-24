@@ -148,9 +148,8 @@ const usePasswordReset = (onSuccess: () => void) => {
 // ===== Subcomponents =====
 const LoadingState: React.FC = () => (
   <div className="min-h-screen bg-background relative overflow-hidden">
-    <div className="absolute inset-0 mesh-gradient pointer-events-none"></div>
     <div className="relative z-10 flex items-center justify-center min-h-screen">
-      <Card className="glass-morphism border-border/20 shadow-xl">
+      <Card className="border-border bg-card">
         <CardContent className="p-8">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
@@ -175,7 +174,7 @@ const Header: React.FC = () => (
 
 const SuccessState: React.FC = () => (
   <div className="text-center space-y-4 py-4">
-    <CheckCircle className="h-12 w-12 text-green-500 mx-auto" />
+    <CheckCircle className="h-12 w-12 text-primary mx-auto" />
     <p className="text-foreground font-medium">Password updated successfully!</p>
     <p className="text-muted-foreground text-sm">Redirecting to sign in...</p>
   </div>
@@ -237,10 +236,10 @@ const PasswordValidationMessages: React.FC<{
   return (
     <>
       {password && confirmPassword && password !== confirmPassword && (
-        <p className="text-sm text-red-500">Passwords do not match</p>
+        <p className="text-sm text-destructive">Passwords do not match</p>
       )}
       {password && password.length < 6 && (
-        <p className="text-sm text-yellow-500">Password must be at least 6 characters</p>
+        <p className="text-sm text-muted-foreground">Password must be at least 6 characters</p>
       )}
     </>
   );
@@ -299,7 +298,7 @@ const PasswordForm: React.FC<{
 
       <Button 
         type="submit" 
-        className="w-full gradient-bg" 
+        className="w-full" 
         disabled={!isValidSession || isDisabled}
       >
         {isLoading ? 'Updating...' : 'Update Password'}
@@ -376,13 +375,12 @@ const ResetPassword: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      <div className="absolute inset-0 mesh-gradient pointer-events-none"></div>
 
       <Header />
 
       <div className="relative z-10 flex items-center justify-center min-h-[calc(100vh-80px)] p-4 sm:p-6">
         <div className="w-full max-w-md">
-          <Card className="glass-morphism border-border/20 shadow-xl">
+          <Card className="border-border bg-card">
             <CardHeader className="text-center">
               <CardTitle className="text-xl sm:text-2xl">Set New Password</CardTitle>
               <CardDescription>

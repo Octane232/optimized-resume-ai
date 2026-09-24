@@ -17,7 +17,7 @@ const VaylanceLogo = () => (
 );
 
 const Logo = () => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+  <div className="flex items-center gap-2.5">
     <VaylanceLogo />
     <span className="text-lg font-bold text-foreground">Vaylance</span>
   </div>
@@ -102,13 +102,14 @@ const Header = () => {
           <div className="md:hidden py-4 border-t border-border bg-background">
             <div className="flex flex-col gap-3 px-2">
               {navItems.map((item, idx) => (
-                <button 
+                <Button
+                  variant="ghost"
                   key={idx} 
                   onClick={() => scrollTo(item.id)} 
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground py-2 text-left"
+                  className="justify-start text-sm font-medium text-muted-foreground hover:text-foreground"
                 >
                   {item.label}
-                </button>
+                </Button>
               ))}
               <div className="flex flex-col gap-2 pt-2 border-t border-border">
                 <Button asChild variant="outline" size="sm">

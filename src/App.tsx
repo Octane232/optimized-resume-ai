@@ -47,10 +47,11 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <ScrollToTop />
-            <ScrollToSection />
-            <Suspense fallback={<LoadingFallback />}>
-              <Routes>
+            <div className="warm min-h-screen bg-background text-foreground">
+              <ScrollToTop />
+              <ScrollToSection />
+              <Suspense fallback={<LoadingFallback />}>
+                <Routes>
                 {/* Marketing Pages */}
                 <Route path="/" element={<Index />} />
                 <Route path="/features" element={<Index />} />
@@ -85,8 +86,9 @@ const App = () => (
 
                 {/* 404 */}
                 <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
+                </Routes>
+              </Suspense>
+            </div>
           </BrowserRouter>
         </UsageLimitProvider>
       </TooltipProvider>
