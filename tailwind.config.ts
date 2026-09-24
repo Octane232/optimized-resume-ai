@@ -20,8 +20,10 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				sans: ['Inter', 'system-ui', 'sans-serif'],
+				sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+				mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
 			},
+
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -84,9 +86,15 @@ export default {
 					dark: 'hsl(217, 91%, 50%)'
 				},
 				success: {
-					DEFAULT: 'hsl(160, 84%, 39%)',
-					foreground: 'hsl(0, 0%, 100%)'
+					DEFAULT: 'hsl(var(--success))',
+					foreground: 'hsl(var(--success-foreground))'
+				},
+				signal: {
+					DEFAULT: 'hsl(var(--signal))',
+					foreground: 'hsl(var(--signal-foreground))',
+					soft: 'hsl(var(--signal-soft))'
 				}
+
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
