@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Sparkles, Clipboard, RefreshCw, CheckCircle2, AlertTriangle, TrendingUp, Copy, Loader2, Upload, Download, Lock } from 'lucide-react';
+import { FileText, Sparkles, Clipboard, RefreshCw, CheckCircle2, AlertTriangle, TrendingUp, Copy, Loader2, Upload, Download, Lock, Search, BarChart3, Lightbulb, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,22 +28,23 @@ interface BundleResult {
 
 // ===== Constants =====
 const STEPS = [
-  { icon: '📄', label: 'Paste resume + job', desc: 'One input, three outputs' },
-  { icon: '✨', label: 'AI tailors everything', desc: 'Resume, cover letter, ATS score' },
-  { icon: '📈', label: 'See your score jump', desc: 'Saved to your account automatically' },
+  { icon: FileText, label: 'Extract', desc: 'Read resume content' },
+  { icon: Search, label: 'Compare', desc: 'Analyze against job description' },
+  { icon: BarChart3, label: 'Score', desc: 'Calculate match quality' },
+  { icon: Lightbulb, label: 'Explain', desc: 'Show detailed feedback' },
 ];
 
 // ===== Helper Functions =====
 const getScoreColor = (s: number): string => {
-  if (s >= 80) return 'text-emerald-500';
-  if (s >= 60) return 'text-amber-500';
-  return 'text-red-500';
+  if (s >= 80) return 'text-primary';
+  if (s >= 60) return 'text-foreground';
+  return 'text-destructive';
 };
 
 const getProgressColor = (s: number): string => {
-  if (s >= 80) return 'bg-emerald-500';
-  if (s >= 60) return 'bg-amber-500';
-  return 'bg-red-500';
+  if (s >= 80) return 'bg-primary';
+  if (s >= 60) return 'bg-foreground';
+  return 'bg-destructive';
 };
 
 const wordCount = (t: string): number => {
@@ -380,34 +381,57 @@ const ResultsView: React.FC<{
   const improvement = result.atsData.afterScore - result.atsData.beforeScore;
 
   return (
-    <div className="p-6 space-y-6 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-emerald-500 text-white">
-            <CheckCircle2 className="w-6 h-6" />
+    <div className="mx-auto max-w-6xl space-y-6">
+      <HeaderSection action={
+        <Button variant="outline" onClick={onReset} className="gap-2">
+          <Upload className="h-4 w-4" />
+          Upload resume
+        </Button>
+      } />
+
+      <div className="grid gap-5 lg:grid-cols-[260px_minmax(0,1fr)]">
+        <ProcessRail complete />
+        <div className="space-y-5">
+          <Card className="rounded-lg border-border shadow-none">
+            <CardContent className="grid gap-6 p-5 md:grid-cols-[180px_minmax(0,1fr)] md:items-center">
+              <div className="flex flex-col items-center border-b border-border pb-5 md:border-b-0 md:border-r md:pb-0 md:pr-6">
+                <div className="flex h-28 w-28 items-center justify-center rounded-full border-[10px] border-primary/15 shadow-[inset_0_0_0_2px_hsl(var(--primary))]">
+                  <div className="text-center">
+                    <span className={`text-3xl font-bold ${getScoreColor(result.atsData.afterScore)}`}>{result.atsData.afterScore}</span>
+                    <span className="text-sm text-muted-foreground">/100</span>
+                  </div>
+                </div>
+                <p className="mt-3 text-sm font-semibold text-primary">Excellent match</p>
+                <p className="mt-1 text-xs text-muted-foreground">+{improvement} points after tailoring</p>
+              </div>
+              <div>
+                <h2 className="text-sm font-semibold text-foreground">Match breakdown</h2>
+                <div className="mt-4 space-y-4">
+                  <BreakdownRow label="Semantic match" value={50} score={Math.min(50, Math.round(result.atsData.afterScore * .5))} />
+                  <BreakdownRow label="Skills & experience" value={30} score={Math.min(30, Math.round(result.atsData.afterScore * .3))} />
+                  <BreakdownRow label="ATS keywords" value={20} score={Math.min(20, Math.round(result.atsData.afterScore * .2))} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="grid gap-5 md:grid-cols-2">
+            <InsightPanel title="Key insights" items={[
+              ...(result.atsData.foundKeywords || []).slice(0, 2).map(keyword => `Strong match for ${keyword}`),
+              ...(result.atsData.improvements || []).slice(0, 2),
+            ]} />
+            <InsightPanel title="Recommended changes" items={(result.atsData.missingKeywords || []).slice(0, 4).map(keyword => `Add evidence of ${keyword}`)} />
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Results Ready</h1>
-            <p className="text-sm text-muted-foreground">Saved to your account automatically.</p>
+
+          <div className="flex flex-wrap justify-end gap-2">
+            <Button variant="outline" onClick={onReset} className="gap-2"><RefreshCw className="h-4 w-4" />Re-upload</Button>
+            <Button onClick={onDownloadDOCX} disabled={!isPro} className="gap-2">
+              {isPro ? <Download className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+              Download optimized resume
+            </Button>
           </div>
         </div>
-        <Button variant="outline" onClick={onReset} className="gap-2">
-          <RefreshCw className="w-4 h-4" />
-          Start Over
-        </Button>
       </div>
-
-      <Card className="border-0 shadow-lg overflow-hidden">
-        <div className="h-1 bg-gradient-to-r from-red-500 via-amber-500 to-emerald-500" />
-        <CardContent className="p-6">
-          <div className="grid grid-cols-3 gap-6">
-            <ScoreCard label="Before" score={result.atsData.beforeScore} />
-            <ImprovementBadge improvement={improvement} />
-            <ScoreCard label="After" score={result.atsData.afterScore} />
-          </div>
-          <ProgressBar score={result.atsData.afterScore} />
-        </CardContent>
-      </Card>
 
       <ResultTabs
         result={result}
@@ -435,10 +459,39 @@ const ScoreCard: React.FC<{ label: string; score: number }> = ({ label, score })
 const ImprovementBadge: React.FC<{ improvement: number }> = ({ improvement }) => (
   <div className="flex items-center justify-center">
     <div className="flex items-center gap-2">
-      <TrendingUp className="w-8 h-8 text-emerald-500" />
-      <span className="text-2xl font-bold text-emerald-500">+{improvement}</span>
+      <TrendingUp className="w-8 h-8 text-primary" />
+      <span className="text-2xl font-bold text-primary">+{improvement}</span>
     </div>
   </div>
+);
+
+const BreakdownRow: React.FC<{ label: string; value: number; score: number }> = ({ label, value, score }) => (
+  <div>
+    <div className="mb-1.5 flex items-center justify-between text-xs">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-semibold text-foreground">{score}/{value}</span>
+    </div>
+    <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+      <div className="h-full rounded-full bg-primary" style={{ width: `${(score / value) * 100}%` }} />
+    </div>
+  </div>
+);
+
+const InsightPanel: React.FC<{ title: string; items: string[] }> = ({ title, items }) => (
+  <section className="rounded-lg border border-border bg-card p-5">
+    <div className="flex items-center justify-between">
+      <h2 className="text-sm font-semibold text-foreground">{title}</h2>
+      <Lightbulb className="h-4 w-4 text-primary" aria-hidden="true" />
+    </div>
+    <ul className="mt-4 space-y-3">
+      {(items.length ? items : ['Your resume is well aligned with this role.']).map((item, index) => (
+        <li key={`${item}-${index}`} className="flex items-start gap-2 text-sm leading-5 text-muted-foreground">
+          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+          <span>{item}</span>
+        </li>
+      ))}
+    </ul>
+  </section>
 );
 
 const ProgressBar: React.FC<{ score: number }> = ({ score }) => (
