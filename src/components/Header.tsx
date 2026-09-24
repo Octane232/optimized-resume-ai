@@ -19,13 +19,13 @@ const VaylanceLogo = () => (
 const Logo = () => (
   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
     <VaylanceLogo />
-    <span style={{ fontWeight: 700, fontSize: 20, color: 'hsl(var(--foreground))', letterSpacing: '-0.02em' }}>Vaylance</span>
+    <span className="text-lg font-bold text-foreground">Vaylance</span>
   </div>
 );
 
 // ===== Navigation Items =====
 const navItems = [
-  { label: 'Job Radar', id: 'features' },
+  { label: 'Features', id: 'features' },
   { label: 'How it works', id: 'how-it-works' },
   { label: 'Pricing', id: 'pricing' },
 ];
@@ -51,7 +51,7 @@ const Header = () => {
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      scrolled ? 'bg-background/80 backdrop-blur-xl border-b border-border/50' : 'bg-transparent'
+      scrolled ? 'bg-background/90 backdrop-blur-xl border-b border-border/70' : 'bg-background/70 backdrop-blur-md'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
@@ -63,13 +63,15 @@ const Header = () => {
           {/* Desktop Navigation - Centered */}
           <nav className="hidden md:flex items-center gap-7 absolute left-1/2 -translate-x-1/2">
             {navItems.map((item, idx) => (
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 key={idx}
                 onClick={() => scrollTo(item.id)}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                className="text-xs font-medium text-muted-foreground hover:text-foreground"
               >
                 {item.label}
-              </button>
+              </Button>
             ))}
           </nav>
 
@@ -84,13 +86,15 @@ const Header = () => {
           </div>
 
           {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2 text-foreground"
+           <Button
+             variant="ghost"
+             size="icon"
+             className="md:hidden"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
           >
             {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+           </Button>
         </div>
 
         {/* Mobile Navigation Menu */}
