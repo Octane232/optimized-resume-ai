@@ -3,7 +3,7 @@ import { Radar, FileText, Mic, DollarSign, Linkedin, Search, TrendingUp, Send } 
 
 const supporting = [
   { icon: Radar, title: 'Job Radar', desc: 'Get the company trigger, likely roles, match score and a practical outreach angle.' },
-  { icon: Search, title: 'Job Search', desc: 'Filter live roles by title, location and work style, then save the strongest matches.' },
+  { icon: Search, title: 'Application Tracker', desc: 'Keep every application, stage and follow-up in one clear list.' },
   { icon: FileText, title: 'Resume + ATS', desc: 'See one score plus the missing skills, weak phrases and exact keywords to improve.' },
   { icon: Mic, title: 'Interview Prep', desc: 'Practise role-specific questions and receive scored feedback on each answer.' },
   { icon: Send, title: 'Cover Letters', desc: 'Turn a job description and your experience into a tailored first draft.' },

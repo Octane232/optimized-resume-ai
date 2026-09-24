@@ -58,7 +58,6 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
   const mainItems: NavItem[] = [
     { id: 'briefing', label: 'Home / Briefing', icon: Home },
     { id: 'scout', label: 'Job Radar', icon: Telescope, badge: radarCount },
-    { id: 'job-search', label: 'Job Search', icon: Search },
     { id: 'resume-engine', label: 'Resume + ATS', icon: FileText },
     { id: 'interview-prep', label: 'Interview Coach', icon: Mic },
     { id: 'skill-gap', label: 'Skill Gap', icon: TrendingUp },
