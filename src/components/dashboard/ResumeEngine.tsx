@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import DocxImprover from './resume-engine/DocxImprover';
 import { motion } from 'framer-motion';
 import { FileText, Sparkles, Clipboard, RefreshCw, CheckCircle2, AlertTriangle, TrendingUp, Copy, Loader2, Upload, Download, Lock, Search, BarChart3, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -727,18 +728,6 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
     resetFileUpload 
   } = useFileUpload(isPro, handleTextExtracted);
   
-  const { 
-    isRewritingDocx, 
-    editedDocxBase64, 
-    handleRewriteDocx, 
-    downloadEditedDocx 
-  } = useDocxRewrite(
-    uploadedDocxFile,
-    jobDescription,
-    (base64, previewText) => {
-      setResumeText(previewText);
-    }
-  );
 
   const { 
     isProcessing, 
@@ -920,16 +909,11 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
             onUpgrade={() => setActiveTab?.('billing')}
           />
 
-          <DocxRewriteSection
-            uploadedDocxFile={uploadedDocxFile}
-            isPro={isPro}
-            isRewritingDocx={isRewritingDocx}
-            editedDocxBase64={editedDocxBase64}
-            jobDescription={jobDescription}
-            resumeText={resumeText}
-            onRewriteDocx={handleRewriteDocx}
-            onDownloadEditedDocx={downloadEditedDocx}
-          />
+          {uploadedDocxFile && isPro && (
+            <div id="docx-improver">
+              <DocxImprover file={uploadedDocxFile} resumeText={resumeText} jobDescription={jobDescription} />
+            </div>
+          )}
         </div>
       </div>
 
@@ -938,7 +922,7 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
         onOpenChange={setShowRewritePrompt}
         hasJobDescription={!!jobDescription.trim()}
         uploadedDocxFile={uploadedDocxFile}
-        onRewriteDocx={handleRewriteDocx}
+        onRewriteDocx={() => document.getElementById('docx-improver')?.scrollIntoView({ behavior: 'smooth' })}
         onGenerate={handleFormSubmit}
       />
     </div>
