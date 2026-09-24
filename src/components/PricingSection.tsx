@@ -55,8 +55,8 @@ const PricingSection = () => (
   <section id="pricing" className="py-12 sm:py-16">
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="text-center mb-10 sm:mb-14">
-        <p className="text-[10px] sm:text-xs font-bold tracking-[0.2em] sm:tracking-[0.25em] mb-3 bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">SIMPLE, TRANSPARENT PRICING</p>
-        <h2 className="text-[26px] leading-tight sm:text-4xl font-black text-foreground tracking-tight mb-3">
+        <p className="text-[10px] sm:text-xs font-bold tracking-[0.2em] sm:tracking-[0.25em] mb-3 font-mono text-signal">SIMPLE, TRANSPARENT PRICING</p>
+        <h2 className="text-[26px] leading-tight sm:text-4xl font-extrabold text-foreground tracking-tight mb-3">
           Choose the perfect plan for you
         </h2>
         <p className="text-muted-foreground">Pick a plan and cancel anytime.</p>
@@ -66,15 +66,15 @@ const PricingSection = () => (
         {plans.map((plan, i) => (
           <div
             key={i}
-            className={`relative p-5 sm:p-7 rounded-2xl border bg-card transition-all flex flex-col ${
+            className={`relative p-5 sm:p-7 rounded-lg border bg-card transition-all flex flex-col ${
               plan.popular
-                ? 'border-violet-500/50 shadow-2xl shadow-violet-600/20 ring-1 ring-violet-500/30 md:scale-[1.02] z-10'
+                ? 'border-signal/60'
                 : 'border-border hover:border-primary/30'
             }`}
           >
             {plan.popular && (
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-3 py-1 rounded-full bg-gradient-to-r from-blue-600 to-violet-600 text-white">
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-3 py-1 rounded-md bg-signal text-signal-foreground">
                   Most Popular
                 </span>
               </div>
@@ -84,7 +84,7 @@ const PricingSection = () => (
               <h3 className="text-lg font-bold text-foreground mb-1">{plan.name}</h3>
               <p className="text-xs text-muted-foreground mb-4">{plan.description}</p>
               <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-black text-foreground">${plan.price}</span>
+                <span className="text-4xl font-mono font-bold text-foreground">${plan.price}</span>
                 <span className="text-muted-foreground text-sm">/month</span>
               </div>
             </div>
@@ -94,7 +94,7 @@ const PricingSection = () => (
               size="lg"
               className={`w-full h-11 font-semibold gap-2 mb-6 ${
                 plan.popular
-                  ? 'bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white shadow-lg shadow-blue-600/20'
+                  ? ''
                   : 'bg-card border border-border text-foreground hover:bg-muted'
               }`}
             >
@@ -107,7 +107,7 @@ const PricingSection = () => (
             <ul className="space-y-2.5 sm:space-y-3 flex-1">
               {plan.features.map((f, fi) => (
                 <li key={fi} className="flex items-start gap-2 text-[13px] sm:text-sm text-foreground/80">
-                  <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <Check className="w-4 h-4 text-signal shrink-0 mt-0.5" />
                   <span>{f}</span>
                 </li>
               ))}

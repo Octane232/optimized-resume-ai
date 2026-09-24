@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const VaylanceLogo = () => (
   <svg width="24" height="24" viewBox="0 0 48 48" fill="none" aria-hidden="true">
-    <rect width="48" height="48" rx="11" fill="#1d4ed8"/>
+    <rect width="48" height="48" rx="11" fill="hsl(var(--primary))"/>
     <circle cx="22" cy="27" r="11" stroke="white" strokeWidth="2.2" fill="none"/>
     <circle cx="22" cy="27" r="6.5" stroke="white" strokeWidth="1.6" strokeOpacity="0.6" fill="none"/>
     <circle cx="22" cy="27" r="2.6" fill="white"/>
@@ -82,7 +82,7 @@ const Footer = () => {
               <span className="font-bold text-lg text-foreground tracking-tight">Vaylance</span>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-              The AI job search platform that helps you get hired faster.
+              Hiring signals and resume tools for reaching companies before the job is posted.
             </p>
           </div>
 
@@ -93,17 +93,17 @@ const Footer = () => {
             </h4>
             
             {formStatus === 'success' && (
-              <div className="mb-3 p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-                <p className="text-xs text-emerald-600 text-center">
-                  ✓ Message sent! We'll get back to you at contact-us@vaylance.com
+              <div className="mb-3 p-2 bg-signal/10 border border-signal/20 rounded-md">
+                <p className="text-xs text-signal text-center">
+                  Message sent! We'll get back to you at contact-us@vaylance.com
                 </p>
               </div>
             )}
             
             {formStatus === 'error' && (
-              <div className="mb-3 p-2 bg-red-500/10 border border-red-500/20 rounded-lg">
-                <p className="text-xs text-red-600 text-center">
-                  ✗ Something went wrong. Please email us directly at contact-us@vaylance.com
+              <div className="mb-3 p-2 bg-destructive/10 border border-destructive/20 rounded-md">
+                <p className="text-xs text-destructive text-center">
+                  Something went wrong. Please email us directly at contact-us@vaylance.com
                 </p>
               </div>
             )}
@@ -118,7 +118,7 @@ const Footer = () => {
                 placeholder="Your name"
                 required
                 disabled={formStatus === 'submitting'}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
+                className="w-full px-3 py-2 text-sm rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
               />
               <input
                 type="email"
@@ -126,7 +126,7 @@ const Footer = () => {
                 placeholder="Your email"
                 required
                 disabled={formStatus === 'submitting'}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
+                className="w-full px-3 py-2 text-sm rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
               />
               <textarea
                 name="message"
@@ -134,12 +134,12 @@ const Footer = () => {
                 required
                 rows={3}
                 disabled={formStatus === 'submitting'}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none disabled:opacity-50"
+                className="w-full px-3 py-2 text-sm rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none disabled:opacity-50"
               />
               <button
                 type="submit"
                 disabled={formStatus === 'submitting'}
-                className="block w-full mt-1 px-4 py-2.5 text-sm font-semibold bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="block w-full mt-1 px-4 py-2.5 text-sm font-semibold bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {formStatus === 'submitting' ? 'Sending...' : 'Send Message'}
               </button>

@@ -4,23 +4,19 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 
 const CTASection = () => (
-  <section className="py-12 sm:py-16">
+  <section className="py-14 sm:py-20 border-t border-border">
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="relative rounded-2xl border border-violet-500/30 bg-gradient-to-r from-blue-600/20 via-violet-600/20 to-fuchsia-600/20 overflow-hidden p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-5">
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-violet-600/20 rounded-full blur-3xl" />
-        </div>
-        <div className="text-center sm:text-left">
-          <h3 className="text-xl sm:text-2xl font-black text-foreground mb-1">
-            Ready to land your next job faster?
+      <div className="rounded-lg border border-border bg-card p-6 sm:p-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        <div>
+          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-signal mb-2">Next step</p>
+          <h3 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight mb-2">
+            Find the companies hiring before everyone else.
           </h3>
-          <p className="text-sm text-muted-foreground">
-            Join 10,000+ job seekers who've already upgraded their careers with AI.
-          </p>
+          <p className="text-sm text-muted-foreground">Run a Job Radar scan and tailor your resume to what you find.</p>
         </div>
-        <Button asChild size="lg" className="h-12 px-6 font-semibold bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white shadow-xl shadow-blue-600/30 shrink-0 w-full sm:w-auto">
+        <Button asChild size="lg" className="h-12 px-6 font-semibold shrink-0 w-full sm:w-auto">
           <Link to="/auth">
-            Get Started Free
+            Start with Job Radar
             <ArrowRight className="w-4 h-4 ml-1" />
           </Link>
         </Button>
