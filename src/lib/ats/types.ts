@@ -87,4 +87,3 @@ export interface AtsScore {
   issues: AtsIssue[]
 }
 
-export interface OptimizationOptions {
