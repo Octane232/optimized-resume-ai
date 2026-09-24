@@ -21,6 +21,8 @@ export default {
 		extend: {
 			fontFamily: {
 				sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+				display: ['Instrument Serif', 'Georgia', 'serif'],
+				body: ['Work Sans', 'system-ui', 'sans-serif'],
 				mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
 			},
 
