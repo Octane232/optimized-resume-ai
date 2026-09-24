@@ -1001,7 +1001,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                             <Radio className="w-3 h-3 mr-1" />Live
                           </Badge>
                           {isListening && (
-                            <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">
+                            <Badge className="bg-primary/10 text-primary border-primary/20">
                               <Mic className="w-3 h-3 mr-1" />Listening
                             </Badge>
                           )}
@@ -1173,10 +1173,10 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
 const StatusBadge: React.FC<{ status: ConnectionStatus }> = ({ status }) => {
   const statusConfig = {
     idle: { label: 'Idle', icon: null, className: 'bg-muted/50 text-muted-foreground' },
-    connecting: { label: 'Connecting...', icon: <Loader2 className="w-3 h-3 animate-spin" />, className: 'bg-blue-500/10 text-blue-500 border-blue-500/20' },
-    connected: { label: 'Connected', icon: <Wifi className="w-3 h-3" />, className: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
+    connecting: { label: 'Connecting...', icon: <Loader2 className="w-3 h-3 animate-spin" />, className: 'bg-primary/10 text-primary border-primary/20' },
+    connected: { label: 'Connected', icon: <Wifi className="w-3 h-3" />, className: 'bg-signal-soft text-signal border-signal/20' },
     disconnected: { label: 'Disconnected', icon: <WifiOff className="w-3 h-3" />, className: 'bg-amber-500/10 text-amber-500 border-amber-500/20' },
-    error: { label: 'Error', icon: <AlertTriangle className="w-3 h-3" />, className: 'bg-red-500/10 text-red-500 border-red-500/20' },
+    error: { label: 'Error', icon: <AlertTriangle className="w-3 h-3" />, className: 'bg-destructive/10 text-destructive border-destructive/20' },
   };
 
   const config = statusConfig[status];

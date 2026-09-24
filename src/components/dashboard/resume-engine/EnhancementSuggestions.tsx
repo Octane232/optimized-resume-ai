@@ -236,15 +236,15 @@ const EnhancementSuggestions: React.FC<EnhancementSuggestionsProps> = ({
   const getTypeIcon = (type: Suggestion['type']) => {
     switch (type) {
       case 'keyword':
-        return <Sparkles className="w-4 h-4 text-purple-500" />;
+        return <Sparkles className="w-4 h-4 text-primary" />;
       case 'formatting':
         return <AlertTriangle className="w-4 h-4 text-amber-500" />;
       case 'content':
-        return <Info className="w-4 h-4 text-blue-500" />;
+        return <Info className="w-4 h-4 text-primary" />;
       case 'achievement':
-        return <Lightbulb className="w-4 h-4 text-yellow-500" />;
+        return <Lightbulb className="w-4 h-4 text-amber-500" />;
       case 'structure':
-        return <ChevronRight className="w-4 h-4 text-emerald-500" />;
+        return <ChevronRight className="w-4 h-4 text-signal" />;
     }
   };
 

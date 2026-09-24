@@ -54,17 +54,17 @@ interface RadarAlert {
 const getStageColor = (stage: string | null): string => {
   const stageLower = stage?.toLowerCase();
   const colorMap: Record<string, string> = {
-    'seed': 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
-    'series a': 'bg-blue-500/10 text-blue-600 border-blue-500/20',
-    'series b': 'bg-purple-500/10 text-purple-600 border-purple-500/20',
-    'series c': 'bg-amber-500/10 text-amber-600 border-amber-500/20',
+    'seed': 'bg-primary/10 text-primary border-primary/20',
+    'series a': 'bg-signal-soft text-signal border-signal/20',
+    'series b': 'bg-secondary text-secondary-foreground border-border',
+    'series c': 'bg-muted text-muted-foreground border-border',
   };
   return colorMap[stageLower || ''] || 'bg-muted text-muted-foreground';
 };
 
 const getMatchColor = (score: number): string => {
-  if (score >= 90) return 'text-emerald-500';
-  if (score >= 75) return 'text-blue-500';
+  if (score >= 90) return 'text-signal';
+  if (score >= 75) return 'text-primary';
   if (score >= 60) return 'text-amber-500';
   return 'text-muted-foreground';
 };
@@ -424,7 +424,7 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
     return (
       <div className="flex flex-wrap gap-1.5 mt-2">
         {alert.match_reasons.map((reason: string, i: number) => (
-          <Badge key={i} variant="outline" className="text-xs bg-emerald-500/5 text-emerald-600 border-emerald-500/20">
+          <Badge key={i} variant="outline" className="text-xs bg-primary/5 text-primary border-primary/20">
             ✓ {reason}
           </Badge>
         ))}
@@ -439,7 +439,7 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 + index * 0.05 }}
     >
-      <Card className="border-0 shadow-sm hover:shadow-md transition-all group">
+      <Card className="border-border transition-colors hover:border-primary/35 group">
         <CardContent className="p-5">
           <div className="flex items-start gap-4">
             <CompanyLogo
