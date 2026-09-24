@@ -84,7 +84,6 @@ export const FEATURE_NAMES: Record<UsageAction, string> = {
   radar_alert: "Job Radar Alerts",
   docx_rewrite: "DOCX Resume Rewrite",
   resume_parse: "Resume File Upload",
-  job_search: "Job Search",
   bullet_rewrite: "Bullet Point Rewrite",
 };
 // ===== Feature Descriptions =====
@@ -98,7 +97,6 @@ export const FEATURE_DESCRIPTIONS: Record<UsageAction, string> = {
   radar_alert: "Discover hidden job opportunities before they're posted",
   docx_rewrite: "AI-powered DOCX resume rewriting",
   resume_parse: "Upload and parse PDF/DOCX resume files",
-  job_search: "Search for jobs across multiple platforms",
   bullet_rewrite: "AI-powered bullet point rewriting for resumes",
 };
 // ===== Deprecated Action Costs (kept for backward compatibility) =====
@@ -113,6 +111,5 @@ export const ACTION_COSTS: Record<UsageAction, number> = {
   radar_alert: 2,
   docx_rewrite: 3,
   resume_parse: 0,
-  job_search: 1,
   bullet_rewrite: 1,
 };
