@@ -18,6 +18,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useUsageLimit } from '@/contexts/UsageLimitContext';
 import { cn } from '@/lib/utils';
+import { CompanyLogo } from '@/components/dashboard/CompanyLogo';
 
 interface HunterDashboardProps {
   setActiveTab: (tab: string) => void;
@@ -26,6 +27,7 @@ interface HunterDashboardProps {
 interface RadarOpportunity {
   id: string;
   company: string;
+  companyDomain?: string | null;
   role: string;
   location: string;
   whyNow: string;
@@ -134,7 +136,7 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
       if (signalIds.length > 0) {
         const { data: signals } = await supabase
           .from('radar_signals')
-          .select('id, company_name, likely_roles, location, why_now, description, source_url, published_at')
+          .select('id, company_name, company_domain, likely_roles, location, why_now, description, source_url, published_at')
           .in('id', signalIds);
 
         const map = new Map((signals || []).map((s: any) => [s.id, s]));
@@ -144,6 +146,7 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
             return {
               id: a.id,
               company: s?.company_name || 'New signal',
+              companyDomain: s?.company_domain,
               role: s?.likely_roles?.[0] || 'Hiring soon',
               location: s?.location || 'Location pending',
               whyNow: s?.why_now || s?.description || 'Recent hiring signal detected',
@@ -267,7 +270,10 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
                 className="w-full text-left rounded-xl bg-background/10 border border-background/15 p-3 transition-colors hover:bg-background/15"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-semibold truncate">{o.company}</span>
+                  <span className="flex min-w-0 items-center gap-2 text-sm font-semibold">
+                    <CompanyLogo companyName={o.company} domain={o.companyDomain} className="h-7 w-7 border-background/20" />
+                    <span className="truncate">{o.company}</span>
+                  </span>
                   <span className="shrink-0 rounded-full bg-primary/25 px-2 py-0.5 text-[11px] font-semibold">
                     {o.match}% match
                   </span>
@@ -352,9 +358,7 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
               <ul className="divide-y divide-border">
                 {opportunities.map((o) => (
                   <li key={o.id} className="p-4 flex flex-wrap items-start gap-3">
-                    <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center text-sm font-bold text-foreground shrink-0">
-                      {o.company.charAt(0).toUpperCase()}
-                    </div>
+                    <CompanyLogo companyName={o.company} domain={o.companyDomain} className="h-9 w-9" />
                     <div className="flex-1 min-w-[180px]">
                       <p className="text-sm font-semibold text-foreground">{o.company}</p>
                       <p className="text-sm text-muted-foreground">{o.role}</p>

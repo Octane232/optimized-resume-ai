@@ -8,3 +8,4 @@
 - [x] Verify the redesigned homepage on desktop and mobile.
 - [x] Improve homepage trust, readability, plan clarity, feature examples, process visuals, and footer contact flow.
 - [x] Verify the homepage trust and clarity improvements on desktop and mobile.
+- [x] Add verified Logo.dev company marks with safe fallbacks throughout Job Radar.

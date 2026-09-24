@@ -13,11 +13,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { useUsageLimit } from '@/contexts/UsageLimitContext';
 import { motion } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
+import { CompanyLogo } from '@/components/dashboard/CompanyLogo';
 
 // ===== Types =====
 interface RadarSignal {
   id: string;
   company_name: string;
+  company_domain?: string | null;
   amount: string | null;
   funding_stage: string | null;
   industry: string | null;
@@ -440,9 +442,12 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
       <Card className="border-0 shadow-sm hover:shadow-md transition-all group">
         <CardContent className="p-5">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-primary font-bold text-lg shrink-0">
-              {s.company_name?.[0] || 'C'}
-            </div>
+            <CompanyLogo
+              companyName={s.company_name}
+              domain={s.company_domain}
+              className="h-12 w-12 rounded-xl"
+              imageClassName="rounded-xl"
+            />
 
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-3 mb-2">
