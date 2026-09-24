@@ -118,56 +118,59 @@
   }
 
   .dark {
-    /* Vaylance Dark Theme - Navy Command Center */
-    --background: 222 47% 6%;
-    --foreground: 210 40% 98%;
+    /* Vaylance Dark - Obsidian Intelligence Surface */
+    --background: 222 34% 5%;
+    --foreground: 210 24% 96%;
 
-    --card: 222 45% 10%;
-    --card-foreground: 210 40% 98%;
+    --card: 222 28% 8%;
+    --card-foreground: 210 24% 96%;
 
-    --popover: 222 45% 10%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 222 28% 9%;
+    --popover-foreground: 210 24% 96%;
 
-    --primary: 217 91% 60%;
-    --primary-foreground: 222 47% 6%;
+    --primary: 214 95% 58%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 222 35% 15%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 222 22% 13%;
+    --secondary-foreground: 210 24% 96%;
 
-    --muted: 222 35% 15%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 222 22% 13%;
+    --muted-foreground: 216 14% 62%;
 
-    --accent: 217 91% 60%;
-    --accent-foreground: 222 47% 6%;
+    --accent: 222 22% 13%;
+    --accent-foreground: 210 24% 96%;
 
-    --destructive: 0 63% 45%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 63% 48%;
+    --destructive-foreground: 0 0% 100%;
 
-    --success: 160 84% 39%;
-    --success-foreground: 222 47% 6%;
+    --success: 158 68% 42%;
+    --success-foreground: 0 0% 100%;
 
-    --border: 222 30% 18%;
-    --input: 222 30% 18%;
-    --ring: 217 91% 60%;
+    --signal: 158 72% 44%;
+    --signal-foreground: 222 34% 5%;
+    --signal-soft: 158 40% 12%;
+
+    --border: 220 16% 16%;
+    --input: 220 16% 16%;
+    --ring: 214 95% 58%;
 
     --gradient-primary: linear-gradient(135deg, hsl(var(--electric-blue)) 0%, hsl(230 80% 65%) 100%);
     --gradient-secondary: linear-gradient(135deg, hsl(230 80% 55%) 0%, hsl(var(--electric-blue)) 100%);
-    --gradient-mesh: radial-gradient(at 0% 0%, hsl(var(--electric-blue) / 0.15) 0%, transparent 50%),
-                     radial-gradient(at 100% 0%, hsl(230 80% 55% / 0.12) 0%, transparent 50%),
-                     radial-gradient(at 100% 100%, hsl(var(--emerald-500) / 0.08) 0%, transparent 50%);
-    
-    --shadow-glow: 0 0 0 1px hsl(var(--electric-blue) / 0.2), 0 8px 32px -8px hsl(var(--electric-blue) / 0.4);
-    --shadow-glow-lg: 0 0 64px -16px hsl(var(--electric-blue) / 0.5);
-    
-    --sidebar-background: 222 45% 8%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 217 91% 60%;
+    --gradient-mesh: none;
+
+    --shadow-glow: 0 0 0 1px hsl(220 16% 20%);
+    --shadow-glow-lg: 0 1px 2px hsl(0 0% 0% / 0.4);
+
+    --sidebar-background: 222 30% 6%;
+    --sidebar-foreground: 216 14% 72%;
+    --sidebar-primary: 214 95% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 35% 12%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 222 30% 18%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-accent: 222 22% 12%;
+    --sidebar-accent-foreground: 210 24% 96%;
+    --sidebar-border: 220 16% 14%;
+    --sidebar-ring: 214 95% 58%;
   }
+
 }
 
 @layer base {
