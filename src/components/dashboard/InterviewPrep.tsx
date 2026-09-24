@@ -158,12 +158,6 @@ const getScoreBackground = (score: number): string => {
   return 'bg-red-500/5 border-red-500/20';
 };
 
-const getScoreGradient = (score: number): string => {
-  if (score >= 8) return 'from-emerald-500 to-teal-500';
-  if (score >= 6) return 'from-amber-500 to-orange-400';
-  return 'from-red-500 to-rose-500';
-};
-
 const getScoreLabel = (score: number): string => {
   if (score >= 8) return 'Excellent';
   if (score >= 6) return 'Good';
@@ -480,7 +474,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
     setConnectionStatus('idle');
     setErrorCount(0);
     reconnectAttemptsRef.current = 0;
-    toast({ title: '🎯 Copilot session started!' });
+    toast({ title: 'Copilot session started' });
   };
 
   // Speech Recognition for Copilot
@@ -648,7 +642,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
       transcriptBufferRef.current = '';
       setIsListening(false);
       setConnectionStatus('idle');
-      toast({ title: '🎙️ Listening paused' });
+      toast({ title: 'Listening paused' });
     } else {
       setIsMicInitializing(true);
       try {
@@ -662,7 +656,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
           recognitionRef.current.start();
         }
         setIsListening(true);
-        toast({ title: '🎙️ Listening to interviewer...' });
+        toast({ title: 'Listening to interviewer' });
       } catch (err) {
         toast({ 
           title: 'Failed to access microphone', 
@@ -875,7 +869,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                     <div className={`p-4 rounded-xl border ${getScoreBackground(currentFeedback.score)}`}>
                       <div className="flex items-center gap-3 mb-2">
                         <span className={`text-2xl font-bold ${getScoreColor(currentFeedback.score)}`}>{currentFeedback.score}/10</span>
-                        <Badge className={`bg-gradient-to-r ${getScoreGradient(currentFeedback.score)} text-white`}>{getScoreLabel(currentFeedback.score)}</Badge>
+                        <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary">{getScoreLabel(currentFeedback.score)}</Badge>
                       </div>
                       <p className="text-sm text-muted-foreground">{currentFeedback.feedback}</p>
                     </div>
@@ -990,7 +984,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                           <p className="text-xs text-muted-foreground">
                             <strong>AI-Powered:</strong> Get real-time suggestions for interview questions.
                             <br />
-                            <span className="text-primary/60">🎙️ Use the mic to auto-detect questions.</span>
+                            <span className="text-primary">Use the microphone to detect questions automatically.</span>
                           </p>
                         </div>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -1063,7 +1057,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                             ) : entry.suggestion && (
                               <div className="text-sm text-muted-foreground bg-primary/5 p-3 rounded">
                                 <p className="font-medium text-primary/80 text-xs uppercase tracking-wider mb-1">
-                                  💡 Suggested Talking Points
+                                  Suggested talking points
                                 </p>
                                 {entry.suggestion}
                               </div>
@@ -1211,7 +1205,7 @@ const HeaderSection: React.FC<{ avgScore: number; sessionsCount: number }> = ({
            <Mic className="w-5 h-5 text-primary-foreground" aria-hidden="true" />
         </div>
         <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-background flex items-center justify-center">
-          <Sparkles className="w-2 h-2 text-white" aria-hidden="true" />
+          <Sparkles className="w-2 h-2 text-primary-foreground" aria-hidden="true" />
         </div>
       </div>
       <div>

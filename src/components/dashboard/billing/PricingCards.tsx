@@ -122,7 +122,7 @@ const PricingCards = () => {
             }`}>
               {isCurrent && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <Badge className="bg-emerald-500 text-white px-3 py-1 text-xs font-semibold border-0">Your Plan</Badge>
+                  <Badge className="bg-primary text-primary-foreground px-3 py-1 text-xs font-semibold border-0">Your Plan</Badge>
                 </div>
               )}
               {plan.popular && !isCurrent && (

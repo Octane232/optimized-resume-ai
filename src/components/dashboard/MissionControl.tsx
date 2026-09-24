@@ -582,7 +582,7 @@ interface EmptyStateProps {
 const EmptyState: React.FC<EmptyStateProps> = ({ onAddClick }) => {
   return (
     <div className="command-card p-12 text-center mt-8">
-      <div className="w-14 h-14 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4">
+      <div className="w-14 h-14 bg-muted rounded-lg flex items-center justify-center mx-auto mb-4">
         <Building2 className="w-7 h-7 text-muted-foreground" aria-hidden="true" />
       </div>
       <h3 className="text-lg font-semibold text-foreground mb-2">No applications yet</h3>

@@ -181,7 +181,7 @@ const Dashboard = () => {
 
     if (upgradeStatus === 'success') {
       toast({
-        title: '✅ Payment successful!',
+        title: 'Payment successful',
         description: 'Your account is being upgraded. This may take a few seconds.',
       });
 

@@ -9,7 +9,7 @@ import {
 const faqs = [
   {
     q: 'What is included in a Resume + ATS run?',
-    a: 'One Resume + ATS run gives you a tailored resume optimized for a specific job description, a matching cover letter, and a detailed ATS score analysis — all generated together. Pro users get 15 runs/month. Elite users get 40 runs/month.',
+    a: 'One Resume + ATS run gives you a tailored resume optimized for a specific job description, a matching cover letter, and a detailed ATS score analysis — all generated together. Pro users get 30 runs/month. Elite users get 100 runs/month.',
   },
   {
     q: 'When do my monthly limits reset?',

@@ -296,7 +296,7 @@ const Settings = () => {
     return (
       <div className="space-y-8">
         {[...Array(3)].map((_, i) => (
-          <Card key={i} className="glass-morphism border border-border/50">
+          <Card key={i} className="rounded-lg border-border shadow-none">
             <CardHeader>
               <div className="animate-pulse">
                 <div className="h-6 bg-muted rounded w-1/4 mb-2"></div>
