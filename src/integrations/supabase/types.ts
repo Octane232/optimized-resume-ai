@@ -372,6 +372,7 @@ export type Database = {
       radar_signals: {
         Row: {
           amount: string | null
+          company_domain: string | null
           company_name: string
           company_size: string | null
           confidence: number | null
@@ -394,6 +395,7 @@ export type Database = {
         }
         Insert: {
           amount?: string | null
+          company_domain?: string | null
           company_name: string
           company_size?: string | null
           confidence?: number | null
@@ -416,6 +418,7 @@ export type Database = {
         }
         Update: {
           amount?: string | null
+          company_domain?: string | null
           company_name?: string
           company_size?: string | null
           confidence?: number | null
