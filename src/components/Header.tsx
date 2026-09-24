@@ -68,7 +68,7 @@ const Header = () => {
                 size="sm"
                 key={idx}
                 onClick={() => scrollTo(item.id)}
-                className="text-xs font-medium text-muted-foreground hover:text-foreground"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground"
               >
                 {item.label}
               </Button>
@@ -81,7 +81,7 @@ const Header = () => {
               <Link to="/auth">Sign in</Link>
             </Button>
             <Button asChild size="sm" className="font-semibold px-5">
-              <Link to="/auth">Get Started Free</Link>
+              <Link to="/auth">Create free account</Link>
             </Button>
           </div>
 
@@ -115,7 +115,7 @@ const Header = () => {
                   <Link to="/auth">Sign in</Link>
                 </Button>
                 <Button asChild size="sm">
-                  <Link to="/auth">Get Started Free</Link>
+                   <Link to="/auth">Create free account</Link>
                 </Button>
               </div>
             </div>

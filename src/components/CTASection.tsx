@@ -12,7 +12,7 @@ const CTASection = () => (
           <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight mb-2">
             Find the companies hiring before everyone else.
           </h2>
-          <p className="text-sm text-muted-foreground">Run a Job Radar scan and tailor your resume to what you find.</p>
+          <p className="text-base text-muted-foreground">Create an account free. Choose a paid plan when you are ready to run Job Radar and the career tools.</p>
         </div>
         <Button asChild size="lg" className="h-12 px-6 font-semibold shrink-0 w-full sm:w-auto">
           <Link to="/auth">

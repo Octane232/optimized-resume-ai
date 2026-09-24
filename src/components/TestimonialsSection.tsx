@@ -16,8 +16,8 @@ const TestimonialsSection = () => (
         <Button asChild size="lg"><Link to="/auth">Explore the app <ArrowRight className="w-4 h-4 ml-1" /></Link></Button>
       </div>
 
-      <div className="relative">
-        <div className="rounded-lg border border-background/15 bg-background/5 p-3 sm:p-5">
+      <div className="grid sm:grid-cols-[1fr_10rem] gap-4 items-center">
+        <div className="rounded-lg border border-background/15 bg-background/5 p-3 sm:p-5 min-w-0">
           <div className="flex items-center justify-between border-b border-background/10 pb-4 mb-4"><div className="flex items-center gap-2 text-sm font-semibold"><Radar className="w-4 h-4 text-signal" /> Job Radar</div><span className="text-xs text-background/50">Latest signals</span></div>
           <div className="space-y-3">
             {[
@@ -27,7 +27,7 @@ const TestimonialsSection = () => (
             ].map((item) => <article key={item.company} className="grid grid-cols-[1fr_auto] gap-4 rounded-md border border-background/10 bg-background/5 p-4"><div><p className="text-sm font-semibold text-background">{item.company}</p><p className="text-xs text-background/65 mt-1">{item.role}</p><p className="text-[11px] text-background/45 mt-2 flex items-center gap-1"><MapPin className="w-3 h-3" />{item.place}</p></div><div className="text-right"><p className="tabular text-lg font-semibold text-signal">{item.score}%</p><p className="text-[10px] text-background/45">match</p></div></article>)}
           </div>
         </div>
-        <div className="hidden sm:block absolute -right-8 top-1/2 -translate-y-1/2 w-44 rounded-lg border border-signal/40 bg-foreground p-4 shadow-xl">
+        <div className="hidden sm:block rounded-lg border border-signal/40 bg-foreground p-4">
           <Radar className="w-5 h-5 text-signal mb-8" /><p className="text-sm font-semibold text-background mb-2">Find the right opening early.</p><p className="text-xs leading-relaxed text-background/55">Use real company activity to decide where to focus next.</p>
         </div>
       </div>

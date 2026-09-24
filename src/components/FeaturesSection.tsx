@@ -2,14 +2,14 @@ import React from 'react';
 import { Radar, FileText, Mic, DollarSign, Linkedin, Search, TrendingUp, Send } from 'lucide-react';
 
 const supporting = [
-  { icon: Radar, title: 'Job Radar', desc: 'Find hiring signals before public job posts appear.' },
-  { icon: Search, title: 'Job Search', desc: 'Search and filter live roles in one focused workspace.' },
-  { icon: FileText, title: 'Resume + ATS', desc: 'Score and tailor your resume against a real role.' },
-  { icon: Mic, title: 'Interview Prep', desc: 'Technical, behavioural and situational rounds with scored feedback.' },
-  { icon: Send, title: 'Cover Letters', desc: 'Create a targeted first draft based on the job.' },
-  { icon: DollarSign, title: 'Salary Intelligence', desc: 'Market benchmarks plus a negotiation script for your offer.' },
-  { icon: Linkedin, title: 'LinkedIn Optimizer', desc: 'Headline and summary rewritten for recruiter search.' },
-  { icon: TrendingUp, title: 'Skill Gap Analyzer', desc: 'What you are missing for a target role, and how to close it.' },
+  { icon: Radar, title: 'Job Radar', desc: 'Get the company trigger, likely roles, match score and a practical outreach angle.' },
+  { icon: Search, title: 'Job Search', desc: 'Filter live roles by title, location and work style, then save the strongest matches.' },
+  { icon: FileText, title: 'Resume + ATS', desc: 'See one score plus the missing skills, weak phrases and exact keywords to improve.' },
+  { icon: Mic, title: 'Interview Prep', desc: 'Practise role-specific questions and receive scored feedback on each answer.' },
+  { icon: Send, title: 'Cover Letters', desc: 'Turn a job description and your experience into a tailored first draft.' },
+  { icon: DollarSign, title: 'Salary Intelligence', desc: 'Compare a £55k offer with the market range and generate a negotiation script.' },
+  { icon: Linkedin, title: 'LinkedIn Optimizer', desc: 'Receive a stronger headline, About section and recruiter-search keywords.' },
+  { icon: TrendingUp, title: 'Skill Gap Analyzer', desc: 'See which three skills block your target role and what to learn next.' },
 ];
 
 const FeaturesSection = () => (
@@ -27,7 +27,7 @@ const FeaturesSection = () => (
           return (
             <article key={f.title} className="flex gap-4">
               <div className="w-10 h-10 shrink-0 rounded-md bg-signal-soft flex items-center justify-center"><Icon className="w-5 h-5 text-primary" /></div>
-              <div><h3 className="text-sm font-semibold text-foreground mb-1.5">{f.title}</h3><p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p></div>
+              <div><h3 className="text-base font-semibold text-foreground mb-1.5">{f.title}</h3><p className="text-[15px] text-muted-foreground leading-relaxed">{f.desc}</p></div>
             </article>
           );
         })}
