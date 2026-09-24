@@ -12,3 +12,4 @@
 - [x] Restyle the remaining dashboard tools to match the approved warm SaaS mockup.
 - [x] Rebuild Resume + ATS to match the approved mockup while preserving analysis, rewrite, preview, and downloads.
 - [x] Standardize the visual system across every public, account, legal, and dashboard screen.
+- [x] Rebuild DOCX flow as Scan → Improve → Review → Re-scan using the ats-resume-improver engine.
