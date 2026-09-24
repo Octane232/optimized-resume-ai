@@ -76,18 +76,18 @@ const PaidManagement = () => {
   return (
     <div className="space-y-4">
       {/* Active Plan Card */}
-      <div className="rounded-xl border p-5 border-emerald-500/20 bg-emerald-500/5">
+      <div className="rounded-lg border p-5 border-primary/20 bg-primary/5">
         <div className="flex items-center justify-between">
           {/* Plan Info */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-emerald-500/10">
-              <CheckCircle className="w-5 h-5 text-emerald-500" />
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-primary/10">
+              <CheckCircle className="w-5 h-5 text-primary" />
             </div>
 
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="font-semibold text-foreground">{tierLabel} Plan</h3>
-                <Badge className="border-0 text-xs bg-emerald-500/10 text-emerald-600">
+                <Badge className="border-0 text-xs bg-primary/10 text-primary">
                   Active
                 </Badge>
               </div>

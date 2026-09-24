@@ -54,20 +54,11 @@ const PaywallGate: React.FC<PaywallGateProps> = ({ feature, onUpgrade, children 
 
   return (
     <div className="max-w-3xl mx-auto py-8 px-4">
-      <Card className="relative overflow-hidden border-2">
-        {/* Gradient background accent */}
-        <div
-          className="absolute inset-0 opacity-[0.08] pointer-events-none"
-          style={{ background: 'linear-gradient(135deg, hsl(217, 100%, 50%), hsl(262, 83%, 58%))' }}
-        />
-
+      <Card className="relative overflow-hidden border-border">
         <div className="relative p-8 md:p-12 text-center">
           {/* Icon badge */}
-          <div
-            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6 shadow-lg"
-            style={{ background: 'linear-gradient(135deg, hsl(217, 100%, 50%), hsl(262, 83%, 58%))' }}
-          >
-            <Icon className="w-8 h-8 text-white" />
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-lg mb-6 bg-primary/10">
+            <Icon className="w-7 h-7 text-primary" />
           </div>
 
           {/* Flagship badge for radar */}
@@ -97,8 +88,7 @@ const PaywallGate: React.FC<PaywallGateProps> = ({ feature, onUpgrade, children 
           <Button
             size="lg"
             onClick={onUpgrade}
-            className="gap-2 font-semibold shadow-lg text-white"
-            style={{ background: 'linear-gradient(135deg, hsl(217, 100%, 50%), hsl(262, 83%, 58%))' }}
+            className="gap-2"
           >
             <Sparkles className="w-4 h-4" />
             Upgrade to unlock

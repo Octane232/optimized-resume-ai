@@ -19,19 +19,16 @@ const steps = [
     icon: Target,
     title: 'Job Radar',
     description: 'Find high-match roles curated just for you based on your skills and experience.',
-    color: 'from-blue-500 to-blue-600'
   },
   {
     icon: FileText,
     title: 'Resume + ATS',
     description: 'Build, optimize, and tailor your resume to beat ATS systems and impress recruiters.',
-    color: 'from-emerald-500 to-emerald-600'
   },
   {
     icon: Sparkles,
     title: 'AI-Powered Tools',
     description: 'Cover letters, interview prep, and skill analysis—all powered by AI.',
-    color: 'from-purple-500 to-purple-600'
   }
 ];
 
@@ -61,12 +58,15 @@ const WalkthroughGuide: React.FC<WalkthroughGuideProps> = ({ onComplete }) => {
         className="relative w-full max-w-md bg-card rounded-lg shadow-lg border border-border overflow-hidden"
       >
         {/* Skip button */}
-        <button 
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={handleSkip}
-          className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted transition-colors z-10"
+          className="absolute top-3 right-3 z-10"
+          aria-label="Skip introduction"
         >
           <X className="w-4 h-4 text-muted-foreground" />
-        </button>
+        </Button>
 
         {/* Progress dots */}
         <div className="absolute top-4 left-4 flex gap-1.5 z-10">
@@ -96,8 +96,8 @@ const WalkthroughGuide: React.FC<WalkthroughGuideProps> = ({ onComplete }) => {
               className="text-center"
             >
               {/* Icon */}
-              <div className={`w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center shadow-lg`}>
-                <Icon className="w-10 h-10 text-white" />
+              <div className="w-16 h-16 mx-auto mb-6 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Icon className="w-8 h-8 text-primary" />
               </div>
 
               {/* Title */}

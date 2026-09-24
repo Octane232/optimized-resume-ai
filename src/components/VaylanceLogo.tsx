@@ -19,7 +19,7 @@ const VaylanceLogo: React.FC<VaylanceLogoProps> = ({
     aria-hidden="true"
     className={className}
   >
-    <rect width="48" height="48" rx="11" fill="#1d4ed8"/>
+    <rect width="48" height="48" rx="11" fill="hsl(var(--primary))"/>
     <circle cx="22" cy="27" r="11" stroke="white" strokeWidth="2.2" fill="none"/>
     <circle cx="22" cy="27" r="6.5" stroke="white" strokeWidth="1.6" strokeOpacity="0.6" fill="none"/>
     <circle cx="22" cy="27" r="2.6" fill="white"/>

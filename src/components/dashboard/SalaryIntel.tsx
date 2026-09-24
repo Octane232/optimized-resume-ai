@@ -80,11 +80,11 @@ const formatCurrency = (amount: number): string => {
 const getDemandColor = (demand: string): string => {
   switch (demand) {
     case 'High':
-      return 'text-emerald-500 bg-emerald-500/10';
+      return 'text-signal bg-signal-soft';
     case 'Medium':
       return 'text-amber-500 bg-amber-500/10';
     default:
-      return 'text-red-500 bg-red-500/10';
+      return 'text-destructive bg-destructive/10';
   }
 };
 
@@ -203,7 +203,7 @@ const SalaryIntel: React.FC = () => {
   const salaryRanges: SalaryRange[] = result ? [
     { label: 'Low', value: result.benchmark.salaryRange.low, color: 'text-muted-foreground' },
     { label: 'Median', value: result.benchmark.salaryRange.median, color: 'text-foreground' },
-    { label: 'High', value: result.benchmark.salaryRange.high, color: 'text-emerald-500' },
+    { label: 'High', value: result.benchmark.salaryRange.high, color: 'text-signal' },
   ] : [];
 
   const compensationItems: CompensationItem[] = result ? [
@@ -559,7 +559,7 @@ interface TopCompaniesProps {
 }
 
 const TopCompanies: React.FC<TopCompaniesProps> = ({ companies }) => (
-  <Card className="border-0 shadow-sm">
+  <Card className="border-border">
     <CardContent className="p-6">
       <div className="flex items-center gap-2 mb-4">
         <Building2 className="w-4 h-4 text-primary" />
@@ -652,14 +652,14 @@ const KeyTips: React.FC<KeyTipsProps> = ({ tips }) => (
   <Card className="border-0 shadow-sm">
     <CardContent className="p-6">
       <div className="flex items-center gap-2 mb-4">
-        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+        <CheckCircle2 className="w-4 h-4 text-signal" />
         <h3 className="font-semibold text-foreground">Key Tips</h3>
       </div>
 
       <div className="space-y-3">
         {tips.map((tip, index) => (
           <div key={index} className="flex items-start gap-2 text-sm text-muted-foreground">
-            <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-signal mt-0.5 shrink-0" />
             {tip}
           </div>
         ))}

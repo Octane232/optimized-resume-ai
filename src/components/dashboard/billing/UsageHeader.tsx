@@ -12,14 +12,14 @@ const UsageHeader = ({ setActiveTab }: { setActiveTab?: (tab: string) => void })
   const tierBadgeClass =
     tier === 'free' ? 'bg-muted text-muted-foreground border-border' :
     tier === 'pro' ? 'bg-primary/10 text-primary border-primary/20' :
-    'bg-emerald-500/10 text-emerald-600 border-emerald-500/20';
+    'bg-signal-soft text-signal border-signal/20';
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-border/60 bg-card p-6 space-y-5">
+      <div className="rounded-lg border border-border bg-card p-6 space-y-5">
         <div className="animate-pulse space-y-4">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 bg-muted rounded-xl" />
+            <div className="h-10 w-10 bg-muted rounded-lg" />
             <div className="space-y-2">
               <div className="h-3 w-16 bg-muted rounded" />
               <div className="h-5 w-24 bg-muted rounded" />
@@ -51,10 +51,10 @@ const UsageHeader = ({ setActiveTab }: { setActiveTab?: (tab: string) => void })
   const displayName = displayTier;
 
   return (
-    <div className="rounded-xl border border-border/60 bg-card p-6 space-y-5">
+    <div className="rounded-lg border border-border bg-card p-6 space-y-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-primary/10">
+          <div className="p-2.5 rounded-lg bg-primary/10">
             <Zap className="w-5 h-5 text-primary" />
           </div>
           <div>
