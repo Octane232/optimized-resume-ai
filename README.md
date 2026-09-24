@@ -37,8 +37,6 @@ The former "Resume Engine" — renamed because it is a scanner/optimizer, not a 
 - **In-place DOCX rewrite**: the AI edits the uploaded `.docx` via JSZip so the user's original template and formatting are preserved — offered as an opt-in prompt after analysis
 - Export as PDF (high fidelity) or DOCX (ATS-friendly structure)
 
-### Job Search
-Direct role search with filters (title, location, remote, experience), served by the `job-search` edge function. Gated behind a paid plan.
 
 ### Other tools
 | Tool | What it does |
