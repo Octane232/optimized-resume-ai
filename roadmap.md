@@ -6,3 +6,5 @@
 - [x] Verify desktop and mobile layouts and preserve existing functionality.
 - [x] Rebuild the public homepage to match the supplied SaaS reference while preserving the warm green palette.
 - [x] Verify the redesigned homepage on desktop and mobile.
+- [ ] Improve homepage trust, readability, plan clarity, feature examples, process visuals, and footer contact flow.
+- [ ] Verify the homepage trust and clarity improvements on desktop and mobile.

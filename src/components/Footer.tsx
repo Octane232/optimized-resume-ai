@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowUpRight, Mail } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const VaylanceLogo = () => (
   <svg width="24" height="24" viewBox="0 0 48 48" fill="none" aria-hidden="true">
@@ -40,114 +42,20 @@ const navSections = [
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setFormStatus('submitting');
-    
-    const form = e.currentTarget;
-    const formData = new FormData(form);
-    
-    try {
-      const response = await fetch('https://formspree.io/f/xwvzzdbp', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Accept': 'application/json',
-        },
-      });
-      
-      if (response.ok) {
-        setFormStatus('success');
-        form.reset();
-        setTimeout(() => setFormStatus('idle'), 5000);
-      } else {
-        setFormStatus('error');
-        setTimeout(() => setFormStatus('idle'), 5000);
-      }
-    } catch (error) {
-      setFormStatus('error');
-      setTimeout(() => setFormStatus('idle'), 5000);
-    }
-  };
 
   return (
     <footer className="bg-background border-t border-border">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
-          <div className="col-span-2 md:col-span-1">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 lg:gap-12">
+          <div className="col-span-2 md:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-3">
               <VaylanceLogo />
               <span className="font-bold text-lg text-foreground tracking-tight">Vaylance</span>
             </Link>
-            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
+            <p className="text-base text-muted-foreground leading-relaxed max-w-sm mb-5">
               Hiring signals and resume tools for reaching companies before the job is posted.
             </p>
-          </div>
-
-          {/* Contact Form Section */}
-          <div className="col-span-2 md:col-span-1">
-            <h4 className="text-xs font-bold text-foreground uppercase tracking-wider mb-4">
-              Contact Us
-            </h4>
-            
-            {formStatus === 'success' && (
-              <div className="mb-3 p-2 bg-signal/10 border border-signal/20 rounded-md">
-                <p className="text-xs text-signal text-center">
-                  Message sent! We'll get back to you at contact-us@vaylance.com
-                </p>
-              </div>
-            )}
-            
-            {formStatus === 'error' && (
-              <div className="mb-3 p-2 bg-destructive/10 border border-destructive/20 rounded-md">
-                <p className="text-xs text-destructive text-center">
-                  Something went wrong. Please email us directly at contact-us@vaylance.com
-                </p>
-              </div>
-            )}
-            
-            <form
-              onSubmit={handleSubmit}
-              className="space-y-3"
-            >
-              <input
-                type="text"
-                name="name"
-                placeholder="Your name"
-                required
-                disabled={formStatus === 'submitting'}
-                className="w-full px-3 py-2 text-sm rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
-              />
-              <input
-                type="email"
-                name="email"
-                placeholder="Your email"
-                required
-                disabled={formStatus === 'submitting'}
-                className="w-full px-3 py-2 text-sm rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
-              />
-              <textarea
-                name="message"
-                placeholder="Your message"
-                required
-                rows={3}
-                disabled={formStatus === 'submitting'}
-                className="w-full px-3 py-2 text-sm rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none disabled:opacity-50"
-              />
-              <button
-                type="submit"
-                disabled={formStatus === 'submitting'}
-                className="block w-full mt-1 px-4 py-2.5 text-sm font-semibold bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {formStatus === 'submitting' ? 'Sending...' : 'Send Message'}
-              </button>
-
-            </form>
-            <p className="text-xs text-muted-foreground text-center mt-2">
-              Or email us directly at <a href="mailto:contact-us@vaylance.com" className="text-primary hover:underline">contact-us@vaylance.com</a>
-            </p>
+            <Button asChild variant="outline"><Link to="/contact"><Mail className="w-4 h-4" /> Contact support <ArrowUpRight className="w-4 h-4" /></Link></Button>
           </div>
 
           {navSections.map((section) => (
@@ -158,7 +66,7 @@ const Footer = () => {
               <ul className="space-y-3">
                 {section.links.map((link, index) => (
                   <li key={index}>
-                    <Link to={link.to} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    <Link to={link.to} className="text-base text-muted-foreground hover:text-foreground transition-colors">
                       {link.label}
                     </Link>
                   </li>
@@ -170,11 +78,7 @@ const Footer = () => {
 
         <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-muted-foreground">© {currentYear} Vaylance. All rights reserved.</p>
-          <p className="text-xs text-muted-foreground">
-            <a href="mailto:contact-us@vaylance.com" className="hover:text-foreground transition-colors">
-              contact-us@vaylance.com
-            </a>
-          </p>
+          <p className="text-xs text-muted-foreground">Career tools for a more focused job search.</p>
         </div>
       </div>
     </footer>
