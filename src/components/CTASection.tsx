@@ -9,9 +9,9 @@ const CTASection = () => (
       <div className="rounded-lg border border-border bg-card p-6 sm:p-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-signal mb-2">Next step</p>
-          <h3 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight mb-2">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight mb-2">
             Find the companies hiring before everyone else.
-          </h3>
+          </h2>
           <p className="text-sm text-muted-foreground">Run a Job Radar scan and tailor your resume to what you find.</p>
         </div>
         <Button asChild size="lg" className="h-12 px-6 font-semibold shrink-0 w-full sm:w-auto">

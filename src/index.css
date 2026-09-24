@@ -117,6 +117,31 @@
     --sidebar-ring: 217 91% 60%;
   }
 
+
+  .warm {
+    --background: 40 33% 97%;
+    --foreground: 60 4% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 60 4% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 60 4% 11%;
+    --primary: 158 57% 28%;
+    --primary-foreground: 40 33% 97%;
+    --secondary: 38 25% 89%;
+    --secondary-foreground: 60 4% 11%;
+    --muted: 38 25% 92%;
+    --muted-foreground: 40 5% 38%;
+    --accent: 38 25% 89%;
+    --accent-foreground: 60 4% 11%;
+    --destructive: 4 70% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --signal: 158 57% 28%;
+    --signal-foreground: 40 33% 97%;
+    --signal-soft: 150 30% 92%;
+    --border: 38 20% 85%;
+    --input: 38 20% 82%;
+    --ring: 158 57% 28%;
+  }
   .dark {
     /* Vaylance Dark - Obsidian Intelligence Surface */
     --background: 222 34% 5%;
@@ -738,3 +763,16 @@
   border-color: hsl(var(--primary) / 0.5);
   box-shadow: 0 0 0 3px hsl(var(--primary) / 0.1);
 }
+
+/* Warm editorial theme for the public site */
+.warm { font-family: 'Work Sans', system-ui, sans-serif; }
+.warm h1, .warm h2 {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-weight: 400 !important;
+  letter-spacing: -0.01em !important;
+}
+.warm h1 { font-size: clamp(2.75rem, 6vw, 4.75rem) !important; line-height: 1.02 !important; }
+.warm h2 { font-size: clamp(2rem, 4vw, 3rem) !important; line-height: 1.08 !important; }
+.warm .font-mono, .warm .tabular { font-family: 'Work Sans', system-ui, sans-serif; letter-spacing: 0; }
+.warm .grid-texture { display: none; }
+.warm .uppercase { letter-spacing: 0.08em; }
