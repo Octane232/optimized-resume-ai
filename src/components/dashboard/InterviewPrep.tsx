@@ -1207,7 +1207,7 @@ const HeaderSection: React.FC<{ avgScore: number; sessionsCount: number }> = ({
   >
     <div className="flex items-center gap-3">
       <div className="relative shrink-0">
-        <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+        <div className="w-11 h-11 rounded-lg bg-primary flex items-center justify-center">
           <Mic className="w-5 h-5 text-white" aria-hidden="true" />
         </div>
         <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-background flex items-center justify-center">
