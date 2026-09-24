@@ -21,6 +21,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useUsageLimit } from '@/contexts/UsageLimitContext';
+import { ToolPageHeader } from './ToolPageHeader';
 
 // ===== Type Definitions =====
 interface SalaryData {
@@ -214,7 +215,7 @@ const SalaryIntel: React.FC = () => {
 
   // ===== Render =====
   return (
-    <div className="p-6 space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-6 max-w-5xl mx-auto">
       {/* Header */}
       <HeaderSection />
 
@@ -255,21 +256,7 @@ const SalaryIntel: React.FC = () => {
 
 // ===== Header Section =====
 const HeaderSection: React.FC = () => (
-  <motion.div
-    initial={{ opacity: 0, y: -10 }}
-    animate={{ opacity: 1, y: 0 }}
-    className="flex items-center gap-3"
-  >
-    <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
-      <DollarSign className="w-6 h-6" />
-    </div>
-    <div>
-      <h1 className="text-2xl font-bold text-foreground">Salary Intelligence</h1>
-      <p className="text-sm text-muted-foreground">
-        Know your worth before the first conversation.
-      </p>
-    </div>
-  </motion.div>
+  <ToolPageHeader title="Salary Intelligence" description="Compare market pay and prepare a stronger negotiation." icon={DollarSign} />
 );
 
 // ===== Input Form Component =====
@@ -315,7 +302,7 @@ const InputForm: React.FC<InputFormProps> = ({
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay: 0.05 }}
   >
-    <Card className="border-0 shadow-sm">
+    <Card className="rounded-lg border-border shadow-none">
       <CardContent className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
           <InputField

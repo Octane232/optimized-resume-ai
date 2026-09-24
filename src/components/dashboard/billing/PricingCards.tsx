@@ -55,7 +55,7 @@ const PLANS = [
       'Priority Support + Early Access',
       'ATS Resume Review',
       'Live Coach Mode',  // ← Added here
-      'Job Application Automation — Coming Soon 🚀'
+      'Job Application Automation — Coming Soon'
     ],
     locked: [],
   },
@@ -116,7 +116,7 @@ const PricingCards = () => {
           const Icon = plan.icon;
           
           return (
-            <div key={plan.id} className={`relative flex flex-col p-6 rounded-2xl border-2 bg-card hover:shadow-lg transition-all ${
+            <div key={plan.id} className={`relative flex flex-col p-6 rounded-lg border bg-card transition-colors ${
               isCurrent ? 'border-emerald-500 ring-2 ring-emerald-500/10' :
               plan.popular ? 'border-primary ring-2 ring-primary/10' : 'border-border'
             }`}>
@@ -143,7 +143,7 @@ const PricingCards = () => {
 
               <div className="text-center mb-5">
                 <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-4xl font-extrabold text-foreground">{price}</span>
+                  <span className="text-3xl font-bold text-foreground">{price}</span>
                   <span className="text-sm text-muted-foreground">/{billing === 'monthly' ? 'month' : 'year'}</span>
                 </div>
                 {billing === 'yearly' && (

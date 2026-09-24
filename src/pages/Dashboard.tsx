@@ -31,6 +31,7 @@ import SalaryIntel from '@/components/dashboard/SalaryIntel';
 import JobSearch from '@/components/dashboard/JobSearch';
 import WalkthroughGuide from '@/components/dashboard/WalkthroughGuide';
 import PaywallGate from '@/components/dashboard/PaywallGate';
+import HelpSupport from '@/components/dashboard/HelpSupport';
 
 import {
   DropdownMenu,
@@ -311,37 +312,7 @@ const Dashboard = () => {
       case 'settings':
         return <Settings />;
       case 'help':
-        return (
-          <div className="max-w-2xl mx-auto text-center py-12">
-            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-              <HelpCircle className="w-10 h-10 text-primary" />
-            </div>
-            <h1 className="text-2xl font-bold text-foreground mb-2">Help & Support</h1>
-            <p className="text-muted-foreground mb-6">
-              Have questions or need assistance? We're here to help.
-            </p>
-            <div className="space-y-4">
-              <div className="p-4 rounded-xl border border-border bg-card">
-                <h3 className="font-semibold mb-1">📧 Email Support</h3>
-                <a 
-                  href="mailto:contact-us@vaylance.com" 
-                  className="text-primary hover:underline"
-                >
-                  contact-us@vaylance.com
-                </a>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Response within 24 hours
-                </p>
-              </div>
-              <div className="p-4 rounded-xl border border-border bg-card">
-                <h3 className="font-semibold mb-1">📚 Documentation</h3>
-                <p className="text-sm text-muted-foreground">
-                  Check our guides for tips on using each feature.
-                </p>
-              </div>
-            </div>
-          </div>
-        );
+        return <HelpSupport />;
       default:
         return <HunterDashboard setActiveTab={handleSetActiveTab} />;
     }
