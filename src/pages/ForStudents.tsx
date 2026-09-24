@@ -159,11 +159,11 @@ const ForStudents = () => {
             <p className="text-xl text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
               Join thousands of students and recent graduates who landed their dream jobs with Vaylance.
             </p>
-            <div className="flex justify-center gap-4">
-              <Button asChild size="lg" variant="secondary" className="px-8 py-4">
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <Button asChild size="lg" variant="secondary" className="w-full sm:w-auto px-6 sm:px-8 py-4">
                 <Link to="/auth">Get Started Free</Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="border-primary-foreground/50 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground px-8 py-4">
+              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto border-primary-foreground/50 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground px-6 sm:px-8 py-4">
                 <Link to="/templates">View Student Templates</Link>
               </Button>
             </div>
