@@ -63,6 +63,27 @@ const HIRING_HINTS = [
 
 const stripTags = (s: string) => s.replace(/<[^>]*>/g, "").replace(/&[a-z]+;/gi, " ").trim();
 
+const BLOCKED_COMPANY_DOMAINS = new Set([
+  "linkedin.com", "facebook.com", "instagram.com", "x.com", "twitter.com", "youtube.com",
+  "news.google.com", "google.com", "reuters.com", "bloomberg.com", "forbes.com", "businesswire.com",
+  "prnewswire.com", "yahoo.com", "msn.com", "bbc.com", "cnn.com", "apnews.com",
+]);
+
+function normalizeCompanyDomain(value: unknown, sourceUrl: string): string | null {
+  if (typeof value !== "string" || !value.trim()) return null;
+  try {
+    const parsed = new URL(value.includes("://") ? value : `https://${value}`);
+    const hostname = parsed.hostname.toLowerCase().replace(/^www\./, "");
+    const sourceHostname = new URL(sourceUrl).hostname.toLowerCase().replace(/^www\./, "");
+    const validHostname = /^(?=.{4,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i.test(hostname);
+    const blocked = BLOCKED_COMPANY_DOMAINS.has(hostname) || [...BLOCKED_COMPANY_DOMAINS].some((domain) => hostname.endsWith(`.${domain}`));
+    if (!validHostname || blocked || hostname === sourceHostname) return null;
+    return hostname;
+  } catch {
+    return null;
+  }
+}
+
 function parseRssItems(xml: string, sourceName: string, requireHiringHint: boolean) {
   const items = xml.match(/<item>([\s\S]*?)<\/item>/g) || [];
   const out: any[] = [];
@@ -404,6 +425,7 @@ Return JSON only:
 {
  "is_hiring_signal": true|false,
  "company_name": "organisation name",
+ "company_domain": "official company website hostname, such as stripe.com; empty string unless you are highly confident it belongs to this exact organisation",
  "signal_type": "Funding|Expansion|New Facility|Contract Win|Acquisition|Investment|Hiring Announcement|Public Programme",
  "industry": "e.g. Healthcare, Retail, Construction, Logistics, Fintech, Education, Energy, Hospitality",
  "location": "city, region or country if known, else empty string",
@@ -419,7 +441,7 @@ Return JSON only:
  "confidence": 0-100
 }
 
-Set is_hiring_signal false if there is no credible hiring implication.
+Set is_hiring_signal false if there is no credible hiring implication. Never use the news publisher, a social network, or a guessed domain as company_domain.
 
 Source: ${article.sourceName}
 Title: ${article.title}
@@ -433,6 +455,7 @@ Description: ${article.description}`
           if (Number(parsed.confidence ?? 0) < 45) return null;
           return {
             company_name: String(parsed.company_name).slice(0, 160),
+            company_domain: normalizeCompanyDomain(parsed.company_domain, article.url),
             signal_type: parsed.signal_type || "Hiring Announcement",
             industry: parsed.industry || null,
             location: parsed.location || null,
@@ -464,6 +487,7 @@ Description: ${article.description}`
       if (existing) {
         await supabase.from("radar_signals").update({
           company_name: signal.company_name,
+          company_domain: signal.company_domain,
           signal_type: signal.signal_type,
           industry: signal.industry,
           location: signal.location,
