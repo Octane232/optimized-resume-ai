@@ -3,7 +3,6 @@ import VaylanceLogo from '@/components/VaylanceLogo';
 import {
   Home,
   Telescope,
-  Search,
   FileText,
   Mic,
   TrendingUp,
