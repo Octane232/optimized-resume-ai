@@ -61,7 +61,7 @@ const HeroSection = () => {
                   </div>
                   <div className="space-y-1 text-xs">
                     <div className="flex items-center gap-2 rounded-md bg-primary px-2.5 py-2 text-primary-foreground"><Radar className="w-3.5 h-3.5" /> Job Radar</div>
-                    <div className="flex items-center gap-2 px-2.5 py-2 text-muted-foreground"><Search className="w-3.5 h-3.5" /> Job Search</div>
+                    <div className="flex items-center gap-2 px-2.5 py-2 text-muted-foreground"><Search className="w-3.5 h-3.5" /> Application Tracker</div>
                     <div className="flex items-center gap-2 px-2.5 py-2 text-muted-foreground"><FileText className="w-3.5 h-3.5" /> Resume + ATS</div>
                     <div className="flex items-center gap-2 px-2.5 py-2 text-muted-foreground"><Target className="w-3.5 h-3.5" /> Interview Prep</div>
                   </div>

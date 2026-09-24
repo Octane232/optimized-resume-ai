@@ -14,7 +14,7 @@ const plans = [
       { icon: Mic, value: '30', label: 'Interview sessions' },
     ],
     groups: [
-      { label: 'Search', detail: '50 job searches · 15 Radar alerts' },
+      { label: 'Discovery', detail: '15 Radar alerts · 100 resume uploads' },
       { label: 'Applications', detail: '30 cover letters · 75 bullet rewrites · 10 DOCX rewrites' },
       { label: 'Career tools', detail: '15 LinkedIn · 15 skill gap · 10 salary reports' },
     ],
@@ -31,7 +31,7 @@ const plans = [
       { icon: Mic, value: '100', label: 'Interview sessions' },
     ],
     groups: [
-      { label: 'Search', detail: '120 job searches · 50 Radar alerts' },
+      { label: 'Discovery', detail: '50 Radar alerts · 500 resume uploads' },
       { label: 'Applications', detail: '100 cover letters · 300 bullet rewrites · 50 DOCX rewrites' },
       { label: 'Career tools', detail: '50 LinkedIn · 50 skill gap · 30 salary reports' },
       { label: 'Elite extras', detail: 'Live Coach Mode · ATS review · priority support' },

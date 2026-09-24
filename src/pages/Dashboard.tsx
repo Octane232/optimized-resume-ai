@@ -28,7 +28,6 @@ import InterviewPrep from '@/components/dashboard/InterviewPrep';
 import { SkillGapAnalyzer } from '@/components/dashboard/SkillGapAnalyzer';
 import LinkedInOptimizer from '@/components/dashboard/LinkedInOptimizer';
 import SalaryIntel from '@/components/dashboard/SalaryIntel';
-import JobSearch from '@/components/dashboard/JobSearch';
 import WalkthroughGuide from '@/components/dashboard/WalkthroughGuide';
 import PaywallGate from '@/components/dashboard/PaywallGate';
 import HelpSupport from '@/components/dashboard/HelpSupport';
@@ -48,7 +47,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 type Mode = 'hunter';
 type Tab = 
   | 'briefing'
-  | 'job-search'
   | 'scout'
   | 'salary-intel'
   | 'resume-engine'
@@ -63,7 +61,6 @@ type Tab =
 // ===== Constants =====
 const TAB_TITLES: Record<Tab, string> = {
   briefing: 'Dashboard',
-  'job-search': 'Job Search',
   scout: 'Job Radar',
   'salary-intel': 'Salary Intelligence',
   'resume-engine': 'Resume + ATS',
@@ -283,12 +280,6 @@ const Dashboard = () => {
     switch (activeTab) {
       case 'briefing':
         return <HunterDashboard setActiveTab={handleSetActiveTab} />;
-      case 'job-search':
-        return (
-          <PaywallGate feature="job-search" onUpgrade={() => handleSetActiveTab('billing')}>
-            <JobSearch />
-          </PaywallGate>
-        );
       case 'scout':
         return (
           <PaywallGate feature="radar" onUpgrade={() => handleSetActiveTab('billing')}>

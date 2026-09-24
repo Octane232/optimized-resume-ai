@@ -141,7 +141,6 @@ export async function checkFeatureLimit(
       radar_alert: "Radar Alerts",
       docx_rewrite: "DOCX Rewrites",
       resume_parse: "Resume Uploads",
-      job_search: "Job Searches",
       bullet_rewrite: "Bullet Rewrites",
     };
     const tierNames = {

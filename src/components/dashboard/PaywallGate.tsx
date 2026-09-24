@@ -1,11 +1,11 @@
 import React from 'react';
-import { Lock, Sparkles, Check, ArrowRight, Telescope, Search } from 'lucide-react';
+import { Lock, Sparkles, Check, ArrowRight, Telescope } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useUsageLimit } from '@/contexts/UsageLimitContext';
 
 interface PaywallGateProps {
-  feature: 'radar' | 'job-search';
+  feature: 'radar';
   onUpgrade: () => void;
   children: React.ReactNode;
 }
@@ -19,16 +19,6 @@ const COPY = {
       'AI-scanned funding & hiring signals',
       'Personalized match score for each company',
       'Alerts delivered before postings go live',
-    ],
-  },
-  'job-search': {
-    icon: Search,
-    title: 'Job Search is a paid feature',
-    subtitle: 'Search millions of live listings across every major board.',
-    bullets: [
-      'Live jobs from LinkedIn, Indeed, Glassdoor & more',
-      'Advanced filters: remote, salary, date, type',
-      'One-click apply with your tailored resume',
     ],
   },
 };

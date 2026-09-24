@@ -455,7 +455,7 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
           <div className="mt-3 space-y-2">
             {[
               { label: 'Scan a resume', caption: 'Score it against a job description', icon: FileText, tab: 'resume-engine' },
-              { label: 'Search live jobs', caption: 'Filter by title, location, work style', icon: Briefcase, tab: 'job-search' },
+              { label: 'Check Job Radar', caption: 'Companies hiring before jobs go public', icon: Briefcase, tab: 'scout' },
               { label: 'Practise an interview', caption: 'Role-specific questions with feedback', icon: Mic, tab: 'interview-prep' },
               { label: 'Improve LinkedIn', caption: 'Headline, About and keywords', icon: Linkedin, tab: 'linkedin' },
             ].map((a) => {

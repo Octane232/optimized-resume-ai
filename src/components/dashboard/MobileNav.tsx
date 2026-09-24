@@ -29,7 +29,6 @@ const MobileNav: React.FC<MobileNavProps> = ({ activeTab, setActiveTab }) => {
   ];
 
   const moreItems = [
-    { id: 'job-search', label: 'Job Search' },
     { id: 'interview-prep', label: 'Interview Coach' },
     { id: 'skill-gap', label: 'Skill Gap' },
     { id: 'linkedin', label: 'LinkedIn' },

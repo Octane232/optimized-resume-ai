@@ -10,7 +10,6 @@ export type UsageAction =
   | "radar_alert"
   | "docx_rewrite"
   | "resume_parse"
-  | "job_search"
   | "bullet_rewrite";
 // ===== Monthly Limits Per Feature Per Tier =====
 export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> = {
@@ -25,7 +24,6 @@ export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> 
     radar_alert: 15,
     docx_rewrite: 10,
     resume_parse: 100,
-    job_search: 50,
     bullet_rewrite: 75,
   },
   pro: {
@@ -38,7 +36,6 @@ export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> 
     radar_alert: 15,
     docx_rewrite: 10,
     resume_parse: 100,
-    job_search: 50,
     bullet_rewrite: 75,
   },
   elite: {
@@ -51,7 +48,6 @@ export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> 
     radar_alert: 50,
     docx_rewrite: 50,
     resume_parse: 500,
-    job_search: 120,
     bullet_rewrite: 300,
   },
 };
@@ -88,7 +84,6 @@ export const FEATURE_NAMES: Record<UsageAction, string> = {
   radar_alert: "Job Radar Alerts",
   docx_rewrite: "DOCX Resume Rewrite",
   resume_parse: "Resume File Upload",
-  job_search: "Job Search",
   bullet_rewrite: "Bullet Point Rewrite",
 };
 // ===== Feature Descriptions =====
@@ -102,7 +97,6 @@ export const FEATURE_DESCRIPTIONS: Record<UsageAction, string> = {
   radar_alert: "Discover hidden job opportunities before they're posted",
   docx_rewrite: "AI-powered DOCX resume rewriting",
   resume_parse: "Upload and parse PDF/DOCX resume files",
-  job_search: "Search for jobs across multiple platforms",
   bullet_rewrite: "AI-powered bullet point rewriting for resumes",
 };
 // ===== Deprecated Action Costs (kept for backward compatibility) =====
@@ -117,6 +111,5 @@ export const ACTION_COSTS: Record<UsageAction, number> = {
   radar_alert: 2,
   docx_rewrite: 3,
   resume_parse: 0,
-  job_search: 1,
   bullet_rewrite: 1,
 };
