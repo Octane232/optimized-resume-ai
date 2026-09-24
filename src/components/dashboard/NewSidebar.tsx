@@ -1,32 +1,32 @@
-import React, { useState } from 'react';
+import React from 'react';
 import VaylanceLogo from '@/components/VaylanceLogo';
-import { 
-  Home, 
-  Target, 
-  Crosshair,
-  ChevronLeft,
-  ChevronRight,
-  ChevronDown,
-  Stethoscope,
-  Sparkles,
+import {
+  Home,
   Telescope,
+  Search,
   FileText,
   Mic,
   TrendingUp,
-  Lock,
-  Radar,
+  Linkedin,
   DollarSign,
-  Globe,
-  Search
+  Crosshair,
+  Settings as SettingsIcon,
+  HelpCircle,
+  CreditCard,
+  ChevronLeft,
+  ChevronRight,
+  ArrowRight,
+  ShieldCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { 
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
-  TooltipTrigger 
+  TooltipTrigger,
 } from '@/components/ui/tooltip';
-import ThemeToggle from '@/components/ThemeToggle';
+import { cn } from '@/lib/utils';
+import { useUsageLimit } from '@/contexts/UsageLimitContext';
 
 interface NewSidebarProps {
   activeTab: string;
@@ -35,33 +35,45 @@ interface NewSidebarProps {
   setMode?: (mode: 'hunter') => void;
   collapsed: boolean;
   setCollapsed: (collapsed: boolean) => void;
+  radarCount?: number;
 }
 
-const NewSidebar: React.FC<NewSidebarProps> = ({ 
-  activeTab, 
-  setActiveTab, 
-  collapsed,
-  setCollapsed
-}) => {
-  const mode: 'hunter' = 'hunter';
-  const [moreOpen, setMoreOpen] = useState(
-    ['job-search', 'salary-intel', 'resume-engine', 'interview-prep', 'mission-control', 'linkedin', 'skill-gap'].includes(activeTab)
-  );
+interface NavItem {
+  id: string;
+  label: string;
+  icon: React.ElementType;
+  badge?: number;
+}
 
-  // Everything except the flagship Job Radar collapses under "More features"
-  const moreItems = [
+const NewSidebar: React.FC<NewSidebarProps> = ({
+  activeTab,
+  setActiveTab,
+  collapsed,
+  setCollapsed,
+  radarCount = 0,
+}) => {
+  const { tier } = useUsageLimit();
+  const isPaid = tier === 'pro' || tier === 'elite';
+
+  const mainItems: NavItem[] = [
+    { id: 'briefing', label: 'Home / Briefing', icon: Home },
+    { id: 'scout', label: 'Job Radar', icon: Telescope, badge: radarCount },
     { id: 'job-search', label: 'Job Search', icon: Search },
-    { id: 'salary-intel', label: 'Salary Intel', icon: DollarSign },
-    { id: 'resume-engine', label: 'Resume + ATS', icon: Stethoscope },
-    { id: 'interview-prep', label: 'Interview Coach ', icon: Mic },
-    { id: 'mission-control', label: 'App Tracker ', icon: Crosshair },
-    { id: 'linkedin', label: 'LinkedIn', icon: Sparkles },
+    { id: 'resume-engine', label: 'Resume + ATS', icon: FileText },
+    { id: 'interview-prep', label: 'Interview Coach', icon: Mic },
     { id: 'skill-gap', label: 'Skill Gap', icon: TrendingUp },
+    { id: 'linkedin', label: 'LinkedIn Optimizer', icon: Linkedin },
+    { id: 'salary-intel', label: 'Salary Intelligence', icon: DollarSign },
+    { id: 'mission-control', label: 'Mission Control', icon: Crosshair },
   ];
 
-  const modeColor = 'hsl(217, 100%, 50%)';
+  const toolItems: NavItem[] = [
+    { id: 'billing', label: 'Billing & Plan', icon: CreditCard },
+    { id: 'settings', label: 'Settings', icon: SettingsIcon },
+    { id: 'help', label: 'Help & Support', icon: HelpCircle },
+  ];
 
-  const renderNavItem = (item: { id: string; label: string; icon: any; comingSoon?: boolean }) => {
+  const renderNavItem = (item: NavItem) => {
     const Icon = item.icon;
     const isActive = activeTab === item.id;
 
@@ -69,173 +81,112 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
       <Tooltip key={item.id}>
         <TooltipTrigger asChild>
           <button
-            onClick={() => !item.comingSoon && setActiveTab(item.id)}
-            className={`
-              w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
-              transition-all duration-200 text-left
-              ${item.comingSoon 
-                ? 'text-sidebar-foreground/40 cursor-not-allowed' 
-                : isActive 
-                  ? 'bg-sidebar-accent text-sidebar-foreground' 
-                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
-              }
-            `}
-            style={isActive && !item.comingSoon ? { borderLeft: `3px solid ${modeColor}` } : {}}
+            onClick={() => setActiveTab(item.id)}
+            className={cn(
+              'w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors',
+              collapsed && 'justify-center px-0',
+              isActive
+                ? 'bg-primary/10 text-primary font-semibold'
+                : 'text-foreground/75 hover:bg-muted hover:text-foreground'
+            )}
           >
-            <Icon 
-              className="w-5 h-5 shrink-0" 
-              style={isActive && !item.comingSoon ? { color: modeColor } : {}}
-            />
+            <Icon className={cn('w-[18px] h-[18px] shrink-0', isActive && 'text-primary')} />
             {!collapsed && (
-              <span className="font-medium text-sm flex items-center gap-2">
-                {item.label}
-                {item.comingSoon && (
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">Soon</span>
-                )}
-              </span>
+              <>
+                <span className="flex-1 text-sm truncate">{item.label}</span>
+                {item.badge ? (
+                  <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                    {item.badge}
+                  </span>
+                ) : null}
+              </>
             )}
           </button>
         </TooltipTrigger>
-        {collapsed && (
-          <TooltipContent side="right">
-            {item.label}{item.comingSoon ? ' (Coming Soon)' : ''}
-          </TooltipContent>
-        )}
+        {collapsed && <TooltipContent side="right">{item.label}</TooltipContent>}
       </Tooltip>
     );
   };
 
   return (
-    <div 
-      className={`
-        h-screen flex flex-col bg-sidebar border-r border-sidebar-border
-        transition-all duration-300 ease-in-out
-        ${collapsed ? 'w-16' : 'w-64'}
-      `}
+    <div
+      className={cn(
+        'h-screen flex flex-col bg-card border-r border-border transition-all duration-300',
+        collapsed ? 'w-[68px]' : 'w-64'
+      )}
     >
-      {/* Logo & Toggle */}
-      <div className="p-4 flex items-center justify-between border-b border-sidebar-border">
+      {/* Brand */}
+      <div className="h-16 px-4 flex items-center justify-between border-b border-border shrink-0">
         {!collapsed ? (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             <VaylanceLogo width={28} height={28} />
-            <span className="text-xl font-bold text-foreground">Vaylance</span>
+            <span className="text-lg font-bold text-foreground truncate">Vaylance</span>
           </div>
         ) : (
-          <VaylanceLogo width={32} height={32} className="mx-auto" />
+          <VaylanceLogo width={28} height={28} className="mx-auto" />
         )}
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={() => setCollapsed(!collapsed)}
-          className="shrink-0"
-        >
-          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-        </Button>
+        {!collapsed && (
+          <Button variant="ghost" size="icon" onClick={() => setCollapsed(true)} className="shrink-0 h-8 w-8">
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+        )}
       </div>
 
+      {collapsed && (
+        <div className="px-2 pt-2">
+          <Button variant="ghost" size="icon" onClick={() => setCollapsed(false)} className="w-full h-8">
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
+      )}
 
-      {/* Navigation with sections */}
-      <nav className="flex-1 p-3 space-y-1 overflow-hidden">
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
         <TooltipProvider delayDuration={0}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => setActiveTab('briefing')}
-                className={`
-                  w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
-                  transition-all duration-200 text-left
-                  ${activeTab === 'briefing' 
-                    ? 'bg-sidebar-accent text-sidebar-foreground' 
-                    : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
-                  }
-                `}
-                style={activeTab === 'briefing' ? { borderLeft: `3px solid ${modeColor}` } : {}}
-              >
-                <Home className="w-5 h-5 shrink-0" style={activeTab === 'briefing' ? { color: modeColor } : {}} />
-                {!collapsed && <span className="font-medium text-sm">Dashboard</span>}
-              </button>
-            </TooltipTrigger>
-            {collapsed && <TooltipContent side="right">Dashboard</TooltipContent>}
-          </Tooltip>
+          {mainItems.map(renderNavItem)}
 
-          {/* ===== FLAGSHIP: JOB RADAR ===== */}
-          <div className="pt-3">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={() => setActiveTab('scout')}
-                  className={`
-                    group relative w-full flex items-center gap-3 rounded-xl text-left
-                    transition-all duration-300 overflow-hidden
-                    ${collapsed ? 'p-2.5 justify-center' : 'p-3'}
-                    ${activeTab === 'scout'
-                      ? 'shadow-lg shadow-blue-500/30'
-                      : 'hover:shadow-md hover:shadow-blue-500/20'
-                    }
-                  `}
-                  style={{
-                    background: activeTab === 'scout'
-                      ? 'linear-gradient(135deg, hsl(217, 100%, 50%), hsl(262, 83%, 58%))'
-                      : 'linear-gradient(135deg, hsl(217, 100%, 50% / 0.12), hsl(262, 83%, 58% / 0.12))',
-                    border: activeTab === 'scout' ? 'none' : `1px solid ${modeColor}40`,
-                  }}
-                >
-                  <div className={`shrink-0 rounded-lg p-1.5 ${activeTab === 'scout' ? 'bg-white/20' : ''}`}
-                       style={activeTab !== 'scout' ? { background: `${modeColor}20` } : {}}>
-                    <Telescope className="w-5 h-5" style={{ color: activeTab === 'scout' ? 'white' : modeColor }} />
-                  </div>
-                  {!collapsed && (
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className={`font-bold text-sm ${activeTab === 'scout' ? 'text-white' : 'text-sidebar-foreground'}`}>
-                          Job Radar
-                        </span>
-                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold tracking-wide ${
-                          activeTab === 'scout' ? 'bg-white/25 text-white' : 'bg-amber-500/20 text-amber-600 dark:text-amber-400'
-                        }`}>
-                          FLAGSHIP
-                        </span>
-                      </div>
-                      <p className={`text-[10px] mt-0.5 ${activeTab === 'scout' ? 'text-white/80' : 'text-sidebar-foreground/60'}`}>
-                        Hidden jobs, 14 days early
-                      </p>
-                    </div>
-                  )}
-                </button>
-              </TooltipTrigger>
-              {collapsed && <TooltipContent side="right">Job Radar — Flagship</TooltipContent>}
-            </Tooltip>
-          </div>
-
-          {/* ===== MORE FEATURES (collapsible) ===== */}
-          <div className="pt-4">
+          <div className="pt-5 pb-1">
             {!collapsed ? (
-              <button
-                onClick={() => setMoreOpen(!moreOpen)}
-                className="w-full flex items-center justify-between px-3 py-1.5 rounded-lg hover:bg-sidebar-accent/50 transition-colors"
-              >
-                <span className="text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/40">
-                  More features
-                </span>
-                <ChevronDown className={`w-3.5 h-3.5 text-sidebar-foreground/40 transition-transform ${moreOpen ? '' : '-rotate-90'}`} />
-              </button>
+              <p className="px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Account
+              </p>
             ) : (
-              <div className="my-2 border-t border-sidebar-border" />
-            )}
-            {(moreOpen || collapsed) && (
-              <div className="mt-1 space-y-1">
-                {moreItems.map(renderNavItem)}
-              </div>
+              <div className="border-t border-border mx-2" />
             )}
           </div>
+
+          {toolItems.map(renderNavItem)}
         </TooltipProvider>
       </nav>
 
-      {/* Bottom section with ThemeToggle */}
-      <div className="p-3 border-t border-sidebar-border flex items-center justify-between">
-        {!collapsed && <span className="text-xs text-muted-foreground">Theme</span>}
-        <ThemeToggle />
-      </div>
+      {/* Plan card */}
+      {!collapsed && (
+        <div className="p-3 shrink-0">
+          {isPaid ? (
+            <div className="rounded-xl border border-border bg-muted/50 p-3 flex items-center gap-2.5">
+              <ShieldCheck className="w-4 h-4 text-primary shrink-0" />
+              <div className="min-w-0">
+                <p className="text-sm font-semibold capitalize text-foreground">{tier} plan</p>
+                <p className="text-xs text-muted-foreground">All tools unlocked</p>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-xl bg-primary p-4 text-primary-foreground">
+              <p className="text-sm font-semibold">Unlock your full potential</p>
+              <p className="mt-1 text-xs text-primary-foreground/80">
+                Upgrade for Job Radar alerts, resume scans and coaching tools.
+              </p>
+              <button
+                onClick={() => setActiveTab('billing')}
+                className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-background px-3 py-2 text-sm font-semibold text-foreground transition-opacity hover:opacity-90"
+              >
+                View plans
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
