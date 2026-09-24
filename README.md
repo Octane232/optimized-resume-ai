@@ -108,7 +108,7 @@ The system uses **per-feature monthly quotas** (not a shared credit wallet).
 ```
 src/
 ├── components/
-│   ├── dashboard/            # Scout, ResumeEngine, JobSearch, MissionControl, …
+│   ├── dashboard/            # Scout, ResumeEngine, MissionControl, …
 │   │   ├── resume-engine/    # Parser, MatchingEngine, ExportPanel, suggestions
 │   │   ├── billing/          # PricingCards, UsageHeader, PaidManagement, FAQ
 │   │   ├── NewSidebar.tsx    # Job Radar highlighted, rest under "Tools"
@@ -131,7 +131,7 @@ supabase/
 │   ├── rewrite-bullet/       # Achievement-focused bullet rewrites
 │   ├── generate-resume-content/
 │   ├── analyze-skill-gap/  interview-feedback/  optimize-linkedin/
-│   ├── salary-intel/  job-search/  apply-bundle/
+│   ├── salary-intel/  apply-bundle/
 │   ├── radar-scan/  radar-alerts/  radar-mark-read/
 │   └── stripe-checkout/  stripe-webhook/  stripe-customer-portal/  check-subscription/
 └── migrations/
