@@ -6,7 +6,6 @@ const logos = [
   { name: 'Notion', slug: 'notion' },
   { name: 'Figma', slug: 'figma' },
   { name: 'Airbnb', slug: 'airbnb' },
-  { name: 'Slack', slug: 'slack' },
 ];
 
 const TrustedBySection = () => (

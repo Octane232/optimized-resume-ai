@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 // ===== Logo Components =====
 const VaylanceLogo = () => (
   <svg width="28" height="28" viewBox="0 0 48 48" fill="none" aria-hidden="true">
-    <rect width="48" height="48" rx="11" fill="#1d4ed8"/>
+    <rect width="48" height="48" rx="11" fill="hsl(var(--primary))"/>
     <circle cx="22" cy="27" r="11" stroke="white" strokeWidth="2.2" fill="none"/>
     <circle cx="22" cy="27" r="6.5" stroke="white" strokeWidth="1.6" strokeOpacity="0.6" fill="none"/>
     <circle cx="22" cy="27" r="2.6" fill="white"/>
@@ -19,17 +19,15 @@ const VaylanceLogo = () => (
 const Logo = () => (
   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
     <VaylanceLogo />
-    <span style={{ fontWeight: 700, fontSize: 20, color: 'white', letterSpacing: '-0.02em' }}>Vaylance</span>
+    <span style={{ fontWeight: 700, fontSize: 20, color: 'hsl(var(--foreground))', letterSpacing: '-0.02em' }}>Vaylance</span>
   </div>
 );
 
 // ===== Navigation Items =====
 const navItems = [
-  { label: 'Product', id: 'features' },
-  { label: 'Features', id: 'features' },
+  { label: 'Job Radar', id: 'features' },
+  { label: 'How it works', id: 'how-it-works' },
   { label: 'Pricing', id: 'pricing' },
-  { label: 'Resources', id: 'features' },
-  { label: 'Company', id: 'features' },
 ];
 
 // ===== Main Header Component =====
@@ -71,9 +69,6 @@ const Header = () => {
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
               >
                 {item.label}
-                {(item.label === 'Product' || item.label === 'Resources' || item.label === 'Company') && (
-                  <ChevronDown className="w-3.5 h-3.5" />
-                )}
               </button>
             ))}
           </nav>
@@ -83,7 +78,7 @@ const Header = () => {
             <Button asChild variant="ghost" size="sm" className="font-medium text-muted-foreground hover:text-foreground">
               <Link to="/auth">Sign in</Link>
             </Button>
-            <Button asChild size="sm" className="font-semibold bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white shadow-lg shadow-blue-500/20 px-5">
+            <Button asChild size="sm" className="font-semibold px-5">
               <Link to="/auth">Get Started Free</Link>
             </Button>
           </div>
@@ -115,7 +110,7 @@ const Header = () => {
                 <Button asChild variant="outline" size="sm">
                   <Link to="/auth">Sign in</Link>
                 </Button>
-                <Button asChild size="sm" className="bg-gradient-to-r from-blue-600 to-violet-600 text-white">
+                <Button asChild size="sm">
                   <Link to="/auth">Get Started Free</Link>
                 </Button>
               </div>
