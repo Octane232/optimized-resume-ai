@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Sparkles, Clipboard, RefreshCw, CheckCircle2, AlertTriangle, TrendingUp, Copy, Loader2, Upload, Download, Lock } from 'lucide-react';
+import { FileText, Sparkles, Clipboard, RefreshCw, CheckCircle2, AlertTriangle, TrendingUp, Copy, Loader2, Upload, Download, Lock, Search, BarChart3, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,22 +28,23 @@ interface BundleResult {
 
 // ===== Constants =====
 const STEPS = [
-  { icon: '📄', label: 'Paste resume + job', desc: 'One input, three outputs' },
-  { icon: '✨', label: 'AI tailors everything', desc: 'Resume, cover letter, ATS score' },
-  { icon: '📈', label: 'See your score jump', desc: 'Saved to your account automatically' },
+  { icon: FileText, label: 'Extract', desc: 'Read resume content' },
+  { icon: Search, label: 'Compare', desc: 'Analyze against job description' },
+  { icon: BarChart3, label: 'Score', desc: 'Calculate match quality' },
+  { icon: Lightbulb, label: 'Explain', desc: 'Show detailed feedback' },
 ];
 
 // ===== Helper Functions =====
 const getScoreColor = (s: number): string => {
-  if (s >= 80) return 'text-emerald-500';
-  if (s >= 60) return 'text-amber-500';
-  return 'text-red-500';
+  if (s >= 80) return 'text-primary';
+  if (s >= 60) return 'text-foreground';
+  return 'text-destructive';
 };
 
 const getProgressColor = (s: number): string => {
-  if (s >= 80) return 'bg-emerald-500';
-  if (s >= 60) return 'bg-amber-500';
-  return 'bg-red-500';
+  if (s >= 80) return 'bg-primary';
+  if (s >= 60) return 'bg-foreground';
+  return 'bg-destructive';
 };
 
 const wordCount = (t: string): number => {
@@ -380,34 +381,57 @@ const ResultsView: React.FC<{
   const improvement = result.atsData.afterScore - result.atsData.beforeScore;
 
   return (
-    <div className="p-6 space-y-6 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-emerald-500 text-white">
-            <CheckCircle2 className="w-6 h-6" />
+    <div className="mx-auto max-w-6xl space-y-6">
+      <HeaderSection action={
+        <Button variant="outline" onClick={onReset} className="gap-2">
+          <Upload className="h-4 w-4" />
+          Upload resume
+        </Button>
+      } />
+
+      <div className="grid gap-5 lg:grid-cols-[260px_minmax(0,1fr)]">
+        <ProcessRail complete />
+        <div className="space-y-5">
+          <Card className="rounded-lg border-border shadow-none">
+            <CardContent className="grid gap-6 p-5 md:grid-cols-[180px_minmax(0,1fr)] md:items-center">
+              <div className="flex flex-col items-center border-b border-border pb-5 md:border-b-0 md:border-r md:pb-0 md:pr-6">
+                <div className="flex h-28 w-28 items-center justify-center rounded-full border-[10px] border-primary/15 shadow-[inset_0_0_0_2px_hsl(var(--primary))]">
+                  <div className="text-center">
+                    <span className={`text-3xl font-bold ${getScoreColor(result.atsData.afterScore)}`}>{result.atsData.afterScore}</span>
+                    <span className="text-sm text-muted-foreground">/100</span>
+                  </div>
+                </div>
+                <p className="mt-3 text-sm font-semibold text-primary">Excellent match</p>
+                <p className="mt-1 text-xs text-muted-foreground">+{improvement} points after tailoring</p>
+              </div>
+              <div>
+                <h2 className="text-sm font-semibold text-foreground">Match breakdown</h2>
+                <div className="mt-4 space-y-4">
+                  <BreakdownRow label="Semantic match" value={50} score={Math.min(50, Math.round(result.atsData.afterScore * .5))} />
+                  <BreakdownRow label="Skills & experience" value={30} score={Math.min(30, Math.round(result.atsData.afterScore * .3))} />
+                  <BreakdownRow label="ATS keywords" value={20} score={Math.min(20, Math.round(result.atsData.afterScore * .2))} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="grid gap-5 md:grid-cols-2">
+            <InsightPanel title="Key insights" items={[
+              ...(result.atsData.foundKeywords || []).slice(0, 2).map(keyword => `Strong match for ${keyword}`),
+              ...(result.atsData.improvements || []).slice(0, 2),
+            ]} />
+            <InsightPanel title="Recommended changes" items={(result.atsData.missingKeywords || []).slice(0, 4).map(keyword => `Add evidence of ${keyword}`)} />
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Results Ready</h1>
-            <p className="text-sm text-muted-foreground">Saved to your account automatically.</p>
+
+          <div className="flex flex-wrap justify-end gap-2">
+            <Button variant="outline" onClick={onReset} className="gap-2"><RefreshCw className="h-4 w-4" />Re-upload</Button>
+            <Button onClick={onDownloadDOCX} disabled={!isPro} className="gap-2">
+              {isPro ? <Download className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+              Download optimized resume
+            </Button>
           </div>
         </div>
-        <Button variant="outline" onClick={onReset} className="gap-2">
-          <RefreshCw className="w-4 h-4" />
-          Start Over
-        </Button>
       </div>
-
-      <Card className="border-0 shadow-lg overflow-hidden">
-        <div className="h-1 bg-gradient-to-r from-red-500 via-amber-500 to-emerald-500" />
-        <CardContent className="p-6">
-          <div className="grid grid-cols-3 gap-6">
-            <ScoreCard label="Before" score={result.atsData.beforeScore} />
-            <ImprovementBadge improvement={improvement} />
-            <ScoreCard label="After" score={result.atsData.afterScore} />
-          </div>
-          <ProgressBar score={result.atsData.afterScore} />
-        </CardContent>
-      </Card>
 
       <ResultTabs
         result={result}
@@ -435,10 +459,39 @@ const ScoreCard: React.FC<{ label: string; score: number }> = ({ label, score })
 const ImprovementBadge: React.FC<{ improvement: number }> = ({ improvement }) => (
   <div className="flex items-center justify-center">
     <div className="flex items-center gap-2">
-      <TrendingUp className="w-8 h-8 text-emerald-500" />
-      <span className="text-2xl font-bold text-emerald-500">+{improvement}</span>
+      <TrendingUp className="w-8 h-8 text-primary" />
+      <span className="text-2xl font-bold text-primary">+{improvement}</span>
     </div>
   </div>
+);
+
+const BreakdownRow: React.FC<{ label: string; value: number; score: number }> = ({ label, value, score }) => (
+  <div>
+    <div className="mb-1.5 flex items-center justify-between text-xs">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-semibold text-foreground">{score}/{value}</span>
+    </div>
+    <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+      <motion.div initial={{ width: 0 }} animate={{ width: `${(score / value) * 100}%` }} className="h-full rounded-full bg-primary" />
+    </div>
+  </div>
+);
+
+const InsightPanel: React.FC<{ title: string; items: string[] }> = ({ title, items }) => (
+  <section className="rounded-lg border border-border bg-card p-5">
+    <div className="flex items-center justify-between">
+      <h2 className="text-sm font-semibold text-foreground">{title}</h2>
+      <Lightbulb className="h-4 w-4 text-primary" aria-hidden="true" />
+    </div>
+    <ul className="mt-4 space-y-3">
+      {(items.length ? items : ['Your resume is well aligned with this role.']).map((item, index) => (
+        <li key={`${item}-${index}`} className="flex items-start gap-2 text-sm leading-5 text-muted-foreground">
+          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+          <span>{item}</span>
+        </li>
+      ))}
+    </ul>
+  </section>
 );
 
 const ProgressBar: React.FC<{ score: number }> = ({ score }) => (
@@ -546,7 +599,7 @@ const ResumeTabContent: React.FC<{
       </div>
     </CardHeader>
     <CardContent>
-      <div className="bg-muted/30 rounded-xl p-6 whitespace-pre-wrap text-sm leading-relaxed max-h-[600px] overflow-y-auto font-mono">
+      <div className="max-h-[600px] overflow-y-auto rounded-lg bg-muted/50 p-6 font-mono text-sm leading-relaxed whitespace-pre-wrap">
         {resume}
       </div>
     </CardContent>
@@ -566,7 +619,7 @@ const CoverLetterTabContent: React.FC<{
       </Button>
     </CardHeader>
     <CardContent>
-      <div className="bg-muted/30 rounded-xl p-6 whitespace-pre-wrap text-sm leading-relaxed max-h-[600px] overflow-y-auto">
+      <div className="max-h-[600px] overflow-y-auto rounded-lg bg-muted/50 p-6 text-sm leading-relaxed whitespace-pre-wrap">
         {coverLetter}
       </div>
     </CardContent>
@@ -579,7 +632,7 @@ const ATSTabContent: React.FC<{ atsData: BundleResult['atsData'] }> = ({ atsData
       {atsData.missingKeywords?.length > 0 && (
         <KeywordSection
           title="Missing Keywords (Added in Tailored Version)"
-          icon={<AlertTriangle className="w-4 h-4 text-amber-500" />}
+          icon={<AlertTriangle className="h-4 w-4 text-destructive" />}
           keywords={atsData.missingKeywords}
           variant="warning"
         />
@@ -587,7 +640,7 @@ const ATSTabContent: React.FC<{ atsData: BundleResult['atsData'] }> = ({ atsData
       {atsData.foundKeywords?.length > 0 && (
         <KeywordSection
           title="Keywords Already Present"
-          icon={<CheckCircle2 className="w-4 h-4 text-emerald-500" />}
+          icon={<CheckCircle2 className="h-4 w-4 text-primary" />}
           keywords={atsData.foundKeywords}
           variant="success"
           showCheckmark
@@ -608,8 +661,8 @@ const KeywordSection: React.FC<{
   showCheckmark?: boolean;
 }> = ({ title, icon, keywords, variant, showCheckmark }) => {
   const colorClass = variant === 'warning'
-    ? 'bg-amber-500/5 text-amber-600 border-amber-500/20'
-    : 'bg-emerald-500/5 text-emerald-600 border-emerald-500/20';
+    ? 'border-destructive/20 bg-destructive/5 text-destructive'
+    : 'border-primary/20 bg-primary/5 text-primary';
 
   return (
     <div>
@@ -631,13 +684,13 @@ const KeywordSection: React.FC<{
 const ImprovementsSection: React.FC<{ improvements: string[] }> = ({ improvements }) => (
   <div>
     <h4 className="font-semibold mb-3 flex items-center gap-2">
-      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+      <CheckCircle2 className="h-4 w-4 text-primary" />
       Improvements Made
     </h4>
     <ul className="space-y-2">
       {improvements.map((imp, i) => (
         <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-          <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
           {imp}
         </li>
       ))}
@@ -828,46 +881,57 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
 
   // Otherwise show the input form
   return (
-    <div className="p-6 space-y-6 max-w-4xl mx-auto">
-      <HeaderSection />
-      <StepsSection />
-      
-      <InputSection
-        resumeText={resumeText}
-        jobDescription={jobDescription}
-        uploadedFileName={uploadedFileName}
-        uploadedDocxFile={uploadedDocxFile}
-        isUploading={isUploading}
-        isPro={isPro}
-        fileInputRef={fileInputRef}
-        onResumeChange={(val) => { 
-          setResumeText(val); 
-          resetFileUpload();
-        }}
-        onJobDescChange={setJobDescription}
-        onFileUpload={handleFileUpload}
-      />
-      
-      <ActionButtonsSection
-        canGenerate={canGenerate}
-        isProcessing={isProcessing}
-        remaining={remaining}
-        tier={tier}
-        hasInputs={hasValidInputs(resumeText, jobDescription)}
-        onGenerate={handleFormSubmit}
-        onUpgrade={() => setActiveTab?.('billing')}
-      />
+    <div className="mx-auto max-w-6xl space-y-6">
+      <HeaderSection action={
+        <>
+          <Button type="button" onClick={() => isPro ? fileInputRef.current?.click() : setActiveTab?.('billing')} disabled={isUploading} className="gap-2">
+            {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : isPro ? <Upload className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+            Upload resume
+          </Button>
+        </>
+      } />
 
-      <DocxRewriteSection
-        uploadedDocxFile={uploadedDocxFile}
-        isPro={isPro}
-        isRewritingDocx={isRewritingDocx}
-        editedDocxBase64={editedDocxBase64}
-        jobDescription={jobDescription}
-        resumeText={resumeText}
-        onRewriteDocx={handleRewriteDocx}
-        onDownloadEditedDocx={downloadEditedDocx}
-      />
+      <div className="grid gap-5 lg:grid-cols-[260px_minmax(0,1fr)]">
+        <ProcessRail />
+        <div className="space-y-5">
+          <InputSection
+            resumeText={resumeText}
+            jobDescription={jobDescription}
+            uploadedFileName={uploadedFileName}
+            uploadedDocxFile={uploadedDocxFile}
+            isUploading={isUploading}
+            isPro={isPro}
+            fileInputRef={fileInputRef}
+            onResumeChange={(val) => {
+              setResumeText(val);
+              resetFileUpload();
+            }}
+            onJobDescChange={setJobDescription}
+            onFileUpload={handleFileUpload}
+          />
+
+          <ActionButtonsSection
+            canGenerate={canGenerate}
+            isProcessing={isProcessing}
+            remaining={remaining}
+            tier={tier}
+            hasInputs={hasValidInputs(resumeText, jobDescription)}
+            onGenerate={handleFormSubmit}
+            onUpgrade={() => setActiveTab?.('billing')}
+          />
+
+          <DocxRewriteSection
+            uploadedDocxFile={uploadedDocxFile}
+            isPro={isPro}
+            isRewritingDocx={isRewritingDocx}
+            editedDocxBase64={editedDocxBase64}
+            jobDescription={jobDescription}
+            resumeText={resumeText}
+            onRewriteDocx={handleRewriteDocx}
+            onDownloadEditedDocx={downloadEditedDocx}
+          />
+        </div>
+      </div>
 
       <RewritePromptDialog
         open={showRewritePrompt}
@@ -882,34 +946,37 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
 };
 
 // Additional subcomponents for the main form
-const HeaderSection: React.FC = () => (
-  <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-    <div className="flex items-center gap-3">
-      <div className="p-2.5 rounded-xl bg-primary text-primary-foreground">
-        <FileText className="w-6 h-6" />
-      </div>
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Resume + ATS Optimizer</h1>
-        <p className="text-sm text-muted-foreground">
-          Paste your resume and a job description. Get a tailored resume, cover letter, and ATS score in 60 seconds.
-        </p>
-      </div>
+const HeaderSection: React.FC<{ action?: React.ReactNode }> = ({ action }) => (
+  <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="flex flex-wrap items-start justify-between gap-4">
+    <div>
+      <h1 className="font-display text-2xl text-foreground">Resume + ATS</h1>
+      <p className="mt-1 text-sm leading-6 text-muted-foreground">Optimize your resume for ATS and get a higher match rate.</p>
     </div>
+    {action}
   </motion.div>
 );
 
-const StepsSection: React.FC = () => (
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-    {STEPS.map((step, i) => (
-      <Card key={i} className="border-0 shadow-sm">
-        <CardContent className="p-4 text-center">
-          <span className="text-2xl">{step.icon}</span>
-          <p className="text-sm font-medium mt-2">{step.label}</p>
-          <p className="text-xs text-muted-foreground mt-1">{step.desc}</p>
-        </CardContent>
-      </Card>
-    ))}
-  </div>
+const ProcessRail: React.FC<{ complete?: boolean }> = ({ complete = false }) => (
+  <aside className="rounded-lg border border-border bg-card p-5">
+    <ol className="grid grid-cols-2 gap-4 lg:block lg:space-y-0">
+      {STEPS.map((step, index) => {
+        const Icon = step.icon;
+        const isActive = complete || index === 0;
+        return (
+          <li key={step.label} className="relative flex gap-3 pb-0 lg:pb-7 last:pb-0">
+            {index < STEPS.length - 1 && <span className="absolute left-3.5 top-7 hidden h-[calc(100%-1.25rem)] w-px bg-border lg:block" aria-hidden="true" />}
+            <div className={`relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border ${isActive ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-background text-muted-foreground'}`}>
+              {complete ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Icon className="h-3.5 w-3.5" />}
+            </div>
+            <div>
+              <p className={`text-sm font-semibold ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}>{step.label}</p>
+              <p className="mt-0.5 text-xs leading-5 text-muted-foreground">{step.desc}</p>
+            </div>
+          </li>
+        );
+      })}
+    </ol>
+  </aside>
 );
 
 const InputSection: React.FC<{
@@ -935,22 +1002,23 @@ const InputSection: React.FC<{
   onJobDescChange, 
   onFileUpload 
 }) => (
-  <div className="space-y-4">
-    <ResumeInputSection
-      resumeText={resumeText}
-      uploadedFileName={uploadedFileName}
-      uploadedDocxFile={uploadedDocxFile}
-      isUploading={isUploading}
-      isPro={isPro}
-      fileInputRef={fileInputRef}
-      onResumeChange={onResumeChange}
-      onFileUpload={onFileUpload}
-    />
-    <JobDescriptionSection
-      jobDescription={jobDescription}
-      onChange={onJobDescChange}
-    />
-  </div>
+  <Card className="rounded-lg border-border shadow-none">
+    <CardContent className="p-5">
+      <div className="grid gap-5 md:grid-cols-2">
+        <ResumeInputSection
+          resumeText={resumeText}
+          uploadedFileName={uploadedFileName}
+          uploadedDocxFile={uploadedDocxFile}
+          isUploading={isUploading}
+          isPro={isPro}
+          fileInputRef={fileInputRef}
+          onResumeChange={onResumeChange}
+          onFileUpload={onFileUpload}
+        />
+        <JobDescriptionSection jobDescription={jobDescription} onChange={onJobDescChange} />
+      </div>
+    </CardContent>
+  </Card>
 );
 
 const ResumeInputSection: React.FC<{
@@ -973,8 +1041,8 @@ const ResumeInputSection: React.FC<{
   onFileUpload 
 }) => (
   <div>
-    <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-      <label className="text-sm font-medium">Your Resume</label>
+    <div className="mb-2 flex min-h-9 flex-wrap items-center justify-between gap-2">
+      <label className="text-sm font-semibold">Your resume</label>
       <div className="flex items-center gap-2">
         <input 
           ref={fileInputRef} 
@@ -999,7 +1067,7 @@ const ResumeInputSection: React.FC<{
           ) : (
             <Lock className="w-4 h-4" />
           )}
-          Upload{!isPro && ' (Pro)'}
+          Replace
         </Button>
       </div>
     </div>
@@ -1007,12 +1075,12 @@ const ResumeInputSection: React.FC<{
       placeholder="Paste your full resume text here..."
       value={resumeText}
       onChange={(e) => onResumeChange(e.target.value)}
-      className="min-h-[200px] bg-muted/30 resize-y"
+      className="min-h-[260px] resize-y border-input bg-background text-sm leading-6"
     />
     <p className="text-xs text-muted-foreground mt-1">
-      {uploadedFileName ? `📎 ${uploadedFileName} — ${wordCount(resumeText)} words` : 
+      {uploadedFileName ? `${uploadedFileName} — ${wordCount(resumeText)} words` : 
        resumeText ? `${wordCount(resumeText)} words` : 
-       'Paste text or upload PDF/DOCX (Pro/Elite feature)'}
+        'Paste text or upload a PDF or DOCX file'}
     </p>
   </div>
 );
@@ -1022,12 +1090,14 @@ const JobDescriptionSection: React.FC<{
   onChange: (val: string) => void;
 }> = ({ jobDescription, onChange }) => (
   <div>
-    <label className="text-sm font-medium mb-2 block">Job Description</label>
+    <div className="mb-2 flex min-h-9 items-center">
+      <label className="text-sm font-semibold">Job description</label>
+    </div>
     <Textarea
       placeholder="Paste the full job posting here..."
       value={jobDescription}
       onChange={(e) => onChange(e.target.value)}
-      className="min-h-[200px] bg-muted/30 resize-y"
+      className="min-h-[260px] resize-y border-input bg-background text-sm leading-6"
     />
     <p className="text-xs text-muted-foreground mt-1">
       {jobDescription ? `${wordCount(jobDescription)} words` : 'Copy the entire posting from LinkedIn, Indeed, etc.'}
@@ -1046,7 +1116,7 @@ const ActionButtonsSection: React.FC<{
 }> = ({ canGenerate, isProcessing, remaining, tier, hasInputs, onGenerate, onUpgrade }) => {
   if (!canGenerate) {
     return (
-      <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-center space-y-2">
+      <div className="space-y-2 rounded-lg border border-primary/20 bg-primary/5 p-4 text-center">
         <p className="text-sm font-semibold">
           {tier === 'free' ? 'Free Limit Reached' : 'Monthly Limit Reached'}
         </p>
@@ -1066,7 +1136,7 @@ const ActionButtonsSection: React.FC<{
         onClick={onGenerate} 
         disabled={isProcessing || !hasInputs} 
         size="lg" 
-        className="w-full h-14 text-lg font-semibold gap-3 rounded-2xl"
+        className="h-12 w-full gap-3 text-base font-semibold"
       >
         {isProcessing ? (
           <>

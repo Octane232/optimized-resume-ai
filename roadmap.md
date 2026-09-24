@@ -10,3 +10,4 @@
 - [x] Verify the homepage trust and clarity improvements on desktop and mobile.
 - [x] Add verified Logo.dev company marks with safe fallbacks throughout Job Radar.
 - [x] Restyle the remaining dashboard tools to match the approved warm SaaS mockup.
+- [x] Rebuild Resume + ATS to match the approved mockup while preserving analysis, rewrite, preview, and downloads.
