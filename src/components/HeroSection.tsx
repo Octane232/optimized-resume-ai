@@ -27,14 +27,14 @@ const HeroSection = () => {
               Find the opportunity <span className="text-primary">before the crowd.</span>
             </h1>
 
-            <p className="text-base sm:text-lg text-muted-foreground max-w-lg mb-8 leading-relaxed">
+            <p className="text-lg text-muted-foreground max-w-lg mb-8 leading-relaxed">
               Discover companies preparing to hire, tailor your resume for the role, and walk into every application better prepared.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 mb-7">
               <Button asChild size="lg" className="h-12 px-6 text-base font-semibold">
                 <Link to="/auth">
-                  Start for free
+                  Create free account
                   <ArrowRight className="w-4 h-4 ml-1.5" />
                 </Link>
               </Button>
@@ -43,8 +43,8 @@ const HeroSection = () => {
               </Button>
             </div>
 
-            <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground">
-              {['No card required', 'Cancel anytime', 'Built for real job searches'].map((item) => (
+            <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
+              {['No card required', 'Explore the workspace', 'Upgrade to run tools'].map((item) => (
                 <span key={item} className="inline-flex items-center gap-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5 text-primary" /> {item}
                 </span>
@@ -114,10 +114,15 @@ const HeroSection = () => {
       </div>
 
       <div className="border-t border-border bg-card/55">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <p className="text-center text-[10px] font-semibold uppercase text-muted-foreground mb-4">Built for job seekers across every industry</p>
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 text-center text-xs font-semibold text-muted-foreground">
-            {['Technology', 'Healthcare', 'Finance', 'Logistics', 'Retail', 'Energy'].map((industry) => <span key={industry}>{industry}</span>)}
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-7">
+          <div className="grid sm:grid-cols-3 gap-5 sm:gap-0 sm:divide-x divide-border mb-7">
+            {[{ value: '12+', label: 'industries monitored' }, { value: 'Every 6h', label: 'signal scan cadence' }, { value: 'PDF + DOCX', label: 'resume formats supported' }].map((stat) => (
+              <div key={stat.label} className="text-center px-4"><p className="text-xl font-semibold text-foreground">{stat.value}</p><p className="text-sm text-muted-foreground mt-1">{stat.label}</p></div>
+            ))}
+          </div>
+          <p className="text-center text-xs font-semibold uppercase text-muted-foreground mb-4">Explore coverage by industry</p>
+          <div className="flex flex-wrap justify-center gap-2">
+            {['Technology', 'Healthcare', 'Finance', 'Logistics', 'Retail', 'Energy'].map((industry) => <Button key={industry} asChild variant="outline" size="sm" className="h-9 rounded-full text-sm"><Link to="/auth" aria-label={`Explore ${industry} opportunities`}>{industry}</Link></Button>)}
           </div>
         </div>
       </div>
