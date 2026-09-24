@@ -4,7 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 
 import Header from '@/components/Header';
 import HeroSection from '@/components/HeroSection';
-import TrustedBySection from '@/components/TrustedBySection';
 import FeaturesSection from '@/components/FeaturesSection';
 import HowItWorksSection from '@/components/HowItWorksSection';
 import TestimonialsSection from '@/components/TestimonialsSection';
@@ -117,7 +116,7 @@ const Index = () => {
   }, [location]);
 
   return (
-    <div className="dark min-h-screen bg-background text-foreground">
+    <div className="warm font-body min-h-screen bg-background text-foreground">
       <SEOHead
         title="Vaylance — AI Job Search Platform | Get Hired Faster"
         description="Vaylance helps you tailor your resume to pass ATS filters, prep for interviews, and find companies hiring before they post publicly. Start free."
@@ -126,7 +125,6 @@ const Index = () => {
       />
       <Header />
       <HeroSection />
-      <TrustedBySection />
       <div id="features"><FeaturesSection /></div>
       <HowItWorksSection />
       <div id="testimonials"><TestimonialsSection /></div>
