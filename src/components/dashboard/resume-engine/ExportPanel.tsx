@@ -404,7 +404,7 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
           >
             {copied ? (
               <>
-                <Check className="w-4 h-4 text-emerald-500" />
+                <Check className="w-4 h-4 text-signal" />
                 Copied!
               </>
             ) : (

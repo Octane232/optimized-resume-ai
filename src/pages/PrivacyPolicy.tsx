@@ -221,13 +221,13 @@ const PrivacyPolicy = () => {
             <p className="text-muted-foreground leading-relaxed">
               If you have questions about this Privacy Policy or how we handle your information, please contact us:
             </p>
-            <div className="bg-primary/5 rounded-xl p-6 space-y-2">
+            <div className="bg-primary/5 rounded-lg p-6 space-y-2">
               <p className="font-semibold text-foreground">Vaylance Privacy Team</p>
               <p className="text-muted-foreground">Email: contact@vaylance.com</p>
             </div>
           </section>
 
-          <div className="mt-12 p-6 bg-primary/5 rounded-xl border border-primary/10">
+          <div className="mt-12 p-6 bg-primary/5 rounded-lg border border-primary/10">
             <p className="text-sm text-muted-foreground leading-relaxed">
               <strong className="text-foreground">Your Trust Matters:</strong> At Vaylance, we are committed to transparency and protecting your privacy. We will never sell your personal information to third parties. Your resume data is yours, and you maintain full control over how it's used and shared.
             </p>
