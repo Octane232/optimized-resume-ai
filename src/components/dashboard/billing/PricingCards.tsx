@@ -18,7 +18,6 @@ const PLANS = [
     tagline: 'For active job seekers',
     popular: false,
     features: [
-      '50 Job Searches / month',
       '75 Bullet Rewrites / month',
       '30 Resume + ATS runs / month',
       '30 Cover Letters / month',
@@ -41,7 +40,6 @@ const PLANS = [
     tagline: 'For serious candidates',
     popular: true,
     features: [
-      '120 Job Searches / month',
       '300 Bullet Rewrites / month',
       '100 Resume + ATS runs / month',
       '100 Cover Letters / month',
