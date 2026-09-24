@@ -492,7 +492,7 @@ const Dashboard = () => {
         </header>
 
         {/* Content Area */}
-        <div>
+        <div className={activeTab === 'briefing' ? '' : 'p-4 md:p-6'}>
           {renderContent()}
         </div>
       </main>
