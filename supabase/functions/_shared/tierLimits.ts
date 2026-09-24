@@ -10,7 +10,6 @@ export type UsageAction =
   | "radar_alert"
   | "docx_rewrite"
   | "resume_parse"
-  | "job_search"
   | "bullet_rewrite";
 // ===== Monthly Limits Per Feature Per Tier =====
 export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> = {
@@ -25,7 +24,6 @@ export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> 
     radar_alert: 15,
     docx_rewrite: 10,
     resume_parse: 100,
-    job_search: 50,
     bullet_rewrite: 75,
   },
   pro: {
@@ -38,7 +36,6 @@ export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> 
     radar_alert: 15,
     docx_rewrite: 10,
     resume_parse: 100,
-    job_search: 50,
     bullet_rewrite: 75,
   },
   elite: {
@@ -51,7 +48,6 @@ export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> 
     radar_alert: 50,
     docx_rewrite: 50,
     resume_parse: 500,
-    job_search: 120,
     bullet_rewrite: 300,
   },
 };
