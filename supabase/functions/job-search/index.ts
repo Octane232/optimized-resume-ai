@@ -79,7 +79,7 @@ async function enforceQuota(userId: string, feature: string) {
   // Monthly limits per tier
   const limits = {
     free: {
-      job_search: 5, // 5 searches per month
+      job_search: 50, // TESTING: temporarily Pro limit
     },
     pro: {
       job_search: 50, // 50 searches per month

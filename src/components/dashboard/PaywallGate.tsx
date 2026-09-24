@@ -45,7 +45,8 @@ const PaywallGate: React.FC<PaywallGateProps> = ({ feature, onUpgrade, children 
     );
   }
 
-  const isPaid = tier === 'pro' || tier === 'elite';
+  // TESTING: everyone unlocked while the site is free for testing
+  const isPaid = tier === 'free' || tier === 'pro' || tier === 'elite';
   if (isPaid) return <>{children}</>;
 
   const copy = COPY[feature];
