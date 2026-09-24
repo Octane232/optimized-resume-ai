@@ -1,4 +1,5 @@
-import type { ResumeData } from '../types'
+// Adapted from simeononsecurity/ats-resume-improver (MIT License).
+import type { ResumeData } from './types'
 
 // ─── Resume Types ─────────────────────────────────────────────────────────────
 

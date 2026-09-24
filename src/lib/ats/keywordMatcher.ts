@@ -1,4 +1,5 @@
-import type { JobDescriptionData, KeywordAnalysis, AIKeywordMatch, AIKeywordMissing } from '../types'
+// Adapted from simeononsecurity/ats-resume-improver (MIT License).
+import type { JobDescriptionData, KeywordAnalysis, AIKeywordMatch, AIKeywordMissing } from './types'
 
 // Common tech skill synonyms / related terms
 const SKILL_RELATIONS: Record<string, string[]> = {
