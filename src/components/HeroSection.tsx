@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Radar, Building2, MapPin, Linkedin, FileText, ArrowDown } from 'lucide-react';
+import { ArrowRight, Radar, Building2, MapPin, Search, FileText, Bell, BriefcaseBusiness, Target, Sparkles, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const signal = {
@@ -14,31 +14,27 @@ const signal = {
 
 const HeroSection = () => {
   return (
-    <section className="relative border-b border-border pt-24 sm:pt-28 pb-12 sm:pb-20">
-      <div className="absolute inset-0 -z-10 grid-texture opacity-[0.35]" aria-hidden="true" />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-[1.05fr_1fr] gap-10 lg:gap-14 items-center">
-          {/* Left: copy */}
-          <div>
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md border border-border bg-secondary/60 text-[11px] font-semibold text-muted-foreground mb-5">
+    <section className="relative overflow-hidden border-b border-border pt-24 sm:pt-28">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14 sm:pb-20">
+        <div className="grid lg:grid-cols-[0.92fr_1.08fr] gap-12 lg:gap-16 items-center">
+          <div className="max-w-xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-secondary/60 text-[11px] font-semibold text-primary mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-signal" />
-              Job Radar · live hiring signals
+              CAREER OPPORTUNITY INTELLIGENCE
             </div>
 
-            <h1 className="text-[2.15rem] leading-[1.1] sm:text-5xl lg:text-[3.5rem] lg:leading-[1.05] font-extrabold text-foreground tracking-tight mb-5">
-              Reach companies before the job is posted
+            <h1 className="text-[2.75rem] sm:text-6xl lg:text-[4.2rem] font-bold text-foreground mb-6 text-balance">
+              Find the opportunity <span className="text-primary">before the crowd.</span>
             </h1>
 
-            <p className="text-base sm:text-lg text-muted-foreground max-w-md mb-7 leading-relaxed">
-              Vaylance tracks funding, expansion and hiring news, then tailors your
-              resume to the roles those companies are about to open.
+            <p className="text-base sm:text-lg text-muted-foreground max-w-lg mb-8 leading-relaxed">
+              Discover companies preparing to hire, tailor your resume for the role, and walk into every application better prepared.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 mb-8">
+            <div className="flex flex-col sm:flex-row gap-3 mb-7">
               <Button asChild size="lg" className="h-12 px-6 text-base font-semibold">
                 <Link to="/auth">
-                  Start scanning
+                  Start for free
                   <ArrowRight className="w-4 h-4 ml-1.5" />
                 </Link>
               </Button>
@@ -47,111 +43,81 @@ const HeroSection = () => {
               </Button>
             </div>
 
-            <dl className="grid grid-cols-3 gap-4 max-w-md border-t border-border pt-6">
-              {[
-                { v: '12+', l: 'Industries scanned' },
-                { v: '6h', l: 'Scan interval' },
-                { v: '50/30/20', l: 'ATS score model' },
-              ].map((s) => (
-                <div key={s.l}>
-                  <dt className="tabular text-xl font-semibold text-foreground">{s.v}</dt>
-                  <dd className="text-xs text-muted-foreground mt-0.5">{s.l}</dd>
-                </div>
+            <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground">
+              {['No card required', 'Cancel anytime', 'Built for real job searches'].map((item) => (
+                <span key={item} className="inline-flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-primary" /> {item}
+                </span>
               ))}
-            </dl>
+            </div>
           </div>
 
-          {/* Right: real product evidence */}
-          <div className="space-y-3">
-            {/* Radar signal */}
-            <article className="panel p-5">
-              <div className="flex items-start justify-between gap-3 mb-4">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-md bg-secondary border border-border flex items-center justify-center">
-                    <Building2 className="w-4 h-4 text-muted-foreground" />
+          <div className="relative">
+            <div className="absolute -inset-5 bg-primary/5 rounded-full blur-3xl" aria-hidden="true" />
+            <div className="relative overflow-hidden rounded-lg border border-border bg-card shadow-xl">
+              <div className="flex h-[440px] sm:h-[480px]">
+                <aside className="hidden sm:flex w-40 shrink-0 flex-col border-r border-border bg-secondary/35 p-3">
+                  <div className="flex items-center gap-2 px-2 py-2 mb-5 font-semibold text-sm text-foreground">
+                    <Radar className="w-4 h-4 text-primary" /> Vaylance
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground leading-tight">{signal.company}</p>
-                    <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                      <MapPin className="w-3 h-3" />
-                      {signal.location}
-                    </p>
+                  <div className="space-y-1 text-xs">
+                    <div className="flex items-center gap-2 rounded-md bg-primary px-2.5 py-2 text-primary-foreground"><Radar className="w-3.5 h-3.5" /> Job Radar</div>
+                    <div className="flex items-center gap-2 px-2.5 py-2 text-muted-foreground"><Search className="w-3.5 h-3.5" /> Job Search</div>
+                    <div className="flex items-center gap-2 px-2.5 py-2 text-muted-foreground"><FileText className="w-3.5 h-3.5" /> Resume + ATS</div>
+                    <div className="flex items-center gap-2 px-2.5 py-2 text-muted-foreground"><Target className="w-3.5 h-3.5" /> Interview Prep</div>
                   </div>
+                  <div className="mt-auto rounded-md border border-border bg-card p-2.5">
+                    <p className="text-[10px] font-semibold text-foreground">Weekly progress</p>
+                    <div className="mt-2 h-1.5 rounded-full bg-secondary overflow-hidden"><div className="h-full w-3/4 bg-primary" /></div>
+                  </div>
+                </aside>
+
+                <div className="min-w-0 flex-1 p-4 sm:p-5 bg-background/55">
+                  <div className="flex items-center justify-between mb-5">
+                    <div>
+                      <p className="text-[11px] text-muted-foreground">Good morning</p>
+                      <h2 className="!text-lg !font-semibold font-body text-foreground">Your opportunity feed</h2>
+                    </div>
+                    <div className="w-9 h-9 rounded-full border border-border bg-card flex items-center justify-center"><Bell className="w-4 h-4 text-muted-foreground" /></div>
+                  </div>
+
+                  <div className="rounded-lg bg-primary p-4 text-primary-foreground mb-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div><p className="text-[11px] opacity-80 mb-1">JOB RADAR</p><p className="text-sm font-semibold">New companies match your goals</p></div>
+                      <span className="tabular text-2xl font-semibold">12</span>
+                    </div>
+                    <Button asChild variant="secondary" size="sm" className="mt-4 h-8 text-xs"><Link to="/auth">View radar <ArrowRight className="w-3.5 h-3.5 ml-1" /></Link></Button>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 mb-4">
+                    {[{ icon: Target, n: '94', l: 'ATS score' }, { icon: BriefcaseBusiness, n: '8', l: 'Applications' }, { icon: Sparkles, n: '3', l: 'Prep sessions' }].map((item) => {
+                      const Icon = item.icon;
+                      return <div key={item.l} className="rounded-md border border-border bg-card p-3"><Icon className="w-4 h-4 text-primary mb-3" /><p className="tabular text-xl font-semibold text-foreground">{item.n}</p><p className="text-[10px] text-muted-foreground mt-0.5">{item.l}</p></div>;
+                    })}
+                  </div>
+
+                  <article className="rounded-lg border border-border bg-card p-4">
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <div className="flex items-center gap-2.5"><div className="w-8 h-8 rounded-md bg-secondary flex items-center justify-center"><Building2 className="w-4 h-4 text-primary" /></div><div><p className="text-xs font-semibold text-foreground">{signal.company}</p><p className="text-[10px] text-muted-foreground flex items-center gap-1"><MapPin className="w-3 h-3" />{signal.location}</p></div></div>
+                      <span className="rounded-full bg-signal-soft px-2 py-1 text-[10px] font-semibold text-signal">{signal.confidence}% match</span>
+                    </div>
+                    <div className="rounded-md bg-secondary/60 p-2.5 mb-3"><p className="text-[9px] text-muted-foreground mb-1">WHY NOW</p><p className="text-xs text-foreground">{signal.trigger} · {signal.when}</p></div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {signal.roles.slice(0, 2).map((role) => <span key={role} className="rounded-full border border-border px-2 py-1 text-[10px] text-muted-foreground">{role}</span>)}
+                    </div>
+                  </article>
                 </div>
-                <span className="shrink-0 inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-signal-soft border border-signal/30 text-[11px] font-semibold text-signal">
-                  <Radar className="w-3 h-3" />
-                  {signal.confidence}% match
-                </span>
               </div>
-
-              <div className="rounded-md border border-border bg-secondary/40 px-3 py-2.5 mb-4">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
-                  Why now
-                </p>
-                <p className="text-sm text-foreground">
-                  {signal.trigger} · {signal.when}
-                </p>
-              </div>
-
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                Likely to open
-              </p>
-              <ul className="space-y-1.5 mb-4">
-                {signal.roles.map((r) => (
-                  <li key={r} className="flex items-center justify-between text-sm text-foreground/90">
-                    <span>{r}</span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-signal" />
-                  </li>
-                ))}
-              </ul>
-
-              <div className="flex items-center gap-2 pt-3 border-t border-border">
-                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                  <Linkedin className="w-3.5 h-3.5" />
-                  Find hiring contact
-                </span>
-              </div>
-            </article>
-
-            <div className="flex justify-center">
-              <ArrowDown className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
             </div>
+          </div>
+        </div>
+      </div>
 
-            {/* ATS follow-through */}
-            <article className="panel p-5">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-md bg-secondary border border-border flex items-center justify-center">
-                    <FileText className="w-4 h-4 text-muted-foreground" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground leading-tight">Resume + ATS</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">Tailored to Operations Manager</p>
-                  </div>
-                </div>
-                <span className="tabular text-2xl font-bold text-signal">94</span>
-              </div>
-
-              <div className="space-y-2.5">
-                {[
-                  { l: 'Semantic fit', w: 96, weight: '50%' },
-                  { l: 'Skills & experience', w: 91, weight: '30%' },
-                  { l: 'Exact ATS keywords', w: 88, weight: '20%' },
-                ].map((b) => (
-                  <div key={b.l}>
-                    <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="text-muted-foreground">
-                        {b.l} <span className="tabular">({b.weight})</span>
-                      </span>
-                      <span className="tabular font-medium text-foreground">{b.w}</span>
-                    </div>
-                    <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
-                      <div className="h-full rounded-full bg-signal" style={{ width: `${b.w}%` }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </article>
+      <div className="border-t border-border bg-card/55">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <p className="text-center text-[10px] font-semibold uppercase text-muted-foreground mb-4">Built for job seekers across every industry</p>
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 text-center text-xs font-semibold text-muted-foreground">
+            {['Technology', 'Healthcare', 'Finance', 'Logistics', 'Retail', 'Energy'].map((industry) => <span key={industry}>{industry}</span>)}
           </div>
         </div>
       </div>
