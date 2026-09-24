@@ -380,6 +380,7 @@ const Dashboard = () => {
           setMode={setMode}
           collapsed={sidebarCollapsed}
           setCollapsed={setSidebarCollapsed}
+          radarCount={unreadAlerts}
         />
       </div>
 
