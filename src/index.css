@@ -291,27 +291,25 @@
   border-radius: 50%;
 }
 
-/* Header glassmorphism */
+/* Sticky header surface */
 .header-glass {
-  backdrop-filter: blur(20px) saturate(180%);
-  background: hsl(var(--background) / 0.85);
+  backdrop-filter: blur(16px);
+  background: hsl(var(--background) / 0.9);
   border-bottom: 1px solid hsl(var(--border));
-  box-shadow: 0 4px 16px -4px hsl(var(--electric-blue) / 0.08);
 }
 
 .saas-button {
-  background: var(--gradient-primary);
+  background: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
   border-radius: var(--radius);
   font-weight: 600;
-  transition: all 0.3s var(--ease-smooth);
-  box-shadow: var(--shadow-glow);
+  transition: background-color 180ms var(--ease-smooth);
 }
 
 .saas-button:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-glow-lg);
+  background: hsl(var(--primary) / 0.88);
 }
+
 
 /* Status indicators */
 .status-success {
