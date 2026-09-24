@@ -1,5 +1,4 @@
 // Adapted from simeononsecurity/ats-resume-improver (MIT License).
-import type { AIConfig } from '../lib/aiProvider'
 
 export interface ResumeData {
   name: string
