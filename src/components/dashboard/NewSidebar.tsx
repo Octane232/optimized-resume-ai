@@ -52,7 +52,7 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
   radarCount = 0,
 }) => {
   const { tier } = useUsageLimit();
-  const isPaid = true; // TESTING: everything free
+  const isPaid = tier === 'trial' || tier === 'pro' || tier === 'elite';
 
   const mainItems: NavItem[] = [
     { id: 'briefing', label: 'Home / Briefing', icon: Home },

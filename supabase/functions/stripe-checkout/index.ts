@@ -89,6 +89,19 @@ serve(async (req) => {
     }
 
 
+    // 3-day free trial: only for customers who never subscribed before.
+    let grantTrial = false;
+    try {
+      const priorSubs = await stripe.subscriptions.list({
+        customer: customerId,
+        status: "all",
+        limit: 1,
+      });
+      grantTrial = priorSubs.data.length === 0;
+    } catch (e) {
+      console.log("Could not check prior subscriptions, skipping trial:", e);
+    }
+
     // Create checkout session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -103,6 +116,7 @@ serve(async (req) => {
         billing,
       },
       subscription_data: {
+        ...(grantTrial ? { trial_period_days: 3 } : {}),
         metadata: {
           supabase_user_id: user.id,
           plan,

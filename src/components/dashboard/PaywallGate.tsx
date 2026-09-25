@@ -13,8 +13,8 @@ interface PaywallGateProps {
 const COPY = {
   radar: {
     icon: Telescope,
-    title: 'Job Radar is a paid feature',
-    subtitle: 'Reach hiring managers 14 days before jobs go public.',
+    title: 'Job Radar is part of the paid plan',
+    subtitle: 'Start a 3-day free trial and reach hiring managers before roles go public.',
     bullets: [
       'AI-scanned funding & hiring signals',
       'Personalized match score for each company',
@@ -35,8 +35,7 @@ const PaywallGate: React.FC<PaywallGateProps> = ({ feature, onUpgrade, children 
     );
   }
 
-  // TESTING: everyone unlocked while the site is free for testing
-  const isPaid = tier === 'free' || tier === 'pro' || tier === 'elite';
+  const isPaid = tier === 'trial' || tier === 'pro' || tier === 'elite';
   if (isPaid) return <>{children}</>;
 
   const copy = COPY[feature];
@@ -55,7 +54,7 @@ const PaywallGate: React.FC<PaywallGateProps> = ({ feature, onUpgrade, children 
           <div className="flex items-center justify-center gap-2 mb-3">
             <Lock className="w-3.5 h-3.5 text-muted-foreground" />
             <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              Locked · Upgrade required
+              Locked · 3-day free trial available
             </span>
           </div>
 
@@ -81,12 +80,12 @@ const PaywallGate: React.FC<PaywallGateProps> = ({ feature, onUpgrade, children 
             className="gap-2"
           >
             <Sparkles className="w-4 h-4" />
-            Upgrade to unlock
+            Start 3-day free trial
             <ArrowRight className="w-4 h-4" />
           </Button>
 
           <p className="text-xs text-muted-foreground mt-4">
-            Cancel anytime · Secure payment via Stripe
+            Card required · Cancel anytime during the trial · Secure payment via Stripe
           </p>
         </div>
       </Card>

@@ -715,7 +715,7 @@ const SignalsList: React.FC<SignalsListProps> = ({
   tier,
   onUpgradeClick 
 }) => {
-  const hasFullAccess = true; // TESTING: everything free
+  const hasFullAccess = tier === 'trial' || tier === 'pro' || tier === 'elite';
   const visibleSignals = hasFullAccess ? signals : signals.slice(0, 3);
   const lockedCount = signals.length - visibleSignals.length;
 
