@@ -571,7 +571,19 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
               <div className="flex items-start justify-between gap-3 mb-2">
                 <div>
                   <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors flex flex-wrap items-center gap-2">
-                    {s.company_name}
+                    {companyUrl ? (
+                      <a
+                        href={companyUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 hover:text-primary hover:underline"
+                      >
+                        {s.company_name}
+                        <ExternalLink className="w-3 h-3 opacity-60" />
+                      </a>
+                    ) : (
+                      s.company_name
+                    )}
                     {s.signal_type && (
                       <Badge variant="outline" className="text-xs bg-primary/5 text-primary border-primary/20">
                         {s.signal_type}
