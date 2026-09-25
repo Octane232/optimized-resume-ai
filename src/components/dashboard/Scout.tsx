@@ -317,8 +317,126 @@ interface SignalCardProps {
   index: number;
 }
 
+interface Opening {
+  title: string;
+  location: string | null;
+  department: string | null;
+  url: string;
+}
+
+interface OpeningsResult {
+  status: 'company_site' | 'ats' | 'pre_market';
+  provider?: string;
+  board_url?: string;
+  careers_url?: string;
+  company_url?: string | null;
+  jobs: Opening[];
+}
+
 const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
   const s = signal;
+  const { toast } = useToast();
+  const [openingsLoading, setOpeningsLoading] = useState(false);
+  const [openings, setOpenings] = useState<OpeningsResult | null>(null);
+  const [showOpenings, setShowOpenings] = useState(false);
+
+  const companyUrl = s.company_domain
+    ? `https://${s.company_domain.replace(/^www\./, '')}`
+    : null;
+
+  const findApplication = async () => {
+    if (openings) {
+      setShowOpenings((v) => !v);
+      return;
+    }
+    setOpeningsLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Please sign in again.');
+      const { data, error } = await supabase.functions.invoke('find-openings', {
+        body: { company_name: s.company_name, company_domain: s.company_domain },
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (error) throw error;
+      const result = data as OpeningsResult;
+      setOpenings(result);
+      setShowOpenings(true);
+      if (result.status === 'company_site' && result.careers_url) {
+        window.open(result.careers_url, '_blank');
+      }
+    } catch (e) {
+      toast({
+        title: "Couldn't check openings",
+        description: e instanceof Error ? e.message : 'Please try again in a moment.',
+        variant: 'destructive',
+      });
+    } finally {
+      setOpeningsLoading(false);
+    }
+  };
+
+  const ApplicationPanel = () => {
+    if (!openings || !showOpenings) return null;
+
+    if (openings.status === 'company_site') {
+      return (
+        <div className="mt-3 p-3 rounded-lg border border-primary/20 bg-primary/5">
+          <p className="text-sm text-foreground mb-2">
+            Applications are handled on their own careers page.
+          </p>
+          <Button size="sm" className="gap-2" onClick={() => window.open(openings.careers_url, '_blank')}>
+            <ExternalLink className="w-3.5 h-3.5" />
+            Open careers page
+          </Button>
+        </div>
+      );
+    }
+
+    if (openings.status === 'ats') {
+      return (
+        <div className="mt-3 rounded-lg border border-border bg-muted/30 p-3">
+          <p className="text-xs font-semibold text-primary mb-2">
+            {openings.jobs.length} open position{openings.jobs.length === 1 ? '' : 's'}
+            {openings.provider ? ` · via ${openings.provider}` : ''}
+          </p>
+          <div className="space-y-1.5 max-h-64 overflow-y-auto">
+            {openings.jobs.map((job, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between gap-3 rounded-md bg-background border border-border px-3 py-2"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{job.title}</p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {[job.location, job.department].filter(Boolean).join(' · ') || 'See listing'}
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="shrink-0 gap-1.5"
+                  onClick={() => window.open(job.url, '_blank')}
+                >
+                  Apply
+                  <ArrowUpRight className="w-3 h-3" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="mt-3 p-3 rounded-lg border border-border bg-muted/30">
+        <p className="text-sm text-foreground">
+          No public application posted yet — you're early. Message the hiring lead using your outreach
+          angle before this goes public.
+        </p>
+      </div>
+    );
+  };
+  
   
   const MetaInfo = () => (
     <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground mb-3">
@@ -453,7 +571,19 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
               <div className="flex items-start justify-between gap-3 mb-2">
                 <div>
                   <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors flex flex-wrap items-center gap-2">
-                    {s.company_name}
+                    {companyUrl ? (
+                      <a
+                        href={companyUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 hover:text-primary hover:underline"
+                      >
+                        {s.company_name}
+                        <ExternalLink className="w-3 h-3 opacity-60" />
+                      </a>
+                    ) : (
+                      s.company_name
+                    )}
                     {s.signal_type && (
                       <Badge variant="outline" className="text-xs bg-primary/5 text-primary border-primary/20">
                         {s.signal_type}
@@ -486,13 +616,21 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
 
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <Button
-                  variant="outline"
                   size="sm"
                   className="gap-2"
-                  onClick={() => window.open(s.source_url, '_blank')}
+                  disabled={openingsLoading}
+                  onClick={findApplication}
                 >
-                  <ArrowUpRight className="w-3.5 h-3.5" />
-                  View Source
+                  {openingsLoading ? (
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Search className="w-3.5 h-3.5" />
+                  )}
+                  {openings
+                    ? showOpenings
+                      ? 'Hide application'
+                      : 'Show application'
+                    : 'Find application'}
                 </Button>
                 <Button
                   variant="outline"
@@ -503,12 +641,24 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
                   <Users className="w-3.5 h-3.5" />
                   Find Hiring Contact
                 </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => window.open(s.source_url, '_blank')}
+                >
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                  View Source
+                </Button>
                 {typeof s.confidence === 'number' && (
                   <Badge variant="secondary" className="text-xs">
                     {s.confidence}% signal confidence
                   </Badge>
                 )}
               </div>
+
+              <ApplicationPanel />
+
 
             </div>
           </div>
