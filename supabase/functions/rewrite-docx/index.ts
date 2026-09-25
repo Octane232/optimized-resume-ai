@@ -16,6 +16,38 @@ function unescapeXml(s: string): string {
   return s.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, "&");
 }
 
+function plainText(s: string): string {
+  return s
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/__([^_]+)__/g, "$1")
+    .replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, "$1")
+    .replace(/(?<!_)_([^_]+)_(?!_)/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/^\s{0,3}#{1,6}\s+/gm, "")
+    .trim();
+}
+
+function splitForExistingRuns(text: string, originalLengths: number[]): string[] {
+  if (originalLengths.length <= 1) return [text];
+  const total = originalLengths.reduce((sum, length) => sum + length, 0);
+  if (total === 0) return [text, ...originalLengths.slice(1).map(() => "")];
+
+  const parts: string[] = [];
+  let cursor = 0;
+  let cumulative = 0;
+  for (let i = 0; i < originalLengths.length - 1; i += 1) {
+    cumulative += originalLengths[i];
+    const target = Math.round((cumulative / total) * text.length);
+    let boundary = target;
+    while (boundary < text.length && boundary > cursor && !/\s/.test(text[boundary])) boundary += 1;
+    if (boundary >= text.length) boundary = target;
+    parts.push(text.slice(cursor, boundary));
+    cursor = boundary;
+  }
+  parts.push(text.slice(cursor));
+  return parts;
+}
+
 function extractParas(xml: string) {
   const paras: { full: string; inner: string; index: number; text: string }[] = [];
   let m: RegExpExecArray | null;
@@ -37,6 +69,7 @@ RULES:
 - Use job keywords only where the original text already supports them.
 - Never add numbers or percentages that are not in the original.
 - Keep each paragraph within ~20% of its original length. Do not merge or split paragraphs.
+- Return plain text only. Never use Markdown, asterisks, underscores, backticks, bullets, or formatting instructions. The Word template already controls bold, italics, fonts, and layout.
 - Only return paragraphs you actually improved, with a one-sentence reason.
 Return JSON: {"items":[{"id":number,"improved":string,"reason":string}]}`;
 
@@ -96,8 +129,9 @@ serve(async (req) => {
       try { parsed = JSON.parse(aiData.choices?.[0]?.message?.content || "{}"); } catch { return jsonResponse({ error: "AI returned invalid data" }, 502); }
 
       const suggestions = (parsed.items || [])
-        .filter((it) => typeof it.id === "number" && typeof it.improved === "string" && paras[it.id] && it.improved.trim() && it.improved.trim() !== paras[it.id].text.trim())
-        .map((it) => ({ id: it.id, original: paras[it.id].text, improved: it.improved.trim(), reason: it.reason || "" }));
+        .map((it) => ({ ...it, improved: typeof it.improved === "string" ? plainText(it.improved) : "" }))
+        .filter((it) => typeof it.id === "number" && paras[it.id] && it.improved && it.improved !== paras[it.id].text.trim())
+        .map((it) => ({ id: it.id, original: paras[it.id].text, improved: it.improved, reason: plainText(it.reason || "") }));
 
       await recordUsage(auth, "docx_rewrite");
       return jsonResponse({ suggestions, originalText: paras.map((p) => p.text).filter((t) => t.trim()).join("\n") });
@@ -109,14 +143,19 @@ serve(async (req) => {
 
       const updates: { start: number; end: number; replacement: string }[] = [];
       paras.forEach((p, idx) => {
-        const newText = edits[String(idx)];
-        if (typeof newText !== "string" || !newText.trim() || newText === p.text) return;
-        let first = false;
+        const requestedText = edits[String(idx)];
+        if (typeof requestedText !== "string") return;
+        const newText = plainText(requestedText).slice(0, 3000);
+        if (!newText || newText === p.text) return;
+        const originalLengths = Array.from(p.inner.matchAll(new RegExp(wtRegex.source, "g"))).map((match) => unescapeXml(match[2]).length);
+        const runTexts = splitForExistingRuns(newText, originalLengths);
+        let runIndex = 0;
         const newInner = p.inner.replace(new RegExp(wtRegex.source, "g"), (_f, attrs) => {
           const a = attrs || "";
           const fa = / xml:space=/.test(a) ? a : `${a} xml:space="preserve"`;
-          if (!first) { first = true; return `<w:t${fa}>${escapeXml(newText.slice(0, 3000))}</w:t>`; }
-          return `<w:t${fa}></w:t>`;
+          const replacement = runTexts[runIndex] || "";
+          runIndex += 1;
+          return `<w:t${fa}>${escapeXml(replacement)}</w:t>`;
         });
         updates.push({ start: p.index, end: p.index + p.full.length, replacement: p.full.replace(p.inner, newInner) });
       });
