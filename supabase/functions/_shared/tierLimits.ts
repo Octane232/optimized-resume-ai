@@ -1,5 +1,5 @@
 // ===== Types =====
-export type SubscriptionTier = "free" | "pro" | "elite";
+export type SubscriptionTier = "free" | "trial" | "pro" | "elite";
 export type UsageAction =
   | "resume_ats"
   | "cover_letter"
@@ -12,43 +12,57 @@ export type UsageAction =
   | "resume_parse"
   | "bullet_rewrite";
 // ===== Monthly Limits Per Feature Per Tier =====
+// free  = no active subscription (trial ended / cancelled)
+// trial = 3-day Stripe trial with fair-use caps
+// pro   = $24/month, elite = $49/month
 export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> = {
   free: {
-    // TESTING: free temporarily gets Pro limits
-    resume_ats: 30,
-    cover_letter: 30,
-    linkedin: 15,
-    skill_gap: 15,
-    interview_prep: 30,
-    salary_intel: 10,
-    radar_alert: 15,
-    docx_rewrite: 10,
-    resume_parse: 100,
-    bullet_rewrite: 75,
+    resume_ats: 1,
+    cover_letter: 1,
+    linkedin: 0,
+    skill_gap: 0,
+    interview_prep: 0,
+    salary_intel: 1,
+    radar_alert: 3,
+    docx_rewrite: 0,
+    resume_parse: 2,
+    bullet_rewrite: 3,
+  },
+  trial: {
+    resume_ats: 5,
+    cover_letter: 5,
+    linkedin: 3,
+    skill_gap: 3,
+    interview_prep: 3,
+    salary_intel: 3,
+    radar_alert: 5,
+    docx_rewrite: 3,
+    resume_parse: 10,
+    bullet_rewrite: 15,
   },
   pro: {
-    resume_ats: 30,
-    cover_letter: 30,
-    linkedin: 15,
-    skill_gap: 15,
-    interview_prep: 30,
-    salary_intel: 10,
-    radar_alert: 15,
-    docx_rewrite: 10,
-    resume_parse: 100,
-    bullet_rewrite: 75,
+    resume_ats: 40,
+    cover_letter: 40,
+    linkedin: 20,
+    skill_gap: 20,
+    interview_prep: 40,
+    salary_intel: 15,
+    radar_alert: 30,
+    docx_rewrite: 15,
+    resume_parse: 120,
+    bullet_rewrite: 150,
   },
   elite: {
-    resume_ats: 100,
-    cover_letter: 100,
-    linkedin: 50,
-    skill_gap: 50,
-    interview_prep: 100,
-    salary_intel: 30,
-    radar_alert: 50,
+    resume_ats: 150,
+    cover_letter: 150,
+    linkedin: 60,
+    skill_gap: 60,
+    interview_prep: 120,
+    salary_intel: 40,
+    radar_alert: 100,
     docx_rewrite: 50,
     resume_parse: 500,
-    bullet_rewrite: 300,
+    bullet_rewrite: 400,
   },
 };
 // ===== Reset Days =====

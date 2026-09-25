@@ -191,7 +191,7 @@ Hiring signal:
 
 // ===== Auth & Quota Helpers (aligned with the app's real usage tables) =====
 
-const PLAN_RADAR_LIMITS: Record<string, number> = { free: 15 /* TESTING */, pro: 15, elite: 50 };
+const PLAN_RADAR_LIMITS: Record<string, number> = { free: 3, trial: 5, pro: 30, elite: 100 };
 
 async function requireUser(authHeader: string | null, adminClient: any) {
   if (!authHeader) throw new Error("Unauthorized - No authorization header");
@@ -212,9 +212,10 @@ async function requireUser(authHeader: string | null, adminClient: any) {
     .order("updated_at", { ascending: false })
     .limit(1);
   const sub = subRows?.[0];
-  if (sub?.plan_status === "active" && sub?.tier) {
+  if ((sub?.plan_status === "active" || sub?.plan_status === "trialing") && sub?.tier) {
     const raw = String(sub.tier);
-    if (raw === "starter" || raw === "pro") tier = "pro";
+    if (raw === "trial") tier = "trial";
+    else if (raw === "starter" || raw === "pro") tier = "pro";
     else if (raw === "premium" || raw === "elite") tier = "elite";
   }
 

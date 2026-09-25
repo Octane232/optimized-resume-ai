@@ -62,9 +62,13 @@ export async function requireUser(req: Request): Promise<AuthedUser | Response> 
     !subData?.current_period_end ||
     new Date(subData.current_period_end as string).getTime() > Date.now();
 
-  if (subData?.plan_status === 'active' && subData?.tier && notExpired) {
+  const activeStatus =
+    subData?.plan_status === 'active' || subData?.plan_status === 'trialing';
+
+  if (activeStatus && subData?.tier && notExpired) {
     const rawTier = subData.tier as string;
-    if (rawTier === 'starter') tier = 'pro';
+    if (rawTier === 'trial') tier = 'trial';
+    else if (rawTier === 'starter') tier = 'pro';
     else if (rawTier === 'premium') tier = 'elite';
     else if (rawTier === 'pro') tier = 'pro';
     else if (rawTier === 'elite') tier = 'elite';
@@ -113,8 +117,9 @@ export async function checkFeatureLimit(
   const limit = getFeatureLimit(user.tier, action);
 
   if (limit === 0) {
-    const tierNames = {
+    const tierNames: Record<string, string> = {
       free: "Free",
+      trial: "Trial",
       pro: "Pro",
       elite: "Elite"
     };
@@ -143,15 +148,16 @@ export async function checkFeatureLimit(
       resume_parse: "Resume Uploads",
       bullet_rewrite: "Bullet Rewrites",
     };
-    const tierNames = {
+    const tierNames: Record<string, string> = {
       free: "Free",
+      trial: "Trial",
       pro: "Pro",
       elite: "Elite"
     };
     return jsonResponse({
       error: `Monthly ${featureNames[action] || action} limit reached (${used}/${limit}). ` +
              `Your ${tierNames[user.tier] || user.tier} plan includes ${limit} per month. ` +
-             `${user.tier === 'free' ? 'Upgrade to Pro or Elite' : user.tier === 'pro' ? 'Upgrade to Elite' : 'Contact support'} for more.`,
+             `${user.tier === 'free' || user.tier === 'trial' ? 'Upgrade to Pro or Elite' : user.tier === 'pro' ? 'Upgrade to Elite' : 'Contact support'} for more.`,
       action,
       tier: user.tier,
       limit,
