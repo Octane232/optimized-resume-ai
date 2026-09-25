@@ -28,7 +28,7 @@ export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> 
     skill_gap: 0,
     interview_prep: 0,
     salary_intel: 1,
-    radar_alert: 3,
+    radar_alert: 0,
     docx_rewrite: 0,
     resume_parse: 2,
     bullet_rewrite: 3,

@@ -191,7 +191,7 @@ Hiring signal:
 
 // ===== Auth & Quota Helpers (aligned with the app's real usage tables) =====
 
-const PLAN_RADAR_LIMITS: Record<string, number> = { free: 3, trial: 5, pro: 30, elite: 100 };
+const PLAN_RADAR_LIMITS: Record<string, number> = { free: 0, trial: 5, pro: 30, elite: 100 };
 
 async function requireUser(authHeader: string | null, adminClient: any) {
   if (!authHeader) throw new Error("Unauthorized - No authorization header");

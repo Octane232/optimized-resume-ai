@@ -11,6 +11,7 @@ const UsageHeader = ({ setActiveTab }: { setActiveTab?: (tab: string) => void })
 
   const tierBadgeClass =
     tier === 'free' ? 'bg-muted text-muted-foreground border-border' :
+    tier === 'trial' ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' :
     tier === 'pro' ? 'bg-primary/10 text-primary border-primary/20' :
     'bg-signal-soft text-signal border-signal/20';
 
@@ -67,7 +68,7 @@ const UsageHeader = ({ setActiveTab }: { setActiveTab?: (tab: string) => void })
             </div>
             {subscriptionEnd && (
               <p className="text-xs text-muted-foreground mt-1">
-                Renews {new Date(subscriptionEnd).toLocaleDateString()}
+                {tier === 'trial' ? 'Trial ends' : 'Renews'} {new Date(subscriptionEnd).toLocaleDateString()}
               </p>
             )}
           </div>

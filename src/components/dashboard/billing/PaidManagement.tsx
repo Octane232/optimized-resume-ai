@@ -31,10 +31,10 @@ const PaidManagement = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
-  // FIXED: Correct tier labels for Pro and Elite
   const getTierLabel = () => {
     if (tier === 'elite') return 'Elite';
     if (tier === 'pro') return 'Pro';
+    if (tier === 'trial') return 'Free trial';
     return 'Free';
   };
   
