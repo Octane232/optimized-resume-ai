@@ -616,13 +616,21 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
 
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <Button
-                  variant="outline"
                   size="sm"
                   className="gap-2"
-                  onClick={() => window.open(s.source_url, '_blank')}
+                  disabled={openingsLoading}
+                  onClick={findApplication}
                 >
-                  <ArrowUpRight className="w-3.5 h-3.5" />
-                  View Source
+                  {openingsLoading ? (
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Search className="w-3.5 h-3.5" />
+                  )}
+                  {openings
+                    ? showOpenings
+                      ? 'Hide application'
+                      : 'Show application'
+                    : 'Find application'}
                 </Button>
                 <Button
                   variant="outline"
@@ -633,12 +641,24 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
                   <Users className="w-3.5 h-3.5" />
                   Find Hiring Contact
                 </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => window.open(s.source_url, '_blank')}
+                >
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                  View Source
+                </Button>
                 {typeof s.confidence === 'number' && (
                   <Badge variant="secondary" className="text-xs">
                     {s.confidence}% signal confidence
                   </Badge>
                 )}
               </div>
+
+              <ApplicationPanel />
+
 
             </div>
           </div>
