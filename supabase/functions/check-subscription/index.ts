@@ -63,11 +63,17 @@ serve(async (req) => {
     const customerId = customers.data[0].id;
     logStep("Found Stripe customer", { customerId });
 
-    const subscriptions = await stripe.subscriptions.list({
+    // Include trialing subscriptions — a 3-day trial is a valid entitlement.
+    const allSubs = await stripe.subscriptions.list({
       customer: customerId,
-      status: "active",
-      limit: 1,
+      status: "all",
+      limit: 10,
     });
+    const subscriptions = {
+      data: allSubs.data.filter(
+        (s) => s.status === "active" || s.status === "trialing",
+      ),
+    };
 
     if (subscriptions.data.length === 0) {
       logStep("No active subscription, reverting to free");
@@ -80,12 +86,18 @@ serve(async (req) => {
 
     const subscription = subscriptions.data[0];
     const priceId = subscription.items.data[0]?.price?.id;
-    const tier = PRICE_TO_TIER[priceId] || subscription.metadata?.plan || "starter";
-    const subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
+    const paidTier = PRICE_TO_TIER[priceId] || subscription.metadata?.plan || "pro";
+    const isTrialing = subscription.status === "trialing";
+    const tier = isTrialing ? "trial" : paidTier;
+    const subscriptionEnd = new Date(
+      (isTrialing && subscription.trial_end
+        ? subscription.trial_end
+        : subscription.current_period_end) * 1000,
+    ).toISOString();
     logStep("Active subscription found", { priceId, tier, subscriptionEnd });
 
     // Sync to DB
-    const planName = tier === "pro" ? "Pro" : "Starter";
+    const planName = paidTier === "elite" ? "Elite" : "Pro";
     const { data: planData } = await supabaseClient
       .from("subscription_plans")
       .select("id")
