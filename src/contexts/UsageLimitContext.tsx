@@ -185,9 +185,13 @@ export const UsageLimitProvider = ({ children }: { children: ReactNode }) => {
         !subData?.current_period_end ||
         new Date(subData.current_period_end).getTime() > Date.now();
 
-      if (subData?.plan_status === 'active' && subData?.tier && notExpired) {
+      const activeStatus =
+        subData?.plan_status === 'active' || subData?.plan_status === 'trialing';
+
+      if (activeStatus && subData?.tier && notExpired) {
         const raw = subData.tier as string;
-        if (raw === 'starter') resolvedTier = 'pro';
+        if (raw === 'trial') resolvedTier = 'trial';
+        else if (raw === 'starter') resolvedTier = 'pro';
         else if (raw === 'premium') resolvedTier = 'elite';
         else if (raw === 'pro') resolvedTier = 'pro';
         else if (raw === 'elite') resolvedTier = 'elite';
