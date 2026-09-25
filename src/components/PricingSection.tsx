@@ -6,37 +6,37 @@ import { Link } from 'react-router-dom';
 const plans = [
   {
     name: 'Pro',
-    price: 15,
+    price: 24,
     description: 'For an active, focused job search.',
     highlights: [
-      { icon: Radar, value: '15', label: 'Job Radar alerts' },
-      { icon: FileCheck2, value: '30', label: 'Resume + ATS runs' },
-      { icon: Mic, value: '30', label: 'Interview sessions' },
+      { icon: Radar, value: '30', label: 'Job Radar alerts' },
+      { icon: FileCheck2, value: '40', label: 'Resume + ATS runs' },
+      { icon: Mic, value: '40', label: 'Interview sessions' },
     ],
     groups: [
-      { label: 'Discovery', detail: '15 Radar alerts · 100 resume uploads' },
-      { label: 'Applications', detail: '30 cover letters · 75 bullet rewrites · 10 DOCX rewrites' },
-      { label: 'Career tools', detail: '15 LinkedIn · 15 skill gap · 10 salary reports' },
+      { label: 'Discovery', detail: '30 Radar alerts · 120 resume uploads' },
+      { label: 'Applications', detail: '40 cover letters · 150 bullet rewrites · 15 Word rewrites' },
+      { label: 'Career tools', detail: '20 LinkedIn · 20 skill gap · 15 salary reports' },
     ],
-    cta: 'Upgrade to Pro',
+    cta: 'Start 3-day free trial',
     popular: true,
   },
   {
     name: 'Elite',
-    price: 29,
+    price: 49,
     description: 'For a high-volume or urgent search.',
     highlights: [
-      { icon: Radar, value: '50', label: 'Job Radar alerts' },
-      { icon: FileCheck2, value: '100', label: 'Resume + ATS runs' },
-      { icon: Mic, value: '100', label: 'Interview sessions' },
+      { icon: Radar, value: '100', label: 'Job Radar alerts' },
+      { icon: FileCheck2, value: '150', label: 'Resume + ATS runs' },
+      { icon: Mic, value: '120', label: 'Interview sessions' },
     ],
     groups: [
-      { label: 'Discovery', detail: '50 Radar alerts · 500 resume uploads' },
-      { label: 'Applications', detail: '100 cover letters · 300 bullet rewrites · 50 DOCX rewrites' },
-      { label: 'Career tools', detail: '50 LinkedIn · 50 skill gap · 30 salary reports' },
+      { label: 'Discovery', detail: '100 Radar alerts · 500 resume uploads' },
+      { label: 'Applications', detail: '150 cover letters · 400 bullet rewrites · 50 Word rewrites' },
+      { label: 'Career tools', detail: '60 LinkedIn · 60 skill gap · 40 salary reports' },
       { label: 'Elite extras', detail: 'Live Coach Mode · ATS review · priority support' },
     ],
-    cta: 'Upgrade to Elite',
+    cta: 'Start 3-day free trial',
     popular: false,
   },
 ];
@@ -47,9 +47,9 @@ const PricingSection = () => (
       <div className="text-center mb-10 sm:mb-14">
         <p className="text-[10px] sm:text-xs font-bold tracking-[0.2em] sm:tracking-[0.25em] mb-3 font-mono text-signal">PRICING</p>
         <h2 className="text-[26px] leading-tight sm:text-4xl font-extrabold text-foreground tracking-tight mb-3">
-          Two plans, no surprises
+          Try it free for 3 days
         </h2>
-        <p className="text-base text-muted-foreground">Create an account free to explore the workspace. A paid plan is required to run searches, scans and coaching tools.</p>
+        <p className="text-base text-muted-foreground">Every plan starts with a 3-day free trial. Card required, cancel any time before it ends and you are not charged.</p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6 md:gap-5 max-w-3xl mx-auto">
