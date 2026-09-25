@@ -20,7 +20,8 @@ serve(async (req) => {
   }
 
   try {
-    const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
+    const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_TEST_API_KEY") || Deno.env.get("STRIPE_SECRET_KEY");
+
     if (!STRIPE_SECRET_KEY) throw new Error("STRIPE_SECRET_KEY not configured");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
