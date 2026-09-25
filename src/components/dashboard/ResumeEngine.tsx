@@ -11,7 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useUsageLimit } from '@/contexts/UsageLimitContext';
-import { Document, Packer, Paragraph, TextRun } from 'docx';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, LevelFormat, AlignmentType } from 'docx';
 import html2pdf from 'html2pdf.js';
 
 // ===== Types =====
@@ -51,6 +51,61 @@ const getProgressColor = (s: number): string => {
 const wordCount = (t: string): number => {
   return t.split(/\s+/).filter(Boolean).length;
 };
+
+const stripMarkdown = (text: string): string => text
+  .replace(/\*\*([^*]+)\*\*/g, '$1')
+  .replace(/__([^_]+)__/g, '$1')
+  .replace(/(^|[^*])\*([^*]+)\*(?!\*)/g, '$1$2')
+  .replace(/(^|[^_])_([^_]+)_(?!_)/g, '$1$2')
+  .replace(/`([^`]+)`/g, '$1')
+  .replace(/^\s{0,3}#{1,6}\s+/gm, '')
+  .replace(/^\s*[-*+]\s+/gm, '')
+  .trim();
+
+const inlineWordRuns = (line: string, size = 21): TextRun[] => {
+  const runs: TextRun[] = [];
+  const pattern = /\*\*([^*]+)\*\*|__([^_]+)__/g;
+  let cursor = 0;
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(line)) !== null) {
+    if (match.index > cursor) runs.push(new TextRun({ text: stripMarkdown(line.slice(cursor, match.index)), size }));
+    runs.push(new TextRun({ text: match[1] || match[2] || '', bold: true, size }));
+    cursor = pattern.lastIndex;
+  }
+  if (cursor < line.length) runs.push(new TextRun({ text: stripMarkdown(line.slice(cursor)), size }));
+  return runs.length ? runs : [new TextRun({ text: stripMarkdown(line) || ' ', size })];
+};
+
+const resumeToWordParagraphs = (resume: string): Paragraph[] => resume.split(/\r?\n/).map((rawLine) => {
+  const line = rawLine.trim();
+  if (!line) return new Paragraph({ spacing: { after: 80 }, children: [] });
+
+  const heading = line.match(/^#{1,6}\s+(.+)$/);
+  if (heading) {
+    return new Paragraph({
+      heading: HeadingLevel.HEADING_1,
+      spacing: { before: 180, after: 80 },
+      children: [new TextRun({ text: stripMarkdown(heading[1]), bold: true, size: 24 })],
+    });
+  }
+
+  const bullet = line.match(/^[-*+]\s+(.+)$/);
+  if (bullet) {
+    return new Paragraph({
+      numbering: { reference: 'resume-bullets', level: 0 },
+      spacing: { after: 55 },
+      children: inlineWordRuns(bullet[1]),
+    });
+  }
+
+  const boldOnly = line.match(/^\*\*([^*]+)\*\*$/) || line.match(/^__([^_]+)__$/);
+  return new Paragraph({
+    spacing: { after: boldOnly ? 65 : 80 },
+    children: boldOnly
+      ? [new TextRun({ text: boldOnly[1], bold: true, size: 22 })]
+      : inlineWordRuns(line),
+  });
+});
 
 const isProUser = (tier: string): boolean => {
   return tier === 'free' || tier === 'pro' || tier === 'elite'; // TESTING: free unlocked
@@ -694,14 +749,39 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
     }
     
     try {
-      const paragraphs = result.tailoredResume.split('\n').map(line =>
-        new Paragraph({ 
-          children: [new TextRun({ text: line || ' ', size: 24 })] 
-        })
-      );
+      const paragraphs = resumeToWordParagraphs(result.tailoredResume);
       const doc = new Document({ 
+        numbering: {
+          config: [{
+            reference: 'resume-bullets',
+            levels: [{
+              level: 0,
+              format: LevelFormat.BULLET,
+              text: '•',
+              alignment: AlignmentType.LEFT,
+              style: { paragraph: { indent: { left: 540, hanging: 260 } } },
+            }],
+          }],
+        },
+        styles: {
+          default: { document: { run: { font: 'Arial', size: 21 } } },
+          paragraphStyles: [{
+            id: 'Heading1',
+            name: 'Heading 1',
+            basedOn: 'Normal',
+            next: 'Normal',
+            quickFormat: true,
+            run: { font: 'Arial', size: 24, bold: true },
+            paragraph: { spacing: { before: 180, after: 80 }, outlineLevel: 0 },
+          }],
+        },
         sections: [{ 
-          properties: {}, 
+          properties: {
+            page: {
+              size: { width: 12240, height: 15840 },
+              margin: { top: 720, right: 720, bottom: 720, left: 720 },
+            },
+          },
           children: paragraphs 
         }] 
       });
