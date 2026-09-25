@@ -7,13 +7,12 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// CHANGE 1: Replaced PRICE_IDS with Pro and Elite prices
+// Stripe prices (test account)
 const PRICE_IDS = {
-  pro_monthly: "price_1TubObJWRvoiSBe022Vai2lg",
-  pro_yearly: "price_1TubdJJWRvoiSBe0t7LFroSD",
-  elite_monthly: "price_1TubbmJWRvoiSBe0pbGLrU1I",
-  elite_yearly: "price_1TubeGJWRvoiSBe04wrFEQCC",
+  pro_monthly: "price_1UJYnAJGlrb83xLfliOIIR3A",
+  elite_monthly: "price_1UJYnxJGlrb83xLfd90hI7Tw",
 };
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
