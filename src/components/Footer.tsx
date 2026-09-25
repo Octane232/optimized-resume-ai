@@ -39,7 +39,7 @@ const Footer = () => {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 lg:gap-12">
           <div className="col-span-2 md:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-3">
-              <VaylanceLogo />
+              <VaylanceLogo width={24} height={24} />
               <span className="font-bold text-lg text-foreground tracking-tight">Vaylance</span>
             </Link>
             <p className="text-base text-muted-foreground leading-relaxed max-w-sm mb-5">
