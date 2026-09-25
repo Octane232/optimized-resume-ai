@@ -75,7 +75,7 @@ const daysAgo = (date?: string | null): string => {
 
 const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
   const { tier } = useUsageLimit();
-  const isPaid = tier === 'pro' || tier === 'elite';
+  const isPaid = true; // TESTING: everything free
 
   const [userName, setUserName] = useState('there');
   const [loading, setLoading] = useState(true);
