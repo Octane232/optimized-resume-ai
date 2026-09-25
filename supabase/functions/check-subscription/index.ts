@@ -8,11 +8,10 @@ const corsHeaders = {
 };
 
 const PRICE_TO_TIER: Record<string, string> = {
-  "price_1TubObJWRvoiSBe022Vai2lg": "pro",
-  "price_1TubdJJWRvoiSBe0t7LFroSD": "pro",
-  "price_1TubbmJWRvoiSBe0pbGLrU1I": "elite",
-  "price_1TubeGJWRvoiSBe04wrFEQCC": "elite",
+  "price_1UJYnAJGlrb83xLfliOIIR3A": "pro",
+  "price_1UJYnxJGlrb83xLfd90hI7Tw": "elite",
 };
+
 
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
