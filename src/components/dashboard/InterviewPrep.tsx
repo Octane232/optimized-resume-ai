@@ -223,7 +223,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
     : 0;
   
   const wordCount = userAnswer.split(/\s+/).filter(Boolean).length;
-  const isElite = true; // TESTING: everyone gets Elite extras
+  const isElite = tier === 'elite';
 
   // Use live getRemaining() directly on every render, not stale local state
   const remainingSessions = getRemaining('interview_prep');

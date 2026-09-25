@@ -108,7 +108,7 @@ const resumeToWordParagraphs = (resume: string): Paragraph[] => resume.split(/\r
 });
 
 const isProUser = (tier: string): boolean => {
-  return tier === 'free' || tier === 'pro' || tier === 'elite'; // TESTING: free unlocked
+  return tier === 'trial' || tier === 'pro' || tier === 'elite';
 };
 
 const hasValidInputs = (resume: string, jobDesc: string): boolean => {
