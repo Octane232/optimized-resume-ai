@@ -115,7 +115,7 @@ export const FEATURE_DESCRIPTIONS: Record<UsageAction, string> = {
 
 interface UsageLimitContextType {
   tier: SubscriptionTier;
-  displayTier: 'Free' | 'Pro' | 'Elite';
+  displayTier: 'Free' | 'Trial' | 'Pro' | 'Elite';
   subscriptionEnd: string | null;
   loading: boolean;
   /** Can the user perform this action? */
@@ -134,7 +134,7 @@ interface UsageLimitContextType {
 // Separate interface for subscription-only data
 interface SubscriptionContextType {
   tier: SubscriptionTier;
-  displayTier: 'Free' | 'Pro' | 'Elite';
+  displayTier: 'Free' | 'Trial' | 'Pro' | 'Elite';
   subscriptionEnd: string | null;
   loading: boolean;
   refresh: () => Promise<void>;
@@ -299,8 +299,8 @@ export const UsageLimitProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [loading, initialFetchDone]);
 
-  const displayTier: 'Free' | 'Pro' | 'Elite' =
-    tier === 'free' ? 'Free' : tier === 'pro' ? 'Pro' : 'Elite';
+  const displayTier: 'Free' | 'Trial' | 'Pro' | 'Elite' =
+    tier === 'free' ? 'Free' : tier === 'trial' ? 'Trial' : tier === 'pro' ? 'Pro' : 'Elite';
 
   const usageLimitValue: UsageLimitContextType = {
     tier,
