@@ -53,7 +53,7 @@ const wordCount = (t: string): number => {
 };
 
 const isProUser = (tier: string): boolean => {
-  return tier === 'pro' || tier === 'elite';
+  return tier === 'free' || tier === 'pro' || tier === 'elite'; // TESTING: free unlocked
 };
 
 const hasValidInputs = (resume: string, jobDesc: string): boolean => {
