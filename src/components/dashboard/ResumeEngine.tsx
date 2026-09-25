@@ -92,7 +92,7 @@ const useFileUpload = (isPro: boolean, onTextExtracted: (text: string, fileName:
       }
       
       const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_FUNCTIONS_URL || 'https://xpmhahyvtyvrxryrqane.supabase.co/functions/v1'}/parse-resume-file`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/parse-resume-file`,
         { 
           method: 'POST', 
           headers: { 
