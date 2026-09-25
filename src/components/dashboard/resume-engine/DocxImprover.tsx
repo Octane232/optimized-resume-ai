@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react';
 import { FunctionsHttpError } from '@supabase/supabase-js';
-import { Document, Packer, Paragraph, TextRun } from 'docx';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -32,6 +31,17 @@ function download(blob: Blob, name: string) {
   URL.revokeObjectURL(url);
 }
 
+function plainText(value: string) {
+  return value
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/__([^_]+)__/g, '$1')
+    .replace(/(^|[^*])\*([^*]+)\*(?!\*)/g, '$1$2')
+    .replace(/(^|[^_])_([^_]+)_(?!_)/g, '$1$2')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/^\s{0,3}#{1,6}\s+/gm, '')
+    .trim();
+}
+
 const ScorePill: React.FC<{ label: string; before: number; after?: number }> = ({ label, before, after }) => (
   <div className="rounded-lg border bg-background p-3">
     <p className="text-xs text-muted-foreground">{label}</p>
@@ -52,7 +62,6 @@ const DocxImprover: React.FC<{ file: File; resumeText: string; jobDescription: s
   const [editing, setEditing] = useState<number | null>(null);
   const [loading, setLoading] = useState<'suggest' | 'apply' | null>(null);
   const [result, setResult] = useState<{ base64: string; text: string; scan: ScanResult } | null>(null);
-  const [mode, setMode] = useState<'preserve' | 'ats'>('preserve');
 
   const jdOk = jobDescription.trim().length >= 30;
   const accepted = suggestions.filter((s) => decisions[s.id] === 'accepted');
@@ -76,7 +85,10 @@ const DocxImprover: React.FC<{ file: File; resumeText: string; jobDescription: s
       fd.append('jobDescription', jobDescription.trim());
       fd.append('missingKeywords', scan.missing.slice(0, 30).join(', '));
       const data = await callRewrite(fd);
-      const list: Suggestion[] = data.suggestions || [];
+      const list: Suggestion[] = (data.suggestions || []).map((suggestion: Suggestion) => ({
+        ...suggestion,
+        improved: plainText(suggestion.improved),
+      }));
       setSuggestions(list);
       setDecisions(Object.fromEntries(list.map((s) => [s.id, 'pending' as Decision])));
       if (!list.length) toast({ title: 'No changes suggested', description: 'Your wording already fits this job well.' });
@@ -89,7 +101,7 @@ const DocxImprover: React.FC<{ file: File; resumeText: string; jobDescription: s
     setLoading('apply');
     try {
       const map: Record<string, string> = {};
-      accepted.forEach((s) => { map[String(s.id)] = edits[s.id] ?? s.improved; });
+      accepted.forEach((s) => { map[String(s.id)] = plainText(edits[s.id] ?? s.improved); });
       const fd = new FormData();
       fd.append('file', file); fd.append('mode', 'apply'); fd.append('edits', JSON.stringify(map));
       const data = await callRewrite(fd);
@@ -102,14 +114,9 @@ const DocxImprover: React.FC<{ file: File; resumeText: string; jobDescription: s
   const doDownload = async () => {
     if (!result) return;
     const base = file.name.replace(/\.docx$/i, '');
-    if (mode === 'ats') {
-      const doc = new Document({ sections: [{ children: result.text.split('\n').map((l) => new Paragraph({ children: [new TextRun({ text: l, font: 'Arial', size: 22 })] })) }] });
-      download(await Packer.toBlob(doc), `${base}-ats.docx`);
-    } else {
-      const bin = atob(result.base64);
-      const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
-      download(new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }), `${base}-improved.docx`);
-    }
+    const bin = atob(result.base64);
+    const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+    download(new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }), `${base}-improved.docx`);
   };
 
   const fixedIssues = useMemo(() => {
@@ -214,15 +221,10 @@ const DocxImprover: React.FC<{ file: File; resumeText: string; jobDescription: s
               </ul>
             </div>
 
-            <div className="grid gap-2 sm:grid-cols-2">
-              <button type="button" onClick={() => setMode('preserve')} className={`rounded-lg border p-3 text-left ${mode === 'preserve' ? 'border-primary bg-primary/5' : ''}`}>
-                <p className="text-sm font-medium text-foreground">Preserve my design</p>
-                <p className="text-xs text-muted-foreground">Your original file, fonts and layout, with better wording.</p>
-              </button>
-              <button type="button" onClick={() => setMode('ats')} className={`rounded-lg border p-3 text-left ${mode === 'ats' ? 'border-primary bg-primary/5' : ''}`}>
-                <p className="text-sm font-medium text-foreground">Optimize for ATS {layoutIssue && <Badge variant="outline" className="ml-1">Recommended</Badge>}</p>
-                <p className="text-xs text-muted-foreground">A plain single-column file that every applicant system can read.</p>
-              </button>
+            <div className="rounded-lg border border-primary bg-primary/5 p-3">
+              <p className="text-sm font-medium text-foreground">Original design preserved</p>
+              <p className="text-xs text-muted-foreground">Your template, fonts, bold text, spacing and layout stay in place. Only accepted wording changes.</p>
+              {layoutIssue && <p className="mt-2 text-xs text-muted-foreground">The scanner found possible layout issues, but it will not redesign your document.</p>}
             </div>
 
             <div className="flex flex-wrap gap-2">
