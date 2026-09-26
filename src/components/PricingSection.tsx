@@ -5,6 +5,24 @@ import { Link } from 'react-router-dom';
 
 const plans = [
   {
+    name: 'Free',
+    price: 0,
+    description: 'Try the whole workspace, no card needed.',
+    highlights: [
+      { icon: FileCheck2, value: '1', label: 'Resume + ATS run' },
+      { icon: FileCheck2, value: '2', label: 'Resume uploads' },
+      { icon: Mic, value: '3', label: 'Bullet rewrites' },
+    ],
+    groups: [
+      { label: 'Applications', detail: '1 run (resume + cover letter + ATS) · 2 resume uploads · 3 bullet rewrites' },
+      { label: 'Career tools', detail: '1 salary report' },
+      { label: 'Always included', detail: 'Full application tracker · dashboard · no credit card' },
+    ],
+    cta: 'Start free — no card',
+    popular: false,
+    free: true,
+  },
+  {
     name: 'Pro',
     price: 24,
     description: 'For an active, focused job search.',
