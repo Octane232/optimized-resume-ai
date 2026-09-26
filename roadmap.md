@@ -13,3 +13,4 @@
 - [x] Rebuild Resume + ATS to match the approved mockup while preserving analysis, rewrite, preview, and downloads.
 - [x] Standardize the visual system across every public, account, legal, and dashboard screen.
 - [x] Rebuild DOCX flow as Scan → Improve → Review → Re-scan using the ats-resume-improver engine.
+- [ ] Clarify Vaylance as an AI career coach and simplify product terminology without changing the design.
