@@ -133,6 +133,30 @@ const tips = [
 ];
 
 // ===== Helper Functions =====
+/** Pull readable CV text out of a stored resume record, whatever shape it was saved in. */
+const extractResumeText = (content: unknown): string => {
+  if (!content) return '';
+  if (typeof content === 'string') return content;
+
+  const obj = content as Record<string, unknown>;
+  const direct = obj.text || obj.raw_text || obj.rawText || obj.markdown || obj.content;
+  if (typeof direct === 'string') return direct;
+
+  try {
+    return JSON.stringify(content);
+  } catch {
+    return '';
+  }
+};
+
+const cleanResumeText = (text: string): string =>
+  text
+    .replace(/```[a-z]*\n?/gi, '')
+    .replace(/\*\*/g, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+    .slice(0, 6000);
+
 const getFallbackQuestions = (position: string): string[] => {
   const p = position.toLowerCase();
   
