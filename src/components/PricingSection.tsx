@@ -93,7 +93,7 @@ const PricingSection = () => (
               <p className="text-sm text-muted-foreground mb-4">{plan.description}</p>
               <div className="flex items-baseline gap-1">
                 <span className="text-4xl font-mono font-bold text-foreground">${plan.price}</span>
-                <span className="text-muted-foreground text-sm">/month</span>
+                <span className="text-muted-foreground text-sm">{plan.free ? 'forever' : '/month'}</span>
               </div>
             </div>
 
