@@ -21,11 +21,29 @@ type Tab = 'practice' | 'copilot' | 'tips' | 'history';
 type Stage = 'setup' | 'question' | 'feedback' | 'results';
 type ConnectionStatus = 'idle' | 'connecting' | 'connected' | 'disconnected' | 'error';
 
+interface StarScores {
+  situation: number;
+  task: number;
+  action: number;
+  result: number;
+}
+
+interface StarNotes {
+  situation: string;
+  task: string;
+  action: string;
+  result: string;
+}
+
 interface Feedback {
   score: number;
   feedback: string;
   strengths: string[];
   improvements: string[];
+  star?: StarScores;
+  starNotes?: StarNotes;
+  improvedAnswer?: string;
+  grounded?: boolean;
 }
 
 interface Answer {
@@ -42,10 +60,21 @@ interface Session {
   answers: Answer[];
 }
 
+interface CopilotCue {
+  opening: string;
+  situation: string;
+  action: string;
+  result: string;
+  closing: string;
+  keywords: string[];
+}
+
 interface CopilotEntry {
   id: string;
   question: string;
   suggestion: string | null;
+  cue: CopilotCue | null;
+  grounded?: boolean;
   loading: boolean;
   timestamp: Date;
 }
