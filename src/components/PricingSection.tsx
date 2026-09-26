@@ -15,7 +15,7 @@ const plans = [
     ],
     groups: [
       { label: 'Discovery', detail: '30 Radar alerts · 120 resume uploads' },
-      { label: 'Applications', detail: '40 cover letters · 150 bullet rewrites · 15 Word rewrites' },
+      { label: 'Applications', detail: '40 runs (resume + cover letter + ATS) · 150 bullet rewrites · 15 Word rewrites' },
       { label: 'Career tools', detail: '20 LinkedIn · 20 skill gap · 15 salary reports' },
     ],
     cta: 'Start 3-day free trial',
@@ -32,7 +32,7 @@ const plans = [
     ],
     groups: [
       { label: 'Discovery', detail: '100 Radar alerts · 500 resume uploads' },
-      { label: 'Applications', detail: '150 cover letters · 400 bullet rewrites · 50 Word rewrites' },
+      { label: 'Applications', detail: '150 runs (resume + cover letter + ATS) · 400 bullet rewrites · 50 Word rewrites' },
       { label: 'Career tools', detail: '60 LinkedIn · 60 skill gap · 40 salary reports' },
       { label: 'Elite extras', detail: 'Live Coach Mode · ATS review · priority support' },
     ],

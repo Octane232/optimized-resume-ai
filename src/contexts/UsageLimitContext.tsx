@@ -73,8 +73,8 @@ export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> 
 
 // ===== Display Names (kept for UI) =====
 export const ACTION_LABELS: Record<UsageAction, string> = {
-  resume_ats: 'Resume + ATS',
-  cover_letter: 'Cover letter',
+  resume_ats: 'Resume + ATS + cover letter',
+  cover_letter: 'Cover letter (included in Resume + ATS)',
   interview_prep: 'Mock interview',
   salary_intel: 'Salary insight',
   linkedin: 'LinkedIn optimization',
@@ -87,8 +87,8 @@ export const ACTION_LABELS: Record<UsageAction, string> = {
 
 // ===== Feature Display Names (for UI) =====
 export const FEATURE_NAMES: Record<UsageAction, string> = {
-  resume_ats: "Resume + ATS Optimization",
-  cover_letter: "Cover Letter Generation",
+  resume_ats: "Application Bundle (Resume + ATS + Cover Letter)",
+  cover_letter: "Cover Letter (included in Application Bundle)",
   linkedin: "LinkedIn Optimizer",
   skill_gap: "Skill Gap Analyzer",
   interview_prep: "Interview Practice",
@@ -102,7 +102,7 @@ export const FEATURE_NAMES: Record<UsageAction, string> = {
 // ===== Feature Descriptions =====
 export const FEATURE_DESCRIPTIONS: Record<UsageAction, string> = {
   resume_ats: "Tailored resume + cover letter + ATS score in one click",
-  cover_letter: "AI-generated cover letters tailored to each job",
+  cover_letter: "Included in every Resume + ATS run — no separate limit",
   linkedin: "Optimize your LinkedIn profile for recruiters",
   skill_gap: "Identify missing skills and get learning recommendations",
   interview_prep: "Practice with AI interview coach and get feedback",

@@ -15,7 +15,6 @@ import { useToast } from '@/hooks/use-toast';
 // FIXED: Added resume_parse and corrected all actions
 const ACTIONS: UsageAction[] = [
   'resume_ats',
-  'cover_letter',
   'interview_prep', 
   'salary_intel', 
   'linkedin', 
