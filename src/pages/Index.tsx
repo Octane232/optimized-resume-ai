@@ -7,6 +7,7 @@ import HeroSection from '@/components/HeroSection';
 import FeaturesSection from '@/components/FeaturesSection';
 import HowItWorksSection from '@/components/HowItWorksSection';
 import TestimonialsSection from '@/components/TestimonialsSection';
+import ComparisonSection from '@/components/ComparisonSection';
 import PricingSection from '@/components/PricingSection';
 import CTASection from '@/components/CTASection';
 import Footer from '@/components/Footer';
@@ -126,6 +127,7 @@ const Index = () => {
       <Header />
       <HeroSection />
       <div id="features"><FeaturesSection /></div>
+      <ComparisonSection />
       <div id="testimonials"><TestimonialsSection /></div>
       <HowItWorksSection />
       <PricingSection />

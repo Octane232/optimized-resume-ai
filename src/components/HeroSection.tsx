@@ -44,7 +44,7 @@ const HeroSection = () => {
             </div>
 
             <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
-              {['No card required', 'Explore the workspace', 'Upgrade to run tools'].map((item) => (
+              {['No credit card required', 'Free resume + ATS scan included', 'Instant access'].map((item) => (
                 <span key={item} className="inline-flex items-center gap-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5 text-primary" /> {item}
                 </span>
