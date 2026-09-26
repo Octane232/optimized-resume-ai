@@ -166,6 +166,74 @@ const useRadarScan = (onScanComplete: () => void) => {
   return { scanning, usageLoading, canScan: canUse('radar_alert'), handleScan };
 };
 
+const useCareerPreferences = () => {
+  const [preferences, setPreferences] = useState<{
+    target_role: string | null;
+    target_industry: string | null;
+    target_location: string | null;
+    experience_level: string | null;
+    work_style: string | null;
+  } | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from('career_preferences')
+        .select('target_role, target_industry, target_location, experience_level, work_style')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      setPreferences(data ?? null);
+    })();
+  }, []);
+
+  return preferences;
+};
+
+const FocusBanner: React.FC<{
+  preferences: {
+    target_role: string | null;
+    target_industry: string | null;
+    target_location: string | null;
+    experience_level: string | null;
+    work_style: string | null;
+  } | null;
+  onEdit: () => void;
+}> = ({ preferences, onEdit }) => {
+  const chips = [
+    preferences?.target_role,
+    preferences?.target_industry,
+    preferences?.work_style,
+    preferences?.target_location,
+    preferences?.experience_level,
+  ].filter(Boolean) as string[];
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.03 }}>
+      <Card className="border-border bg-card">
+        <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Scanning for</span>
+            {chips.length > 0 ? (
+              chips.map((chip) => (
+                <Badge key={chip} variant="secondary" className="text-xs">{chip}</Badge>
+              ))
+            ) : (
+              <span className="text-sm text-muted-foreground">
+                No career preferences set — the radar is scanning broadly.
+              </span>
+            )}
+          </div>
+          <Button variant="outline" size="sm" onClick={onEdit} className="shrink-0">
+            {chips.length > 0 ? 'Change focus' : 'Set preferences'}
+          </Button>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+};
+
 // ===== Subcomponents =====
 const HeaderSection: React.FC<{
   onMarkAllRead: () => void;
