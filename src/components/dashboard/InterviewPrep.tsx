@@ -266,6 +266,11 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
 
+  // Resume grounding State
+  const [resumeText, setResumeText] = useState('');
+  const [resumeTitle, setResumeTitle] = useState('');
+  const [useResume, setUseResume] = useState(true);
+
   // ===== Derived Values =====
   const overallScore = answers.length > 0 
     ? answers.reduce((sum, a) => sum + a.feedback.score, 0) / answers.length 
