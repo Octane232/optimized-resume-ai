@@ -323,6 +323,17 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
     }
   };
 
+  const copyText = async (text: string) => {
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({ title: 'Copied' });
+    } catch {
+      toast({ title: 'Could not copy', variant: 'destructive' });
+    }
+  };
+
+
   const loadHistory = async () => {
     try {
       const { data: sessionData } = await supabase
