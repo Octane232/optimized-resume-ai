@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { useUsageLimit, UsageAction, ACTION_LABELS, PLAN_LIMITS } from '@/contexts/UsageLimitContext';
 
 const TRACKED_ACTIONS: UsageAction[] = [
-  'resume_ats', 'cover_letter', 'interview_prep', 'salary_intel', 'linkedin', 'skill_gap', 'radar_alert', 'docx_rewrite',
+  'resume_ats', 'interview_prep', 'salary_intel', 'linkedin', 'skill_gap', 'radar_alert', 'docx_rewrite',
 ];
 
 const UsageHeader = ({ setActiveTab }: { setActiveTab?: (tab: string) => void }) => {
