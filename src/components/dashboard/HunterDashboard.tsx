@@ -86,6 +86,7 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
     newSignals: 0,
     applications: 0,
     interviews: 0,
+    practiceSessions: 0,
     resumeScore: null,
   });
   const [checklist, setChecklist] = useState<ChecklistItem[]>([]);
