@@ -4,7 +4,7 @@ import {
   Brain, Mic, MicOff, RotateCcw, ArrowRight, Loader2,
   CheckCircle2, AlertCircle, Sparkles, Radio, Send, Lock,
   BarChart3, BookOpen, Trophy, Shield, AlertTriangle, Wifi, Search, Target,
-  WifiOff, Clock
+  WifiOff, Clock, FileText, Copy, Wand2
 } from 'lucide-react';
 
 import { Card, CardContent } from '@/components/ui/card';
