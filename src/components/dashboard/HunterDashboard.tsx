@@ -214,8 +214,8 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
     {
       label: 'Interview prep',
       caption: 'Practice sessions',
-      value: stats.interviews,
-      note: 'Keep practising',
+      value: stats.practiceSessions,
+      note: stats.practiceSessions > 0 ? 'Completed' : 'Start your first',
       icon: Mic,
       action: () => setActiveTab('interview-prep'),
       actionLabel: 'Start practice',
