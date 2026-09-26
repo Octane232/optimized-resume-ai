@@ -138,7 +138,7 @@ function parseDate(dateStr: string): Date | null {
   }
 
   // "2022-01" or "01/2022"
-  const numericDate = cleaned.match(/^(\d{1,2})[\/\-](\d{4})$/)
+  const numericDate = cleaned.match(/^(\d{1,2})[/-](\d{4})$/)
   if (numericDate) return new Date(parseInt(numericDate[2]), parseInt(numericDate[1]) - 1)
 
   // Just a year "2022"
