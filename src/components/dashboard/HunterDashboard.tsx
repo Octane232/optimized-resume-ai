@@ -101,7 +101,7 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
       const [profileRes, prefsRes, resumesRes, appsRes, alertsRes] = await Promise.all([
         supabase.from('profiles').select('full_name, phone, location').eq('user_id', user.id).maybeSingle(),
         supabase.from('career_preferences').select('target_role').eq('user_id', user.id).maybeSingle(),
-        supabase.from('resumes').select('id, ats_score, created_at').eq('user_id', user.id).order('created_at', { ascending: false }),
+        supabase.from('resumes').select('id, ats_score, content, created_at').eq('user_id', user.id).order('created_at', { ascending: false }),
         supabase.from('job_applications').select('status').eq('user_id', user.id),
         supabase.from('radar_alerts').select('id, match_score, signal_id, is_read, created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20),
       ]);
@@ -114,7 +114,13 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
 
       setUserName(profile?.full_name?.split(' ')[0] || user.email?.split('@')[0] || 'there');
 
-      const topScore = resumes.find((r) => typeof r.ats_score === 'number')?.ats_score ?? null;
+      const scoreOf = (r: any) => {
+        const direct = typeof r?.ats_score === 'number' ? r.ats_score : null;
+        if (direct !== null) return direct;
+        const nested = r?.content?.ats_score;
+        return typeof nested === 'number' ? nested : null;
+      };
+      const topScore = resumes.map(scoreOf).find((s) => s !== null) ?? null;
 
       setStats({
         radarSignals: alerts.length,
