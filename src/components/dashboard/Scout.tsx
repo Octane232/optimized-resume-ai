@@ -818,6 +818,7 @@ const Scout: React.FC<ScoutProps> = ({ setActiveTab }) => {
   const { scanning, usageLoading, canScan, handleScan } = useRadarScan(fetchData);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'alerts' | 'all'>('alerts');
+  const preferences = useCareerPreferences();
 
   const handleUpgradeClick = () => {
     if (setActiveTab) {
@@ -847,6 +848,8 @@ const Scout: React.FC<ScoutProps> = ({ setActiveTab }) => {
         canScan={canScan}
       />
       
+      <FocusBanner preferences={preferences} onEdit={() => setActiveTab?.('settings')} />
+
       <ExplainerBanner />
       
       <ViewToggle
