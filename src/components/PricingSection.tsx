@@ -65,12 +65,12 @@ const PricingSection = () => (
       <div className="text-center mb-10 sm:mb-14">
         <p className="text-[10px] sm:text-xs font-bold tracking-[0.2em] sm:tracking-[0.25em] mb-3 font-mono text-signal">PRICING</p>
         <h2 className="text-[26px] leading-tight sm:text-4xl font-extrabold text-foreground tracking-tight mb-3">
-          Try it free for 3 days
+          Start free. No credit card.
         </h2>
-        <p className="text-base text-muted-foreground">Every plan starts with a 3-day free trial. Card required, cancel any time before it ends and you are not charged.</p>
+        <p className="text-base text-muted-foreground max-w-xl mx-auto">The Free plan is yours forever and never asks for a card. Pro and Elite add a 3-day trial you can cancel any time before it ends.</p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6 md:gap-5 max-w-3xl mx-auto">
+      <div className="grid md:grid-cols-3 gap-6 md:gap-5 max-w-5xl mx-auto">
         {plans.map((plan, i) => (
           <div
             key={i}
