@@ -55,6 +55,50 @@ const GOOGLE_NEWS_QUERIES = [
   '"call center" opening jobs',
 ];
 
+// ===== Preference-driven query builder =====
+// Injects the user's Target Role / Industry / Work Style directly into the search.
+function buildPreferenceQueries(preferences: any): { news: string[]; googleNews: string[]; remote: boolean } {
+  const role = String(preferences?.target_role || "").trim();
+  const industry = String(preferences?.target_industry || "").trim();
+  const location = String(preferences?.target_location || "").trim();
+  const workStyle = String(preferences?.work_style || "").trim();
+  const remote = /remote|anywhere|distributed|work from home/i.test(workStyle);
+
+  const news: string[] = [];
+  const googleNews: string[] = [];
+
+  if (role) {
+    news.push(`"${role}" AND (hiring OR "now hiring" OR "expanding team" OR recruiting)`);
+    googleNews.push(`"${role}" hiring`);
+    googleNews.push(`"${role}" "joining our team" OR "expanding team"`);
+    if (remote) {
+      news.push(`"${role}" AND remote AND (hiring OR "distributed team" OR "work from anywhere")`);
+      googleNews.push(`"${role}" remote hiring`);
+      googleNews.push(`"remote-first" company hiring "${role}"`);
+    }
+  }
+
+  if (industry) {
+    news.push(`"${industry}" AND (expansion OR "plans to hire" OR "new office" OR funding)`);
+    googleNews.push(`"${industry}" hiring expansion`);
+  }
+
+  if (role && industry) {
+    googleNews.push(`"${industry}" "${role}" hiring`);
+  }
+
+  if (location && !remote) {
+    googleNews.push(`hiring "${location}" ${role || "jobs"}`);
+  }
+
+  if (remote && !role) {
+    googleNews.push(`"remote-first" company hiring`);
+    googleNews.push(`"hiring remotely" "work from anywhere"`);
+  }
+
+  return { news: news.slice(0, 6), googleNews: googleNews.slice(0, 8), remote };
+}
+
 const HIRING_HINTS = [
   "hire", "hiring", "jobs", "recruit", "workforce", "staff", "employees",
   "expansion", "expands", "opens", "opening", "raised", "raises", "funding",
