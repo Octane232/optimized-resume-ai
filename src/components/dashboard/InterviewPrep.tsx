@@ -1425,4 +1425,129 @@ const TabBar: React.FC<{
   </div>
 );
 
+// Resume grounding notice + toggle
+const ResumeGrounding: React.FC<{
+  hasResume: boolean;
+  resumeTitle: string;
+  useResume: boolean;
+  onToggle: () => void;
+  onGoToResume: () => void;
+}> = ({ hasResume, resumeTitle, useResume, onToggle, onGoToResume }) => {
+  if (!hasResume) {
+    return (
+      <div className="flex items-start gap-2 p-3 rounded-lg border border-border/60 bg-muted/40">
+        <FileText className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" aria-hidden="true" />
+        <p className="text-xs text-muted-foreground">
+          Add a resume and your questions and answers will use your real projects and results.
+          <button className="text-primary underline ml-1" onClick={onGoToResume}>Add resume</button>
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-between gap-3 p-3 rounded-lg border border-primary/20 bg-primary/5">
+      <div className="flex items-start gap-2 min-w-0">
+        <FileText className="w-4 h-4 text-primary mt-0.5 shrink-0" aria-hidden="true" />
+        <p className="text-xs text-muted-foreground min-w-0">
+          {useResume ? 'Using your resume: ' : 'Resume available: '}
+          <span className="font-medium text-foreground">{resumeTitle}</span>
+          <br />
+          {useResume
+            ? 'Questions and answers will reference your real experience.'
+            : 'Turn this on for answers built from your real experience.'}
+        </p>
+      </div>
+      <Button variant={useResume ? 'secondary' : 'outline'} size="sm" className="shrink-0" onClick={onToggle}>
+        {useResume ? 'On' : 'Off'}
+      </Button>
+    </div>
+  );
+};
+
+// STAR score breakdown for a practice answer
+const StarBreakdown: React.FC<{ star: StarScores; notes?: StarNotes }> = ({ star, notes }) => {
+  const rows: { key: keyof StarScores; label: string }[] = [
+    { key: 'situation', label: 'Situation' },
+    { key: 'task', label: 'Task' },
+    { key: 'action', label: 'Action' },
+    { key: 'result', label: 'Result' },
+  ];
+
+  const barColor = (v: number) =>
+    v >= 8 ? 'bg-signal' : v >= 5 ? 'bg-amber-500' : 'bg-destructive';
+
+  return (
+    <div className="rounded-xl border border-border/60 p-4 space-y-3">
+      <p className="text-sm font-medium text-foreground">STAR breakdown</p>
+      <div className="space-y-2.5">
+        {rows.map(({ key, label }) => (
+          <div key={key} className="space-y-1">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-medium text-foreground">{label}</span>
+              <span className="text-muted-foreground">{star[key]}/10</span>
+            </div>
+            <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+              <div
+                className={`h-full rounded-full ${barColor(star[key])}`}
+                style={{ width: `${Math.max(4, star[key] * 10)}%` }}
+              />
+            </div>
+            {notes?.[key] && <p className="text-xs text-muted-foreground">{notes[key]}</p>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Glanceable live cue card
+const CueCard: React.FC<{ cue: CopilotCue; grounded?: boolean; onCopy: () => void }> = ({ cue, grounded, onCopy }) => {
+  const lines: { label: string; value: string }[] = [
+    { label: 'Open with', value: cue.opening },
+    { label: 'Context', value: cue.situation },
+    { label: 'What you did', value: cue.action },
+    { label: 'Result', value: cue.result },
+    { label: 'Close with', value: cue.closing },
+  ].filter(l => l.value);
+
+  return (
+    <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-2.5">
+      <div className="flex items-center justify-between gap-2">
+        <p className="font-medium text-primary text-xs uppercase tracking-wider">Say this</p>
+        <div className="flex items-center gap-1.5">
+          {grounded && (
+            <Badge variant="outline" className="border-primary/20 bg-background/60 text-[10px]">
+              <FileText className="w-2.5 h-2.5 mr-1" /> From your resume
+            </Badge>
+          )}
+          <Button variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={onCopy}>
+            <Copy className="w-3 h-3" />
+            <span className="sr-only">Copy talking points</span>
+          </Button>
+        </div>
+      </div>
+
+      <ul className="space-y-2">
+        {lines.map(({ label, value }) => (
+          <li key={label} className="flex gap-2">
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground w-24 shrink-0 pt-1">
+              {label}
+            </span>
+            <span className="text-base font-medium text-foreground leading-snug">{value}</span>
+          </li>
+        ))}
+      </ul>
+
+      {cue.keywords.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 pt-1">
+          {cue.keywords.map(k => (
+            <Badge key={k} variant="secondary" className="text-[10px]">{k}</Badge>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default InterviewPrep;
