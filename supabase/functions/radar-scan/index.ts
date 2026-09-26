@@ -350,6 +350,25 @@ serve(async (req) => {
       await enforceQuota(supabase, user.id, user.tier, "radar_alert");
     }
 
+    // Load the requesting user's career preferences so the scan searches for
+    // their actual target role / industry / work style, not just generic signals.
+    let requesterPreferences: any = null;
+    if (requestingUserId) {
+      const { data: prefRow } = await supabase
+        .from("career_preferences")
+        .select("target_role, target_industry, target_location, experience_level, target_salary, work_style")
+        .eq("user_id", requestingUserId)
+        .maybeSingle();
+      requesterPreferences = prefRow || null;
+    }
+    const prefQueries = buildPreferenceQueries(requesterPreferences);
+    const newsQueries = [...prefQueries.news, ...NEWS_QUERIES];
+    const googleNewsQueries = [...prefQueries.googleNews, ...GOOGLE_NEWS_QUERIES];
+    console.log(
+      `Preference-driven queries: ${prefQueries.news.length + prefQueries.googleNews.length}` +
+      ` (role: ${requesterPreferences?.target_role || "none"}, remote: ${prefQueries.remote})`
+    );
+
     const allArticles: any[] = [];
     const seenUrls = new Set<string>();
     const pushArticle = (a: any) => {
@@ -357,6 +376,7 @@ serve(async (req) => {
       seenUrls.add(a.url);
       allArticles.push(a);
     };
+
 
     // SOURCE 1: NewsAPI — cross-industry hiring intent queries
     if (NEWS_API_KEY) {
