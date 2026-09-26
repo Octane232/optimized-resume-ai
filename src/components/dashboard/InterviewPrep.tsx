@@ -381,7 +381,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
 
     try {
       const { data } = await supabase.functions.invoke('interview-feedback', {
-        body: { generateOnly: true, position, company },
+        body: { generateOnly: true, position, company, resume: resumePayload },
       });
 
       const generatedQuestions: string[] = data?.questions?.length 
