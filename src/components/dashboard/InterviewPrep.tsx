@@ -923,6 +923,13 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                         />
                       </div>
                     </div>
+                    <ResumeGrounding
+                      hasResume={hasResume}
+                      resumeTitle={resumeTitle}
+                      useResume={useResume}
+                      onToggle={() => setUseResume(v => !v)}
+                      onGoToResume={() => setActiveTab?.('resume')}
+                    />
                     <Button 
                       onClick={generateQuestions} 
                       disabled={!position.trim() || loadingQuestions || !canUse('interview_prep')} 
