@@ -984,6 +984,11 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                       </div>
                       <p className="text-sm text-muted-foreground">{currentFeedback.feedback}</p>
                     </div>
+
+                    {currentFeedback.star && (
+                      <StarBreakdown star={currentFeedback.star} notes={currentFeedback.starNotes} />
+                    )}
+
                     {currentFeedback.strengths.length > 0 && (
                       <div className="space-y-1">
                         <p className="text-sm font-medium text-signal flex items-center gap-1">
