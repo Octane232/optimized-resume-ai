@@ -42,6 +42,7 @@ interface Stats {
   newSignals: number;
   applications: number;
   interviews: number;
+  practiceSessions: number;
   resumeScore: number | null;
 }
 
