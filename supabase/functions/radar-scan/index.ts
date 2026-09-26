@@ -385,7 +385,7 @@ serve(async (req) => {
         since.setDate(since.getDate() - 4);
         const from = since.toISOString().split("T")[0];
         const results = await Promise.allSettled(
-          NEWS_QUERIES.map((q) =>
+          newsQueries.map((q) =>
             fetch(`https://newsapi.org/v2/everything?q=${encodeURIComponent(q)}&from=${from}&language=en&sortBy=publishedAt&pageSize=12&apiKey=${NEWS_API_KEY}`)
               .then((r) => r.json())
           )
@@ -407,15 +407,23 @@ serve(async (req) => {
       } catch (e) { console.error("NewsAPI failed:", e); }
     }
 
-    // SOURCE 2: Google News RSS — free, global, every sector
+    // SOURCE 2: Google News RSS — free, global, every sector.
+    // Remote-focused users get worldwide editions, not just the US edition.
+    const locales = prefQueries.remote
+      ? [
+          { hl: "en-US", gl: "US", ceid: "US:en" },
+          { hl: "en-GB", gl: "GB", ceid: "GB:en" },
+          { hl: "en-IN", gl: "IN", ceid: "IN:en" },
+        ]
+      : [{ hl: "en-US", gl: "US", ceid: "US:en" }];
     try {
       const before = allArticles.length;
       const results = await Promise.allSettled(
-        GOOGLE_NEWS_QUERIES.map((q) =>
-          fetch(`https://news.google.com/rss/search?q=${encodeURIComponent(q + " when:7d")}&hl=en-US&gl=US&ceid=US:en`, {
+        googleNewsQueries.flatMap((q) => locales.map((loc) =>
+          fetch(`https://news.google.com/rss/search?q=${encodeURIComponent(q + " when:7d")}&hl=${loc.hl}&gl=${loc.gl}&ceid=${loc.ceid}`, {
             headers: { "User-Agent": "Mozilla/5.0 (compatible; VaylanceRadar/1.0)" },
           }).then((r) => r.text())
-        )
+        ))
       );
       for (const r of results) {
         if (r.status === "fulfilled") {
