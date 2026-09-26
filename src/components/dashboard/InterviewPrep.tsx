@@ -783,6 +783,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
       id, 
       question: questionText, 
       suggestion: null, 
+      cue: null,
       loading: true,
       timestamp: new Date()
     }]);
@@ -793,20 +794,32 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
           liveMode: true,
           question: questionText,
           position: copilotPosition,
-          company: copilotCompany
+          company: copilotCompany,
+          resume: resumePayload,
         },
       });
 
       if (error) throw error;
 
       const suggestion = data?.suggestion?.trim();
-      if (!suggestion) throw new Error('Empty AI response');
+      const cue: CopilotCue | null = data?.cue
+        ? {
+            opening: data.cue.opening || '',
+            situation: data.cue.situation || '',
+            action: data.cue.action || '',
+            result: data.cue.result || '',
+            closing: data.cue.closing || '',
+            keywords: Array.isArray(data.cue.keywords) ? data.cue.keywords : [],
+          }
+        : null;
+
+      if (!suggestion && !cue) throw new Error('Empty AI response');
 
       await trackUsage('interview_prep');
 
       setCopilotEntries(prev => prev.map(entry =>
         entry.id === id
-          ? { ...entry, suggestion, loading: false }
+          ? { ...entry, suggestion, cue, grounded: data?.grounded, loading: false }
           : entry
       ));
     } catch (error: any) {
