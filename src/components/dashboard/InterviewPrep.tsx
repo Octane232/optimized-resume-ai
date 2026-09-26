@@ -428,7 +428,9 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
         body: { 
           question: questions[currentQ], 
           answer: userAnswer, 
-          position 
+          position,
+          company,
+          resume: resumePayload,
         },
       });
 
@@ -439,6 +441,10 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
         feedback: data?.feedback || 'Good attempt.',
         strengths: data?.strengths || [],
         improvements: data?.improvements || [],
+        star: data?.star,
+        starNotes: data?.starNotes,
+        improvedAnswer: data?.improvedAnswer,
+        grounded: data?.grounded,
       };
 
       const newAnswer: Answer = {
