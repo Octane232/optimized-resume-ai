@@ -114,7 +114,13 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
 
       setUserName(profile?.full_name?.split(' ')[0] || user.email?.split('@')[0] || 'there');
 
-      const topScore = resumes.find((r) => typeof r.ats_score === 'number')?.ats_score ?? null;
+      const scoreOf = (r: any) => {
+        const direct = typeof r?.ats_score === 'number' ? r.ats_score : null;
+        if (direct !== null) return direct;
+        const nested = r?.content?.ats_score;
+        return typeof nested === 'number' ? nested : null;
+      };
+      const topScore = resumes.map(scoreOf).find((s) => s !== null) ?? null;
 
       setStats({
         radarSignals: alerts.length,
