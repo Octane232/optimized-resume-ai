@@ -209,6 +209,7 @@ const useBundleGeneration = () => {
         supabase.from('resumes').insert({
           user_id: userId,
           title: `Tailored Resume — ${new Date().toLocaleDateString()}`,
+          ats_score: data.atsData?.afterScore ?? null,
           content: { 
             text: data.tailoredResume, 
             ats_score: data.atsData?.afterScore ?? null, 
