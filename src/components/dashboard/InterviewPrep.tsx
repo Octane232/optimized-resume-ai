@@ -1013,6 +1013,28 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                         </ul>
                       </div>
                     )}
+
+                    {currentFeedback.improvedAnswer && (
+                      <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-sm font-medium text-primary flex items-center gap-1.5">
+                            <Wand2 className="w-3.5 h-3.5" /> Stronger version of your answer
+                          </p>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 px-2 text-xs"
+                            onClick={() => copyText(currentFeedback.improvedAnswer || '')}
+                          >
+                            <Copy className="w-3 h-3 mr-1" /> Copy
+                          </Button>
+                        </div>
+                        <p className="text-sm text-foreground leading-relaxed">{currentFeedback.improvedAnswer}</p>
+                        {currentFeedback.grounded && (
+                          <p className="text-xs text-muted-foreground">Built from your own resume — no invented experience.</p>
+                        )}
+                      </div>
+                    )}
                     <Button onClick={nextQuestion}>
                       <ArrowRight className="w-4 h-4 mr-2" />
                       {currentQ + 1 < questions.length ? 'Next Question' : 'See Results'}
