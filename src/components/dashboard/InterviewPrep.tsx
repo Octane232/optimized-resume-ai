@@ -1118,6 +1118,13 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                           />
                         </div>
                       </div>
+                      <ResumeGrounding
+                        hasResume={hasResume}
+                        resumeTitle={resumeTitle}
+                        useResume={useResume}
+                        onToggle={() => setUseResume(v => !v)}
+                        onGoToResume={() => setActiveTab?.('resume')}
+                      />
                       <div className="flex flex-col gap-3">
                         <Button onClick={startCopilot} disabled={!copilotPosition.trim() || !canUse('interview_prep')} className="flex-1">
                           <Radio className="w-4 h-4 mr-2" />Start Copilot Session
