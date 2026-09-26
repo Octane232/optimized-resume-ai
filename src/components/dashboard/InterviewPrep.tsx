@@ -286,9 +286,15 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
   // Use live getRemaining() directly on every render, not stale local state
   const remainingSessions = getRemaining('interview_prep');
 
+  const hasResume = resumeText.length > 50;
+  const groundingOn = hasResume && useResume;
+  // Only send the CV when we actually have one and the user hasn't switched it off
+  const resumePayload = groundingOn ? resumeText : undefined;
+
   // ===== Effects =====
   useEffect(() => {
     loadHistory();
+    loadResume();
   }, []);
 
   useEffect(() => {
@@ -296,6 +302,27 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
   }, [copilotEntries]);
 
   // ===== Data Fetching =====
+  const loadResume = async () => {
+    try {
+      const { data } = await supabase
+        .from('resumes')
+        .select('title, content, updated_at')
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (!data) return;
+
+      const text = cleanResumeText(extractResumeText(data.content));
+      if (text.length > 50) {
+        setResumeText(text);
+        setResumeTitle(data.title || 'Your resume');
+      }
+    } catch (error) {
+      console.error('Error loading resume:', error);
+    }
+  };
+
   const loadHistory = async () => {
     try {
       const { data: sessionData } = await supabase
