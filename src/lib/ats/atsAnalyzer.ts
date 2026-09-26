@@ -82,7 +82,7 @@ export function detectContactInfo(text: string): {
   const hasPhone = /(\+?1\s?)?([\d\s\-().]{10,})/i.test(text)
   // Name is hard to detect deterministically; assume it's there if first line looks like a name
   const firstLine = text.split('\n')[0]?.trim() ?? ''
-  const hasName = firstLine.length > 2 && firstLine.length < 60 && !/[<>{}\[\]@]/.test(firstLine)
+  const hasName = firstLine.length > 2 && firstLine.length < 60 && !/[<>{}[\]@]/.test(firstLine)
   return { hasEmail, hasPhone, hasName }
 }
 

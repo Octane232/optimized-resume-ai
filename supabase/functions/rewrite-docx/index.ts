@@ -162,10 +162,10 @@ serve(async (req) => {
       updates.sort((a, b) => b.start - a.start);
       for (const u of updates) xml = xml.slice(0, u.start) + u.replacement + xml.slice(u.end);
 
-      zip.file("word/document.xml", xml);
-      const out = await zip.generateAsync({ type: "uint8array", compression: "DEFLATE" });
+      (zip as any).file("word/document.xml", xml);
+      const out = await zip.generateAsync({ type: "uint8array", compression: "DEFLATE" }) as Uint8Array;
       const previewText = paras.map((p, i) => edits[String(i)] ?? p.text).filter((t) => t.trim()).join("\n");
-      return jsonResponse({ docxBase64: encodeBase64(out), previewText, appliedCount: updates.length });
+      return jsonResponse({ docxBase64: encodeBase64(out as unknown as ArrayBuffer), previewText, appliedCount: updates.length });
     }
 
     return jsonResponse({ error: "Unknown mode" }, 400);

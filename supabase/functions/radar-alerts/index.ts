@@ -182,7 +182,7 @@ const handleRadarAlerts = async (req: Request): Promise<Response> => {
   ]);
   
   // Fetch associated signals for alerts
-  const signalIds = [...new Set(alerts.map((a: any) => a.signal_id).filter(Boolean))];
+  const signalIds = [...new Set(alerts.map((a: any) => a.signal_id).filter(Boolean))] as string[];
   const alertSignals = await fetchSignalsByIds(supabase, signalIds);
   const signalMap = buildSignalMap(alertSignals);
   
@@ -193,13 +193,13 @@ const handleRadarAlerts = async (req: Request): Promise<Response> => {
   const filteredAlerts = filterByIndustry(
     enrichedAlerts,
     industry,
-    (alert) => alert.radar_signals?.industry
+    (alert) => alert.radar_signals?.industry ?? null
   );
   
   const filteredSignals = filterByIndustry(
     allSignals,
     industry,
-    (signal) => signal.industry
+    (signal) => signal.industry ?? null
   );
   
   // Get additional metadata

@@ -70,7 +70,7 @@ serve(async (req) => {
     });
     const subscriptions = {
       data: allSubs.data.filter(
-        (s) => s.status === "active" || s.status === "trialing",
+        (s: any) => s.status === "active" || s.status === "trialing",
       ),
     };
 

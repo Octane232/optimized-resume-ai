@@ -317,13 +317,13 @@ const ResetPassword: React.FC = () => {
   const { isValidSession, isChecking } = useResetPasswordSession();
   const { isLoading, resetPassword } = usePasswordReset(() => setIsSuccess(true));
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const validation = validatePassword(password, confirmPassword);
     if (!validation.isValid) {
-      const { toast } = useToast();
       toast({ 
         title: validation.error || "Validation Error", 
         variant: "destructive" 

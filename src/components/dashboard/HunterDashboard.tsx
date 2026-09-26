@@ -42,6 +42,7 @@ interface Stats {
   newSignals: number;
   applications: number;
   interviews: number;
+  practiceSessions: number;
   resumeScore: number | null;
 }
 
@@ -85,6 +86,7 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
     newSignals: 0,
     applications: 0,
     interviews: 0,
+    practiceSessions: 0,
     resumeScore: null,
   });
   const [checklist, setChecklist] = useState<ChecklistItem[]>([]);
@@ -98,12 +100,15 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const [profileRes, prefsRes, resumesRes, appsRes, alertsRes] = await Promise.all([
+      const [profileRes, prefsRes, resumesRes, appsRes, alertsRes, alertsCountRes, unreadCountRes, sessionsCountRes] = await Promise.all([
         supabase.from('profiles').select('full_name, phone, location').eq('user_id', user.id).maybeSingle(),
         supabase.from('career_preferences').select('target_role').eq('user_id', user.id).maybeSingle(),
         supabase.from('resumes').select('id, ats_score, content, created_at').eq('user_id', user.id).order('created_at', { ascending: false }),
         supabase.from('job_applications').select('status').eq('user_id', user.id),
         supabase.from('radar_alerts').select('id, match_score, signal_id, is_read, created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20),
+        supabase.from('radar_alerts').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+        supabase.from('radar_alerts').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('is_read', false),
+        supabase.from('interview_sessions').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
       ]);
 
       const profile: any = profileRes.data;
@@ -111,6 +116,9 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
       const resumes: any[] = resumesRes.data || [];
       const apps: any[] = appsRes.data || [];
       const alerts: any[] = alertsRes.data || [];
+      const totalAlerts = alertsCountRes.count ?? alerts.length;
+      const unreadAlerts = unreadCountRes.count ?? alerts.filter((a) => !a.is_read).length;
+      const practiceSessions = sessionsCountRes.count ?? 0;
 
       setUserName(profile?.full_name?.split(' ')[0] || user.email?.split('@')[0] || 'there');
 
@@ -123,10 +131,11 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
       const topScore = resumes.map(scoreOf).find((s) => s !== null) ?? null;
 
       setStats({
-        radarSignals: alerts.length,
-        newSignals: alerts.filter((a) => !a.is_read).length,
+        radarSignals: totalAlerts,
+        newSignals: unreadAlerts,
         applications: apps.length,
         interviews: apps.filter((a) => a.status === 'interviewing').length,
+        practiceSessions,
         resumeScore: topScore,
       });
 
@@ -135,7 +144,7 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
         { label: 'Upload a resume', done: resumes.length > 0, detail: resumes.length > 0 ? `${resumes.length} saved` : 'Not yet' },
         { label: 'Set career preferences', done: Boolean(prefs?.target_role), detail: prefs?.target_role || 'Not set' },
         { label: 'Track 10 applications', done: apps.length >= 10, detail: `${apps.length}/10` },
-        { label: 'Practise 2 interviews', done: apps.filter((a) => a.status === 'interviewing').length >= 2, detail: `${apps.filter((a) => a.status === 'interviewing').length}/2` },
+        { label: 'Practise 2 interviews', done: practiceSessions >= 2, detail: `${practiceSessions}/2` },
       ]);
 
       // Resolve radar signals for the top alerts
@@ -205,8 +214,8 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
     {
       label: 'Interview prep',
       caption: 'Practice sessions',
-      value: stats.interviews,
-      note: 'Keep practising',
+      value: stats.practiceSessions,
+      note: stats.practiceSessions > 0 ? 'Completed' : 'Start your first',
       icon: Mic,
       action: () => setActiveTab('interview-prep'),
       actionLabel: 'Start practice',
