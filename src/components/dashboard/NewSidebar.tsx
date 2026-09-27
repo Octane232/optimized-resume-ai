@@ -62,7 +62,7 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
     { id: 'skill-gap', label: 'Skill Gap', icon: TrendingUp },
     { id: 'linkedin', label: 'LinkedIn Optimizer', icon: Linkedin },
     { id: 'salary-intel', label: 'Salary Intelligence', icon: DollarSign },
-    { id: 'mission-control', label: 'Mission Control', icon: Crosshair },
+    { id: 'mission-control', label: 'Application Tracker', icon: Crosshair },
   ];
 
   const toolItems: NavItem[] = [

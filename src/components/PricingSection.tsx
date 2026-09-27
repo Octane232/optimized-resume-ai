@@ -63,9 +63,9 @@ const PricingSection = () => (
   <section id="pricing" className="py-16 sm:py-24">
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="text-center mb-10 sm:mb-14">
-        <p className="text-[10px] sm:text-xs font-bold tracking-[0.2em] sm:tracking-[0.25em] mb-3 font-mono text-signal">PRICING</p>
+        <p className="text-[10px] sm:text-xs font-bold tracking-[0.2em] sm:tracking-[0.25em] mb-3 font-mono text-signal">SIMPLE, TRANSPARENT PRICING</p>
         <h2 className="text-[26px] leading-tight sm:text-4xl font-extrabold text-foreground tracking-tight mb-3">
-          Start free. No credit card.
+          Choose the plan that fits your goals.
         </h2>
         <p className="text-base text-muted-foreground max-w-xl mx-auto">The Free plan is yours forever and never asks for a card. Pro and Elite add a 3-day trial you can cancel any time before it ends.</p>
       </div>
