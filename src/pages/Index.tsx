@@ -4,6 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 
 import Header from '@/components/Header';
 import HeroSection from '@/components/HeroSection';
+import SignalFlowSection from '@/components/SignalFlowSection';
+import HiringRadarSection from '@/components/HiringRadarSection';
+import BigPictureSection from '@/components/BigPictureSection';
 import FeaturesSection from '@/components/FeaturesSection';
 import HowItWorksSection from '@/components/HowItWorksSection';
 import TestimonialsSection from '@/components/TestimonialsSection';
