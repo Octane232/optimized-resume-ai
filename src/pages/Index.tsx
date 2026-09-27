@@ -122,14 +122,17 @@ const Index = () => {
   return (
     <div className="warm font-body min-h-screen bg-background text-foreground">
       <SEOHead
-        title="Vaylance — AI Job Search Platform | Get Hired Faster"
-        description="Vaylance helps you tailor your resume to pass ATS filters, prep for interviews, and find companies hiring before they post publicly. Start free."
-        keywords="ATS resume scanner, resume checker, interview prep AI, job search tool, cover letter generator, salary intelligence"
+        title="Vaylance — AI Career Coach | Know Who's Hiring Before the Job Is Posted"
+        description="Vaylance detects the business signals that come before hiring, then helps you prepare: resume and ATS match, interview coaching, and application tracking. Free plan, no card."
+        keywords="hiring signals, AI career coach, ATS resume scanner, interview prep AI, cover letter generator, salary intelligence"
         canonical="https://vaylance.com/"
       />
       <Header />
       <HeroSection />
+      <SignalFlowSection />
+      <HiringRadarSection />
       <div id="features"><FeaturesSection /></div>
+      <BigPictureSection />
       <ComparisonSection />
       <div id="testimonials"><TestimonialsSection /></div>
       <HowItWorksSection />
