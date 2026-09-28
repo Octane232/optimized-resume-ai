@@ -96,7 +96,17 @@ export default {
 					DEFAULT: 'hsl(var(--signal))',
 					foreground: 'hsl(var(--signal-foreground))',
 					soft: 'hsl(var(--signal-soft))'
+				},
+				ink: {
+					DEFAULT: 'hsl(var(--ink))',
+					foreground: 'hsl(var(--ink-foreground))',
+					muted: 'hsl(var(--ink-muted))'
+				},
+				brass: {
+					DEFAULT: 'hsl(var(--brass))',
+					foreground: 'hsl(var(--brass-foreground))'
 				}
+
 
 			},
 			borderRadius: {

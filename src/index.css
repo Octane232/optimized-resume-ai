@@ -43,6 +43,15 @@
     --signal-foreground: 0 0% 100%;
     --signal-soft: 158 60% 94%;
 
+    /* Editorial surfaces */
+    --ink: 162 53% 9%;
+    --ink-foreground: 40 33% 97%;
+    --ink-muted: 150 18% 74%;
+    --brass: 36 38% 62%;
+    --brass-foreground: 60 10% 8%;
+
+
+
 
     /* Hunter Mode - Electric Blue */
     --hunter-primary: 217 100% 50%;
