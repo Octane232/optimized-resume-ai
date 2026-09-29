@@ -1,32 +1,21 @@
 import React from 'react';
 
-const logos = [
-  { name: 'Stripe', slug: 'stripe' },
-  { name: 'Shopify', slug: 'shopify' },
-  { name: 'Notion', slug: 'notion' },
-  { name: 'Figma', slug: 'figma' },
-  { name: 'Airbnb', slug: 'airbnb' },
-];
+const companies = ['Google', 'Meta', 'Apple', 'Amazon', 'Microsoft', 'Stripe', 'Anthropic'];
 
 const TrustedBySection = () => (
-  <section className="py-10 sm:py-12 border-b border-border">
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <p className="text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground mb-7">
-        Signals tracked across companies like these
+  <section className="border-b border-border bg-background py-10 sm:py-12">
+    <div className="mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-10">
+      <p className="text-[10px] font-semibold uppercase text-muted-foreground">
+        Follow the companies shaping your market
       </p>
-      <div className="flex flex-wrap items-center justify-center gap-x-10 sm:gap-x-16 gap-y-7">
-        {logos.map((l) => (
-          <img
-            key={l.slug}
-            src={`https://cdn.simpleicons.org/${l.slug}/94a3b8`}
-            alt={l.name}
-            loading="lazy"
-            width={28}
-            height={28}
-            className="h-6 sm:h-7 w-auto opacity-60 hover:opacity-100 transition-opacity"
-          />
+      <div className="mt-7 flex flex-wrap items-center gap-x-8 gap-y-5 sm:justify-between">
+        {companies.map((company) => (
+          <span key={company} className="text-sm font-semibold text-foreground/70 sm:text-base">
+            {company}
+          </span>
         ))}
       </div>
+      <p className="mt-7 text-xs leading-5 text-muted-foreground">Company names are examples of organizations candidates may choose to follow; no endorsement is implied.</p>
     </div>
   </section>
 );

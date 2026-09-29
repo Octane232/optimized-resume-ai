@@ -7,15 +7,16 @@ import VaylanceLogo from '@/components/VaylanceLogo';
 
 const Logo = () => (
   <div className="flex items-center gap-2.5">
-    <VaylanceLogo />
-    <span className="text-lg font-bold text-foreground">Vaylance</span>
+    <VaylanceLogo width={24} height={24} />
+    <span className="text-[17px] font-semibold text-foreground">Vaylance</span>
   </div>
 );
 
 // ===== Navigation Items =====
 const navItems = [
-  { label: 'Features', id: 'features' },
   { label: 'How it works', id: 'how-it-works' },
+  { label: 'Features', id: 'features' },
+  { label: 'Success stories', id: 'testimonials' },
   { label: 'Pricing', id: 'pricing' },
 ];
 
@@ -40,24 +41,24 @@ const Header = () => {
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      scrolled ? 'bg-background/90 backdrop-blur-xl border-b border-border/70' : 'bg-background/70 backdrop-blur-md'
+      scrolled ? 'bg-background/95 backdrop-blur-xl border-b border-border/70' : 'bg-background/90 backdrop-blur-md'
     }`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10">
+        <div className="flex items-center justify-between h-[68px]">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
             <Logo />
           </Link>
 
           {/* Desktop Navigation - Centered */}
-          <nav className="hidden md:flex items-center gap-7 absolute left-1/2 -translate-x-1/2">
+          <nav className="hidden lg:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
             {navItems.map((item, idx) => (
               <Button
                 variant="ghost"
                 size="sm"
                 key={idx}
                 onClick={() => scrollTo(item.id)}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground"
+                className="h-8 px-3 text-xs font-medium text-muted-foreground hover:text-foreground"
               >
                 {item.label}
               </Button>
@@ -65,7 +66,7 @@ const Header = () => {
           </nav>
 
           {/* Desktop Auth Buttons */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-2">
             <Button asChild variant="ghost" size="sm" className="font-medium text-muted-foreground hover:text-foreground">
               <Link to="/auth">Sign in</Link>
             </Button>
@@ -78,7 +79,7 @@ const Header = () => {
            <Button
              variant="ghost"
              size="icon"
-             className="md:hidden"
+             className="lg:hidden"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
           >
@@ -88,7 +89,7 @@ const Header = () => {
 
         {/* Mobile Navigation Menu */}
         {menuOpen && (
-          <div className="md:hidden py-4 border-t border-border bg-background">
+          <div className="lg:hidden py-4 border-t border-border bg-background">
             <div className="flex flex-col gap-3 px-2">
               {navItems.map((item, idx) => (
                 <Button

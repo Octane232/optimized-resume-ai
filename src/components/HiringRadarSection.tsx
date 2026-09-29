@@ -1,71 +1,82 @@
 import React from 'react';
-import { Building2, Clock, Users, Gauge } from 'lucide-react';
+import { ArrowRight, FileCheck2, Search, Target } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import deskImage from '@/assets/editorial-desk.jpg';
 
 const rows = [
-  { company: 'Northwind Logistics', signal: 'New distribution center', why: 'Facility expansion plus operational growth', roles: ['Operations Manager', 'Warehouse Manager'], match: 92 },
-  { company: 'Apex Energy', signal: '$42M funding round', why: 'Funding plus a new projects pipeline', roles: ['Project Manager', 'Mechanical Engineer'], match: 78 },
-  { company: 'HealthPlus', signal: 'New regional office', why: 'Regional expansion and service growth', roles: ['Administrator', 'Nurse Manager'], match: 85 },
+  { company: 'Anthropic', signal: 'Expanding research team', level: 'HIGH' },
+  { company: 'OpenAI', signal: 'New infrastructure roles', level: 'HIGH' },
+  { company: 'Stripe', signal: 'Growing go-to-market team', level: 'MEDIUM' },
+  { company: 'Figma', signal: 'Product design expansion', level: 'MEDIUM' },
+  { company: 'Amazon', signal: 'Increased engineering hiring', level: 'MEDIUM' },
 ];
 
 const benefits = [
-  { icon: Building2, title: 'Real company intelligence', desc: 'We identify the company, its location, size and the roles it is likely to need.' },
-  { icon: Clock, title: 'Why now', desc: 'You see what is driving the signal and what it means for their hiring.' },
-  { icon: Users, title: 'Find contacts', desc: 'Jump to LinkedIn to find the people relevant to that opportunity.' },
-  { icon: Gauge, title: 'Your fit', desc: 'See how well you match and get tailored next steps to prepare.' },
+  { icon: Search, title: 'Discover early opportunities', desc: 'See which companies are showing credible signs of future hiring.' },
+  { icon: FileCheck2, title: 'Strengthen your positioning', desc: 'Compare your resume with a target role and get clear improvement guidance.' },
+  { icon: Target, title: 'Take action with confidence', desc: 'Know when to reach out, what to highlight and how to prepare.' },
 ];
 
 const HiringRadarSection = () => (
-  <section id="hiring-radar" className="py-16 sm:py-24 border-b border-border bg-card">
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mb-10">
-        <p className="text-[11px] font-semibold uppercase text-primary mb-4">Our flagship feature</p>
-        <h2 className="text-[26px] leading-tight sm:text-4xl font-bold text-foreground mb-4">Meet Hiring Radar</h2>
-        <p className="text-muted-foreground leading-relaxed">
-          The clearest way to discover companies that may be hiring before the job is posted — with real context, not just a list of links.
-        </p>
-      </div>
-
-      <div className="grid lg:grid-cols-[1.35fr_0.65fr] gap-8 lg:gap-12 items-start">
-        <div className="overflow-hidden rounded-lg border border-border bg-background">
-          <div className="border-b border-border px-5 py-4">
-            <h3 className="text-base font-semibold text-foreground">Hiring Radar</h3>
-            <p className="text-xs text-muted-foreground">Companies showing signs of upcoming hiring</p>
+  <section id="hiring-radar" className="border-b border-border bg-card">
+    <div className="mx-auto grid max-w-[1280px] lg:grid-cols-2">
+      <div className="relative min-h-[570px] overflow-hidden lg:min-h-[650px]">
+        <img src={deskImage} alt="Resume and career planning workspace" className="absolute inset-0 h-full w-full object-cover" />
+        <div className="absolute inset-x-4 top-8 mx-auto max-w-[400px] rounded-lg border border-foreground/10 bg-card/95 p-4 shadow-xl backdrop-blur-sm sm:left-12 sm:right-auto sm:top-14 sm:w-[390px]">
+          <div className="mb-3 flex items-center justify-between border-b border-border pb-3">
+            <div>
+              <p className="text-xs font-semibold text-foreground">Vaylance</p>
+              <h2 className="!mt-1 !text-xl font-display text-foreground">Hiring Signals</h2>
+            </div>
+            <span className="text-[9px] font-semibold uppercase text-primary">Live view</span>
           </div>
-          <div className="divide-y divide-border">
-            {rows.map((r) => (
-              <div key={r.company} className="p-4 sm:p-5 grid sm:grid-cols-[1.1fr_1fr_0.9fr_auto] gap-4 items-start">
-                <div>
-                  <p className="text-sm font-semibold text-foreground">{r.company}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{r.signal}</p>
+          <div className="space-y-1.5">
+            {rows.map((row) => (
+              <div key={row.company} className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-md px-2.5 py-2 hover:bg-secondary/55">
+                <div className="min-w-0">
+                  <p className="truncate text-[11px] font-semibold text-foreground">{row.company}</p>
+                  <p className="truncate text-[10px] text-muted-foreground">{row.signal}</p>
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">{r.why}</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {r.roles.map((role) => (
-                    <span key={role} className="rounded-full border border-border px-2 py-0.5 text-[10px] text-muted-foreground">{role}</span>
-                  ))}
-                </div>
-                <div className="text-right">
-                  <p className="tabular text-base font-semibold text-primary">{r.match}%</p>
-                  <p className="text-[10px] text-muted-foreground">your fit</p>
-                </div>
+                <span className="rounded-sm bg-signal-soft px-2 py-1 text-[8px] font-semibold text-primary">{row.level}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="space-y-6">
-          {benefits.map((b) => {
-            const Icon = b.icon;
-            return (
-              <article key={b.title} className="flex gap-3.5">
-                <span className="w-9 h-9 shrink-0 rounded-md bg-signal-soft flex items-center justify-center"><Icon className="w-4 h-4 text-primary" /></span>
+        <div className="absolute bottom-7 left-5 right-5 rounded-md border border-border bg-card/95 p-4 shadow-lg backdrop-blur-sm sm:bottom-10 sm:left-auto sm:right-10 sm:w-[310px]">
+          <p className="text-[9px] font-semibold uppercase text-primary">Resume + ATS guidance</p>
+          <div className="mt-3 space-y-2 text-[10px] text-muted-foreground">
+            <p className="border-l-2 border-primary pl-3">Strengthen impact statement</p>
+            <p className="border-l-2 border-brass pl-3">Quantify this result</p>
+            <p className="border-l-2 border-primary pl-3">Add a relevant keyword naturally</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex bg-ink px-6 py-14 text-ink-foreground sm:px-12 sm:py-20 lg:px-16">
+        <div className="my-auto max-w-lg">
+          <p className="text-[10px] font-semibold uppercase text-brass">AI career coach</p>
+          <h2 className="mt-5 text-ink-foreground">Smarter insights.<br />A more intentional next step.</h2>
+          <p className="mt-6 max-w-md text-sm leading-7 text-ink-muted">
+            Vaylance combines live market signals, document analysis and practical coaching to help you move with clarity — not just keep up.
+          </p>
+
+          <div className="mt-9 space-y-6">
+            {benefits.map(({ icon: Icon, title, desc }) => (
+              <article key={title} className="flex gap-4">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center border border-ink-muted/30"><Icon className="h-4 w-4 text-brass" /></span>
                 <div>
-                  <h3 className="text-sm font-semibold text-foreground mb-1">{b.title}</h3>
-                  <p className="text-[13px] text-muted-foreground leading-relaxed">{b.desc}</p>
+                  <h3 className="text-sm font-semibold text-ink-foreground">{title}</h3>
+                  <p className="mt-1 text-xs leading-5 text-ink-muted">{desc}</p>
                 </div>
               </article>
-            );
-          })}
+            ))}
+          </div>
+
+          <Button asChild size="lg" className="mt-10 h-12 bg-brass px-6 text-brass-foreground hover:bg-brass/90">
+            <Link to="/auth">Create free account <ArrowRight className="ml-1 h-4 w-4" /></Link>
+          </Button>
         </div>
       </div>
     </div>
