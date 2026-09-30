@@ -12,7 +12,7 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_TEST_API_KEY") || Deno.env.get("STRIPE_SECRET_KEY");
+  const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
   const STRIPE_WEBHOOK_SECRET = Deno.env.get("STRIPE_WEBHOOK_SECRET");
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -99,13 +99,6 @@ serve(async (req) => {
     subscription: Stripe.Subscription, 
     userId: string
   ): Promise<string> {
-    // Strategy 0: A subscription still inside its 3-day trial gets the
-    // capped "trial" tier, regardless of the plan they picked.
-    if (subscription.status === "trialing") {
-      console.log("Tier resolved as trial (subscription is trialing)");
-      return "trial";
-    }
-
     // Strategy 1: Check metadata first (most reliable)
     if (subscription.metadata?.plan) {
       const tier = subscription.metadata?.plan === "elite" ? "elite" : 
@@ -152,16 +145,10 @@ serve(async (req) => {
         let periodEnd: Date;
         let stripeSubscriptionId: string | null = null;
         
-        let isTrialing = false;
-
         if (session.subscription) {
           stripeSubscriptionId = session.subscription as string;
           const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
           periodEnd = new Date(subscription.current_period_end * 1000);
-          isTrialing = subscription.status === "trialing";
-          if (isTrialing && subscription.trial_end) {
-            periodEnd = new Date(subscription.trial_end * 1000);
-          }
         } else {
           // Fallback if no subscription (shouldn't happen for paid plans)
           const now = new Date();
@@ -177,8 +164,7 @@ serve(async (req) => {
         }
 
         // PROBLEM 4 FIXED: Updated tier mapping and price map
-        let tier = plan === "elite" ? "elite" : plan === "pro" ? "pro" : "free";
-        if (isTrialing) tier = "trial";
+        const tier = plan === "elite" ? "elite" : plan === "pro" ? "pro" : "free";
 
         const priceMap: Record<string, Record<string, number>> = {
           pro: { monthly: 15, yearly: 144 },
@@ -307,8 +293,7 @@ serve(async (req) => {
         const newTier = await resolveSubscriptionTier(subscription, userId);
         
         const periodEnd = new Date(subscription.current_period_end * 1000);
-        const status = subscription.status === "active" ? "active" :
-                       subscription.status === "trialing" ? "active" :
+        const status = subscription.status === "active" ? "active" : 
                        subscription.status === "past_due" ? "past_due" : 
                        subscription.status === "canceled" ? "cancelled" : "incomplete";
 
@@ -334,12 +319,6 @@ serve(async (req) => {
           await supabase.from("profiles")
             .update({ plan: newTier })
             .eq("user_id", userId);
-
-          // A tier change (e.g. trial converting to Pro) opens a fresh
-          // monthly allowance.
-          if (existingSub?.tier !== newTier) {
-            await resetFeatureUsage(userId);
-          }
 
           // PROBLEM 5 FIXED: Removed credit adjustment blocks
           console.log(`✅ Subscription updated for user ${userId}: ${existingSub?.tier || 'none'} → ${newTier}, status = ${status}`);

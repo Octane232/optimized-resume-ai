@@ -296,7 +296,7 @@ const Settings = () => {
     return (
       <div className="space-y-8">
         {[...Array(3)].map((_, i) => (
-          <Card key={i} className="rounded-lg border-border shadow-none">
+          <Card key={i} className="glass-morphism border border-border/50">
             <CardHeader>
               <div className="animate-pulse">
                 <div className="h-6 bg-muted rounded w-1/4 mb-2"></div>
@@ -316,21 +316,27 @@ const Settings = () => {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      <div className="flex items-start gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-primary/15 bg-primary/10">
-          <SettingsIcon className="h-4 w-4 text-primary" aria-hidden="true" />
+    <div className="space-y-8">
+      <div className="text-center space-y-4">
+        <div className="inline-flex items-center gap-3 px-6 py-3 bg-accent/50 rounded-2xl border border-border/50">
+          <div className="w-8 h-8 bg-primary/10 rounded-xl flex items-center justify-center">
+            <SettingsIcon className="w-4 h-4 text-primary" />
+          </div>
+          <span className="text-sm font-medium text-foreground">Account Settings</span>
         </div>
-        <div>
-          <h1 className="font-display text-2xl text-foreground">Settings</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Manage your profile, preferences, notifications, and security.</p>
-        </div>
+        
+        <h1 className="text-4xl font-bold text-foreground">
+          Settings
+        </h1>
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          Manage your profile and account settings
+        </p>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="max-w-4xl mx-auto space-y-8">
         {/* Profile Completion Card */}
-        <Card className="rounded-lg border-border shadow-none overflow-hidden lg:col-span-2">
-          <div className="p-5">
+        <Card className="glass-morphism border border-border/50 shadow-xl rounded-2xl overflow-hidden">
+          <div className="bg-gradient-subtle p-6">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
@@ -393,7 +399,7 @@ const Settings = () => {
         </Card>
 
         {/* Profile Information */}
-        <Card className="rounded-lg border-border shadow-none lg:col-span-2">
+        <Card className="glass-morphism border border-border/50 shadow-xl rounded-2xl">
           <CardHeader className="border-b border-border/60">
             <CardTitle className="flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-xl">
@@ -475,7 +481,7 @@ const Settings = () => {
         </Card>
 
         {/* Job Preferences */}
-        <Card className="rounded-lg border-border shadow-none">
+        <Card className="glass-morphism border border-border/50 shadow-xl rounded-2xl">
           <CardHeader className="border-b border-border/60">
             <CardTitle className="flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-xl">
@@ -517,7 +523,7 @@ const Settings = () => {
         </Card>
 
         {/* Notifications */}
-        <Card className="rounded-lg border-border shadow-none">
+        <Card className="glass-morphism border border-border/50 shadow-xl rounded-2xl">
           <CardHeader className="border-b border-border/60">
             <CardTitle className="flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-xl">
@@ -578,7 +584,7 @@ const Settings = () => {
         </Card>
 
         {/* Privacy & Security */}
-        <Card className="rounded-lg border-border shadow-none lg:col-span-2">
+        <Card className="glass-morphism border border-border/50 shadow-xl rounded-2xl">
           <CardHeader className="border-b border-border/60">
             <CardTitle className="flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-xl">

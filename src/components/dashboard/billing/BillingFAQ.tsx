@@ -9,11 +9,7 @@ import {
 const faqs = [
   {
     q: 'What is included in a Resume + ATS run?',
-    a: 'One Resume + ATS run gives you a tailored resume optimized for a specific job description, a matching cover letter, and a detailed ATS score analysis — all generated together. Pro users get 40 runs/month. Elite users get 150 runs/month.',
-  },
-  {
-    q: 'How does the 3-day free trial work?',
-    a: 'Every new subscription starts with a 3-day free trial. You add a card at checkout but you are not charged until day 4. During the trial you get fair-use limits: 5 Resume + ATS runs, 3 Word rewrites, 5 Job Radar alerts and 3 interview sessions. Cancel before the trial ends and you pay nothing.',
+    a: 'One Resume + ATS run gives you a tailored resume optimized for a specific job description, a matching cover letter, and a detailed ATS score analysis — all generated together. Pro users get 15 runs/month. Elite users get 40 runs/month.',
   },
   {
     q: 'When do my monthly limits reset?',
@@ -29,7 +25,7 @@ const faqs = [
   },
   {
     q: 'What happens when I hit my monthly limit?',
-    a: 'An upgrade prompt appears right inside the feature. You can still use unlimited application tracking and read the alerts you already have. Only AI-powered features pause until your next billing cycle or until you upgrade to a higher tier.',
+    a: 'An upgrade prompt appears right inside the feature. You can still use unlimited application tracking and browse Job Radar alerts. Only AI-powered features pause until your next billing cycle or until you upgrade to a higher tier.',
   },
   {
     q: 'Can I switch between Pro and Elite?',

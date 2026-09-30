@@ -1,51 +1,45 @@
 import React from 'react';
-import { BellRing, Search, FileCheck2, BriefcaseBusiness } from 'lucide-react';
+import { User, Target, Send } from 'lucide-react';
 
 const steps = [
-  {
-    num: '01',
-    icon: BellRing,
-    title: 'Set your direction',
-    desc: 'Add your target roles, skills and preferred locations.',
-  },
-  {
-    num: '02',
-    icon: Search,
-    title: 'Find opportunities',
-    desc: 'See matched roles and early hiring signals in one feed.',
-  },
-  {
-    num: '03',
-    icon: FileCheck2,
-    title: 'Prepare and apply',
-    desc: 'Tailor your resume, check its ATS fit and prepare your outreach.',
-  },
-  {
-    num: '04',
-    icon: BriefcaseBusiness,
-    title: 'Track what happens',
-    desc: 'Keep applications organized and prepare for the interview.',
-  },
+  { icon: User, num: 1, title: 'Create Your Profile', desc: 'Upload your resume and tell us about your experience.' },
+  { icon: Target, num: 2, title: 'Get Matched', desc: 'Our AI finds the best jobs that match your profile.' },
+  { icon: Send, num: 3, title: 'Apply & Get Hired', desc: 'Apply with AI-powered tools and land more interviews.' },
 ];
 
 const HowItWorksSection = () => (
-  <section id="how-it-works" className="py-16 sm:py-24 border-b border-border bg-card">
+  <section className="py-12 sm:py-14">
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="text-center max-w-2xl mx-auto mb-12"><p className="text-[11px] font-semibold uppercase text-primary mb-3">How it works</p><h2 className="text-[26px] leading-tight sm:text-4xl font-bold text-foreground mb-3">Get from where you are to where you want to be.</h2><p className="text-sm text-muted-foreground">A clear four-step process for a more focused job search.</p></div>
+      <div className="text-center mb-8 sm:mb-16">
+        <p className="text-[10px] sm:text-xs font-bold tracking-[0.2em] sm:tracking-[0.25em] mb-3 bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">HOW IT WORKS</p>
+        <h2 className="text-[26px] leading-tight sm:text-4xl font-black text-foreground tracking-tight">
+          Get hired in 3 simple steps
+        </h2>
+      </div>
 
-      <ol className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {steps.map((s, index) => {
+      <div className="grid md:grid-cols-3 gap-8 sm:gap-8 relative">
+        {steps.map((s, i) => {
           const Icon = s.icon;
           return (
-            <li key={s.num} className="relative rounded-lg border border-border bg-background p-5">
-              {index < steps.length - 1 && <span className="hidden lg:block absolute top-10 -right-5 w-5 border-t border-dashed border-primary/50" aria-hidden="true" />}
-              <div className="flex items-center justify-between mb-6"><span className="w-11 h-11 flex items-center justify-center rounded-md bg-signal-soft"><Icon className="w-5 h-5 text-primary" /></span><span className="tabular text-sm font-semibold text-signal">{s.num}</span></div>
-              <h3 className="text-base font-semibold text-foreground mb-2">{s.title}</h3>
-              <p className="text-[15px] text-muted-foreground leading-relaxed">{s.desc}</p>
-            </li>
+            <div key={i} className="relative text-center">
+              <div className="relative inline-flex items-center justify-center mb-3 sm:mb-5">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-violet-600 rounded-full blur-xl opacity-50" />
+                <div className="relative w-16 h-16 rounded-full bg-card border border-border flex items-center justify-center">
+                  <Icon className="w-7 h-7 text-violet-400" />
+                </div>
+              </div>
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <span className="text-sm font-bold text-violet-400">{s.num}</span>
+                <h3 className="font-bold text-foreground">{s.title}</h3>
+              </div>
+              <p className="text-sm text-muted-foreground max-w-xs mx-auto">{s.desc}</p>
+              {i < steps.length - 1 && (
+                <div className="hidden md:block absolute top-8 left-[60%] w-[80%] border-t border-dashed border-border/60" />
+              )}
+            </div>
           );
         })}
-      </ol>
+      </div>
     </div>
   </section>
 );

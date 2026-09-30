@@ -1,6 +1,5 @@
 
 import type { Config } from "tailwindcss";
-import tailwindcssAnimate from "tailwindcss-animate";
 
 export default {
 	darkMode: ["class"],
@@ -21,12 +20,8 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
-				display: ['Instrument Serif', 'Georgia', 'serif'],
-				body: ['Work Sans', 'system-ui', 'sans-serif'],
-				mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+				sans: ['Inter', 'system-ui', 'sans-serif'],
 			},
-
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -89,25 +84,9 @@ export default {
 					dark: 'hsl(217, 91%, 50%)'
 				},
 				success: {
-					DEFAULT: 'hsl(var(--success))',
-					foreground: 'hsl(var(--success-foreground))'
-				},
-				signal: {
-					DEFAULT: 'hsl(var(--signal))',
-					foreground: 'hsl(var(--signal-foreground))',
-					soft: 'hsl(var(--signal-soft))'
-				},
-				ink: {
-					DEFAULT: 'hsl(var(--ink))',
-					foreground: 'hsl(var(--ink-foreground))',
-					muted: 'hsl(var(--ink-muted))'
-				},
-				brass: {
-					DEFAULT: 'hsl(var(--brass))',
-					foreground: 'hsl(var(--brass-foreground))'
+					DEFAULT: 'hsl(160, 84%, 39%)',
+					foreground: 'hsl(0, 0%, 100%)'
 				}
-
-
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -169,5 +148,5 @@ export default {
 			}
 		}
 	},
-	plugins: [tailwindcssAnimate],
+	plugins: [require("tailwindcss-animate")],
 } satisfies Config;

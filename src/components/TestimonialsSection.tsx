@@ -1,38 +1,56 @@
-import React from 'react';
-import { ArrowRight, Check, MapPin, Radar } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Star, ChevronLeft, ChevronRight } from 'lucide-react';
 
-const TestimonialsSection = () => (
-  <section className="py-16 sm:py-24 bg-foreground text-background overflow-hidden">
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[0.78fr_1.22fr] gap-12 lg:gap-16 items-center">
-      <div>
-        <p className="text-[11px] font-semibold uppercase text-signal mb-4">The Vaylance advantage</p>
-        <h2 className="text-[26px] leading-tight sm:text-4xl text-background mb-5">More than a job board. Your career command center.</h2>
-        <p className="text-background/65 leading-relaxed mb-7">See where demand is building, prepare the right application, and keep every next step in one place.</p>
-        <ul className="space-y-3 mb-8">
-          {['Fresh hiring signals', 'Role-specific resume scoring', 'Focused preparation tools', 'A clear application workflow'].map((point) => <li key={point} className="flex items-center gap-2.5 text-sm text-background/85"><Check className="w-4 h-4 text-signal" />{point}</li>)}
-        </ul>
-        <Button asChild size="lg"><Link to="/auth">Explore the app <ArrowRight className="w-4 h-4 ml-1" /></Link></Button>
-      </div>
+const testimonials = [
+  { name: 'Sarah J.', role: 'Product Designer at Linear', content: 'Vaylance changed my job search completely. I started getting interviews within a week!', tone: 'from-pink-500 to-rose-500' },
+  { name: 'Mike R.', role: 'Software Engineer at Meta', content: 'The AI cover letters are incredible. So personalized and effective!', tone: 'from-blue-500 to-cyan-500' },
+  { name: 'David L.', role: 'Product Manager at Google', content: 'Got my dream job at Google! The interview coach really helped me prepare.', tone: 'from-emerald-500 to-teal-500' },
+];
 
-      <div className="grid sm:grid-cols-[1fr_10rem] gap-4 items-center">
-        <div className="rounded-lg border border-background/15 bg-background/5 p-3 sm:p-5 min-w-0">
-          <div className="flex items-center justify-between border-b border-background/10 pb-4 mb-4"><div className="flex items-center gap-2 text-sm font-semibold"><Radar className="w-4 h-4 text-signal" /> Job Radar</div><span className="text-xs text-background/50">Latest signals</span></div>
-          <div className="space-y-3">
-            {[
-              { company: 'Northwind Logistics', role: 'Operations Manager', place: 'Austin · Hybrid', score: 92 },
-              { company: 'Meridian Health', role: 'Program Coordinator', place: 'Chicago · On-site', score: 88 },
-              { company: 'Harbor Energy', role: 'Commercial Analyst', place: 'Houston · Hybrid', score: 84 },
-            ].map((item) => <article key={item.company} className="grid grid-cols-[1fr_auto] gap-4 rounded-md border border-background/10 bg-background/5 p-4"><div><p className="text-sm font-semibold text-background">{item.company}</p><p className="text-xs text-background/65 mt-1">{item.role}</p><p className="text-[11px] text-background/45 mt-2 flex items-center gap-1"><MapPin className="w-3 h-3" />{item.place}</p></div><div className="text-right"><p className="tabular text-lg font-semibold text-signal">{item.score}%</p><p className="text-[10px] text-background/45">match</p></div></article>)}
+const TestimonialsSection = () => {
+  return (
+    <section className="py-12 sm:py-14">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-8 sm:mb-14">
+          <p className="text-[10px] sm:text-xs font-bold tracking-[0.2em] sm:tracking-[0.25em] mb-3 bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">LOVED BY JOB SEEKERS</p>
+          <h2 className="text-[26px] leading-tight sm:text-4xl font-black text-foreground tracking-tight">
+            See what our users are saying
+          </h2>
+        </div>
+
+        <div className="relative">
+          <button className="hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-card border border-border items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors z-10">
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <button className="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-card border border-border items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors z-10">
+            <ChevronRight className="w-4 h-4" />
+          </button>
+
+          <div className="grid md:grid-cols-3 gap-3 sm:gap-4">
+            {testimonials.map((t, i) => (
+              <div key={i} className="p-5 sm:p-6 rounded-2xl border border-border bg-card flex flex-col">
+                <div className="flex gap-0.5 mb-3">
+                  {[...Array(5)].map((_, s) => (
+                    <Star key={s} className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                  ))}
+                </div>
+                <p className="text-sm text-foreground/90 leading-relaxed flex-1 mb-5">"{t.content}"</p>
+                <div className="flex items-center gap-3">
+                  <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${t.tone} flex items-center justify-center text-xs font-bold text-white`}>
+                    {t.name[0]}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{t.name}</p>
+                    <p className="text-xs text-muted-foreground">{t.role}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-        <div className="hidden sm:block rounded-lg border border-signal/40 bg-foreground p-4">
-          <Radar className="w-5 h-5 text-signal mb-8" /><p className="text-sm font-semibold text-background mb-2">Find the right opening early.</p><p className="text-xs leading-relaxed text-background/55">Use real company activity to decide where to focus next.</p>
-        </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 export default TestimonialsSection;

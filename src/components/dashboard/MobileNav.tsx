@@ -21,19 +21,21 @@ interface MobileNavProps {
 }
 
 const MobileNav: React.FC<MobileNavProps> = ({ activeTab, setActiveTab }) => {
+  const modeColor = 'hsl(217, 100%, 50%)';
+
   const primaryItems = [
     { id: 'briefing', label: 'Home', icon: Home },
     { id: 'scout', label: 'Radar', icon: Telescope },
-    { id: 'resume-engine', label: 'Resume', icon: Stethoscope },
+    { id: 'resume-engine', label: 'Resume + ATS', icon: Stethoscope },
     { id: 'mission-control', label: 'Tracker', icon: Crosshair },
   ];
 
   const moreItems = [
+    { id: 'job-search', label: 'Job Search' },
     { id: 'interview-prep', label: 'Interview Coach' },
     { id: 'skill-gap', label: 'Skill Gap' },
     { id: 'linkedin', label: 'LinkedIn' },
-    { id: 'salary-intel', label: 'Salary Intelligence' },
-    { id: 'billing', label: 'Billing & Plan' },
+    { id: 'billing', label: 'Billing' },
     { id: 'settings', label: 'Settings' },
   ];
 
@@ -43,22 +45,22 @@ const MobileNav: React.FC<MobileNavProps> = ({ activeTab, setActiveTab }) => {
         {primaryItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
-
+          
           return (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
               className={cn(
                 "mobile-nav-item flex-1 min-w-0",
-                isActive ? "active text-primary" : "text-muted-foreground"
+                isActive && "active"
               )}
+              style={isActive ? { color: modeColor } : {}}
             >
               <Icon className="w-5 h-5" />
-              <span className="text-[11px] font-medium truncate">{item.label}</span>
+              <span className="text-[10px] font-medium truncate">{item.label}</span>
             </button>
           );
         })}
-        
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

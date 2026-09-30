@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Brain, Mic, MicOff, RotateCcw, ArrowRight, Loader2,
   CheckCircle2, AlertCircle, Sparkles, Radio, Send, Lock,
-  BarChart3, BookOpen, Trophy, Shield, AlertTriangle, Wifi, Search, Target,
-  WifiOff, Clock, FileText, Copy, Wand2
+  BarChart3, BookOpen, Trophy, Shield, AlertTriangle, Wifi,
+  WifiOff, Clock
 } from 'lucide-react';
 
 import { Card, CardContent } from '@/components/ui/card';
@@ -21,29 +21,11 @@ type Tab = 'practice' | 'copilot' | 'tips' | 'history';
 type Stage = 'setup' | 'question' | 'feedback' | 'results';
 type ConnectionStatus = 'idle' | 'connecting' | 'connected' | 'disconnected' | 'error';
 
-interface StarScores {
-  situation: number;
-  task: number;
-  action: number;
-  result: number;
-}
-
-interface StarNotes {
-  situation: string;
-  task: string;
-  action: string;
-  result: string;
-}
-
 interface Feedback {
   score: number;
   feedback: string;
   strengths: string[];
   improvements: string[];
-  star?: StarScores;
-  starNotes?: StarNotes;
-  improvedAnswer?: string;
-  grounded?: boolean;
 }
 
 interface Answer {
@@ -60,21 +42,10 @@ interface Session {
   answers: Answer[];
 }
 
-interface CopilotCue {
-  opening: string;
-  situation: string;
-  action: string;
-  result: string;
-  closing: string;
-  keywords: string[];
-}
-
 interface CopilotEntry {
   id: string;
   question: string;
   suggestion: string | null;
-  cue: CopilotCue | null;
-  grounded?: boolean;
   loading: boolean;
   timestamp: Date;
 }
@@ -89,42 +60,42 @@ const TABS: { id: Tab; label: string; icon: React.FC<any> }[] = [
 
 const tips = [
   { 
-    icon: Trophy, 
+    icon: '⭐', 
     title: 'STAR Method', 
     priority: 'High', 
     time: '2 min', 
     desc: 'Every behavioral answer needs structure: Situation, Task, Action, Result. Without it your answer drifts and interviewers notice immediately.' 
   },
   { 
-    icon: Search, 
+    icon: '🔍', 
     title: 'Research The Company', 
     priority: 'High', 
     time: '3 min', 
     desc: 'Know their mission, recent funding, key products, main competitors. Referencing something specific shows you actually want this role.' 
   },
   { 
-    icon: Target, 
+    icon: '🎯', 
     title: 'Nail Your Pitch', 
     priority: 'High', 
     time: '2 min', 
     desc: 'A crisp 60-second "tell me about yourself" sets the tone for the whole interview. Rehearse it until it sounds natural.' 
   },
   { 
-    icon: BarChart3, 
+    icon: '📊', 
     title: 'Quantify Everything', 
     priority: 'High', 
     time: '1 min', 
     desc: '"Cut load time by 60%" hits differently than "improved performance." Numbers make abstract claims concrete and memorable.' 
   },
   { 
-    icon: BookOpen, 
+    icon: '❓', 
     title: 'Ask Great Questions', 
     priority: 'Medium', 
     time: '2 min', 
     desc: 'Ask about team culture, what success looks like at 90 days, the biggest current challenge. Never say you have no questions.' 
   },
   { 
-    icon: Clock, 
+    icon: '⏸️', 
     title: 'Pause With Confidence', 
     priority: 'Medium', 
     time: '1 min', 
@@ -133,30 +104,6 @@ const tips = [
 ];
 
 // ===== Helper Functions =====
-/** Pull readable CV text out of a stored resume record, whatever shape it was saved in. */
-const extractResumeText = (content: unknown): string => {
-  if (!content) return '';
-  if (typeof content === 'string') return content;
-
-  const obj = content as Record<string, unknown>;
-  const direct = obj.text || obj.raw_text || obj.rawText || obj.markdown || obj.content;
-  if (typeof direct === 'string') return direct;
-
-  try {
-    return JSON.stringify(content);
-  } catch {
-    return '';
-  }
-};
-
-const cleanResumeText = (text: string): string =>
-  text
-    .replace(/```[a-z]*\n?/gi, '')
-    .replace(/\*\*/g, '')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim()
-    .slice(0, 6000);
-
 const getFallbackQuestions = (position: string): string[] => {
   const p = position.toLowerCase();
   
@@ -200,15 +147,21 @@ const getFallbackQuestions = (position: string): string[] => {
 };
 
 const getScoreColor = (score: number): string => {
-  if (score >= 8) return 'text-signal';
+  if (score >= 8) return 'text-emerald-500';
   if (score >= 6) return 'text-amber-500';
-  return 'text-destructive';
+  return 'text-red-500';
 };
 
 const getScoreBackground = (score: number): string => {
-  if (score >= 8) return 'bg-signal-soft border-signal/20';
+  if (score >= 8) return 'bg-emerald-500/5 border-emerald-500/20';
   if (score >= 6) return 'bg-amber-500/5 border-amber-500/20';
-  return 'bg-destructive/5 border-destructive/20';
+  return 'bg-red-500/5 border-red-500/20';
+};
+
+const getScoreGradient = (score: number): string => {
+  if (score >= 8) return 'from-emerald-500 to-teal-500';
+  if (score >= 6) return 'from-amber-500 to-orange-400';
+  return 'from-red-500 to-rose-500';
 };
 
 const getScoreLabel = (score: number): string => {
@@ -266,11 +219,6 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
 
-  // Resume grounding State
-  const [resumeText, setResumeText] = useState('');
-  const [resumeTitle, setResumeTitle] = useState('');
-  const [useResume, setUseResume] = useState(true);
-
   // ===== Derived Values =====
   const overallScore = answers.length > 0 
     ? answers.reduce((sum, a) => sum + a.feedback.score, 0) / answers.length 
@@ -286,15 +234,9 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
   // Use live getRemaining() directly on every render, not stale local state
   const remainingSessions = getRemaining('interview_prep');
 
-  const hasResume = resumeText.length > 50;
-  const groundingOn = hasResume && useResume;
-  // Only send the CV when we actually have one and the user hasn't switched it off
-  const resumePayload = groundingOn ? resumeText : undefined;
-
   // ===== Effects =====
   useEffect(() => {
     loadHistory();
-    loadResume();
   }, []);
 
   useEffect(() => {
@@ -302,38 +244,6 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
   }, [copilotEntries]);
 
   // ===== Data Fetching =====
-  const loadResume = async () => {
-    try {
-      const { data } = await supabase
-        .from('resumes')
-        .select('title, content, updated_at')
-        .order('updated_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (!data) return;
-
-      const text = cleanResumeText(extractResumeText(data.content));
-      if (text.length > 50) {
-        setResumeText(text);
-        setResumeTitle(data.title || 'Your resume');
-      }
-    } catch (error) {
-      console.error('Error loading resume:', error);
-    }
-  };
-
-  const copyText = async (text: string) => {
-    if (!text) return;
-    try {
-      await navigator.clipboard.writeText(text);
-      toast({ title: 'Copied' });
-    } catch {
-      toast({ title: 'Could not copy', variant: 'destructive' });
-    }
-  };
-
-
   const loadHistory = async () => {
     try {
       const { data: sessionData } = await supabase
@@ -392,7 +302,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
 
     try {
       const { data } = await supabase.functions.invoke('interview-feedback', {
-        body: { generateOnly: true, position, company, resume: resumePayload },
+        body: { generateOnly: true, position, company },
       });
 
       const generatedQuestions: string[] = data?.questions?.length 
@@ -439,9 +349,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
         body: { 
           question: questions[currentQ], 
           answer: userAnswer, 
-          position,
-          company,
-          resume: resumePayload,
+          position 
         },
       });
 
@@ -452,10 +360,6 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
         feedback: data?.feedback || 'Good attempt.',
         strengths: data?.strengths || [],
         improvements: data?.improvements || [],
-        star: data?.star,
-        starNotes: data?.starNotes,
-        improvedAnswer: data?.improvedAnswer,
-        grounded: data?.grounded,
       };
 
       const newAnswer: Answer = {
@@ -576,7 +480,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
     setConnectionStatus('idle');
     setErrorCount(0);
     reconnectAttemptsRef.current = 0;
-    toast({ title: 'Copilot session started' });
+    toast({ title: '🎯 Copilot session started!' });
   };
 
   // Speech Recognition for Copilot
@@ -744,7 +648,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
       transcriptBufferRef.current = '';
       setIsListening(false);
       setConnectionStatus('idle');
-      toast({ title: 'Listening paused' });
+      toast({ title: '🎙️ Listening paused' });
     } else {
       setIsMicInitializing(true);
       try {
@@ -758,7 +662,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
           recognitionRef.current.start();
         }
         setIsListening(true);
-        toast({ title: 'Listening to interviewer' });
+        toast({ title: '🎙️ Listening to interviewer...' });
       } catch (err) {
         toast({ 
           title: 'Failed to access microphone', 
@@ -794,7 +698,6 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
       id, 
       question: questionText, 
       suggestion: null, 
-      cue: null,
       loading: true,
       timestamp: new Date()
     }]);
@@ -805,32 +708,20 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
           liveMode: true,
           question: questionText,
           position: copilotPosition,
-          company: copilotCompany,
-          resume: resumePayload,
+          company: copilotCompany
         },
       });
 
       if (error) throw error;
 
       const suggestion = data?.suggestion?.trim();
-      const cue: CopilotCue | null = data?.cue
-        ? {
-            opening: data.cue.opening || '',
-            situation: data.cue.situation || '',
-            action: data.cue.action || '',
-            result: data.cue.result || '',
-            closing: data.cue.closing || '',
-            keywords: Array.isArray(data.cue.keywords) ? data.cue.keywords : [],
-          }
-        : null;
-
-      if (!suggestion && !cue) throw new Error('Empty AI response');
+      if (!suggestion) throw new Error('Empty AI response');
 
       await trackUsage('interview_prep');
 
       setCopilotEntries(prev => prev.map(entry =>
         entry.id === id
-          ? { ...entry, suggestion, cue, grounded: data?.grounded, loading: false }
+          ? { ...entry, suggestion, loading: false }
           : entry
       ));
     } catch (error: any) {
@@ -886,7 +777,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
 
   // ===== Render =====
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="p-4 md:p-6 max-w-5xl mx-auto space-y-6">
       {/* Header */}
       <HeaderSection 
         avgScore={avgScore} 
@@ -905,7 +796,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
       <AnimatePresence mode="wait">
         {tab === 'practice' && (
           <motion.div key="practice" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <Card className="rounded-lg border-border shadow-none">
+            <Card className="border-border/60">
               <CardContent className="p-6 space-y-4">
                 {stage === 'setup' && (
                   <div className="space-y-4">
@@ -934,13 +825,6 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                         />
                       </div>
                     </div>
-                    <ResumeGrounding
-                      hasResume={hasResume}
-                      resumeTitle={resumeTitle}
-                      useResume={useResume}
-                      onToggle={() => setUseResume(v => !v)}
-                      onGoToResume={() => setActiveTab?.('resume')}
-                    />
                     <Button 
                       onClick={generateQuestions} 
                       disabled={!position.trim() || loadingQuestions || !canUse('interview_prep')} 
@@ -991,18 +875,13 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                     <div className={`p-4 rounded-xl border ${getScoreBackground(currentFeedback.score)}`}>
                       <div className="flex items-center gap-3 mb-2">
                         <span className={`text-2xl font-bold ${getScoreColor(currentFeedback.score)}`}>{currentFeedback.score}/10</span>
-                        <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary">{getScoreLabel(currentFeedback.score)}</Badge>
+                        <Badge className={`bg-gradient-to-r ${getScoreGradient(currentFeedback.score)} text-white`}>{getScoreLabel(currentFeedback.score)}</Badge>
                       </div>
                       <p className="text-sm text-muted-foreground">{currentFeedback.feedback}</p>
                     </div>
-
-                    {currentFeedback.star && (
-                      <StarBreakdown star={currentFeedback.star} notes={currentFeedback.starNotes} />
-                    )}
-
                     {currentFeedback.strengths.length > 0 && (
                       <div className="space-y-1">
-                        <p className="text-sm font-medium text-signal flex items-center gap-1">
+                        <p className="text-sm font-medium text-emerald-600 flex items-center gap-1">
                           <CheckCircle2 className="w-3.5 h-3.5" /> Strengths
                         </p>
                         <ul className="space-y-1">
@@ -1022,28 +901,6 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                             <li key={i} className="text-sm text-muted-foreground ml-5">• {s}</li>
                           ))}
                         </ul>
-                      </div>
-                    )}
-
-                    {currentFeedback.improvedAnswer && (
-                      <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-2">
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="text-sm font-medium text-primary flex items-center gap-1.5">
-                            <Wand2 className="w-3.5 h-3.5" /> Stronger version of your answer
-                          </p>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 text-xs"
-                            onClick={() => copyText(currentFeedback.improvedAnswer || '')}
-                          >
-                            <Copy className="w-3 h-3 mr-1" /> Copy
-                          </Button>
-                        </div>
-                        <p className="text-sm text-foreground leading-relaxed">{currentFeedback.improvedAnswer}</p>
-                        {currentFeedback.grounded && (
-                          <p className="text-xs text-muted-foreground">Built from your own resume — no invented experience.</p>
-                        )}
                       </div>
                     )}
                     <Button onClick={nextQuestion}>
@@ -1118,13 +975,6 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                           />
                         </div>
                       </div>
-                      <ResumeGrounding
-                        hasResume={hasResume}
-                        resumeTitle={resumeTitle}
-                        useResume={useResume}
-                        onToggle={() => setUseResume(v => !v)}
-                        onGoToResume={() => setActiveTab?.('resume')}
-                      />
                       <div className="flex flex-col gap-3">
                         <Button onClick={startCopilot} disabled={!copilotPosition.trim() || !canUse('interview_prep')} className="flex-1">
                           <Radio className="w-4 h-4 mr-2" />Start Copilot Session
@@ -1140,7 +990,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                           <p className="text-xs text-muted-foreground">
                             <strong>AI-Powered:</strong> Get real-time suggestions for interview questions.
                             <br />
-                            <span className="text-primary">Use the microphone to detect questions automatically.</span>
+                            <span className="text-primary/60">🎙️ Use the mic to auto-detect questions.</span>
                           </p>
                         </div>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -1157,7 +1007,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                             <Radio className="w-3 h-3 mr-1" />Live
                           </Badge>
                           {isListening && (
-                            <Badge className="bg-primary/10 text-primary border-primary/20">
+                            <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">
                               <Mic className="w-3 h-3 mr-1" />Listening
                             </Badge>
                           )}
@@ -1197,7 +1047,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                         </div>
                       )}
 
-                      <div className="space-y-3 max-h-[26rem] overflow-y-auto" aria-live="polite">
+                      <div className="space-y-3 max-h-96 overflow-y-auto" aria-live="polite">
                         {copilotEntries.map(entry => (
                           <div key={entry.id} className="p-3 rounded-lg border border-border/60 space-y-2">
                             <div className="flex items-start justify-between">
@@ -1210,17 +1060,14 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                 <Loader2 className="w-3 h-3 animate-spin" />Thinking…
                               </div>
-                            ) : entry.cue ? (
-                              <CueCard
-                                cue={entry.cue}
-                                grounded={entry.grounded}
-                                onCopy={() => copyText(entry.suggestion || '')}
-                              />
-                            ) : entry.suggestion ? (
-                              <div className="text-base text-foreground bg-primary/5 p-3 rounded leading-relaxed">
+                            ) : entry.suggestion && (
+                              <div className="text-sm text-muted-foreground bg-primary/5 p-3 rounded">
+                                <p className="font-medium text-primary/80 text-xs uppercase tracking-wider mb-1">
+                                  💡 Suggested Talking Points
+                                </p>
                                 {entry.suggestion}
                               </div>
-                            ) : null}
+                            )}
                           </div>
                         ))}
                         <div ref={copilotBottomRef} />
@@ -1249,7 +1096,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                       </div>
 
                       <div className="text-xs text-muted-foreground flex items-center gap-2">
-                        <Shield className="w-3 h-3 text-signal" />
+                        <Shield className="w-3 h-3 text-emerald-500" />
                         <span>AI suggestions appear instantly. Use them as talking points, not a script.</span>
                       </div>
                     </div>
@@ -1267,7 +1114,7 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
                 <Card key={i} className="border-border/60">
                   <CardContent className="p-4 space-y-2">
                     <div className="flex items-center gap-2">
-                       <tip.icon className="h-4 w-4 text-primary" aria-hidden="true" />
+                      <span className="text-lg" aria-hidden="true">{tip.icon}</span>
                       <h3 className="font-medium text-foreground text-sm">{tip.title}</h3>
                       <Badge variant="secondary" className="ml-auto text-[10px]">{tip.priority}</Badge>
                     </div>
@@ -1332,10 +1179,10 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
 const StatusBadge: React.FC<{ status: ConnectionStatus }> = ({ status }) => {
   const statusConfig = {
     idle: { label: 'Idle', icon: null, className: 'bg-muted/50 text-muted-foreground' },
-    connecting: { label: 'Connecting...', icon: <Loader2 className="w-3 h-3 animate-spin" />, className: 'bg-primary/10 text-primary border-primary/20' },
-    connected: { label: 'Connected', icon: <Wifi className="w-3 h-3" />, className: 'bg-signal-soft text-signal border-signal/20' },
+    connecting: { label: 'Connecting...', icon: <Loader2 className="w-3 h-3 animate-spin" />, className: 'bg-blue-500/10 text-blue-500 border-blue-500/20' },
+    connected: { label: 'Connected', icon: <Wifi className="w-3 h-3" />, className: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
     disconnected: { label: 'Disconnected', icon: <WifiOff className="w-3 h-3" />, className: 'bg-amber-500/10 text-amber-500 border-amber-500/20' },
-    error: { label: 'Error', icon: <AlertTriangle className="w-3 h-3" />, className: 'bg-destructive/10 text-destructive border-destructive/20' },
+    error: { label: 'Error', icon: <AlertTriangle className="w-3 h-3" />, className: 'bg-red-500/10 text-red-500 border-red-500/20' },
   };
 
   const config = statusConfig[status];
@@ -1360,21 +1207,21 @@ const HeaderSection: React.FC<{ avgScore: number; sessionsCount: number }> = ({
   >
     <div className="flex items-center gap-3">
       <div className="relative shrink-0">
-        <div className="w-11 h-11 rounded-lg bg-primary flex items-center justify-center">
-           <Mic className="w-5 h-5 text-primary-foreground" aria-hidden="true" />
+        <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+          <Mic className="w-5 h-5 text-white" aria-hidden="true" />
         </div>
-        <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-signal border-2 border-background flex items-center justify-center">
-          <Sparkles className="w-2 h-2 text-primary-foreground" aria-hidden="true" />
+        <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-background flex items-center justify-center">
+          <Sparkles className="w-2 h-2 text-white" aria-hidden="true" />
         </div>
       </div>
       <div>
-         <h1 className="font-display text-2xl text-foreground">Interview Coach</h1>
-         <p className="text-sm text-muted-foreground">Practice role-specific questions and review clear feedback.</p>
+        <h1 className="text-xl font-bold text-foreground tracking-tight">Interview Coach</h1>
+        <p className="text-xs text-muted-foreground">Practice before. Get help during. Win the offer.</p>
       </div>
     </div>
 
     {sessionsCount > 0 && (
-      <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/5 border border-primary/10">
+      <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/5 border border-primary/10">
         <Trophy className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
         <span className="text-sm font-bold text-primary">{avgScore.toFixed(1)}</span>
         <span className="text-xs text-muted-foreground">avg / 10</span>
@@ -1424,130 +1271,5 @@ const TabBar: React.FC<{
     ))}
   </div>
 );
-
-// Resume grounding notice + toggle
-const ResumeGrounding: React.FC<{
-  hasResume: boolean;
-  resumeTitle: string;
-  useResume: boolean;
-  onToggle: () => void;
-  onGoToResume: () => void;
-}> = ({ hasResume, resumeTitle, useResume, onToggle, onGoToResume }) => {
-  if (!hasResume) {
-    return (
-      <div className="flex items-start gap-2 p-3 rounded-lg border border-border/60 bg-muted/40">
-        <FileText className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" aria-hidden="true" />
-        <p className="text-xs text-muted-foreground">
-          Add a resume and your questions and answers will use your real projects and results.
-          <button className="text-primary underline ml-1" onClick={onGoToResume}>Add resume</button>
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex items-center justify-between gap-3 p-3 rounded-lg border border-primary/20 bg-primary/5">
-      <div className="flex items-start gap-2 min-w-0">
-        <FileText className="w-4 h-4 text-primary mt-0.5 shrink-0" aria-hidden="true" />
-        <p className="text-xs text-muted-foreground min-w-0">
-          {useResume ? 'Using your resume: ' : 'Resume available: '}
-          <span className="font-medium text-foreground">{resumeTitle}</span>
-          <br />
-          {useResume
-            ? 'Questions and answers will reference your real experience.'
-            : 'Turn this on for answers built from your real experience.'}
-        </p>
-      </div>
-      <Button variant={useResume ? 'secondary' : 'outline'} size="sm" className="shrink-0" onClick={onToggle}>
-        {useResume ? 'On' : 'Off'}
-      </Button>
-    </div>
-  );
-};
-
-// STAR score breakdown for a practice answer
-const StarBreakdown: React.FC<{ star: StarScores; notes?: StarNotes }> = ({ star, notes }) => {
-  const rows: { key: keyof StarScores; label: string }[] = [
-    { key: 'situation', label: 'Situation' },
-    { key: 'task', label: 'Task' },
-    { key: 'action', label: 'Action' },
-    { key: 'result', label: 'Result' },
-  ];
-
-  const barColor = (v: number) =>
-    v >= 8 ? 'bg-signal' : v >= 5 ? 'bg-amber-500' : 'bg-destructive';
-
-  return (
-    <div className="rounded-xl border border-border/60 p-4 space-y-3">
-      <p className="text-sm font-medium text-foreground">STAR breakdown</p>
-      <div className="space-y-2.5">
-        {rows.map(({ key, label }) => (
-          <div key={key} className="space-y-1">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-medium text-foreground">{label}</span>
-              <span className="text-muted-foreground">{star[key]}/10</span>
-            </div>
-            <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
-              <div
-                className={`h-full rounded-full ${barColor(star[key])}`}
-                style={{ width: `${Math.max(4, star[key] * 10)}%` }}
-              />
-            </div>
-            {notes?.[key] && <p className="text-xs text-muted-foreground">{notes[key]}</p>}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-// Glanceable live cue card
-const CueCard: React.FC<{ cue: CopilotCue; grounded?: boolean; onCopy: () => void }> = ({ cue, grounded, onCopy }) => {
-  const lines: { label: string; value: string }[] = [
-    { label: 'Open with', value: cue.opening },
-    { label: 'Context', value: cue.situation },
-    { label: 'What you did', value: cue.action },
-    { label: 'Result', value: cue.result },
-    { label: 'Close with', value: cue.closing },
-  ].filter(l => l.value);
-
-  return (
-    <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-2.5">
-      <div className="flex items-center justify-between gap-2">
-        <p className="font-medium text-primary text-xs uppercase tracking-wider">Say this</p>
-        <div className="flex items-center gap-1.5">
-          {grounded && (
-            <Badge variant="outline" className="border-primary/20 bg-background/60 text-[10px]">
-              <FileText className="w-2.5 h-2.5 mr-1" /> From your resume
-            </Badge>
-          )}
-          <Button variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={onCopy}>
-            <Copy className="w-3 h-3" />
-            <span className="sr-only">Copy talking points</span>
-          </Button>
-        </div>
-      </div>
-
-      <ul className="space-y-2">
-        {lines.map(({ label, value }) => (
-          <li key={label} className="flex gap-2">
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground w-24 shrink-0 pt-1">
-              {label}
-            </span>
-            <span className="text-base font-medium text-foreground leading-snug">{value}</span>
-          </li>
-        ))}
-      </ul>
-
-      {cue.keywords.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 pt-1">
-          {cue.keywords.map(k => (
-            <Badge key={k} variant="secondary" className="text-[10px]">{k}</Badge>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
 
 export default InterviewPrep;

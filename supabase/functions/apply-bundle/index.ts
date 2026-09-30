@@ -84,9 +84,9 @@ RULES:
 9. Output ONLY the rewritten resume — no explanations, no commentary, no preamble
 
 FORMAT:
-- Return plain resume text only; do not use Markdown symbols such as **, __, #, or backticks
-- Put section headers on their own lines in uppercase
-- Start experience bullets with "- " so the app can create real Word bullet formatting
+- Use clean markdown formatting
+- Bold section headers
+- Bullet points for experience
 - Keep to 1-2 pages worth of content
 
 RESUME:

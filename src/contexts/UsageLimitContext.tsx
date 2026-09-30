@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, Rea
 import { supabase } from '@/integrations/supabase/client';
 
 // ===== STEP 1: Fix Types =====
-export type SubscriptionTier = 'free' | 'trial' | 'pro' | 'elite';
+export type SubscriptionTier = 'free' | 'pro' | 'elite';
 export type UsageAction =
   | 'resume_ats'
   | 'cover_letter'
@@ -13,68 +13,56 @@ export type UsageAction =
   | 'radar_alert'
   | 'docx_rewrite'
   | 'resume_parse'
+  | 'job_search'
   | 'bullet_rewrite';
 
-// ===== Monthly limits per tier =====
-// free  = account with no active subscription (trial ended or cancelled)
-// trial = 3-day Stripe trial, fair-use caps
-// pro   = $24/month
-// elite = $49/month
+// ===== STEP 4: Add PLAN_LIMITS Constant - MUST BE EXPORTED =====
 export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> = {
   free: {
-    resume_ats: 1,
-    cover_letter: 1,
+    resume_ats: 0,
+    cover_letter: 0,
     linkedin: 0,
     skill_gap: 0,
     interview_prep: 0,
-    salary_intel: 1,
+    salary_intel: 0,
     radar_alert: 0,
     docx_rewrite: 0,
-    resume_parse: 2,
-    bullet_rewrite: 3,
-  },
-  trial: {
-    resume_ats: 5,
-    cover_letter: 5,
-    linkedin: 3,
-    skill_gap: 3,
-    interview_prep: 3,
-    salary_intel: 3,
-    radar_alert: 5,
-    docx_rewrite: 3,
-    resume_parse: 10,
-    bullet_rewrite: 15,
+    resume_parse: 0,
+    job_search: 0,
+    bullet_rewrite: 0,
   },
   pro: {
-    resume_ats: 40,
-    cover_letter: 40,
-    linkedin: 20,
-    skill_gap: 20,
-    interview_prep: 40,
-    salary_intel: 15,
-    radar_alert: 30,
-    docx_rewrite: 15,
-    resume_parse: 120,
-    bullet_rewrite: 150,
+    resume_ats: 30,
+    cover_letter: 30,
+    linkedin: 15,
+    skill_gap: 15,
+    interview_prep: 30,
+    salary_intel: 10,
+    radar_alert: 15,
+    docx_rewrite: 10,
+    resume_parse: 100,
+    job_search: 50,
+    bullet_rewrite: 75,
   },
   elite: {
-    resume_ats: 150,
-    cover_letter: 150,
-    linkedin: 60,
-    skill_gap: 60,
-    interview_prep: 120,
-    salary_intel: 40,
-    radar_alert: 100,
+    resume_ats: 100,
+    cover_letter: 100,
+    linkedin: 50,
+    skill_gap: 50,
+    interview_prep: 100,
+    salary_intel: 30,
+    radar_alert: 50,
     docx_rewrite: 50,
     resume_parse: 500,
-    bullet_rewrite: 400,
+    job_search: 120,
+    bullet_rewrite: 300,
   },
 };
 
 // ===== Display Names (kept for UI) =====
 export const ACTION_LABELS: Record<UsageAction, string> = {
-  resume_ats: 'Resume + ATS + cover letter',
-  cover_letter: 'Cover letter (included in Resume + ATS)',
+  resume_ats: 'Resume + ATS',
+  cover_letter: 'Cover letter',
   interview_prep: 'Mock interview',
   salary_intel: 'Salary insight',
   linkedin: 'LinkedIn optimization',
@@ -82,13 +70,14 @@ export const ACTION_LABELS: Record<UsageAction, string> = {
   radar_alert: 'Job Radar scan',
   docx_rewrite: 'AI DOCX rewrite',
   resume_parse: 'Resume upload',
+  job_search: 'Job search',
   bullet_rewrite: 'Bullet rewrite',
 };
 
 // ===== Feature Display Names (for UI) =====
 export const FEATURE_NAMES: Record<UsageAction, string> = {
-  resume_ats: "Application Bundle (Resume + ATS + Cover Letter)",
-  cover_letter: "Cover Letter (included in Application Bundle)",
+  resume_ats: "Resume + ATS Optimization",
+  cover_letter: "Cover Letter Generation",
   linkedin: "LinkedIn Optimizer",
   skill_gap: "Skill Gap Analyzer",
   interview_prep: "Interview Practice",
@@ -96,13 +85,14 @@ export const FEATURE_NAMES: Record<UsageAction, string> = {
   radar_alert: "Job Radar Alerts",
   docx_rewrite: "DOCX Resume Rewrite",
   resume_parse: "Resume File Upload",
+  job_search: "Job Search",
   bullet_rewrite: "Bullet Point Rewrite",
 };
 
 // ===== Feature Descriptions =====
 export const FEATURE_DESCRIPTIONS: Record<UsageAction, string> = {
   resume_ats: "Tailored resume + cover letter + ATS score in one click",
-  cover_letter: "Included in every Resume + ATS run — no separate limit",
+  cover_letter: "AI-generated cover letters tailored to each job",
   linkedin: "Optimize your LinkedIn profile for recruiters",
   skill_gap: "Identify missing skills and get learning recommendations",
   interview_prep: "Practice with AI interview coach and get feedback",
@@ -110,12 +100,13 @@ export const FEATURE_DESCRIPTIONS: Record<UsageAction, string> = {
   radar_alert: "Discover hidden job opportunities before they're posted",
   docx_rewrite: "AI-powered DOCX resume rewriting",
   resume_parse: "Upload and parse PDF/DOCX resume files",
+  job_search: "Search for jobs across multiple platforms",
   bullet_rewrite: "AI-powered bullet point rewriting for resumes",
 };
 
 interface UsageLimitContextType {
   tier: SubscriptionTier;
-  displayTier: 'Free' | 'Trial' | 'Pro' | 'Elite';
+  displayTier: 'Free' | 'Pro' | 'Elite';
   subscriptionEnd: string | null;
   loading: boolean;
   /** Can the user perform this action? */
@@ -134,7 +125,7 @@ interface UsageLimitContextType {
 // Separate interface for subscription-only data
 interface SubscriptionContextType {
   tier: SubscriptionTier;
-  displayTier: 'Free' | 'Trial' | 'Pro' | 'Elite';
+  displayTier: 'Free' | 'Pro' | 'Elite';
   subscriptionEnd: string | null;
   loading: boolean;
   refresh: () => Promise<void>;
@@ -185,13 +176,9 @@ export const UsageLimitProvider = ({ children }: { children: ReactNode }) => {
         !subData?.current_period_end ||
         new Date(subData.current_period_end).getTime() > Date.now();
 
-      const activeStatus =
-        subData?.plan_status === 'active' || subData?.plan_status === 'trialing';
-
-      if (activeStatus && subData?.tier && notExpired) {
+      if (subData?.plan_status === 'active' && subData?.tier && notExpired) {
         const raw = subData.tier as string;
-        if (raw === 'trial') resolvedTier = 'trial';
-        else if (raw === 'starter') resolvedTier = 'pro';
+        if (raw === 'starter') resolvedTier = 'pro';
         else if (raw === 'premium') resolvedTier = 'elite';
         else if (raw === 'pro') resolvedTier = 'pro';
         else if (raw === 'elite') resolvedTier = 'elite';
@@ -299,8 +286,8 @@ export const UsageLimitProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [loading, initialFetchDone]);
 
-  const displayTier: 'Free' | 'Trial' | 'Pro' | 'Elite' =
-    tier === 'free' ? 'Free' : tier === 'trial' ? 'Trial' : tier === 'pro' ? 'Pro' : 'Elite';
+  const displayTier: 'Free' | 'Pro' | 'Elite' =
+    tier === 'free' ? 'Free' : tier === 'pro' ? 'Pro' : 'Elite';
 
   const usageLimitValue: UsageLimitContextType = {
     tier,

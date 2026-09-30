@@ -1,127 +1,186 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Radar, Building2, MapPin, Search, FileText, Bell, BriefcaseBusiness, Target, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Play, CheckCircle, Search, Bell, User, Briefcase, FileText, PenTool, Mic, BarChart3, Settings, Layers, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-const signal = {
-  company: 'Northwind Logistics',
-  trigger: 'Raised $42M Series B',
-  when: '2 days ago',
-  location: 'Austin, TX · Hybrid',
-  roles: ['Operations Manager', 'Supply Chain Analyst', 'Regional Dispatch Lead'],
-  confidence: 92,
-};
+const sidebarItems = [
+  { icon: Layers, label: 'Dashboard', active: true },
+  { icon: Briefcase, label: 'Job Matches' },
+  { icon: FileText, label: 'Applications' },
+  { icon: PenTool, label: 'Resume + ATS' },
+  { icon: FileText, label: 'AI Cover Letter' },
+  { icon: Mic, label: 'Interview Coach' },
+  { icon: BarChart3, label: 'Analytics' },
+  { icon: Sparkles, label: 'Saved Items' },
+  { icon: Settings, label: 'Settings' },
+];
+
+const jobMatches = [
+  { initial: 'S', company: 'Senior Product Designer', sub: 'Linear', location: 'Remote', match: '95%', tone: 'from-blue-500 to-blue-600' },
+  { initial: 'P', company: 'Product Designer', sub: '', location: 'Remote', match: '92%', tone: 'from-violet-500 to-violet-600' },
+  { initial: 'S', company: 'UI/UX Designer', sub: 'Stripe', location: 'New York, NY', match: '90%', tone: 'from-emerald-500 to-emerald-600' },
+];
 
 const HeroSection = () => {
   return (
-    <section className="relative overflow-hidden border-b border-border pt-24 sm:pt-28">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14 sm:pb-20">
-        <div className="grid lg:grid-cols-[0.92fr_1.08fr] gap-12 lg:gap-16 items-center">
-          <div className="max-w-xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-secondary/60 text-[11px] font-semibold text-primary mb-6">
-              <span className="w-1.5 h-1.5 rounded-full bg-signal" />
-              CAREER OPPORTUNITY INTELLIGENCE
+    <section className="relative pt-24 sm:pt-28 pb-10 sm:pb-16 overflow-hidden">
+      {/* Background glow */}
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute top-0 left-1/3 w-[700px] h-[700px] bg-violet-600/15 rounded-full blur-[140px]" />
+        <div className="absolute top-40 right-0 w-[600px] h-[600px] bg-blue-600/15 rounded-full blur-[140px]" />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          {/* Left: copy */}
+          <div className="text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-card/50 backdrop-blur text-[11px] sm:text-xs font-semibold text-muted-foreground mb-4 sm:mb-6">
+              <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+              AI-Powered Job Search
             </div>
 
-            <h1 className="text-[2.75rem] sm:text-6xl lg:text-[4.2rem] font-bold text-foreground mb-6 text-balance">
-              Find the opportunity <span className="text-primary">before the crowd.</span>
+            <h1 className="text-[2.5rem] leading-[1.06] sm:text-6xl lg:text-7xl font-black text-foreground tracking-tight sm:leading-[1.02] mb-4 sm:mb-6">
+              Land your next job{' '}
+              <span className="bg-gradient-to-r from-blue-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
+                faster
+              </span>
+              {' '}with AI
             </h1>
 
-            <p className="text-lg text-muted-foreground max-w-lg mb-8 leading-relaxed">
-              Discover companies preparing to hire, tailor your resume for the role, and walk into every application better prepared.
+            <p className="text-base sm:text-lg text-muted-foreground max-w-lg mx-auto lg:mx-0 mb-6 sm:mb-8 leading-relaxed">
+              Vaylance helps you create the perfect resume, find matching jobs,
+              and apply with AI — so you can get hired faster.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 mb-7">
-              <Button asChild size="lg" className="h-12 px-6 text-base font-semibold">
-                <Link to="/auth">
-                  Create free account
-                  <ArrowRight className="w-4 h-4 ml-1.5" />
-                </Link>
+            <div className="flex flex-col sm:flex-row sm:justify-center lg:justify-start gap-3 mb-6 sm:mb-8">
+              <Button asChild size="lg" className="h-12 px-7 font-semibold text-base bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white shadow-xl shadow-blue-600/30">
+                <Link to="/auth">Get Started Free →</Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="h-12 px-6 text-base font-semibold">
-                <Link to="/#pricing">See pricing</Link>
+              <Button asChild variant="outline" size="lg" className="h-12 px-7 font-semibold text-base border-border bg-card/30 hover:bg-card text-foreground">
+                <Link to="/auth">
+                  <Play className="w-4 h-4 mr-1 fill-current" />
+                  Watch Demo
+                </Link>
               </Button>
             </div>
 
-            <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
-              {['No credit card required', 'Free resume + ATS scan included', 'Instant access'].map((item) => (
-                <span key={item} className="inline-flex items-center gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-primary" /> {item}
-                </span>
-              ))}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-5 gap-y-2 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> Cancel anytime</span>
+              <span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> Secure payments</span>
+              <span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> Loved by 10,000+ users</span>
             </div>
           </div>
 
+
+          {/* Right: dashboard mockup */}
           <div className="relative">
-            <div className="relative overflow-hidden rounded-lg border border-border bg-card shadow-card">
-              <div className="flex h-[440px] sm:h-[480px]">
-                <aside className="hidden sm:flex w-40 shrink-0 flex-col border-r border-border bg-secondary/35 p-3">
-                  <div className="flex items-center gap-2 px-2 py-2 mb-5 font-semibold text-sm text-foreground">
-                    <Radar className="w-4 h-4 text-primary" /> Vaylance
-                  </div>
-                  <div className="space-y-1 text-xs">
-                    <div className="flex items-center gap-2 rounded-md bg-primary px-2.5 py-2 text-primary-foreground"><Radar className="w-3.5 h-3.5" /> Job Radar</div>
-                    <div className="flex items-center gap-2 px-2.5 py-2 text-muted-foreground"><Search className="w-3.5 h-3.5" /> Application Tracker</div>
-                    <div className="flex items-center gap-2 px-2.5 py-2 text-muted-foreground"><FileText className="w-3.5 h-3.5" /> Resume + ATS</div>
-                    <div className="flex items-center gap-2 px-2.5 py-2 text-muted-foreground"><Target className="w-3.5 h-3.5" /> Interview Prep</div>
-                  </div>
-                  <div className="mt-auto rounded-md border border-border bg-card p-2.5">
-                    <p className="text-[10px] font-semibold text-foreground">Weekly progress</p>
-                    <div className="mt-2 h-1.5 rounded-full bg-secondary overflow-hidden"><div className="h-full w-3/4 bg-primary" /></div>
-                  </div>
-                </aside>
+            <div className="absolute -inset-4 bg-gradient-to-tr from-blue-600/30 via-violet-600/20 to-fuchsia-600/30 rounded-3xl blur-2xl" />
+            <div className="relative rounded-2xl border border-border/80 bg-card shadow-2xl overflow-hidden">
+              {/* Topbar */}
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border/60 bg-card">
+                <div className="flex items-center gap-2">
+                  {/* Fixed: Replaced gradient mountain logo with target logo */}
+                  <svg width="18" height="18" viewBox="0 0 48 48" fill="none">
+                    <rect width="48" height="48" rx="11" fill="#1d4ed8"/>
+                    <circle cx="22" cy="27" r="11" stroke="white" strokeWidth="2.2" fill="none"/>
+                    <circle cx="22" cy="27" r="6.5" stroke="white" strokeWidth="1.6" strokeOpacity="0.6" fill="none"/>
+                    <circle cx="22" cy="27" r="2.6" fill="white"/>
+                    <line x1="29.5" y1="19.5" x2="36" y2="13" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
+                    <line x1="32.5" y1="13" x2="36" y2="13" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
+                    <line x1="36" y1="13" x2="36" y2="16.5" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
+                  </svg>
+                  <span className="text-xs font-bold text-foreground">Vaylance</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Search className="w-3.5 h-3.5 text-muted-foreground" />
+                  <Bell className="w-3.5 h-3.5 text-muted-foreground" />
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center"><User className="w-3 h-3 text-white" /></div>
+                </div>
+              </div>
 
-                <div className="min-w-0 flex-1 p-4 sm:p-5 bg-background/55">
-                  <div className="flex items-center justify-between mb-5">
-                    <div>
-                      <p className="text-[11px] text-muted-foreground">Good morning</p>
-                      <h2 className="!text-lg !font-semibold font-body text-foreground">Your opportunity feed</h2>
-                    </div>
-                    <div className="w-9 h-9 rounded-full border border-border bg-card flex items-center justify-center"><Bell className="w-4 h-4 text-muted-foreground" /></div>
+              <div className="flex">
+                {/* Sidebar */}
+                <div className="w-36 border-r border-border/60 bg-background/50 p-2 space-y-0.5 hidden sm:block">
+                  {sidebarItems.map((item, i) => {
+                    const Icon = item.icon;
+                    return (
+                      <div key={i} className={`flex items-center gap-1.5 px-2 py-1.5 rounded-md text-[10px] ${item.active ? 'bg-primary/15 text-primary font-semibold' : 'text-muted-foreground'}`}>
+                        <Icon className="w-3 h-3" />
+                        <span>{item.label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 p-3 space-y-3">
+                  <div>
+                    <p className="text-[11px] font-bold text-foreground">Good morning, Alex 👋</p>
+                    <p className="text-[9px] text-muted-foreground">Here's your job search overview</p>
                   </div>
 
-                  <div className="rounded-lg bg-primary p-4 text-primary-foreground mb-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div><p className="text-[11px] opacity-80 mb-1">JOB RADAR</p><p className="text-sm font-semibold">New companies match your goals</p></div>
-                      <span className="tabular text-2xl font-semibold">12</span>
-                    </div>
-                    <Button asChild variant="secondary" size="sm" className="mt-4 h-8 text-xs"><Link to="/auth">View radar <ArrowRight className="w-3.5 h-3.5 ml-1" /></Link></Button>
+                  {/* Stat tiles */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                    {[
+                      { label: 'Job Matches', value: '128', chg: '+24 this week' },
+                      { label: 'Applications', value: '32', chg: '+12 this week' },
+                      { label: 'Interview Calls', value: '8', chg: 'this week' },
+                      { label: 'Profile Score', value: '85%', chg: '+15% improv' },
+                    ].map((s, i) => (
+                      <div key={i} className="rounded-md border border-border/60 bg-background/40 p-1.5">
+                        <p className="text-[7px] text-muted-foreground">{s.label}</p>
+                        <p className="text-sm font-bold text-foreground">{s.value}</p>
+                        <p className="text-[6px] text-emerald-400">{s.chg}</p>
+                      </div>
+                    ))}
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2 mb-4">
-                    {[{ icon: Target, n: '94', l: 'ATS score' }, { icon: BriefcaseBusiness, n: '8', l: 'Applications' }, { icon: Sparkles, n: '3', l: 'Prep sessions' }].map((item) => {
-                      const Icon = item.icon;
-                      return <div key={item.l} className="rounded-md border border-border bg-card p-3"><Icon className="w-4 h-4 text-primary mb-3" /><p className="tabular text-xl font-semibold text-foreground">{item.n}</p><p className="text-[10px] text-muted-foreground mt-0.5">{item.l}</p></div>;
-                    })}
-                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {/* Top job matches */}
+                    <div className="sm:col-span-2 rounded-md border border-border/60 bg-background/40 p-2">
+                      <p className="text-[9px] font-bold text-foreground mb-1.5">Top Job Matches</p>
+                      <div className="space-y-1">
+                        {jobMatches.map((j, i) => (
+                          <div key={i} className="flex items-center gap-1.5 p-1 rounded bg-card/60">
+                            <div className={`w-5 h-5 rounded bg-gradient-to-br ${j.tone} flex items-center justify-center text-[8px] font-bold text-white`}>{j.initial}</div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[8px] font-semibold text-foreground truncate">{j.company}</p>
+                              <p className="text-[6px] text-muted-foreground">{j.location}</p>
+                            </div>
+                            <span className="text-[7px] font-bold text-emerald-400">{j.match} match</span>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-[7px] text-primary mt-1 font-semibold">View all matches →</p>
+                    </div>
 
-                  <article className="rounded-lg border border-border bg-card p-4">
-                    <div className="flex items-start justify-between gap-3 mb-3">
-                      <div className="flex items-center gap-2.5"><div className="w-8 h-8 rounded-md bg-secondary flex items-center justify-center"><Building2 className="w-4 h-4 text-primary" /></div><div><p className="text-xs font-semibold text-foreground">{signal.company}</p><p className="text-[10px] text-muted-foreground flex items-center gap-1"><MapPin className="w-3 h-3" />{signal.location}</p></div></div>
-                      <span className="rounded-full bg-signal-soft px-2 py-1 text-[10px] font-semibold text-signal">{signal.confidence}% match</span>
+                    {/* Profile strength */}
+                    <div className="hidden sm:block rounded-md border border-border/60 bg-background/40 p-2">
+                      <p className="text-[9px] font-bold text-foreground mb-1">Profile Strength</p>
+                      <div className="relative w-12 h-12 mx-auto mb-1">
+                        <svg viewBox="0 0 36 36" className="w-12 h-12 -rotate-90">
+                          <circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--muted))" strokeWidth="3"/>
+                          <circle cx="18" cy="18" r="15" fill="none" stroke="url(#pg)" strokeWidth="3" strokeDasharray="80 100" strokeLinecap="round"/>
+                          <defs><linearGradient id="pg" x1="0" y1="0" x2="36" y2="36"><stop stopColor="#60a5fa"/><stop offset="1" stopColor="#a78bfa"/></linearGradient></defs>
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <span className="text-[10px] font-bold text-foreground">85%</span>
+                          <span className="text-[5px] text-muted-foreground">Excellent</span>
+                        </div>
+                      </div>
+                      <div className="space-y-0.5">
+                        {['Resume', 'Skills', 'Experience', 'Keywords'].map((s) => (
+                          <div key={s} className="flex items-center gap-1 text-[6px] text-muted-foreground">
+                            <CheckCircle className="w-1.5 h-1.5 text-emerald-400" />{s}
+                          </div>
+                        ))}
+                      </div>
+                      <button className="mt-1 w-full rounded text-[6px] font-semibold py-1 bg-gradient-to-r from-blue-600 to-violet-600 text-white">Improve Score</button>
                     </div>
-                    <div className="rounded-md bg-secondary/60 p-2.5 mb-3"><p className="text-[9px] text-muted-foreground mb-1">WHY NOW</p><p className="text-xs text-foreground">{signal.trigger} · {signal.when}</p></div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {signal.roles.slice(0, 2).map((role) => <span key={role} className="rounded-full border border-border px-2 py-1 text-[10px] text-muted-foreground">{role}</span>)}
-                    </div>
-                  </article>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="border-t border-border bg-card/55">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-7">
-          <div className="grid sm:grid-cols-3 gap-5 sm:gap-0 sm:divide-x divide-border mb-7">
-            {[{ value: '12+', label: 'industries monitored' }, { value: 'Every 6h', label: 'signal scan cadence' }, { value: 'PDF + DOCX', label: 'resume formats supported' }].map((stat) => (
-              <div key={stat.label} className="text-center px-4"><p className="text-xl font-semibold text-foreground">{stat.value}</p><p className="text-sm text-muted-foreground mt-1">{stat.label}</p></div>
-            ))}
-          </div>
-          <p className="text-center text-xs font-semibold uppercase text-muted-foreground mb-4">Explore coverage by industry</p>
-          <div className="flex flex-wrap justify-center gap-2">
-            {['Technology', 'Healthcare', 'Finance', 'Logistics', 'Retail', 'Energy'].map((industry) => <Button key={industry} asChild variant="outline" size="sm" className="h-9 rounded-full text-sm"><Link to="/auth" aria-label={`Explore ${industry} opportunities`}>{industry}</Link></Button>)}
           </div>
         </div>
       </div>
