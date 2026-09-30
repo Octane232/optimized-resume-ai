@@ -7,13 +7,12 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// CHANGE 1: Replaced PRICE_IDS with Pro and Elite prices
+// Stripe prices (test account)
 const PRICE_IDS = {
-  pro_monthly: "price_1TubObJWRvoiSBe022Vai2lg",
-  pro_yearly: "price_1TubdJJWRvoiSBe0t7LFroSD",
-  elite_monthly: "price_1TubbmJWRvoiSBe0pbGLrU1I",
-  elite_yearly: "price_1TubeGJWRvoiSBe04wrFEQCC",
+  pro_monthly: "price_1UJYnAJGlrb83xLfliOIIR3A",
+  elite_monthly: "price_1UJYnxJGlrb83xLfd90hI7Tw",
 };
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -21,7 +20,8 @@ serve(async (req) => {
   }
 
   try {
-    const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
+    const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_TEST_API_KEY") || Deno.env.get("STRIPE_SECRET_KEY");
+
     if (!STRIPE_SECRET_KEY) throw new Error("STRIPE_SECRET_KEY not configured");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
@@ -89,6 +89,19 @@ serve(async (req) => {
     }
 
 
+    // 3-day free trial: only for customers who never subscribed before.
+    let grantTrial = false;
+    try {
+      const priorSubs = await stripe.subscriptions.list({
+        customer: customerId,
+        status: "all",
+        limit: 1,
+      });
+      grantTrial = priorSubs.data.length === 0;
+    } catch (e) {
+      console.log("Could not check prior subscriptions, skipping trial:", e);
+    }
+
     // Create checkout session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -103,6 +116,7 @@ serve(async (req) => {
         billing,
       },
       subscription_data: {
+        ...(grantTrial ? { trial_period_days: 3 } : {}),
         metadata: {
           supabase_user_id: user.id,
           plan,

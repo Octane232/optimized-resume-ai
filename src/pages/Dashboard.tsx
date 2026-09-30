@@ -28,9 +28,9 @@ import InterviewPrep from '@/components/dashboard/InterviewPrep';
 import { SkillGapAnalyzer } from '@/components/dashboard/SkillGapAnalyzer';
 import LinkedInOptimizer from '@/components/dashboard/LinkedInOptimizer';
 import SalaryIntel from '@/components/dashboard/SalaryIntel';
-import JobSearch from '@/components/dashboard/JobSearch';
 import WalkthroughGuide from '@/components/dashboard/WalkthroughGuide';
 import PaywallGate from '@/components/dashboard/PaywallGate';
+import HelpSupport from '@/components/dashboard/HelpSupport';
 
 import {
   DropdownMenu,
@@ -47,7 +47,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 type Mode = 'hunter';
 type Tab = 
   | 'briefing'
-  | 'job-search'
   | 'scout'
   | 'salary-intel'
   | 'resume-engine'
@@ -62,7 +61,6 @@ type Tab =
 // ===== Constants =====
 const TAB_TITLES: Record<Tab, string> = {
   briefing: 'Dashboard',
-  'job-search': 'Job Search',
   scout: 'Job Radar',
   'salary-intel': 'Salary Intelligence',
   'resume-engine': 'Resume + ATS',
@@ -180,7 +178,7 @@ const Dashboard = () => {
 
     if (upgradeStatus === 'success') {
       toast({
-        title: '✅ Payment successful!',
+        title: 'Payment successful',
         description: 'Your account is being upgraded. This may take a few seconds.',
       });
 
@@ -282,12 +280,6 @@ const Dashboard = () => {
     switch (activeTab) {
       case 'briefing':
         return <HunterDashboard setActiveTab={handleSetActiveTab} />;
-      case 'job-search':
-        return (
-          <PaywallGate feature="job-search" onUpgrade={() => handleSetActiveTab('billing')}>
-            <JobSearch />
-          </PaywallGate>
-        );
       case 'scout':
         return (
           <PaywallGate feature="radar" onUpgrade={() => handleSetActiveTab('billing')}>
@@ -311,37 +303,7 @@ const Dashboard = () => {
       case 'settings':
         return <Settings />;
       case 'help':
-        return (
-          <div className="max-w-2xl mx-auto text-center py-12">
-            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-              <HelpCircle className="w-10 h-10 text-primary" />
-            </div>
-            <h1 className="text-2xl font-bold text-foreground mb-2">Help & Support</h1>
-            <p className="text-muted-foreground mb-6">
-              Have questions or need assistance? We're here to help.
-            </p>
-            <div className="space-y-4">
-              <div className="p-4 rounded-xl border border-border bg-card">
-                <h3 className="font-semibold mb-1">📧 Email Support</h3>
-                <a 
-                  href="mailto:contact-us@vaylance.com" 
-                  className="text-primary hover:underline"
-                >
-                  contact-us@vaylance.com
-                </a>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Response within 24 hours
-                </p>
-              </div>
-              <div className="p-4 rounded-xl border border-border bg-card">
-                <h3 className="font-semibold mb-1">📚 Documentation</h3>
-                <p className="text-sm text-muted-foreground">
-                  Check our guides for tips on using each feature.
-                </p>
-              </div>
-            </div>
-          </div>
-        );
+        return <HelpSupport />;
       default:
         return <HunterDashboard setActiveTab={handleSetActiveTab} />;
     }
@@ -365,7 +327,7 @@ const Dashboard = () => {
 
   // ===== Render =====
   return (
-    <div className="h-screen flex w-full bg-background overflow-hidden">
+    <div className="warm font-body h-screen flex w-full bg-background overflow-hidden">
       {/* Walkthrough Guide */}
       {showWalkthrough && (
         <WalkthroughGuide onComplete={handleWalkthroughComplete} />
@@ -380,17 +342,18 @@ const Dashboard = () => {
           setMode={setMode}
           collapsed={sidebarCollapsed}
           setCollapsed={setSidebarCollapsed}
+          radarCount={unreadAlerts}
         />
       </div>
 
       {/* Main Content */}
       <main className="flex-1 h-screen overflow-y-auto pb-16 md:pb-0">
         {/* Header */}
-        <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="flex h-14 items-center px-4 md:px-6">
+        <header className="sticky top-0 z-40 w-full border-b border-border bg-card">
+          <div className="flex h-16 items-center px-4 md:px-6">
             {/* Title */}
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-semibold">{getTabTitle()}</h1>
+            <div className="flex items-center gap-2 min-w-0">
+              <h1 className="text-lg font-semibold truncate">{getTabTitle()}</h1>
             </div>
 
             {/* Actions */}
@@ -492,7 +455,7 @@ const Dashboard = () => {
         </header>
 
         {/* Content Area */}
-        <div className="p-4 md:p-6">
+        <div className={activeTab === 'briefing' ? '' : 'p-4 md:p-6'}>
           {renderContent()}
         </div>
       </main>

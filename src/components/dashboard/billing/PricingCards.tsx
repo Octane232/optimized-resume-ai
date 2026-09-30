@@ -14,21 +14,20 @@ const PLANS = [
     id: 'pro' as PlanId,
     label: 'Pro',
     icon: Sparkles,
-    monthly: '$15', yearly: '$144',
+    monthly: '$24',
     tagline: 'For active job seekers',
     popular: false,
     features: [
-      '50 Job Searches / month',
-      '75 Bullet Rewrites / month',
-      '30 Resume + ATS runs / month',
-      '30 Cover Letters / month',
-      '15 LinkedIn Optimizations / month',
-      '15 Skill Gap Analyses / month',
-      '30 Interview Prep sessions / month',
-      '10 Salary Insights / month',
-      '15 Job Radar Alerts / month',
-      '10 DOCX Rewrites / month',
-      '100 Resume Uploads / month',
+      '30 Job Radar Alerts / month',
+      '40 Resume + ATS runs / month',
+      '15 DOCX Rewrites / month',
+      '40 Cover Letters / month',
+      '150 Bullet Rewrites / month',
+      '40 Interview Prep sessions / month',
+      '20 LinkedIn Optimizations / month',
+      '20 Skill Gap Analyses / month',
+      '15 Salary Insights / month',
+      '120 Resume Uploads / month',
       'Priority Support',
     ],
     locked: [],
@@ -37,25 +36,24 @@ const PLANS = [
     id: 'elite' as PlanId,
     label: 'Elite',
     icon: Crown,
-    monthly: '$29', yearly: '$278',
+    monthly: '$49',
     tagline: 'For serious candidates',
     popular: true,
     features: [
-      '120 Job Searches / month',
-      '300 Bullet Rewrites / month',
-      '100 Resume + ATS runs / month',
-      '100 Cover Letters / month',
-      '50 LinkedIn Optimizations / month',
-      '50 Skill Gap Analyses / month',
-      '100 Interview Prep sessions / month',
-      '30 Salary Insights / month',
-      '50 Job Radar Alerts / month',
+      '100 Job Radar Alerts / month',
+      '150 Resume + ATS runs / month',
       '50 DOCX Rewrites / month',
+      '150 Cover Letters / month',
+      '400 Bullet Rewrites / month',
+      '120 Interview Prep sessions / month',
+      '60 LinkedIn Optimizations / month',
+      '60 Skill Gap Analyses / month',
+      '40 Salary Insights / month',
       '500 Resume Uploads / month',
       'Priority Support + Early Access',
       'ATS Resume Review',
       'Live Coach Mode',  // ← Added here
-      'Job Application Automation — Coming Soon 🚀'
+      'Job Application Automation — Coming Soon'
     ],
     locked: [],
   },
@@ -64,7 +62,7 @@ const PLANS = [
 const PricingCards = () => {
   const { tier, displayTier } = useUsageLimit();
   const { toast } = useToast();
-  const [billing, setBilling] = useState<Billing>('monthly');
+  const billing: Billing = 'monthly';
   const [loading, setLoading] = useState<PlanId | null>(null);
 
 
@@ -92,37 +90,21 @@ const PricingCards = () => {
   return (
     <div className="space-y-6">
 
-      {/* Billing toggle */}
-      <div className="flex justify-center">
-        <div className="bg-muted/50 rounded-full p-1 border border-border/60 flex gap-1">
-          {(['monthly', 'yearly'] as Billing[]).map((p) => (
-            <button 
-              key={p} 
-              onClick={() => setBilling(p)}
-              className={`px-5 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${billing === p ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
-            >
-              {p.charAt(0).toUpperCase() + p.slice(1)}
-              {p === 'yearly' && <Badge className="bg-emerald-100 text-emerald-700 border-0 text-[10px] px-1.5">Save ~20%</Badge>}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Plan cards */}
       <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
         {PLANS.map((plan) => {
           const isCurrent = displayTier.toLowerCase() === plan.id;
-          const price = billing === 'monthly' ? plan.monthly : plan.yearly;
+          const price = plan.monthly;
           const Icon = plan.icon;
           
           return (
-            <div key={plan.id} className={`relative flex flex-col p-6 rounded-2xl border-2 bg-card hover:shadow-lg transition-all ${
-              isCurrent ? 'border-emerald-500 ring-2 ring-emerald-500/10' :
+            <div key={plan.id} className={`relative flex flex-col p-6 rounded-lg border bg-card transition-colors ${
+              isCurrent ? 'border-primary ring-2 ring-primary/10' :
               plan.popular ? 'border-primary ring-2 ring-primary/10' : 'border-border'
             }`}>
               {isCurrent && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <Badge className="bg-emerald-500 text-white px-3 py-1 text-xs font-semibold border-0">Your Plan</Badge>
+                  <Badge className="bg-primary text-primary-foreground px-3 py-1 text-xs font-semibold border-0">Your Plan</Badge>
                 </div>
               )}
               {plan.popular && !isCurrent && (
@@ -143,28 +125,24 @@ const PricingCards = () => {
 
               <div className="text-center mb-5">
                 <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-4xl font-extrabold text-foreground">{price}</span>
-                  <span className="text-sm text-muted-foreground">/{billing === 'monthly' ? 'month' : 'year'}</span>
+                  <span className="text-3xl font-bold text-foreground">{price}</span>
+                  <span className="text-sm text-muted-foreground">/month</span>
                 </div>
-                {billing === 'yearly' && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    ~${Math.round(parseInt(price.replace('$', '')) / 12)}/month billed annually
-                  </p>
-                )}
+                <p className="text-xs text-muted-foreground mt-1">Starts with a 3-day free trial</p>
               </div>
 
               <ul className="space-y-2 flex-1 mb-6">
                 {plan.features.map((f, i) => (
                   <li key={i} className="flex items-start gap-2.5 text-sm">
-                    <Check className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+                    <Check className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                     <span className="text-foreground/80">{f}</span>
                   </li>
                 ))}
               </ul>
 
               <Button
-                className={`w-full h-11 font-semibold gap-2 rounded-xl ${
-                  isCurrent ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/30 hover:bg-emerald-500/20' :
+                className={`w-full h-11 font-semibold gap-2 ${
+                  isCurrent ? 'bg-primary/10 text-primary border border-primary/30 hover:bg-primary/15' :
                   plan.popular ? 'bg-primary text-primary-foreground hover:bg-primary/90' :
                   'bg-foreground text-background hover:bg-foreground/90'
                 }`}
@@ -173,7 +151,7 @@ const PricingCards = () => {
               >
                 {isCurrent ? 'Current Plan' :
                  loading === plan.id ? <><Loader2 className="w-4 h-4 animate-spin" />Redirecting…</> :
-                 <><Zap className="w-4 h-4" />Get {plan.label}</>}
+                 <><Zap className="w-4 h-4" />{tier === 'free' ? 'Start 3-day free trial' : `Get ${plan.label}`}</>}
               </Button>
             </div>
           );
@@ -181,7 +159,7 @@ const PricingCards = () => {
       </div>
 
       <p className="text-center text-xs text-muted-foreground">
-        Cancel anytime. Secure payment via Stripe.
+        Card required for the trial. Cancel any time before day 3 and you are not charged. Secure payment via Stripe.
       </p>
     </div>
   );

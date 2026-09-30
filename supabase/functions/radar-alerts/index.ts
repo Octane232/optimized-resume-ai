@@ -84,7 +84,7 @@ const fetchSignalsByIds = async (supabase: any, signalIds: string[]) => {
   
   const { data, error } = await supabase
     .from("radar_signals")
-    .select("id, company_name, amount, funding_stage, industry, description, likely_roles, hiring_window, source_url, published_at, created_at, signal_type, location, company_size, why_now, outreach_angle, departments, confidence, source_name")
+    .select("id, company_name, company_domain, amount, funding_stage, industry, description, likely_roles, hiring_window, source_url, published_at, created_at, signal_type, location, company_size, why_now, outreach_angle, departments, confidence, source_name")
     .in("id", signalIds);
   
   if (error) throw error;
@@ -94,7 +94,7 @@ const fetchSignalsByIds = async (supabase: any, signalIds: string[]) => {
 const fetchAllSignals = async (supabase: any, limit: number) => {
   const { data, error } = await supabase
     .from("radar_signals")
-    .select("id, company_name, amount, funding_stage, industry, description, likely_roles, hiring_window, source_url, published_at, created_at, signal_type, location, company_size, why_now, outreach_angle, departments, confidence, source_name")
+    .select("id, company_name, company_domain, amount, funding_stage, industry, description, likely_roles, hiring_window, source_url, published_at, created_at, signal_type, location, company_size, why_now, outreach_angle, departments, confidence, source_name")
     .order("created_at", { ascending: false })
     .limit(limit);
   
@@ -182,7 +182,7 @@ const handleRadarAlerts = async (req: Request): Promise<Response> => {
   ]);
   
   // Fetch associated signals for alerts
-  const signalIds = [...new Set(alerts.map((a: any) => a.signal_id).filter(Boolean))];
+  const signalIds = [...new Set(alerts.map((a: any) => a.signal_id).filter(Boolean))] as string[];
   const alertSignals = await fetchSignalsByIds(supabase, signalIds);
   const signalMap = buildSignalMap(alertSignals);
   
@@ -193,13 +193,13 @@ const handleRadarAlerts = async (req: Request): Promise<Response> => {
   const filteredAlerts = filterByIndustry(
     enrichedAlerts,
     industry,
-    (alert) => alert.radar_signals?.industry
+    (alert) => alert.radar_signals?.industry ?? null
   );
   
   const filteredSignals = filterByIndustry(
     allSignals,
     industry,
-    (signal) => signal.industry
+    (signal) => signal.industry ?? null
   );
   
   // Get additional metadata

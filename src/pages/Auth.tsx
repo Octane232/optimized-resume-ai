@@ -222,10 +222,6 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0 mesh-gradient"></div>
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,hsl(var(--primary)/0.1)_0%,transparent_70%)]"></div>
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_60%,hsl(var(--primary)/0.05)_0%,transparent_70%)]"></div>
 
       {/* Header */}
       <header className="relative z-10 p-4 sm:p-6">
@@ -241,17 +237,13 @@ const Auth = () => {
       <div className="relative z-10 flex items-center justify-center min-h-[calc(100vh-80px)] sm:min-h-[calc(100vh-100px)] p-4 sm:p-6">
         <div className="w-full max-w-md">
           <div className="text-center mb-6 sm:mb-8">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2">
-              <span className="bg-gradient-to-r from-blue-500 to-orange-500 bg-clip-text text-transparent">
-                Vaylance
-              </span>
-            </h1>
+            <h1 className="font-display text-4xl sm:text-5xl text-foreground mb-2">Vaylance</h1>
             <p className="text-muted-foreground text-base sm:text-lg">
               Your AI-powered career command center
             </p>
           </div>
 
-          <Card className="glass-morphism border-border/20 shadow-xl">
+          <Card className="border-border bg-card">
             <CardContent className="p-0">
               <Tabs defaultValue="signin" className="w-full">
                 <TabsList className="grid w-full grid-cols-2 mb-4 sm:mb-6 bg-muted/50">
@@ -345,7 +337,7 @@ const Auth = () => {
 
                       <Button
                         type="submit"
-                        className="w-full gradient-bg magnetic-button"
+                        className="w-full"
                         disabled={isLoading}
                       >
                         {isLoading ? 'Signing in...' : 'Sign In'}
@@ -497,7 +489,7 @@ const Auth = () => {
 
                       <Button
                         type="submit"
-                        className="w-full gradient-bg magnetic-button"
+                        className="w-full"
                         disabled={isLoading}
                       >
                         {isLoading ? 'Creating account...' : 'Create Account'}

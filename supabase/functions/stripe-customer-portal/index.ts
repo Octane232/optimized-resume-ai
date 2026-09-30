@@ -43,7 +43,7 @@ serve(async (req: Request) => {
     if (corsResponse) return corsResponse;
 
     // ===== Validate Environment Variables =====
-    const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
+    const stripeSecretKey = Deno.env.get("STRIPE_TEST_API_KEY") || Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeSecretKey) {
       console.error("STRIPE_SECRET_KEY not configured");
       return createErrorResponse("Stripe configuration error", 500);
