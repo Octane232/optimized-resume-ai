@@ -4,9 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 
 import Header from '@/components/Header';
 import HeroSection from '@/components/HeroSection';
-import HiringRadarSection from '@/components/HiringRadarSection';
-import TrustedBySection from '@/components/TrustedBySection';
-import BigPictureSection from '@/components/BigPictureSection';
 import FeaturesSection from '@/components/FeaturesSection';
 import HowItWorksSection from '@/components/HowItWorksSection';
 import TestimonialsSection from '@/components/TestimonialsSection';
@@ -15,6 +12,62 @@ import PricingSection from '@/components/PricingSection';
 import CTASection from '@/components/CTASection';
 import Footer from '@/components/Footer';
 import SEOHead from '@/components/SEOHead';
+
+// DashboardMockup component with the correct logo
+const DashboardMockup = () => {
+  return (
+    <div className="relative w-full max-w-5xl mx-auto mt-12 rounded-lg border border-border overflow-hidden">
+      {/* Mockup Header */}
+      <div className="bg-foreground px-4 py-3 border-b border-background/20 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          {/* Fixed: Replaced gradient box with SVG logo */}
+          <svg width="24" height="24" viewBox="0 0 48 48" fill="none">
+            <rect width="48" height="48" rx="11" fill="hsl(var(--primary))"/>
+            <circle cx="22" cy="27" r="11" stroke="white" strokeWidth="2.2" fill="none"/>
+            <circle cx="22" cy="27" r="6.5" stroke="white" strokeWidth="1.6" strokeOpacity="0.6" fill="none"/>
+            <circle cx="22" cy="27" r="2.6" fill="white"/>
+            <line x1="29.5" y1="19.5" x2="36" y2="13" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
+            <line x1="32.5" y1="13" x2="36" y2="13" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
+            <line x1="36" y1="13" x2="36" y2="16.5" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
+          </svg>
+          <span className="text-sm font-bold text-primary-foreground">Vaylance</span>
+        </div>
+        <div className="flex gap-2">
+          <div className="w-2 h-2 rounded-full bg-red-500" />
+          <div className="w-2 h-2 rounded-full bg-yellow-500" />
+          <div className="w-2 h-2 rounded-full bg-green-500" />
+        </div>
+      </div>
+      
+      {/* Mockup Sidebar + Content */}
+      <div className="flex min-h-[500px] bg-foreground">
+        {/* Sidebar */}
+        <div className="w-48 border-r border-border/50 p-3 space-y-4">
+          <div className="space-y-1">
+            <div className="h-8 bg-muted/20 rounded-lg w-full" />
+            <div className="h-8 bg-muted/10 rounded-lg w-full" />
+            <div className="h-8 bg-muted/10 rounded-lg w-full" />
+          </div>
+          <div className="pt-4 border-t border-border/50">
+            <div className="h-8 bg-primary/20 rounded-lg w-full" />
+          </div>
+        </div>
+        
+        {/* Main Content */}
+        <div className="flex-1 p-4">
+          <div className="space-y-3">
+            <div className="h-8 bg-muted/20 rounded-lg w-1/3" />
+            <div className="h-32 bg-muted/10 rounded-lg w-full" />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="h-24 bg-muted/10 rounded-lg" />
+              <div className="h-24 bg-muted/10 rounded-lg" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Index = () => {
   const location = useLocation();
@@ -66,16 +119,13 @@ const Index = () => {
   return (
     <div className="warm font-body min-h-screen bg-background text-foreground">
       <SEOHead
-        title="Vaylance — AI Career Coach | Know Who's Hiring Before the Job Is Posted"
-        description="Vaylance detects the business signals that come before hiring, then helps you prepare: resume and ATS match, interview coaching, and application tracking. Free plan, no card."
-        keywords="hiring signals, AI career coach, ATS resume scanner, interview prep AI, cover letter generator, salary intelligence"
+        title="Vaylance — AI Job Search Platform | Get Hired Faster"
+        description="Vaylance helps you tailor your resume to pass ATS filters, prep for interviews, and find companies hiring before they post publicly. Start free."
+        keywords="ATS resume scanner, resume checker, interview prep AI, job search tool, cover letter generator, salary intelligence"
         canonical="https://vaylance.com/"
       />
       <Header />
       <HeroSection />
-      <HiringRadarSection />
-      <TrustedBySection />
-      <BigPictureSection />
       <div id="features"><FeaturesSection /></div>
       <ComparisonSection />
       <div id="testimonials"><TestimonialsSection /></div>
