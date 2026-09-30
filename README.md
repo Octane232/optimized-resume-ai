@@ -37,8 +37,6 @@ The former "Resume Engine" — renamed because it is a scanner/optimizer, not a 
 - **In-place DOCX rewrite**: the AI edits the uploaded `.docx` via JSZip so the user's original template and formatting are preserved — offered as an opt-in prompt after analysis
 - Export as PDF (high fidelity) or DOCX (ATS-friendly structure)
 
-### Job Search
-Direct role search with filters (title, location, remote, experience), served by the `job-search` edge function. Gated behind a paid plan.
 
 ### Other tools
 | Tool | What it does |
@@ -110,7 +108,7 @@ The system uses **per-feature monthly quotas** (not a shared credit wallet).
 ```
 src/
 ├── components/
-│   ├── dashboard/            # Scout, ResumeEngine, JobSearch, MissionControl, …
+│   ├── dashboard/            # Scout, ResumeEngine, MissionControl, …
 │   │   ├── resume-engine/    # Parser, MatchingEngine, ExportPanel, suggestions
 │   │   ├── billing/          # PricingCards, UsageHeader, PaidManagement, FAQ
 │   │   ├── NewSidebar.tsx    # Job Radar highlighted, rest under "Tools"
@@ -133,7 +131,7 @@ supabase/
 │   ├── rewrite-bullet/       # Achievement-focused bullet rewrites
 │   ├── generate-resume-content/
 │   ├── analyze-skill-gap/  interview-feedback/  optimize-linkedin/
-│   ├── salary-intel/  job-search/  apply-bundle/
+│   ├── salary-intel/  apply-bundle/
 │   ├── radar-scan/  radar-alerts/  radar-mark-read/
 │   └── stripe-checkout/  stripe-webhook/  stripe-customer-portal/  check-subscription/
 └── migrations/

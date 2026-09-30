@@ -25,7 +25,7 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
   const [isExporting, setIsExporting] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const { tier } = useSubscription();
-  const isPro = tier === 'pro' || tier === 'elite';
+  const isPro = tier === 'trial' || tier === 'pro' || tier === 'elite';
 
   const handleExportPDF = async () => {
     if (!isPro) {
@@ -404,7 +404,7 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
           >
             {copied ? (
               <>
-                <Check className="w-4 h-4 text-emerald-500" />
+                <Check className="w-4 h-4 text-signal" />
                 Copied!
               </>
             ) : (

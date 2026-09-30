@@ -55,6 +55,50 @@ const GOOGLE_NEWS_QUERIES = [
   '"call center" opening jobs',
 ];
 
+// ===== Preference-driven query builder =====
+// Injects the user's Target Role / Industry / Work Style directly into the search.
+function buildPreferenceQueries(preferences: any): { news: string[]; googleNews: string[]; remote: boolean } {
+  const role = String(preferences?.target_role || "").trim();
+  const industry = String(preferences?.target_industry || "").trim();
+  const location = String(preferences?.target_location || "").trim();
+  const workStyle = String(preferences?.work_style || "").trim();
+  const remote = /remote|anywhere|distributed|work from home/i.test(workStyle);
+
+  const news: string[] = [];
+  const googleNews: string[] = [];
+
+  if (role) {
+    news.push(`"${role}" AND (hiring OR "now hiring" OR "expanding team" OR recruiting)`);
+    googleNews.push(`"${role}" hiring`);
+    googleNews.push(`"${role}" "joining our team" OR "expanding team"`);
+    if (remote) {
+      news.push(`"${role}" AND remote AND (hiring OR "distributed team" OR "work from anywhere")`);
+      googleNews.push(`"${role}" remote hiring`);
+      googleNews.push(`"remote-first" company hiring "${role}"`);
+    }
+  }
+
+  if (industry) {
+    news.push(`"${industry}" AND (expansion OR "plans to hire" OR "new office" OR funding)`);
+    googleNews.push(`"${industry}" hiring expansion`);
+  }
+
+  if (role && industry) {
+    googleNews.push(`"${industry}" "${role}" hiring`);
+  }
+
+  if (location && !remote) {
+    googleNews.push(`hiring "${location}" ${role || "jobs"}`);
+  }
+
+  if (remote && !role) {
+    googleNews.push(`"remote-first" company hiring`);
+    googleNews.push(`"hiring remotely" "work from anywhere"`);
+  }
+
+  return { news: news.slice(0, 6), googleNews: googleNews.slice(0, 8), remote };
+}
+
 const HIRING_HINTS = [
   "hire", "hiring", "jobs", "recruit", "workforce", "staff", "employees",
   "expansion", "expands", "opens", "opening", "raised", "raises", "funding",
@@ -62,6 +106,27 @@ const HIRING_HINTS = [
 ];
 
 const stripTags = (s: string) => s.replace(/<[^>]*>/g, "").replace(/&[a-z]+;/gi, " ").trim();
+
+const BLOCKED_COMPANY_DOMAINS = new Set([
+  "linkedin.com", "facebook.com", "instagram.com", "x.com", "twitter.com", "youtube.com",
+  "news.google.com", "google.com", "reuters.com", "bloomberg.com", "forbes.com", "businesswire.com",
+  "prnewswire.com", "yahoo.com", "msn.com", "bbc.com", "cnn.com", "apnews.com",
+]);
+
+function normalizeCompanyDomain(value: unknown, sourceUrl: string): string | null {
+  if (typeof value !== "string" || !value.trim()) return null;
+  try {
+    const parsed = new URL(value.includes("://") ? value : `https://${value}`);
+    const hostname = parsed.hostname.toLowerCase().replace(/^www\./, "");
+    const sourceHostname = new URL(sourceUrl).hostname.toLowerCase().replace(/^www\./, "");
+    const validHostname = /^(?=.{4,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i.test(hostname);
+    const blocked = BLOCKED_COMPANY_DOMAINS.has(hostname) || [...BLOCKED_COMPANY_DOMAINS].some((domain) => hostname.endsWith(`.${domain}`));
+    if (!validHostname || blocked || hostname === sourceHostname) return null;
+    return hostname;
+  } catch {
+    return null;
+  }
+}
 
 function parseRssItems(xml: string, sourceName: string, requireHiringHint: boolean) {
   const items = xml.match(/<item>([\s\S]*?)<\/item>/g) || [];
@@ -170,7 +235,7 @@ Hiring signal:
 
 // ===== Auth & Quota Helpers (aligned with the app's real usage tables) =====
 
-const PLAN_RADAR_LIMITS: Record<string, number> = { free: 0, pro: 15, elite: 50 };
+const PLAN_RADAR_LIMITS: Record<string, number> = { free: 0, trial: 5, pro: 30, elite: 100 };
 
 async function requireUser(authHeader: string | null, adminClient: any) {
   if (!authHeader) throw new Error("Unauthorized - No authorization header");
@@ -191,9 +256,10 @@ async function requireUser(authHeader: string | null, adminClient: any) {
     .order("updated_at", { ascending: false })
     .limit(1);
   const sub = subRows?.[0];
-  if (sub?.plan_status === "active" && sub?.tier) {
+  if ((sub?.plan_status === "active" || sub?.plan_status === "trialing") && sub?.tier) {
     const raw = String(sub.tier);
-    if (raw === "starter" || raw === "pro") tier = "pro";
+    if (raw === "trial") tier = "trial";
+    else if (raw === "starter" || raw === "pro") tier = "pro";
     else if (raw === "premium" || raw === "elite") tier = "elite";
   }
 
@@ -284,6 +350,25 @@ serve(async (req) => {
       await enforceQuota(supabase, user.id, user.tier, "radar_alert");
     }
 
+    // Load the requesting user's career preferences so the scan searches for
+    // their actual target role / industry / work style, not just generic signals.
+    let requesterPreferences: any = null;
+    if (requestingUserId) {
+      const { data: prefRow } = await supabase
+        .from("career_preferences")
+        .select("target_role, target_industry, target_location, experience_level, target_salary, work_style")
+        .eq("user_id", requestingUserId)
+        .maybeSingle();
+      requesterPreferences = prefRow || null;
+    }
+    const prefQueries = buildPreferenceQueries(requesterPreferences);
+    const newsQueries = [...prefQueries.news, ...NEWS_QUERIES];
+    const googleNewsQueries = [...prefQueries.googleNews, ...GOOGLE_NEWS_QUERIES];
+    console.log(
+      `Preference-driven queries: ${prefQueries.news.length + prefQueries.googleNews.length}` +
+      ` (role: ${requesterPreferences?.target_role || "none"}, remote: ${prefQueries.remote})`
+    );
+
     const allArticles: any[] = [];
     const seenUrls = new Set<string>();
     const pushArticle = (a: any) => {
@@ -292,6 +377,7 @@ serve(async (req) => {
       allArticles.push(a);
     };
 
+
     // SOURCE 1: NewsAPI — cross-industry hiring intent queries
     if (NEWS_API_KEY) {
       try {
@@ -299,7 +385,7 @@ serve(async (req) => {
         since.setDate(since.getDate() - 4);
         const from = since.toISOString().split("T")[0];
         const results = await Promise.allSettled(
-          NEWS_QUERIES.map((q) =>
+          newsQueries.map((q) =>
             fetch(`https://newsapi.org/v2/everything?q=${encodeURIComponent(q)}&from=${from}&language=en&sortBy=publishedAt&pageSize=12&apiKey=${NEWS_API_KEY}`)
               .then((r) => r.json())
           )
@@ -321,15 +407,23 @@ serve(async (req) => {
       } catch (e) { console.error("NewsAPI failed:", e); }
     }
 
-    // SOURCE 2: Google News RSS — free, global, every sector
+    // SOURCE 2: Google News RSS — free, global, every sector.
+    // Remote-focused users get worldwide editions, not just the US edition.
+    const locales = prefQueries.remote
+      ? [
+          { hl: "en-US", gl: "US", ceid: "US:en" },
+          { hl: "en-GB", gl: "GB", ceid: "GB:en" },
+          { hl: "en-IN", gl: "IN", ceid: "IN:en" },
+        ]
+      : [{ hl: "en-US", gl: "US", ceid: "US:en" }];
     try {
       const before = allArticles.length;
       const results = await Promise.allSettled(
-        GOOGLE_NEWS_QUERIES.map((q) =>
-          fetch(`https://news.google.com/rss/search?q=${encodeURIComponent(q + " when:7d")}&hl=en-US&gl=US&ceid=US:en`, {
+        googleNewsQueries.flatMap((q) => locales.map((loc) =>
+          fetch(`https://news.google.com/rss/search?q=${encodeURIComponent(q + " when:7d")}&hl=${loc.hl}&gl=${loc.gl}&ceid=${loc.ceid}`, {
             headers: { "User-Agent": "Mozilla/5.0 (compatible; VaylanceRadar/1.0)" },
           }).then((r) => r.text())
-        )
+        ))
       );
       for (const r of results) {
         if (r.status === "fulfilled") {
@@ -404,6 +498,7 @@ Return JSON only:
 {
  "is_hiring_signal": true|false,
  "company_name": "organisation name",
+ "company_domain": "official company website hostname, such as stripe.com; empty string unless you are highly confident it belongs to this exact organisation",
  "signal_type": "Funding|Expansion|New Facility|Contract Win|Acquisition|Investment|Hiring Announcement|Public Programme",
  "industry": "e.g. Healthcare, Retail, Construction, Logistics, Fintech, Education, Energy, Hospitality",
  "location": "city, region or country if known, else empty string",
@@ -419,7 +514,7 @@ Return JSON only:
  "confidence": 0-100
 }
 
-Set is_hiring_signal false if there is no credible hiring implication.
+Set is_hiring_signal false if there is no credible hiring implication. Never use the news publisher, a social network, or a guessed domain as company_domain.
 
 Source: ${article.sourceName}
 Title: ${article.title}
@@ -433,6 +528,7 @@ Description: ${article.description}`
           if (Number(parsed.confidence ?? 0) < 45) return null;
           return {
             company_name: String(parsed.company_name).slice(0, 160),
+            company_domain: normalizeCompanyDomain(parsed.company_domain, article.url),
             signal_type: parsed.signal_type || "Hiring Announcement",
             industry: parsed.industry || null,
             location: parsed.location || null,
@@ -464,6 +560,7 @@ Description: ${article.description}`
       if (existing) {
         await supabase.from("radar_signals").update({
           company_name: signal.company_name,
+          company_domain: signal.company_domain,
           signal_type: signal.signal_type,
           industry: signal.industry,
           location: signal.location,

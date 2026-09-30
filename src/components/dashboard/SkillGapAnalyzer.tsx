@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Target, TrendingUp, BookOpen, Clock } from "lucide-react";
 import { useUsageLimit } from "@/contexts/UsageLimitContext";
+import { ToolPageHeader } from "./ToolPageHeader";
 
 // ===== Type Definitions =====
 interface FormData {
@@ -159,7 +160,8 @@ export const SkillGapAnalyzer = () => {
 
   // ===== Render =====
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-5xl space-y-6">
+      <ToolPageHeader title="Skill Gap Analyzer" description="Compare your skills with a target role and get a focused learning plan." icon={Target} />
       {/* Input Form Card */}
       <InputFormCard
         formData={formData}
@@ -203,7 +205,7 @@ const InputFormCard: React.FC<InputFormCardProps> = ({
   used,
   limit,
 }) => (
-  <Card className="p-6">
+  <Card className="rounded-lg border-border p-5 shadow-none">
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
@@ -275,7 +277,7 @@ interface AnalysisResultsCardProps {
 const AnalysisResultsCard: React.FC<AnalysisResultsCardProps> = ({
   analysis,
 }) => (
-  <Card className="p-6">
+  <Card className="rounded-lg border-border p-5 shadow-none">
     <div className="space-y-6">
       {/* Match Percentage */}
       <MatchPercentage percentage={analysis.match_percentage} />

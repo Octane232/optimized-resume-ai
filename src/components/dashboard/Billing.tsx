@@ -11,8 +11,7 @@ interface BillingProps {
 const Billing = ({ setActiveTab }: BillingProps) => {
   const { tier, loading } = useSubscription();
   
-  // FIXED: Correct tier check for Pro and Elite only
-  const isPaid = tier === 'pro' || tier === 'elite';
+  const isPaid = tier === 'trial' || tier === 'pro' || tier === 'elite';
   
   const showPaidManagement = isPaid;
   
