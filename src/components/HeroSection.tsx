@@ -16,10 +16,11 @@ const sidebarItems = [
 ];
 
 const jobMatches = [
-  { initial: 'S', company: 'Senior Product Designer', sub: 'Linear', location: 'Remote', match: '95%', tone: 'from-blue-500 to-blue-600' },
-  { initial: 'P', company: 'Product Designer', sub: '', location: 'Remote', match: '92%', tone: 'from-violet-500 to-violet-600' },
-  { initial: 'S', company: 'UI/UX Designer', sub: 'Stripe', location: 'New York, NY', match: '90%', tone: 'from-emerald-500 to-emerald-600' },
+  { initial: 'A', company: 'Expanding research team', sub: 'Anthropic', location: 'Early signal · Remote', match: '95%', tone: 'from-blue-500 to-blue-600' },
+  { initial: 'O', company: 'New infrastructure roles', sub: 'OpenAI', location: 'Early signal · Hybrid', match: '92%', tone: 'from-violet-500 to-violet-600' },
+  { initial: 'S', company: 'Growing go-to-market team', sub: 'Stripe', location: 'New York, NY', match: '90%', tone: 'from-emerald-500 to-emerald-600' },
 ];
+
 
 const HeroSection = () => {
   return (
@@ -36,20 +37,20 @@ const HeroSection = () => {
           <div className="text-center lg:text-left">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-card/50 backdrop-blur text-[11px] sm:text-xs font-semibold text-muted-foreground mb-4 sm:mb-6">
               <Sparkles className="w-3.5 h-3.5 text-violet-400" />
-              AI-Powered Job Search
+              Career Intelligence For What's Next
             </div>
 
             <h1 className="text-[2.5rem] leading-[1.06] sm:text-6xl lg:text-7xl font-black text-foreground tracking-tight sm:leading-[1.02] mb-4 sm:mb-6">
-              Land your next job{' '}
+              Know who's hiring{' '}
               <span className="bg-gradient-to-r from-blue-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
-                faster
+                before
               </span>
-              {' '}with AI
+              {' '}the job is posted
             </h1>
 
             <p className="text-base sm:text-lg text-muted-foreground max-w-lg mx-auto lg:mx-0 mb-6 sm:mb-8 leading-relaxed">
-              Vaylance helps you create the perfect resume, find matching jobs,
-              and apply with AI — so you can get hired faster.
+              Vaylance reads real-time hiring signals, scores your resume against
+              the role, and coaches you through the offer — so you move first.
             </p>
 
             <div className="flex flex-col sm:flex-row sm:justify-center lg:justify-start gap-3 mb-6 sm:mb-8">
@@ -59,16 +60,17 @@ const HeroSection = () => {
               <Button asChild variant="outline" size="lg" className="h-12 px-7 font-semibold text-base border-border bg-card/30 hover:bg-card text-foreground">
                 <Link to="/auth">
                   <Play className="w-4 h-4 mr-1 fill-current" />
-                  Watch Demo
+                  See How It Works
                 </Link>
               </Button>
             </div>
 
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-5 gap-y-2 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> Real-time hiring signals</span>
+              <span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> Tailored career guidance</span>
               <span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> Cancel anytime</span>
-              <span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> Secure payments</span>
-              <span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> Loved by 10,000+ users</span>
             </div>
+
           </div>
 
 
