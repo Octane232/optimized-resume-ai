@@ -1,3 +1,3 @@
 # Project architecture decisions
 
-- Keep the homepage’s Modern Editorial opening as separate shared sections (hero, product/coaching showcase, company row, transition band) so each remains responsive and independently maintainable.
+- Keep the homepage product-led: the hero renders a live in-app preview (sidebar, opportunity feed, metrics) instead of stock photography, so visitors see the real product.

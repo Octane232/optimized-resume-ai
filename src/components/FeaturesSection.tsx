@@ -1,71 +1,36 @@
 import React from 'react';
-import { Radar, FileText, Mic, DollarSign, Linkedin, Search, TrendingUp, Send, Building2, Users, Trophy } from 'lucide-react';
+import { Radar, FileText, Mic, DollarSign, Linkedin, Search, TrendingUp, Send } from 'lucide-react';
 
-const pillars = [
-  {
-    title: 'Get ahead',
-    subtitle: 'Discover and understand',
-    items: [
-      { icon: Radar, title: 'Hiring Radar', desc: 'Spot companies showing signs of upcoming hiring.' },
-      { icon: Building2, title: 'Company intelligence', desc: 'See the full picture: roles, location and timing.' },
-      { icon: Users, title: 'Hiring contacts', desc: 'Find the people relevant to the opportunity.' },
-    ],
-  },
-  {
-    title: 'Get ready',
-    subtitle: 'Build your advantage',
-    items: [
-      { icon: FileText, title: 'Resume + ATS', desc: 'Improve your match while keeping your own layout.' },
-      { icon: TrendingUp, title: 'Skill Gap Analyzer', desc: 'See what you are missing for your target role.' },
-      { icon: Send, title: 'Cover letters', desc: 'Create tailored, high-impact letters in minutes.' },
-      { icon: Linkedin, title: 'LinkedIn Optimizer', desc: 'Make your profile easier for recruiters to find.' },
-      { icon: Mic, title: 'Interview Coach', desc: 'Practise your answers and get scored feedback.' },
-    ],
-  },
-  {
-    title: 'Stay on track',
-    subtitle: 'Take action',
-    items: [
-      { icon: Search, title: 'Application Tracker', desc: 'Keep every application and follow-up in one place.' },
-      { icon: DollarSign, title: 'Salary Intelligence', desc: 'Know your value and negotiate with confidence.' },
-      { icon: Trophy, title: 'Career wins and streaks', desc: 'Stay motivated and build steady momentum.' },
-    ],
-  },
+const supporting = [
+  { icon: Radar, title: 'Job Radar', desc: 'Get the company trigger, likely roles, match score and a practical outreach angle.' },
+  { icon: Search, title: 'Application Tracker', desc: 'Keep every application, stage and follow-up in one clear list.' },
+  { icon: FileText, title: 'Resume + ATS', desc: 'See one score plus the missing skills, weak phrases and exact keywords to improve.' },
+  { icon: Mic, title: 'Interview Prep', desc: 'Practise role-specific questions and receive scored feedback on each answer.' },
+  { icon: Send, title: 'Cover Letters', desc: 'Turn a job description and your experience into a tailored first draft.' },
+  { icon: DollarSign, title: 'Salary Intelligence', desc: 'Compare a £55k offer with the market range and generate a negotiation script.' },
+  { icon: Linkedin, title: 'LinkedIn Optimizer', desc: 'Receive a stronger headline, About section and recruiter-search keywords.' },
+  { icon: TrendingUp, title: 'Skill Gap Analyzer', desc: 'See which three skills block your target role and what to learn next.' },
 ];
 
 const FeaturesSection = () => (
-  <section className="py-16 sm:py-24 border-b border-border bg-secondary/40">
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mb-10 sm:mb-12">
-        <p className="text-[11px] font-semibold uppercase text-primary mb-4">The complete career workspace</p>
-        <h2 className="text-[26px] leading-tight sm:text-4xl font-bold text-foreground">
-          Everything you need to get ahead, get ready and get hired.
-        </h2>
+  <section className="py-16 sm:py-24 border-b border-border bg-card">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[0.8fr_1.2fr] gap-12 lg:gap-20 items-start">
+      <div className="lg:sticky lg:top-28">
+        <p className="text-[11px] font-semibold uppercase text-primary mb-4">Key features</p>
+        <h2 className="text-[26px] leading-tight sm:text-4xl font-bold text-foreground mb-4">Everything you need to land your next role.</h2>
+        <p className="text-muted-foreground leading-relaxed max-w-md">From early hiring signals to the final interview, Vaylance keeps your search focused and your applications relevant.</p>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-5">
-        {pillars.map((p) => (
-          <article key={p.title} className="rounded-lg border border-border bg-card p-5 sm:p-6">
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-foreground">{p.title}</h3>
-              <p className="text-[11px] font-semibold uppercase text-muted-foreground mt-1">{p.subtitle}</p>
-            </div>
-            <ul className="space-y-5">
-              {p.items.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <li key={item.title} className="flex gap-3">
-                    <span className="w-8 h-8 shrink-0 rounded-md bg-signal-soft flex items-center justify-center"><Icon className="w-4 h-4 text-primary" /></span>
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">{item.title}</p>
-                      <p className="text-[13px] text-muted-foreground leading-relaxed mt-0.5">{item.desc}</p>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </article>
-        ))}
+      <div className="grid sm:grid-cols-2 gap-x-10 gap-y-8">
+        {supporting.map((f) => {
+          const Icon = f.icon;
+          return (
+            <article key={f.title} className="flex gap-4">
+              <div className="w-10 h-10 shrink-0 rounded-md bg-signal-soft flex items-center justify-center"><Icon className="w-5 h-5 text-primary" /></div>
+              <div><h3 className="text-base font-semibold text-foreground mb-1.5">{f.title}</h3><p className="text-[15px] text-muted-foreground leading-relaxed">{f.desc}</p></div>
+            </article>
+          );
+        })}
       </div>
     </div>
   </section>

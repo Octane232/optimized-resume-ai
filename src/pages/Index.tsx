@@ -4,9 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 
 import Header from '@/components/Header';
 import HeroSection from '@/components/HeroSection';
-import HiringRadarSection from '@/components/HiringRadarSection';
-import TrustedBySection from '@/components/TrustedBySection';
-import BigPictureSection from '@/components/BigPictureSection';
 import FeaturesSection from '@/components/FeaturesSection';
 import HowItWorksSection from '@/components/HowItWorksSection';
 import TestimonialsSection from '@/components/TestimonialsSection';
@@ -66,16 +63,13 @@ const Index = () => {
   return (
     <div className="warm font-body min-h-screen bg-background text-foreground">
       <SEOHead
-        title="Vaylance — AI Career Coach | Know Who's Hiring Before the Job Is Posted"
-        description="Vaylance detects the business signals that come before hiring, then helps you prepare: resume and ATS match, interview coaching, and application tracking. Free plan, no card."
-        keywords="hiring signals, AI career coach, ATS resume scanner, interview prep AI, cover letter generator, salary intelligence"
+        title="Vaylance — AI Job Search Platform | Get Hired Faster"
+        description="Vaylance helps you tailor your resume to pass ATS filters, prep for interviews, and find companies hiring before they post publicly. Start free."
+        keywords="ATS resume scanner, resume checker, interview prep AI, job search tool, cover letter generator, salary intelligence"
         canonical="https://vaylance.com/"
       />
       <Header />
       <HeroSection />
-      <HiringRadarSection />
-      <TrustedBySection />
-      <BigPictureSection />
       <div id="features"><FeaturesSection /></div>
       <ComparisonSection />
       <div id="testimonials"><TestimonialsSection /></div>
