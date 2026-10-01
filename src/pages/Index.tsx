@@ -78,23 +78,26 @@ const Index = () => {
   // signed-in user straight to the dashboard instead of stranding them here.
   useEffect(() => {
     const url = new URL(window.location.href);
+    // Supabase may strip the token and leave a bare "#", so treat that as a callback too.
     const isOAuthReturn =
-      url.searchParams.has('code') || url.hash.includes('access_token');
-    if (!isOAuthReturn) return;
+      url.searchParams.has('code') ||
+      url.hash.includes('access_token') ||
+      window.location.href.endsWith('#');
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      if (session) {
-        window.history.replaceState({}, '', '/');
-        navigate('/dashboard', { replace: true });
-      }
+    const goDashboard = () => {
+      window.history.replaceState({}, '', '/');
+      navigate('/dashboard', { replace: true });
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session && (event === 'SIGNED_IN' || isOAuthReturn)) goDashboard();
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        window.history.replaceState({}, '', '/');
-        navigate('/dashboard', { replace: true });
-      }
-    });
+    if (isOAuthReturn) {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) goDashboard();
+      });
+    }
 
     return () => subscription.unsubscribe();
   }, [navigate]);
