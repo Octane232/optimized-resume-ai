@@ -21,8 +21,23 @@ export default {
 		extend: {
 			fontFamily: {
 				sans: ['Inter', 'system-ui', 'sans-serif'],
+				serif: ['"Source Serif 4"', 'Georgia', 'serif'],
 			},
 			colors: {
+				vy: {
+					ink: 'hsl(var(--vy-ink))',
+					panel: 'hsl(var(--vy-panel))',
+					line: 'hsl(var(--vy-line))',
+					text: 'hsl(var(--vy-text))',
+					dim: 'hsl(var(--vy-dim))',
+					teal: 'hsl(var(--vy-teal))',
+					glow: 'hsl(var(--vy-glow))',
+					paper: 'hsl(var(--vy-paper))',
+					mist: 'hsl(var(--vy-mist))',
+					deep: 'hsl(var(--vy-deep))',
+					body: 'hsl(var(--vy-body))',
+					amber: 'hsl(var(--vy-amber))',
+				},
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
