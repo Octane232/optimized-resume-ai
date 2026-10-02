@@ -1,193 +1,77 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Play, CheckCircle, Search, Bell, User, Briefcase, FileText, PenTool, Mic, BarChart3, Settings, Layers, Sparkles } from 'lucide-react';
+import { ArrowRight, Radio, TrendingUp, Building2, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-const sidebarItems = [
-  { icon: Layers, label: 'Dashboard', active: true },
-  { icon: Briefcase, label: 'Job Matches' },
-  { icon: FileText, label: 'Applications' },
-  { icon: PenTool, label: 'Resume + ATS' },
-  { icon: FileText, label: 'AI Cover Letter' },
-  { icon: Mic, label: 'Interview Coach' },
-  { icon: BarChart3, label: 'Analytics' },
-  { icon: Sparkles, label: 'Saved Items' },
-  { icon: Settings, label: 'Settings' },
+const signals = [
+  { company: 'Stripe', trigger: 'Go-to-market team expansion', detail: '14 new headcount approved · New York', lead: '6 days', match: 94 },
+  { company: 'Datadog', trigger: 'New EMEA office announced', detail: 'Dublin · Engineering & Sales', lead: '11 days', match: 89 },
+  { company: 'Ramp', trigger: 'Series D funding closed', detail: '$150M raised · Finance & Ops roles', lead: '9 days', match: 86 },
 ];
 
-const jobMatches = [
-  { initial: 'A', company: 'Expanding research team', sub: 'Anthropic', location: 'Early signal · Remote', match: '95%', tone: 'from-blue-500 to-blue-600' },
-  { initial: 'O', company: 'New infrastructure roles', sub: 'OpenAI', location: 'Early signal · Hybrid', match: '92%', tone: 'from-violet-500 to-violet-600' },
-  { initial: 'S', company: 'Growing go-to-market team', sub: 'Stripe', location: 'New York, NY', match: '90%', tone: 'from-emerald-500 to-emerald-600' },
-];
-
-
-const HeroSection = () => {
-  return (
-    <section className="relative pt-24 sm:pt-28 pb-10 sm:pb-16 overflow-hidden">
-      {/* Background glow */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute top-0 left-1/3 w-[700px] h-[700px] bg-violet-600/15 rounded-full blur-[140px]" />
-        <div className="absolute top-40 right-0 w-[600px] h-[600px] bg-blue-600/15 rounded-full blur-[140px]" />
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-          {/* Left: copy */}
-          <div className="text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-card/50 backdrop-blur text-[11px] sm:text-xs font-semibold text-muted-foreground mb-4 sm:mb-6">
-              <Sparkles className="w-3.5 h-3.5 text-violet-400" />
-              Career Intelligence For What's Next
-            </div>
-
-            <h1 className="text-[2.5rem] leading-[1.06] sm:text-6xl lg:text-7xl font-black text-foreground tracking-tight sm:leading-[1.02] mb-4 sm:mb-6">
-              Know who's hiring{' '}
-              <span className="bg-gradient-to-r from-blue-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
-                before
-              </span>
-              {' '}the job is posted
-            </h1>
-
-            <p className="text-base sm:text-lg text-muted-foreground max-w-lg mx-auto lg:mx-0 mb-6 sm:mb-8 leading-relaxed">
-              Vaylance reads real-time hiring signals, scores your resume against
-              the role, and coaches you through the offer — so you move first.
-            </p>
-
-            <div className="flex flex-col sm:flex-row sm:justify-center lg:justify-start gap-3 mb-6 sm:mb-8">
-              <Button asChild size="lg" className="h-12 px-7 font-semibold text-base bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white shadow-xl shadow-blue-600/30">
-                <Link to="/auth">Get Started Free →</Link>
-              </Button>
-              <Button asChild variant="outline" size="lg" className="h-12 px-7 font-semibold text-base border-border bg-card/30 hover:bg-card text-foreground">
-                <Link to="/auth">
-                  <Play className="w-4 h-4 mr-1 fill-current" />
-                  See How It Works
-                </Link>
-              </Button>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-5 gap-y-2 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> Real-time hiring signals</span>
-              <span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> Tailored career guidance</span>
-              <span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> Cancel anytime</span>
-            </div>
-
-          </div>
-
-
-          {/* Right: dashboard mockup */}
-          <div className="relative">
-            <div className="absolute -inset-4 bg-gradient-to-tr from-blue-600/30 via-violet-600/20 to-fuchsia-600/30 rounded-3xl blur-2xl" />
-            <div className="relative rounded-2xl border border-border/80 bg-card shadow-2xl overflow-hidden">
-              {/* Topbar */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-border/60 bg-card">
-                <div className="flex items-center gap-2">
-                  {/* Fixed: Replaced gradient mountain logo with target logo */}
-                  <svg width="18" height="18" viewBox="0 0 48 48" fill="none">
-                    <rect width="48" height="48" rx="11" fill="#1d4ed8"/>
-                    <circle cx="22" cy="27" r="11" stroke="white" strokeWidth="2.2" fill="none"/>
-                    <circle cx="22" cy="27" r="6.5" stroke="white" strokeWidth="1.6" strokeOpacity="0.6" fill="none"/>
-                    <circle cx="22" cy="27" r="2.6" fill="white"/>
-                    <line x1="29.5" y1="19.5" x2="36" y2="13" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
-                    <line x1="32.5" y1="13" x2="36" y2="13" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
-                    <line x1="36" y1="13" x2="36" y2="16.5" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
-                  </svg>
-                  <span className="text-xs font-bold text-foreground">Vaylance</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Search className="w-3.5 h-3.5 text-muted-foreground" />
-                  <Bell className="w-3.5 h-3.5 text-muted-foreground" />
-                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center"><User className="w-3 h-3 text-white" /></div>
-                </div>
-              </div>
-
-              <div className="flex">
-                {/* Sidebar */}
-                <div className="w-36 border-r border-border/60 bg-background/50 p-2 space-y-0.5 hidden sm:block">
-                  {sidebarItems.map((item, i) => {
-                    const Icon = item.icon;
-                    return (
-                      <div key={i} className={`flex items-center gap-1.5 px-2 py-1.5 rounded-md text-[10px] ${item.active ? 'bg-primary/15 text-primary font-semibold' : 'text-muted-foreground'}`}>
-                        <Icon className="w-3 h-3" />
-                        <span>{item.label}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 p-3 space-y-3">
-                  <div>
-                    <p className="text-[11px] font-bold text-foreground">Good morning, Alex 👋</p>
-                    <p className="text-[9px] text-muted-foreground">Here's your job search overview</p>
-                  </div>
-
-                  {/* Stat tiles */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-                    {[
-                      { label: 'Job Matches', value: '128', chg: '+24 this week' },
-                      { label: 'Applications', value: '32', chg: '+12 this week' },
-                      { label: 'Interview Calls', value: '8', chg: 'this week' },
-                      { label: 'Profile Score', value: '85%', chg: '+15% improv' },
-                    ].map((s, i) => (
-                      <div key={i} className="rounded-md border border-border/60 bg-background/40 p-1.5">
-                        <p className="text-[7px] text-muted-foreground">{s.label}</p>
-                        <p className="text-sm font-bold text-foreground">{s.value}</p>
-                        <p className="text-[6px] text-emerald-400">{s.chg}</p>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    {/* Top job matches */}
-                    <div className="sm:col-span-2 rounded-md border border-border/60 bg-background/40 p-2">
-                      <p className="text-[9px] font-bold text-foreground mb-1.5">Top Job Matches</p>
-                      <div className="space-y-1">
-                        {jobMatches.map((j, i) => (
-                          <div key={i} className="flex items-center gap-1.5 p-1 rounded bg-card/60">
-                            <div className={`w-5 h-5 rounded bg-gradient-to-br ${j.tone} flex items-center justify-center text-[8px] font-bold text-white`}>{j.initial}</div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-[8px] font-semibold text-foreground truncate">{j.company}</p>
-                              <p className="text-[6px] text-muted-foreground">{j.location}</p>
-                            </div>
-                            <span className="text-[7px] font-bold text-emerald-400">{j.match} match</span>
-                          </div>
-                        ))}
-                      </div>
-                      <p className="text-[7px] text-primary mt-1 font-semibold">View all matches →</p>
-                    </div>
-
-                    {/* Profile strength */}
-                    <div className="hidden sm:block rounded-md border border-border/60 bg-background/40 p-2">
-                      <p className="text-[9px] font-bold text-foreground mb-1">Profile Strength</p>
-                      <div className="relative w-12 h-12 mx-auto mb-1">
-                        <svg viewBox="0 0 36 36" className="w-12 h-12 -rotate-90">
-                          <circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--muted))" strokeWidth="3"/>
-                          <circle cx="18" cy="18" r="15" fill="none" stroke="url(#pg)" strokeWidth="3" strokeDasharray="80 100" strokeLinecap="round"/>
-                          <defs><linearGradient id="pg" x1="0" y1="0" x2="36" y2="36"><stop stopColor="#60a5fa"/><stop offset="1" stopColor="#a78bfa"/></linearGradient></defs>
-                        </svg>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <span className="text-[10px] font-bold text-foreground">85%</span>
-                          <span className="text-[5px] text-muted-foreground">Excellent</span>
-                        </div>
-                      </div>
-                      <div className="space-y-0.5">
-                        {['Resume', 'Skills', 'Experience', 'Keywords'].map((s) => (
-                          <div key={s} className="flex items-center gap-1 text-[6px] text-muted-foreground">
-                            <CheckCircle className="w-1.5 h-1.5 text-emerald-400" />{s}
-                          </div>
-                        ))}
-                      </div>
-                      <button className="mt-1 w-full rounded text-[6px] font-semibold py-1 bg-gradient-to-r from-blue-600 to-violet-600 text-white">Improve Score</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+const HeroSection = () => (
+  <section className="pt-28 sm:pt-32 pb-16 sm:pb-24 border-b border-border">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[1.05fr_1fr] gap-12 lg:gap-16 items-center">
+      <div>
+        <p className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground mb-6">
+          <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+          Early hiring intelligence
+        </p>
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.05] text-foreground mb-6">
+          Know who's hiring before the job is posted.
+        </h1>
+        <p className="text-lg text-muted-foreground max-w-[34rem] leading-relaxed mb-8">
+          Vaylance tracks funding, expansion and headcount signals, then tunes your resume for the role before it goes public.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button asChild size="lg" className="h-12 px-6 text-base font-semibold active:scale-[0.98]">
+            <Link to="/auth">Start free <ArrowRight className="w-4 h-4 ml-1" /></Link>
+          </Button>
+          <Button asChild size="lg" variant="ghost" className="h-12 px-6 text-base font-medium">
+            <a href="#how-it-works">How it works</a>
+          </Button>
         </div>
       </div>
-    </section>
-  );
-};
+
+      <div className="rounded-xl border border-border bg-card">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+          <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+            <Radio className="w-4 h-4 text-primary" /> Job Radar
+          </div>
+          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className="relative flex w-2 h-2">
+              <span className="absolute inline-flex w-full h-full rounded-full bg-primary opacity-60 motion-safe:animate-ping" />
+              <span className="relative inline-flex w-2 h-2 rounded-full bg-primary" />
+            </span>
+            Live
+          </span>
+        </div>
+        <ul className="divide-y divide-border">
+          {signals.map((s) => (
+            <li key={s.company} className="px-5 py-4 flex items-start gap-4">
+              <div className="w-10 h-10 rounded-lg border border-border bg-muted flex items-center justify-center shrink-0">
+                <Building2 className="w-4 h-4 text-muted-foreground" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="font-semibold text-foreground">{s.company}</p>
+                  <span className="text-sm font-semibold text-primary tabular-nums">{s.match}% match</span>
+                </div>
+                <p className="text-sm text-foreground mt-0.5">{s.trigger}</p>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{s.detail}</span>
+                  <span className="flex items-center gap-1"><TrendingUp className="w-3 h-3" />Spotted {s.lead} before listing</span>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+        <div className="px-5 py-3 border-t border-border text-xs text-muted-foreground">
+          Example signals · updated every 6 hours
+        </div>
+      </div>
+    </div>
+  </section>
+);
 
 export default HeroSection;
