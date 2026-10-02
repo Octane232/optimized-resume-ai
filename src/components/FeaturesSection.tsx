@@ -1,41 +1,57 @@
 import React from 'react';
-import { FileText, Target, PenTool, Mic, BarChart3, DollarSign } from 'lucide-react';
-
-const features = [
-  { icon: FileText, title: 'ATS Resume Scanner', desc: 'Upload your resume and get an AI ATS score plus missing-keyword fixes.', tone: 'from-blue-500/20 to-blue-500/5', iconColor: 'text-blue-400' },
-  { icon: Target, title: 'Smart Job Matching', desc: 'Get matched with jobs that fit your skills and experience.', tone: 'from-violet-500/20 to-violet-500/5', iconColor: 'text-violet-400' },
-  { icon: PenTool, title: 'AI Cover Letter', desc: 'Generate personalized cover letters that impress recruiters.', tone: 'from-emerald-500/20 to-emerald-500/5', iconColor: 'text-emerald-400' },
-  { icon: Mic, title: 'Interview Coach', desc: 'Practice with AI and get real-time feedback to boost your confidence.', tone: 'from-amber-500/20 to-amber-500/5', iconColor: 'text-amber-400' },
-  { icon: BarChart3, title: 'Application Tracker', desc: 'Track your applications and never miss an opportunity.', tone: 'from-fuchsia-500/20 to-fuchsia-500/5', iconColor: 'text-fuchsia-400' },
-  { icon: DollarSign, title: 'Salary Insights', desc: 'Get accurate salary data and negotiate with confidence.', tone: 'from-yellow-500/20 to-yellow-500/5', iconColor: 'text-yellow-400' },
-];
+import { Radio, FileText, PenTool, DollarSign, Mic } from 'lucide-react';
 
 const FeaturesSection = () => (
-  <section className="py-12 sm:py-16">
+  <section id="features" className="py-20 sm:py-24 border-b border-border">
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="text-center mb-8 sm:mb-14">
-        <p className="text-[10px] sm:text-xs font-bold tracking-[0.2em] sm:tracking-[0.25em] mb-3 bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">POWERFUL FEATURES</p>
-        <h2 className="text-[26px] leading-tight sm:text-4xl font-black text-foreground tracking-tight mb-3">
-          Everything you need to get hired
-        </h2>
-        <p className="text-muted-foreground text-base max-w-xl mx-auto">
-          Our AI tools work together to help you stand out and land more interviews.
-        </p>
-      </div>
+      <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground max-w-2xl mb-4">
+        One place to find the role and win it.
+      </h2>
+      <p className="text-muted-foreground max-w-[60ch] mb-12">
+        Spot openings early, then get your resume, letter and interview ready for that exact role.
+      </p>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-        {features.map((f, i) => {
-          const Icon = f.icon;
-          return (
-            <div key={i} className="group p-5 sm:p-6 rounded-2xl border border-border bg-card hover:border-primary/40 hover:bg-card/80 transition-all">
-              <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${f.tone} flex items-center justify-center mb-4 border border-border/50`}>
-                <Icon className={`w-5 h-5 ${f.iconColor}`} />
-              </div>
-              <h3 className="font-bold text-foreground mb-2">{f.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+      <div className="grid md:grid-cols-6 gap-4">
+        <div className="md:col-span-4 rounded-xl border border-border bg-primary text-primary-foreground p-8 flex flex-col justify-between min-h-[260px]">
+          <Radio className="w-6 h-6" />
+          <div>
+            <h3 className="text-2xl font-bold mb-2">Job Radar</h3>
+            <p className="opacity-85 max-w-md">Reads funding rounds, office openings and hiring news across every industry, and tells you why each company is likely to hire now.</p>
+          </div>
+        </div>
+
+        <div className="md:col-span-2 rounded-xl border border-border bg-card p-6 flex flex-col justify-between">
+          <FileText className="w-5 h-5 text-primary" />
+          <div className="mt-8">
+            <h3 className="font-semibold text-foreground mb-3">Resume + ATS score</h3>
+            <div className="space-y-2 text-xs">
+              {[['Meaning match', 50], ['Skills & experience', 30], ['Exact keywords', 20]].map(([k, v]) => (
+                <div key={k as string}>
+                  <div className="flex justify-between text-muted-foreground mb-1"><span>{k}</span><span>{v}%</span></div>
+                  <div className="h-1.5 rounded-full bg-muted"><div className="h-full rounded-full bg-primary" style={{ width: `${(v as number) * 2}%` }} /></div>
+                </div>
+              ))}
             </div>
-          );
-        })}
+          </div>
+        </div>
+
+        <div className="md:col-span-2 rounded-xl border border-border bg-muted p-6">
+          <PenTool className="w-5 h-5 text-primary mb-6" />
+          <h3 className="font-semibold text-foreground mb-2">Rewrite in your own file</h3>
+          <p className="text-sm text-muted-foreground">Upload a Word resume and get it back tailored to the job, same layout.</p>
+        </div>
+
+        <div className="md:col-span-2 rounded-xl border border-border bg-card p-6">
+          <Mic className="w-5 h-5 text-primary mb-6" />
+          <h3 className="font-semibold text-foreground mb-2">Interview practice</h3>
+          <p className="text-sm text-muted-foreground">Answer real questions for the role and get honest feedback.</p>
+        </div>
+
+        <div className="md:col-span-2 rounded-xl border border-border bg-card p-6">
+          <DollarSign className="w-5 h-5 text-primary mb-6" />
+          <h3 className="font-semibold text-foreground mb-2">Salary insights</h3>
+          <p className="text-sm text-muted-foreground">See the pay range and walk in with a negotiation script.</p>
+        </div>
       </div>
     </div>
   </section>
