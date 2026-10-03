@@ -7,8 +7,8 @@ interface VaylanceLogoProps {
 }
 
 const VaylanceLogo: React.FC<VaylanceLogoProps> = ({ 
-  width = 28, 
-  height = 28,
+  width = 40, 
+  height = 40,
   className = ''
 }) => (
   <svg 
@@ -19,13 +19,12 @@ const VaylanceLogo: React.FC<VaylanceLogoProps> = ({
     aria-hidden="true"
     className={className}
   >
-    <rect width="48" height="48" rx="11" fill="#1d4ed8"/>
-    <circle cx="22" cy="27" r="11" stroke="white" strokeWidth="2.2" fill="none"/>
-    <circle cx="22" cy="27" r="6.5" stroke="white" strokeWidth="1.6" strokeOpacity="0.6" fill="none"/>
-    <circle cx="22" cy="27" r="2.6" fill="white"/>
-    <line x1="29.5" y1="19.5" x2="36" y2="13" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
-    <line x1="32.5" y1="13" x2="36" y2="13" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
-    <line x1="36" y1="13" x2="36" y2="16.5" stroke="white" strokeWidth="1.9" strokeLinecap="round"/>
+    <rect width="48" height="48" rx="10" className="fill-vy-deep" />
+    <path d="M9 11.5L21.4 36.5L25.6 27.9L17.5 11.5H9Z" className="fill-vy-text" />
+    <path d="M19.2 11.5L27.8 28.8L36.4 11.5H28.2L23.8 20.5L19.2 11.5Z" className="fill-vy-teal" />
+    <path d="M27.8 28.8L32 37L39.5 21.9H31.2L27.8 28.8Z" className="fill-vy-glow" />
+    <circle cx="39" cy="10" r="3" className="fill-vy-glow" />
+    <path d="M34.5 13.8L37.1 11.7" className="stroke-vy-glow" strokeWidth="1.6" strokeLinecap="round" />
   </svg>
 );
 

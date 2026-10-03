@@ -11,9 +11,9 @@ const checks = [
 ];
 
 const rows = [
-  { name: 'Northwind Logistics', sig: 'New distribution center announced', loc: 'Manchester, UK', t: '2h ago', m: 92, tone: 'teal' },
-  { name: 'Apex Energy', sig: '$43M expansion funding round', loc: 'Houston, TX', t: '6h ago', m: 78, tone: 'amber' },
-  { name: 'HealthPlus', sig: 'New regional office opening', loc: 'Chicago, IL', t: '8h ago', m: 65, tone: 'amber' },
+  { name: 'Northwind Logistics', sig: 'New distribution center announced', loc: 'Manchester, UK', t: '2h ago', m: 74, tone: 'teal' },
+  { name: 'Apex Energy', sig: '$43M expansion funding round', loc: 'Houston, TX', t: '6h ago', m: 58, tone: 'amber' },
+  { name: 'HealthPlus', sig: 'New regional office opening', loc: 'Chicago, IL', t: '8h ago', m: 41, tone: 'amber' },
 ];
 
 const Ring = ({ v, tone }: { v: number; tone: string }) => {
@@ -92,8 +92,8 @@ const FeaturesSection = () => (
         <div className="flex gap-2 mb-5">
           <Crosshair className="w-3.5 h-3.5 text-vy-teal mt-0.5" />
           <div className="flex-1">
-            <div className="flex justify-between"><span className="text-vy-teal font-medium">Your fit</span><span className="font-semibold text-vy-deep">92%</span></div>
-            <div className="h-1.5 rounded-full bg-vy-mist mt-2"><div className="h-full w-[92%] rounded-full bg-vy-teal" /></div>
+           <div className="flex justify-between"><span className="text-vy-teal font-medium">Preference fit</span><span className="font-semibold text-vy-deep">74%</span></div>
+             <div className="h-1.5 rounded-full bg-vy-mist mt-2"><div className="h-full w-[74%] rounded-full bg-vy-teal" /></div>
           </div>
         </div>
         <span className="flex items-center justify-center gap-1 h-9 rounded-md border border-vy-teal/50 text-vy-teal font-semibold">Find hiring contacts <ArrowRight className="w-3.5 h-3.5" /></span>

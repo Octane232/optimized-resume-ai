@@ -154,32 +154,89 @@ function parseRssItems(xml: string, sourceName: string, requireHiringHint: boole
   return out;
 }
 
+type FitDimension = "role_fit" | "industry_fit" | "location_fit" | "seniority_fit";
+
+const FIT_WEIGHTS: Record<FitDimension, number> = {
+  role_fit: 50,
+  industry_fit: 25,
+  location_fit: 15,
+  seniority_fit: 10,
+};
+
+const normalise = (value: unknown) => String(value || "").trim().toLowerCase();
+
+const phraseFit = (target: string, candidates: string[]): number => {
+  if (!target || candidates.length === 0) return 0;
+  if (candidates.some((candidate) => candidate.includes(target) || target.includes(candidate))) return 100;
+
+  const targetTokens = new Set(target.split(/[^a-z0-9]+/).filter((token) => token.length > 2));
+  if (targetTokens.size === 0) return 0;
+  const bestOverlap = candidates.reduce((best, candidate) => {
+    const candidateTokens = new Set(candidate.split(/[^a-z0-9]+/).filter((token) => token.length > 2));
+    const shared = [...targetTokens].filter((token) => candidateTokens.has(token)).length;
+    return Math.max(best, shared / targetTokens.size);
+  }, 0);
+  return clampMatch(bestOverlap * 75);
+};
+
+const calculateWeightedFit = (
+  dimensions: Partial<Record<FitDimension, unknown>>,
+  preferences: any,
+): number => {
+  const active: FitDimension[] = [];
+  if (normalise(preferences?.target_role)) active.push("role_fit");
+  if (normalise(preferences?.target_industry)) active.push("industry_fit");
+  if (normalise(preferences?.target_location) || normalise(preferences?.work_style)) active.push("location_fit");
+  if (normalise(preferences?.experience_level)) active.push("seniority_fit");
+  if (active.length === 0) return 0;
+
+  const totalWeight = active.reduce((sum, key) => sum + FIT_WEIGHTS[key], 0);
+  const weightedScore = active.reduce(
+    (sum, key) => sum + clampMatch(dimensions[key]) * FIT_WEIGHTS[key],
+    0,
+  );
+  return clampMatch(weightedScore / totalWeight);
+};
+
 const fallbackPreferenceScore = (signal: any, preferences: any) => {
-  const targetRole = String(preferences?.target_role || "").toLowerCase();
-  const targetIndustry = String(preferences?.target_industry || "").toLowerCase();
-  const experienceLevel = String(preferences?.experience_level || "").toLowerCase();
-  const roles = Array.isArray(signal?.likely_roles) ? signal.likely_roles.map((r: string) => String(r).toLowerCase()) : [];
-  const industry = String(signal?.industry || "").toLowerCase();
-  let score = 48;
+  const targetRole = normalise(preferences?.target_role);
+  const targetIndustry = normalise(preferences?.target_industry);
+  const targetLocation = normalise(preferences?.target_location);
+  const workStyle = normalise(preferences?.work_style);
+  const experienceLevel = normalise(preferences?.experience_level);
+  const roles = Array.isArray(signal?.likely_roles) ? signal.likely_roles.map(normalise) : [];
+  const departments = Array.isArray(signal?.departments) ? signal.departments.map(normalise) : [];
+  const industry = normalise(signal?.industry);
+  const location = normalise(signal?.location);
+  const signalText = normalise(`${signal?.description || ""} ${signal?.why_now || ""}`);
+  const remoteRequested = /remote|anywhere|distributed|work from home/.test(workStyle);
+  const remoteOffered = /remote|anywhere|distributed|work from home/.test(`${location} ${signalText}`);
+
+  const dimensions = {
+    role_fit: phraseFit(targetRole, [...roles, ...departments]),
+    industry_fit: phraseFit(targetIndustry, [industry]),
+    location_fit: remoteRequested
+      ? (remoteOffered ? 100 : 20)
+      : phraseFit(targetLocation, [location]),
+    seniority_fit: phraseFit(experienceLevel, roles),
+  };
   const reasons: string[] = [];
+  if (dimensions.role_fit >= 70) reasons.push(`Role aligns with ${preferences.target_role}`);
+  if (dimensions.industry_fit >= 70) reasons.push(`Industry aligns with ${preferences.target_industry}`);
+  if (dimensions.location_fit >= 70) reasons.push(remoteRequested ? "Remote work preference aligns" : `Location aligns with ${preferences.target_location}`);
+  if (dimensions.seniority_fit >= 70) reasons.push(`Seniority aligns with ${preferences.experience_level}`);
 
-  if (targetIndustry && industry && (industry.includes(targetIndustry) || targetIndustry.includes(industry))) {
-    score += 24;
-    reasons.push(`Industry aligns with ${preferences.target_industry}`);
-  }
-  if (targetRole && roles.some((role: string) => role.includes(targetRole) || targetRole.includes(role))) {
-    score += 24;
-    reasons.push(`Likely hiring includes ${preferences.target_role}`);
-  }
-  if (experienceLevel && roles.some((role: string) => role.includes(experienceLevel))) {
-    score += 8;
-    reasons.push(`Seniority signal fits ${preferences.experience_level}`);
-  }
-
+  const matchScore = calculateWeightedFit(dimensions, preferences);
   return {
-    match_score: clampMatch(score),
-    match_reasons: reasons.length ? reasons : ["Broad hiring signal based on your saved preferences"],
-    insight: `${signal.company_name} is showing a hiring signal. Review the likely roles and reach out early if it fits your direction.`,
+    match_score: matchScore,
+    match_reasons: reasons.length
+      ? reasons
+      : matchScore === 0
+        ? ["Add your target role, industry and location to calculate a fit score"]
+        : ["This signal has limited overlap with your saved preferences"],
+    insight: matchScore === 0
+      ? `Set your career preferences before assessing ${signal.company_name}.`
+      : `${signal.company_name} is showing a hiring signal, but the available details have limited confirmed alignment. Review the likely roles before reaching out.`,
   };
 };
 
@@ -195,12 +252,15 @@ async function scoreSignalWithAI(signal: any, preferences: any, openAiKey: strin
         response_format: { type: "json_object" },
         messages: [{
           role: "user",
-          content: `You are matching a job seeker to a hidden hiring signal from ANY industry (tech, healthcare, retail, construction, logistics, hospitality, education, finance, energy, manufacturing, public sector, non-profit). Judge meaning-level fit, not keywords. Return JSON only:
-{"match_score":0-100,"match_reasons":["2-4 short reasons"],"insight":"2 direct sentences: why this is or is not a fit and the single next action to take"}
+          content: `You are matching a job seeker to a hidden hiring signal from ANY industry (tech, healthcare, retail, construction, logistics, hospitality, education, finance, energy, manufacturing, public sector, non-profit). Judge meaning-level fit, including adjacent and transferable roles, but do not inflate uncertain matches. Score each dimension independently. Use null when the user did not specify that preference. Return JSON only:
+{"role_fit":0-100|null,"industry_fit":0-100|null,"location_fit":0-100|null,"seniority_fit":0-100|null,"match_reasons":["2-4 short evidence-based reasons, including mismatches"],"insight":"2 direct sentences: why this is or is not a fit and the single next action to take"}
+
+Scoring anchors: 90-100 is direct and strongly evidenced; 70-89 is strong with a minor gap; 45-69 is plausible or adjacent; 20-44 is weak; 0-19 is conflicting or unsupported. Location fit must account for the user's work style. Do not create a final score; the server calculates it with role 50%, industry 25%, location/work style 15%, and seniority 10%, reweighted when a preference is absent.
 
 User preferences:
 - Target role: ${preferences?.target_role || "not specified"}
 - Target industry: ${preferences?.target_industry || "not specified"}
+- Target location: ${preferences?.target_location || "not specified"}
 - Experience level: ${preferences?.experience_level || "not specified"}
 - Target salary: ${preferences?.target_salary || "not specified"}
 - Work style: ${preferences?.work_style || "not specified"}
@@ -223,8 +283,14 @@ Hiring signal:
     if (!res.ok) return fallback;
     const data = await res.json();
     const parsed = JSON.parse(data.choices?.[0]?.message?.content || "{}");
+    const dimensions = {
+      role_fit: parsed.role_fit,
+      industry_fit: parsed.industry_fit,
+      location_fit: parsed.location_fit,
+      seniority_fit: parsed.seniority_fit,
+    };
     return {
-      match_score: clampMatch(parsed.match_score || fallback.match_score),
+      match_score: calculateWeightedFit(dimensions, preferences),
       match_reasons: Array.isArray(parsed.match_reasons) && parsed.match_reasons.length ? parsed.match_reasons.slice(0, 4) : fallback.match_reasons,
       insight: parsed.insight || fallback.insight,
     };
@@ -595,11 +661,11 @@ Description: ${article.description}`
     }
 
     // STEP 4: Match signals against user preferences
-    let usersQuery = supabase.from("career_preferences").select("user_id, target_role, target_industry, experience_level, target_salary, work_style");
+    let usersQuery = supabase.from("career_preferences").select("user_id, target_role, target_industry, target_location, experience_level, target_salary, work_style");
     if (requestingUserId) usersQuery = usersQuery.eq("user_id", requestingUserId);
     const { data: users } = await usersQuery;
     const usersToMatch = requestingUserId && (!users || users.length === 0)
-      ? [{ user_id: requestingUserId, target_role: null, target_industry: null, experience_level: null, target_salary: null, work_style: null }]
+      ? [{ user_id: requestingUserId, target_role: null, target_industry: null, target_location: null, experience_level: null, target_salary: null, work_style: null }]
       : users || [];
 
     let alertsCreated = 0;
