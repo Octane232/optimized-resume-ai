@@ -4,6 +4,7 @@ import {
   ArrowRight, PlayCircle, Users, Building2, Heart, LayoutDashboard, Radar, FileText, Mail,
   Mic, GraduationCap, Linkedin, Rocket, Settings, Search, Bell, MapPin, Clock,
 } from 'lucide-react';
+import VaylanceLogo from '@/components/VaylanceLogo';
 
 const side = [
   { icon: LayoutDashboard, label: 'Dashboard' },
@@ -47,7 +48,7 @@ const HeroSection = () => (
           {[
             { icon: Users, a: '34 signals detected', b: 'in the last 7 days' },
             { icon: Building2, a: '12 high-potential', b: 'companies identified' },
-            { icon: Heart, a: '92% average', b: 'career match' },
+            { icon: Heart, a: 'Fit explained', b: 'against your preferences' },
           ].map((s) => (
             <div key={s.a} className="flex items-center gap-3">
               <span className="w-9 h-9 rounded-full border border-vy-line flex items-center justify-center shrink-0">
@@ -66,7 +67,7 @@ const HeroSection = () => (
         </div>
         <div className="flex">
           <aside className="hidden sm:flex w-44 flex-col border-r border-vy-line p-3 text-[11px]">
-            <div className="flex items-center gap-2 px-2 pb-4"><img src="/favicon.svg" alt="" className="w-4 h-4" /><span className="font-semibold text-vy-text text-xs">Vaylance</span></div>
+            <div className="flex items-center gap-2 px-2 pb-4"><VaylanceLogo width={20} height={20} /><span className="font-semibold text-vy-text text-xs">Vaylance</span></div>
             <div className="space-y-0.5">
               {side.map((s) => (
                 <div key={s.label} className={`flex items-center gap-2 px-2 py-1.5 rounded-md ${s.active ? 'bg-vy-teal/70 text-vy-text' : 'text-vy-dim'}`}>
@@ -122,7 +123,7 @@ const HeroSection = () => (
                   <span className="inline-flex items-center gap-1 mt-3 text-[9px] px-2.5 py-1 rounded bg-vy-teal/60 text-vy-text">View intelligence <ArrowRight className="w-3 h-3" /></span>
                 </div>
                 <div className="w-12 h-12 rounded-full border-2 border-vy-glow flex flex-col items-center justify-center shrink-0">
-                  <span className="text-xs font-semibold text-vy-text">92%</span><span className="text-[7px] text-vy-glow">match</span>
+                  <span className="text-xs font-semibold text-vy-text">74%</span><span className="text-[7px] text-vy-glow">match</span>
                 </div>
               </div>
             </div>
@@ -139,7 +140,7 @@ const HeroSection = () => (
                   <span className="flex items-center gap-1"><Users className="w-3 h-3" />Medium (100-500)</span>
                 </div>
               </div>
-              <div className="w-12 h-12 rounded-full border-2 border-vy-amber flex items-center justify-center shrink-0 text-xs font-semibold text-vy-amber">78%</div>
+               <div className="w-12 h-12 rounded-full border-2 border-vy-amber flex items-center justify-center shrink-0 text-xs font-semibold text-vy-amber">58%</div>
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, X, ArrowRight } from 'lucide-react';
+import VaylanceLogo from '@/components/VaylanceLogo';
 
 const navItems = [
   { label: 'Home', href: '#top' },
@@ -11,8 +12,8 @@ const navItems = [
 
 export const Logo = () => (
   <span className="flex items-center gap-2.5">
-    <img src="/favicon.svg" alt="" className="w-8 h-8" />
-    <span className="text-xl font-semibold tracking-tight text-vy-text">Vaylance</span>
+    <VaylanceLogo width={40} height={40} />
+    <span className="text-[21px] font-semibold text-vy-text">Vaylance</span>
   </span>
 );
 

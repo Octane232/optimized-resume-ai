@@ -15,3 +15,6 @@
 - [x] Rebuild DOCX flow as Scan → Improve → Review → Re-scan using the ats-resume-improver engine.
 - [ ] Clarify Vaylance as an AI career coach and simplify product terminology without changing the design.
 - [x] Reverted the homepage to the product-led software layout (live dashboard hero, feature grid, comparison, how it works, pricing); removed the editorial stock-photo sections.
+- [ ] Replace the brand mark with the selected Radar Prism logo across public and dashboard surfaces.
+- [ ] Calibrate Job Radar preference matching and make landing-page example scores realistic.
+- [ ] Verify the updated brand and matching flow.
