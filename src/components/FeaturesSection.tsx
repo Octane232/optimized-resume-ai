@@ -49,7 +49,7 @@ const FeaturesSection = () => (
         </Link>
       </div>
 
-      <div className="rounded-2xl border border-vy-mist bg-card shadow-[0_20px_50px_-30px_hsl(var(--vy-deep)/0.35)] p-5">
+      <div className="rounded-2xl border border-vy-mist bg-vy-paper shadow-[0_20px_50px_-30px_hsl(var(--vy-deep)/0.35)] p-5">
         <div className="flex items-start justify-between mb-3">
           <div><p className="font-semibold text-vy-deep">Hiring Radar</p><p className="text-xs text-vy-teal">34 signals detected</p></div>
           <div className="flex items-center justify-between w-32 h-8 px-2 rounded-md border border-vy-mist text-[11px] text-vy-body">Search... <Search className="w-3.5 h-3.5" /></div>
@@ -74,7 +74,7 @@ const FeaturesSection = () => (
         </ul>
       </div>
 
-      <div className="rounded-2xl border border-vy-mist bg-card p-5 text-xs">
+      <div className="rounded-2xl border border-vy-mist bg-vy-paper p-5 text-xs">
         <p className="font-semibold text-vy-deep mb-4">Signal Intelligence</p>
         <div className="flex items-center gap-2 mb-4">
           <span className="w-6 h-6 rounded-full bg-vy-teal flex items-center justify-center"><Building2 className="w-3 h-3 text-vy-text" /></span>

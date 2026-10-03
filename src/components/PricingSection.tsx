@@ -4,8 +4,8 @@ import { Check } from 'lucide-react';
 
 const plans = [
   { name: 'Free', sub: 'Get started at no cost.', price: 0, cta: 'Get started', features: ['1 Hiring Radar alert', '1 Resume analysis', '1 Cover letter', 'Access to basic tools'] },
-  { name: 'Pro', sub: 'Build your advantage.', price: 15, cta: 'Go Pro', popular: true, features: ['15 Hiring Radar alerts', '30 Resume + ATS analyses', '30 Cover letters', '15 Skill gap analyses', '15 LinkedIn optimizations', '30 Interview sessions', '10 DOCX rewrites', '50 Job searches'] },
-  { name: 'Elite', sub: 'Maximum impact.', price: 29, cta: 'Go Elite', features: ['50 Hiring Radar alerts', '100 Resume + ATS analyses', '100 Cover letters', '50 Skill gap analyses', '50 LinkedIn optimizations', '100 Interview sessions', '50 DOCX rewrites', '120 Job searches'] },
+  { name: 'Pro', sub: 'Build your advantage.', price: 24, cta: 'Go Pro', popular: true, features: ['15 Hiring Radar alerts', '30 Resume + ATS analyses', '30 Cover letters', '15 Skill gap analyses', '15 LinkedIn optimizations', '30 Interview sessions', '10 DOCX rewrites', '50 Job searches'] },
+  { name: 'Elite', sub: 'Maximum impact.', price: 49, cta: 'Go Elite', features: ['50 Hiring Radar alerts', '100 Resume + ATS analyses', '100 Cover letters', '50 Skill gap analyses', '50 LinkedIn optimizations', '100 Interview sessions', '50 DOCX rewrites', '120 Job searches'] },
 ];
 
 const PricingSection = () => (
@@ -18,7 +18,7 @@ const PricingSection = () => (
       </div>
       <div className="grid md:grid-cols-3 gap-6 items-start">
         {plans.map((p) => (
-          <div key={p.name} className={`relative rounded-xl bg-card p-5 border ${p.popular ? 'border-2 border-vy-teal' : 'border-vy-mist'}`}>
+          <div key={p.name} className={`relative rounded-xl bg-vy-paper p-5 border ${p.popular ? 'border-2 border-vy-teal' : 'border-vy-mist'}`}>
             {p.popular && <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-vy-teal text-vy-text text-[10px] font-semibold">Most Popular</span>}
             <p className="font-semibold text-vy-deep">{p.name}</p>
             <p className="text-xs text-vy-body mb-2">{p.sub}</p>
