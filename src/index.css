@@ -19,25 +19,25 @@
     --vy-body: 205 12% 42%;
     --vy-amber: 36 92% 52%;
     /* Vaylance Light Theme - Clean & Professional */
-    --background: 220 20% 97%;
-    --foreground: 222 47% 11%;
+    --background: 195 30% 97%;
+    --foreground: 204 52% 9%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 204 52% 9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 204 52% 9%;
 
-    --primary: 217 91% 60%;
+    --primary: 172 72% 32%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary: 190 25% 94%;
+    --secondary-foreground: 204 52% 9%;
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 190 25% 94%;
+    --muted-foreground: 200 14% 40%;
 
-    --accent: 217 91% 60%;
+    --accent: 172 72% 32%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -46,9 +46,9 @@
     --success: 160 84% 39%;
     --success-foreground: 0 0% 100%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 217 91% 60%;
+    --border: 196 25% 88%;
+    --input: 196 25% 88%;
+    --ring: 172 72% 32%;
     --radius: 0.75rem;
 
     /* Hunter Mode - Electric Blue */
@@ -126,26 +126,26 @@
 
   .dark {
     /* Vaylance Dark Theme - Navy Command Center */
-    --background: 222 47% 6%;
-    --foreground: 210 40% 98%;
+    --background: 204 52% 7%;
+    --foreground: 180 20% 96%;
 
-    --card: 222 45% 10%;
-    --card-foreground: 210 40% 98%;
+    --card: 203 45% 11%;
+    --card-foreground: 180 20% 96%;
 
     --popover: 222 45% 10%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217 91% 60%;
-    --primary-foreground: 222 47% 6%;
+    --primary: 170 70% 45%;
+    --primary-foreground: 204 52% 7%;
 
-    --secondary: 222 35% 15%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 203 40% 15%;
+    --secondary-foreground: 180 20% 96%;
 
-    --muted: 222 35% 15%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 203 40% 15%;
+    --muted-foreground: 195 15% 68%;
 
-    --accent: 217 91% 60%;
-    --accent-foreground: 222 47% 6%;
+    --accent: 170 70% 45%;
+    --accent-foreground: 204 52% 7%;
 
     --destructive: 0 63% 45%;
     --destructive-foreground: 210 40% 98%;
@@ -153,9 +153,9 @@
     --success: 160 84% 39%;
     --success-foreground: 222 47% 6%;
 
-    --border: 222 30% 18%;
-    --input: 222 30% 18%;
-    --ring: 217 91% 60%;
+    --border: 196 30% 18%;
+    --input: 196 30% 18%;
+    --ring: 170 70% 45%;
 
     --gradient-primary: linear-gradient(135deg, hsl(var(--electric-blue)) 0%, hsl(230 80% 65%) 100%);
     --gradient-secondary: linear-gradient(135deg, hsl(230 80% 55%) 0%, hsl(var(--electric-blue)) 100%);
