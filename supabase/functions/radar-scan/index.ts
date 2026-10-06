@@ -228,6 +228,7 @@ const fallbackPreferenceScore = (signal: any, preferences: any) => {
 
   const matchScore = calculateWeightedFit(dimensions, preferences);
   return {
+    dimensions,
     match_score: matchScore,
     match_reasons: reasons.length
       ? reasons
@@ -283,11 +284,14 @@ Hiring signal:
     if (!res.ok) return fallback;
     const data = await res.json();
     const parsed = JSON.parse(data.choices?.[0]?.message?.content || "{}");
+    // Missing/invalid AI values fall back to the rule-based dimension, never silently to 0.
+    const pick = (v: unknown, fb: number) =>
+      v === null || v === undefined || !Number.isFinite(Number(v)) ? fb : v;
     const dimensions = {
-      role_fit: parsed.role_fit,
-      industry_fit: parsed.industry_fit,
-      location_fit: parsed.location_fit,
-      seniority_fit: parsed.seniority_fit,
+      role_fit: pick(parsed.role_fit, fallback.dimensions.role_fit),
+      industry_fit: pick(parsed.industry_fit, fallback.dimensions.industry_fit),
+      location_fit: pick(parsed.location_fit, fallback.dimensions.location_fit),
+      seniority_fit: pick(parsed.seniority_fit, fallback.dimensions.seniority_fit),
     };
     return {
       match_score: calculateWeightedFit(dimensions, preferences),

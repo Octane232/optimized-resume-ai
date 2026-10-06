@@ -35,6 +35,8 @@ interface RadarOpportunity {
   signalAge: string;
   match: number;
   url?: string;
+  sourceName?: string | null;
+  signalType?: string | null;
 }
 
 interface Stats {
@@ -142,36 +144,45 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
       setChecklist([
         { label: 'Complete your profile', done: Boolean(profile?.full_name && profile?.location), detail: profile?.full_name && profile?.location ? 'Done' : 'Add name and location' },
         { label: 'Upload a resume', done: resumes.length > 0, detail: resumes.length > 0 ? `${resumes.length} saved` : 'Not yet' },
-        { label: 'Set career preferences', done: Boolean(prefs?.target_role), detail: prefs?.target_role || 'Not set' },
+        { label: 'Set career preferences', done: Boolean(prefs?.target_role), detail: prefs?.target_role ? String(prefs.target_role).replace(/\b\w/g, (c: string) => c.toUpperCase()) : 'Not set' },
         { label: 'Track 10 applications', done: apps.length >= 10, detail: `${apps.length}/10` },
         { label: 'Practise 2 interviews', done: practiceSessions >= 2, detail: `${practiceSessions}/2` },
       ]);
 
-      // Resolve radar signals for the top alerts
-      const signalIds = alerts.map((a) => a.signal_id).filter(Boolean).slice(0, 5);
+      // Rank by real fit, and only call strong matches "top" opportunities
+      const MIN_TOP_MATCH = 50;
+      const ranked = [...alerts]
+        .filter((a) => (a.match_score || 0) >= MIN_TOP_MATCH)
+        .sort((a, b) => (b.match_score || 0) - (a.match_score || 0) || +new Date(b.created_at) - +new Date(a.created_at))
+        .slice(0, 5);
+      const signalIds = ranked.map((a) => a.signal_id).filter(Boolean);
       if (signalIds.length > 0) {
         const { data: signals } = await supabase
           .from('radar_signals')
-          .select('id, company_name, company_domain, likely_roles, location, why_now, description, source_url, published_at')
+          .select('id, company_name, company_domain, likely_roles, location, why_now, description, source_url, source_name, signal_type, published_at')
           .in('id', signalIds);
 
         const map = new Map((signals || []).map((s: any) => [s.id, s]));
         setOpportunities(
-          alerts.slice(0, 5).map((a) => {
+          ranked.map((a) => {
             const s: any = map.get(a.signal_id);
             return {
               id: a.id,
               company: s?.company_name || 'New signal',
               companyDomain: s?.company_domain,
               role: s?.likely_roles?.[0] || 'Hiring soon',
-              location: s?.location || 'Location pending',
+              location: s?.location || 'Multi-site / nationwide',
               whyNow: s?.why_now || s?.description || 'Recent hiring signal detected',
               signalAge: daysAgo(s?.published_at || a.created_at),
               match: a.match_score || 0,
               url: s?.source_url,
+              sourceName: s?.source_name || null,
+              signalType: s?.signal_type || null,
             };
           })
         );
+      } else {
+        setOpportunities([]);
       }
     } catch (error) {
       console.error('Dashboard load failed:', error);
@@ -357,10 +368,10 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
             {opportunities.length === 0 ? (
               <div className="p-8 text-center">
                 <Telescope className="w-8 h-8 text-muted-foreground mx-auto" />
-                <p className="mt-3 text-sm font-medium text-foreground">No signals yet</p>
+                <p className="mt-3 text-sm font-medium text-foreground">No strong matches yet</p>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {isPaid
-                    ? 'Set your career preferences, then run a radar scan.'
+                    ? 'Only signals with 50%+ fit show here. Refine your preferences or run a new scan.'
                     : 'A paid plan is required to run Job Radar scans.'}
                 </p>
                 <button
@@ -381,9 +392,14 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
                       <p className="text-sm text-muted-foreground">{o.role}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">{o.location}</p>
                       <p className="mt-2 text-[13px] text-foreground/80">{o.whyNow}</p>
-                      <span className="mt-2 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
-                        Hiring signal · {o.signalAge}
-                      </span>
+                      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                        <span className="inline-block rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                          {o.signalType || 'Hiring signal'} · {o.signalAge}
+                        </span>
+                        {o.sourceName && (
+                          <span className="text-[11px] text-muted-foreground">via {o.sourceName}</span>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
                       <span className="text-sm font-bold text-primary tabular-nums">{o.match}%</span>
@@ -492,24 +508,6 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
           </div>
         </div>
 
-        {!isPaid && (
-          <div className="rounded-lg bg-foreground text-background p-5">
-            <span className="inline-block rounded-full bg-background/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider">
-              Upgrade
-            </span>
-            <h3 className="font-display text-2xl mt-3">Unlock every tool</h3>
-            <p className="mt-2 text-sm text-background/75">
-              Paid plans include Job Radar alerts, resume scans, interview coaching and salary reports.
-            </p>
-            <button
-              onClick={() => setActiveTab('billing')}
-              className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
-            >
-              View plans
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-        )}
 
         <div className="rounded-lg border border-border bg-card p-4">
           <div className="flex items-center gap-2">
