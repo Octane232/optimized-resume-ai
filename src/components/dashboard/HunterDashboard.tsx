@@ -35,6 +35,8 @@ interface RadarOpportunity {
   signalAge: string;
   match: number;
   url?: string;
+  sourceName?: string | null;
+  signalType?: string | null;
 }
 
 interface Stats {
@@ -366,10 +368,10 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
             {opportunities.length === 0 ? (
               <div className="p-8 text-center">
                 <Telescope className="w-8 h-8 text-muted-foreground mx-auto" />
-                <p className="mt-3 text-sm font-medium text-foreground">No signals yet</p>
+                <p className="mt-3 text-sm font-medium text-foreground">No strong matches yet</p>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {isPaid
-                    ? 'Set your career preferences, then run a radar scan.'
+                    ? 'Only signals with 50%+ fit show here. Refine your preferences or run a new scan.'
                     : 'A paid plan is required to run Job Radar scans.'}
                 </p>
                 <button
@@ -390,9 +392,14 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
                       <p className="text-sm text-muted-foreground">{o.role}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">{o.location}</p>
                       <p className="mt-2 text-[13px] text-foreground/80">{o.whyNow}</p>
-                      <span className="mt-2 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
-                        Hiring signal · {o.signalAge}
-                      </span>
+                      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                        <span className="inline-block rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                          {o.signalType || 'Hiring signal'} · {o.signalAge}
+                        </span>
+                        {o.sourceName && (
+                          <span className="text-[11px] text-muted-foreground">via {o.sourceName}</span>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
                       <span className="text-sm font-bold text-primary tabular-nums">{o.match}%</span>
@@ -501,24 +508,6 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
           </div>
         </div>
 
-        {!isPaid && (
-          <div className="rounded-lg bg-foreground text-background p-5">
-            <span className="inline-block rounded-full bg-background/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider">
-              Upgrade
-            </span>
-            <h3 className="font-display text-2xl mt-3">Unlock every tool</h3>
-            <p className="mt-2 text-sm text-background/75">
-              Paid plans include Job Radar alerts, resume scans, interview coaching and salary reports.
-            </p>
-            <button
-              onClick={() => setActiveTab('billing')}
-              className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
-            >
-              View plans
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-        )}
 
         <div className="rounded-lg border border-border bg-card p-4">
           <div className="flex items-center gap-2">
