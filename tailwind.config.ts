@@ -101,6 +101,11 @@ export default {
 				success: {
 					DEFAULT: 'hsl(160, 84%, 39%)',
 					foreground: 'hsl(0, 0%, 100%)'
+				},
+				match: {
+					strong: 'hsl(var(--match-strong))',
+					moderate: 'hsl(var(--match-moderate))',
+					weak: 'hsl(var(--match-weak))'
 				}
 			},
 			borderRadius: {
