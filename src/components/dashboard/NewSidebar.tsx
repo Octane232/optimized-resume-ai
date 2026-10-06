@@ -169,9 +169,9 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
               </div>
             </div>
           ) : (
-            <div className="rounded-xl bg-primary p-4 text-primary-foreground">
+            <div className="rounded-xl bg-foreground p-4 text-background border-l-4 border-primary">
               <p className="text-sm font-semibold">Unlock your full potential</p>
-              <p className="mt-1 text-xs text-primary-foreground/80">
+              <p className="mt-1 text-xs text-background/75">
                 Upgrade for Job Radar alerts, resume scans and coaching tools.
               </p>
               <button
