@@ -62,12 +62,7 @@ const getStageColor = (stage: string | null): string => {
   return colorMap[stageLower || ''] || 'bg-muted text-muted-foreground';
 };
 
-const getMatchColor = (score: number): string => {
-  if (score >= 90) return 'text-signal';
-  if (score >= 75) return 'text-primary';
-  if (score >= 60) return 'text-amber-500';
-  return 'text-muted-foreground';
-};
+const getMatchColor = (score: number): string => matchTextClass(score);
 
 const filterSignals = (signals: any[], searchQuery: string): any[] => {
   if (!searchQuery) return signals;

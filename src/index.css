@@ -28,7 +28,10 @@
     --popover: 0 0% 100%;
     --popover-foreground: 204 52% 9%;
 
-    --primary: 172 72% 32%;
+    --primary: 172 72% 36%;
+    --match-strong: 172 72% 34%;
+    --match-moderate: 36 77% 50%;
+    --match-weak: 2 55% 52%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 190 25% 94%;
@@ -136,6 +139,9 @@
     --popover-foreground: 210 40% 98%;
 
     --primary: 170 70% 45%;
+    --match-strong: 170 70% 48%;
+    --match-moderate: 36 80% 58%;
+    --match-weak: 2 60% 64%;
     --primary-foreground: 204 52% 7%;
 
     --secondary: 203 40% 15%;

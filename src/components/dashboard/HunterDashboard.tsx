@@ -18,6 +18,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useUsageLimit } from '@/contexts/UsageLimitContext';
 import { cn } from '@/lib/utils';
+import { matchBadgeClass } from '@/lib/matchTier';
 import { CompanyLogo } from '@/components/dashboard/CompanyLogo';
 import { Button } from '@/components/ui/button';
 
@@ -402,7 +403,7 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
                       </div>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
-                      <span className="text-sm font-bold text-primary tabular-nums">{o.match}%</span>
+                      <span className={cn('rounded-full border px-2 py-0.5 text-sm font-bold tabular-nums', matchBadgeClass(o.match))}>{o.match}%</span>
                       <button
                         onClick={() => setActiveTab('scout')}
                         className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
