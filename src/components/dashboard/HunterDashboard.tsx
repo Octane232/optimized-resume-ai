@@ -142,36 +142,45 @@ const HunterDashboard: React.FC<HunterDashboardProps> = ({ setActiveTab }) => {
       setChecklist([
         { label: 'Complete your profile', done: Boolean(profile?.full_name && profile?.location), detail: profile?.full_name && profile?.location ? 'Done' : 'Add name and location' },
         { label: 'Upload a resume', done: resumes.length > 0, detail: resumes.length > 0 ? `${resumes.length} saved` : 'Not yet' },
-        { label: 'Set career preferences', done: Boolean(prefs?.target_role), detail: prefs?.target_role || 'Not set' },
+        { label: 'Set career preferences', done: Boolean(prefs?.target_role), detail: prefs?.target_role ? String(prefs.target_role).replace(/\b\w/g, (c: string) => c.toUpperCase()) : 'Not set' },
         { label: 'Track 10 applications', done: apps.length >= 10, detail: `${apps.length}/10` },
         { label: 'Practise 2 interviews', done: practiceSessions >= 2, detail: `${practiceSessions}/2` },
       ]);
 
-      // Resolve radar signals for the top alerts
-      const signalIds = alerts.map((a) => a.signal_id).filter(Boolean).slice(0, 5);
+      // Rank by real fit, and only call strong matches "top" opportunities
+      const MIN_TOP_MATCH = 50;
+      const ranked = [...alerts]
+        .filter((a) => (a.match_score || 0) >= MIN_TOP_MATCH)
+        .sort((a, b) => (b.match_score || 0) - (a.match_score || 0) || +new Date(b.created_at) - +new Date(a.created_at))
+        .slice(0, 5);
+      const signalIds = ranked.map((a) => a.signal_id).filter(Boolean);
       if (signalIds.length > 0) {
         const { data: signals } = await supabase
           .from('radar_signals')
-          .select('id, company_name, company_domain, likely_roles, location, why_now, description, source_url, published_at')
+          .select('id, company_name, company_domain, likely_roles, location, why_now, description, source_url, source_name, signal_type, published_at')
           .in('id', signalIds);
 
         const map = new Map((signals || []).map((s: any) => [s.id, s]));
         setOpportunities(
-          alerts.slice(0, 5).map((a) => {
+          ranked.map((a) => {
             const s: any = map.get(a.signal_id);
             return {
               id: a.id,
               company: s?.company_name || 'New signal',
               companyDomain: s?.company_domain,
               role: s?.likely_roles?.[0] || 'Hiring soon',
-              location: s?.location || 'Location pending',
+              location: s?.location || 'Multi-site / nationwide',
               whyNow: s?.why_now || s?.description || 'Recent hiring signal detected',
               signalAge: daysAgo(s?.published_at || a.created_at),
               match: a.match_score || 0,
               url: s?.source_url,
+              sourceName: s?.source_name || null,
+              signalType: s?.signal_type || null,
             };
           })
         );
+      } else {
+        setOpportunities([]);
       }
     } catch (error) {
       console.error('Dashboard load failed:', error);
