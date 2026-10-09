@@ -87,7 +87,7 @@ ${button}${code}
 <p style="margin:20px 0 0 0;font-size:12px;line-height:1.5;color:#94A3B8;">If you didn't request this, you can safely ignore this email.</p>
 </td></tr>${fallback}
 <tr><td style="padding:24px 32px;background-color:#F8FAFC;border-top:1px solid #E2E8F0;text-align:center;">
-<p style="margin:0 0 6px 0;font-size:11px;color:#94A3B8;"><a href="https://vaylance.com/contact" style="color:#64748B;">Contact Support</a> &bull; <a href="https://vaylance.com/privacy-policy" style="color:#64748B;">Privacy Policy</a></p>
+<p style="margin:0 0 6px 0;font-size:11px;color:#94A3B8;"><a href="https://vaylance.com/contact" style="color:#64748B;">Contact Support</a> &bull; <a href="https://vaylance.com/privacy" style="color:#64748B;">Privacy Policy</a></p>
 <p style="margin:10px 0 0 0;font-size:11px;color:#CBD5E1;">&copy; 2026 Vaylance. All rights reserved.</p>
 </td></tr></table></td></tr></table></body></html>`;
 }
