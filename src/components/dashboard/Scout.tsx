@@ -14,6 +14,7 @@ import { useUsageLimit } from '@/contexts/UsageLimitContext';
 import { motion } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 import { CompanyLogo } from '@/components/dashboard/CompanyLogo';
+import { matchTextClass } from '@/lib/matchTier';
 
 // ===== Types =====
 interface RadarSignal {
