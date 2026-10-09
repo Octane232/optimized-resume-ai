@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 import { Check } from 'lucide-react';
 
 const plans = [
-  { name: 'Free', sub: 'Get started at no cost.', price: 0, cta: 'Get started', features: ['1 Hiring Radar alert', '1 Resume analysis', '1 Cover letter', 'Access to basic tools'] },
-  { name: 'Pro', sub: 'Build your advantage.', price: 24, cta: 'Go Pro', popular: true, features: ['15 Hiring Radar alerts', '30 Resume + ATS analyses', '30 Cover letters', '15 Skill gap analyses', '15 LinkedIn optimizations', '30 Interview sessions', '10 DOCX rewrites', '50 Job searches'] },
-  { name: 'Elite', sub: 'Maximum impact.', price: 49, cta: 'Go Elite', features: ['50 Hiring Radar alerts', '100 Resume + ATS analyses', '100 Cover letters', '50 Skill gap analyses', '50 LinkedIn optimizations', '100 Interview sessions', '50 DOCX rewrites', '120 Job searches'] },
+  { name: 'Free', sub: 'Explore before you upgrade.', price: 0, cta: 'Get started', features: ['1 Resume + ATS analysis', '1 Cover letter', '1 Salary insight', 'Job Radar requires Pro or Elite'] },
+  { name: 'Pro', sub: 'Build your advantage.', price: 24, cta: 'Go Pro', popular: true, features: ['30 Job Radar scans', '40 Resume + ATS analyses', '40 Cover letters', '20 Skill gap analyses', '20 LinkedIn optimizations', '40 Interview sessions', '15 DOCX rewrites', '15 Salary insights'] },
+  { name: 'Elite', sub: 'Maximum impact.', price: 49, cta: 'Go Elite', features: ['100 Job Radar scans', '150 Resume + ATS analyses', '150 Cover letters', '60 Skill gap analyses', '60 LinkedIn optimizations', '120 Interview sessions', '50 DOCX rewrites', '40 Salary insights'] },
 ];
 
 const PricingSection = () => (
