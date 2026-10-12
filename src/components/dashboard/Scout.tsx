@@ -382,6 +382,7 @@ interface SignalCardProps {
   signal: RadarSignal;
   alert?: RadarAlert;
   index: number;
+  targetRole?: string | null;
 }
 
 interface Opening {
@@ -918,6 +919,7 @@ interface SignalsListProps {
   canScan: boolean;
   tier: string;
   onUpgradeClick: () => void;
+  targetRole?: string | null;
 }
 
 const SignalsList: React.FC<SignalsListProps> = ({ 
@@ -929,7 +931,8 @@ const SignalsList: React.FC<SignalsListProps> = ({
   usageLoading, 
   canScan, 
   tier,
-  onUpgradeClick 
+  onUpgradeClick,
+  targetRole
 }) => {
   const hasFullAccess = tier === 'trial' || tier === 'pro' || tier === 'elite';
   const visibleSignals = hasFullAccess ? signals : signals.slice(0, 3);
@@ -948,6 +951,7 @@ const SignalsList: React.FC<SignalsListProps> = ({
           signal={signal.radar_signals || signal}
           alert={signal.alert || null}
           index={index}
+          targetRole={targetRole}
         />
       ))}
       {lockedCount > 0 && <LockedTeaser lockedCount={lockedCount} onUpgradeClick={onUpgradeClick} />}
@@ -1018,6 +1022,7 @@ const Scout: React.FC<ScoutProps> = ({ setActiveTab }) => {
         usageLoading={usageLoading}
         canScan={canScan}
         tier={tier}
+        targetRole={preferences?.target_role}
         onUpgradeClick={handleUpgradeClick}
       />
     </div>
