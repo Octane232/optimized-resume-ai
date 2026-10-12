@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Check } from 'lucide-react';
 
 const plans = [
-  { name: 'Free', sub: 'Explore before you upgrade.', price: 0, cta: 'Get started', features: ['1 Resume + ATS analysis', '1 Cover letter', '1 Salary insight', 'Job Radar requires Pro or Elite'] },
+  { name: 'Free', sub: 'Explore before you upgrade.', price: 0, cta: 'Get started', features: ['1 Job Radar scan (top 3 signals)', '2 Interview prep & Copilot sessions', '2 DOCX rewrites', '1 Resume + ATS analysis', '1 Cover letter', '1 Salary insight'] },
   { name: 'Pro', sub: 'Build your advantage.', price: 24, cta: 'Go Pro', popular: true, features: ['30 Job Radar scans', '40 Resume + ATS analyses', '40 Cover letters', '20 Skill gap analyses', '20 LinkedIn optimizations', '40 Interview sessions', '15 DOCX rewrites', '15 Salary insights'] },
   { name: 'Elite', sub: 'Maximum impact.', price: 49, cta: 'Go Elite', features: ['100 Job Radar scans', '150 Resume + ATS analyses', '150 Cover letters', '60 Skill gap analyses', '60 LinkedIn optimizations', '120 Interview sessions', '50 DOCX rewrites', '40 Salary insights'] },
 ];
