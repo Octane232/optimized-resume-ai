@@ -281,7 +281,8 @@ const InterviewPrep: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ set
     : 0;
   
   const wordCount = userAnswer.split(/\s+/).filter(Boolean).length;
-  const isElite = tier === 'elite';
+  // Copilot is available on every plan; usage is capped by the interview_prep quota.
+  const isElite = true;
 
   // Use live getRemaining() directly on every render, not stale local state
   const remainingSessions = getRemaining('interview_prep');

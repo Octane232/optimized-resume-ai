@@ -667,7 +667,8 @@ const ResumeEngine: React.FC<{ setActiveTab?: (tab: string) => void; hasResume?:
 }) => {
   const { toast } = useToast();
   const { tier } = useUsageLimit();
-  const isPro = isProUser(tier);
+  // Free users get a small DOCX rewrite quota (enforced server-side).
+  const isPro = isProUser(tier) || tier === 'free';
   
   const [resumeText, setResumeText] = useState('');
   const [jobDescription, setJobDescription] = useState('');

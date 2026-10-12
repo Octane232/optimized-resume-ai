@@ -29,7 +29,6 @@ import { SkillGapAnalyzer } from '@/components/dashboard/SkillGapAnalyzer';
 import LinkedInOptimizer from '@/components/dashboard/LinkedInOptimizer';
 import SalaryIntel from '@/components/dashboard/SalaryIntel';
 import WalkthroughGuide from '@/components/dashboard/WalkthroughGuide';
-import PaywallGate from '@/components/dashboard/PaywallGate';
 import HelpSupport from '@/components/dashboard/HelpSupport';
 
 import {
@@ -281,11 +280,7 @@ const Dashboard = () => {
       case 'briefing':
         return <HunterDashboard setActiveTab={handleSetActiveTab} />;
       case 'scout':
-        return (
-          <PaywallGate feature="radar" onUpgrade={() => handleSetActiveTab('billing')}>
-            <Scout />
-          </PaywallGate>
-        );
+        return <Scout setActiveTab={handleSetActiveTab} />;
       case 'salary-intel':
         return <SalaryIntel />;
       case 'resume-engine':
