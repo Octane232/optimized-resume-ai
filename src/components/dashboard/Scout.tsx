@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { 
   Telescope, Search, MapPin, DollarSign, Clock, ExternalLink,
   Sparkles, Crown, Lock, Zap, TrendingUp, Rocket, Building2,
-  Users, ArrowUpRight, RefreshCw, Bell, BellOff
+  Users, ArrowUpRight, RefreshCw, Bell, BellOff,
+  Plus, Check, Copy, ThumbsUp, ThumbsDown
 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -397,12 +400,109 @@ interface OpeningsResult {
   jobs: Opening[];
 }
 
-const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
+const buildOutreachDraft = (s: RadarSignal, role?: string | null) => {
+  const trigger = s.why_now || s.description || 'your recent growth';
+  const roleLine = role || s.likely_roles?.[0] || 'a role on your team';
+  const angle = s.outreach_angle ? `\n\n${s.outreach_angle}` : '';
+  return `Hi [Name],
+
+I saw the news about ${s.company_name}${s.amount ? ` (${[s.funding_stage, s.amount].filter(Boolean).join(' · ')})` : ''}: ${trigger.replace(/\.$/, '')}. Congratulations.
+
+Teams usually grow fast after a move like this, and I'd love to be considered for ${roleLine} before it's posted publicly.${angle}
+
+Would you be open to a 15-minute chat this week? I can share my resume and a few ideas on how I'd contribute.
+
+Best,
+[Your name]`;
+};
+
+const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index, targetRole }) => {
   const s = signal;
   const { toast } = useToast();
   const [openingsLoading, setOpeningsLoading] = useState(false);
   const [openings, setOpenings] = useState<OpeningsResult | null>(null);
   const [showOpenings, setShowOpenings] = useState(false);
+  const [showOutreach, setShowOutreach] = useState(false);
+  const [draft, setDraft] = useState(() => buildOutreachDraft(s, targetRole));
+  const [tracking, setTracking] = useState(false);
+  const [tracked, setTracked] = useState(false);
+  const feedbackKey = `radar_feedback_${s.id}`;
+  const [feedback, setFeedback] = useState<string | null>(() => localStorage.getItem(feedbackKey));
+
+  useEffect(() => { setDraft(buildOutreachDraft(s, targetRole)); }, [targetRole, s.id]);
+
+  const copyDraft = async () => {
+    await navigator.clipboard.writeText(draft);
+    toast({ title: 'Message copied', description: 'Paste it into LinkedIn or your email.' });
+  };
+
+  const saveFeedback = async (value: 'up' | 'down') => {
+    localStorage.setItem(feedbackKey, value);
+    setFeedback(value);
+    if (value === 'down' && alert && !alert.is_read) {
+      supabase.from('radar_alerts').update({ is_read: true }).eq('id', alert.id);
+    }
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase.from('usage_events').insert({
+        user_id: user.id,
+        feature: 'radar_feedback',
+        metadata: { signal_id: s.id, value, signal_type: s.signal_type, industry: s.industry },
+      });
+    }
+    toast({ title: value === 'up' ? 'Thanks — marked useful' : "Got it — we'll show fewer like this" });
+  };
+
+  const addToMissionControl = async () => {
+    setTracking(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Please sign in again.');
+      const { data: existing } = await supabase
+        .from('job_applications').select('id')
+        .eq('user_id', user.id).ilike('company_name', s.company_name).limit(1);
+      if (existing?.length) { setTracked(true); toast({ title: 'Already in Mission Control' }); return; }
+      const notes = [
+        `Radar signal: ${s.signal_type || 'Hiring signal'}`,
+        s.why_now && `Why now: ${s.why_now}`,
+        s.outreach_angle && `Outreach angle: ${s.outreach_angle}`,
+        alert && `Match: ${alert.match_score}%`,
+      ].filter(Boolean).join('\n');
+      const { error } = await supabase.from('job_applications').insert({
+        user_id: user.id,
+        company_name: s.company_name,
+        job_title: targetRole || s.likely_roles?.[0] || 'Target role',
+        job_url: s.source_url || null,
+        location: s.location || null,
+        notes,
+        status: 'saved',
+      });
+      if (error) throw error;
+      setTracked(true);
+      toast({ title: 'Added to Mission Control', description: `${s.company_name} is now tracked as Saved.` });
+    } catch (e) {
+      toast({ title: "Couldn't add it", description: e instanceof Error ? e.message : 'Please try again.', variant: 'destructive' });
+    } finally {
+      setTracking(false);
+    }
+  };
+
+  const ProofBadge = () => {
+    if (!openings) return (
+      <Badge variant="outline" className="text-xs font-normal">Postings not checked yet</Badge>
+    );
+    if (openings.status === 'ats' && openings.jobs.length) return (
+      <Badge variant="outline" className="text-xs bg-muted text-foreground border-border">Already posted · {openings.jobs.length} open</Badge>
+    );
+    if (openings.status === 'company_site') return (
+      <Badge variant="outline" className="text-xs font-normal">Careers page found</Badge>
+    );
+    return (
+      <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/30">
+        <Zap className="w-3 h-3 mr-1" /> Hiring signal · no posting yet
+      </Badge>
+    );
+  };
 
   const companyUrl = s.company_domain
     ? `https://${s.company_domain.replace(/^www\./, '')}`
@@ -696,23 +796,28 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
                       : 'Show application'
                     : 'Find application'}
                 </Button>
+                <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowOutreach(true)}>
+                  <Rocket className="w-3.5 h-3.5" />
+                  Draft Outreach
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   className="gap-2"
-                  onClick={() => window.open(`https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${s.company_name} recruiter`)}`, '_blank')}
+                  disabled={tracked || tracking}
+                  onClick={addToMissionControl}
                 >
-                  <Users className="w-3.5 h-3.5" />
-                  Find Hiring Contact
+                  {tracked ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+                  {tracked ? 'In Mission Control' : 'Add to Mission Control'}
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
                   className="gap-2"
-                  onClick={() => window.open(s.source_url, '_blank')}
+                  onClick={() => window.open(`https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${s.company_name} recruiter`)}`, '_blank')}
                 >
-                  <ArrowUpRight className="w-3.5 h-3.5" />
-                  View Source
+                  <Users className="w-3.5 h-3.5" />
+                  Hiring Contact
                 </Button>
                 {typeof s.confidence === 'number' && (
                   <Badge variant="secondary" className="text-xs">
@@ -721,7 +826,54 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index }) => {
                 )}
               </div>
 
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
+                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                  <ProofBadge />
+                  {s.source_url && (
+                    <a href={s.source_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-primary hover:underline">
+                      <ArrowUpRight className="w-3 h-3" />
+                      Source: {s.source_name || 'article'}
+                      {s.published_at ? ` · ${new Date(s.published_at).toLocaleDateString()}` : ''}
+                    </a>
+                  )}
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-muted-foreground mr-1">Useful?</span>
+                  <Button
+                    size="icon" variant={feedback === 'up' ? 'default' : 'ghost'} className="h-7 w-7"
+                    aria-label="Useful signal" onClick={() => saveFeedback('up')}
+                  >
+                    <ThumbsUp className="w-3.5 h-3.5" />
+                  </Button>
+                  <Button
+                    size="icon" variant={feedback === 'down' ? 'secondary' : 'ghost'} className="h-7 w-7"
+                    aria-label="Not useful signal" onClick={() => saveFeedback('down')}
+                  >
+                    <ThumbsDown className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+              </div>
+
               <ApplicationPanel />
+
+              <Dialog open={showOutreach} onOpenChange={setShowOutreach}>
+                <DialogContent className="max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle>Outreach to {s.company_name}</DialogTitle>
+                  </DialogHeader>
+                  <p className="text-xs text-muted-foreground">Edit it, then copy into LinkedIn or email.</p>
+                  <Textarea value={draft} onChange={(e) => setDraft(e.target.value)} rows={11} className="text-sm" />
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" size="sm" onClick={() => window.open(`https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${s.company_name} hiring manager`)}`, '_blank')}>
+                      Find on LinkedIn
+                    </Button>
+                    <Button size="sm" className="gap-2" onClick={copyDraft}>
+                      <Copy className="w-3.5 h-3.5" /> Copy message
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
 
 
             </div>
