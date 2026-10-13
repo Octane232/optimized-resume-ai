@@ -64,8 +64,6 @@ const fetchAlerts = async (supabase: any, userId: string, limit: number, unreadO
     .from("radar_alerts")
     .select("id, signal_id, match_score, match_reasons, insight, is_read, created_at")
     .eq("user_id", userId)
-    .neq("trust_tier", "low")
-    .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
     .order("created_at", { ascending: false })
     .limit(limit);
   
