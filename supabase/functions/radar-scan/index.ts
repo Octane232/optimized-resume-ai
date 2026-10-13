@@ -655,13 +655,17 @@ Description: ${article.description}`
     }
     console.log(`Prepared ${storedSignals.length} signals for matching`);
 
-    if (storedSignals.length === 0 && requestingUserId) {
+    if (requestingUserId && storedSignals.length < 15) {
+      // Read from the verified pool built by earlier/scheduled scans.
       const { data: recentSignals } = await supabase
         .from("radar_signals")
         .select("*")
+        .neq("trust_tier", "low")
+        .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
         .order("created_at", { ascending: false })
-        .limit(25);
-      for (const signal of recentSignals || []) storedSignals.push({ id: signal.id, signal });
+        .limit(60);
+      const have = new Set(storedSignals.map((s) => s.id));
+      for (const signal of recentSignals || []) if (!have.has(signal.id)) storedSignals.push({ id: signal.id, signal });
     }
 
     // STEP 4: Match signals against user preferences
@@ -674,9 +678,10 @@ Description: ${article.description}`
 
     let alertsCreated = 0;
     let alertsUpdated = 0;
-    const matchLimit = storedSignals.slice(0, 40);
 
     for (const user of usersToMatch) {
+      // Hard eligibility filter BEFORE scoring (e.g. US-only remote for a UK user).
+      const matchLimit = storedSignals.filter(({ signal }) => isEligible(signal, user)).slice(0, 40);
       for (let i = 0; i < matchLimit.length; i += 5) {
         const chunk = matchLimit.slice(i, i + 5);
         const scored = await Promise.all(chunk.map(async ({ id: signalId, signal }) => ({
