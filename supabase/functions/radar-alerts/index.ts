@@ -64,6 +64,8 @@ const fetchAlerts = async (supabase: any, userId: string, limit: number, unreadO
     .from("radar_alerts")
     .select("id, signal_id, match_score, match_reasons, insight, is_read, created_at")
     .eq("user_id", userId)
+    .neq("trust_tier", "low")
+    .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
     .order("created_at", { ascending: false })
     .limit(limit);
   
@@ -84,8 +86,10 @@ const fetchSignalsByIds = async (supabase: any, signalIds: string[]) => {
   
   const { data, error } = await supabase
     .from("radar_signals")
-    .select("id, company_name, company_domain, amount, funding_stage, industry, description, likely_roles, hiring_window, source_url, published_at, created_at, signal_type, location, company_size, why_now, outreach_angle, departments, confidence, source_name")
-    .in("id", signalIds);
+    .select("id, company_name, company_domain, amount, funding_stage, industry, description, likely_roles, hiring_window, source_url, published_at, created_at, signal_type, location, company_size, why_now, outreach_angle, departments, confidence, source_name, kind, trust_tier, workplace_type, remote_region, country, sector, expires_at")
+    .in("id", signalIds)
+    .neq("trust_tier", "low")
+    .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`);
   
   if (error) throw error;
   return data || [];
@@ -94,7 +98,9 @@ const fetchSignalsByIds = async (supabase: any, signalIds: string[]) => {
 const fetchAllSignals = async (supabase: any, limit: number) => {
   const { data, error } = await supabase
     .from("radar_signals")
-    .select("id, company_name, company_domain, amount, funding_stage, industry, description, likely_roles, hiring_window, source_url, published_at, created_at, signal_type, location, company_size, why_now, outreach_angle, departments, confidence, source_name")
+    .select("id, company_name, company_domain, amount, funding_stage, industry, description, likely_roles, hiring_window, source_url, published_at, created_at, signal_type, location, company_size, why_now, outreach_angle, departments, confidence, source_name, kind, trust_tier, workplace_type, remote_region, country, sector, expires_at")
+    .neq("trust_tier", "low")
+    .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
     .order("created_at", { ascending: false })
     .limit(limit);
   
