@@ -107,6 +107,134 @@ const HIRING_HINTS = [
 
 const stripTags = (s: string) => s.replace(/<[^>]*>/g, "").replace(/&[a-z]+;/gi, " ").trim();
 
+// Everyday, frontline and public-sector hiring — not just corporate/tech.
+const EVERYDAY_QUERIES = [
+  '"recruiting teachers" OR "teacher vacancies" OR "teaching assistants" hiring',
+  '"school" "new teachers" recruitment',
+  '"hiring nurses" OR "nurse recruitment" OR "care workers" hiring',
+  '"NHS trust" recruitment OR "hospital" "new staff"',
+  '"council" "recruitment drive" OR "jobs created" council',
+  '"warehouse" OR "distribution centre" jobs created',
+  '"supermarket" OR "new store" jobs hiring',
+  '"drivers" recruitment drive',
+  '"hotel" OR "restaurant" opening "staff" hiring',
+  '"remote-first" company hiring',
+];
+
+type Locale = { hl: string; gl: string; ceid: string };
+const LOCALES: Record<string, Locale> = {
+  GB: { hl: "en-GB", gl: "GB", ceid: "GB:en" },
+  US: { hl: "en-US", gl: "US", ceid: "US:en" },
+  CA: { hl: "en-CA", gl: "CA", ceid: "CA:en" },
+  AU: { hl: "en-AU", gl: "AU", ceid: "AU:en" },
+  IE: { hl: "en-IE", gl: "IE", ceid: "IE:en" },
+  IN: { hl: "en-IN", gl: "IN", ceid: "IN:en" },
+  NG: { hl: "en-NG", gl: "NG", ceid: "NG:en" },
+  ZA: { hl: "en-ZA", gl: "ZA", ceid: "ZA:en" },
+};
+
+const COUNTRY_PATTERNS: [string, RegExp][] = [
+  ["GB", /\b(uk|united kingdom|england|scotland|wales|northern ireland|britain|london|manchester|birmingham|leeds|glasgow|liverpool|bristol|edinburgh)\b/i],
+  ["US", /\b(us|usa|united states|america|new york|california|texas|florida|chicago)\b/i],
+  ["CA", /\b(canada|toronto|vancouver|montreal|ontario)\b/i],
+  ["AU", /\b(australia|sydney|melbourne|brisbane)\b/i],
+  ["IE", /\b(ireland|dublin|europe|eu)\b/i],
+  ["IN", /\b(india|bangalore|bengaluru|mumbai|delhi)\b/i],
+  ["NG", /\b(nigeria|lagos|abuja)\b/i],
+  ["ZA", /\b(south africa|johannesburg|cape town)\b/i],
+];
+
+function countryCode(value: unknown): string | null {
+  const text = String(value || "");
+  for (const [code, re] of COUNTRY_PATTERNS) if (re.test(text)) return code;
+  return null;
+}
+
+function resolveLocales(targetLocation: unknown, remote: boolean): Locale[] {
+  const code = countryCode(targetLocation);
+  const worldwide = !code || /worldwide|global|anywhere|any/i.test(String(targetLocation || ""));
+  if (worldwide) return [LOCALES.GB, LOCALES.US, LOCALES.CA, LOCALES.AU, LOCALES.IE];
+  const primary = LOCALES[code!];
+  return remote && code !== "US" ? [primary, LOCALES.US] : [primary];
+}
+
+// Which user countries a regional-remote label covers.
+function regionCovers(region: string, userCode: string): boolean {
+  const r = region.toLowerCase();
+  if (/worldwide|global|anywhere/.test(r)) return true;
+  const groups: Record<string, string[]> = {
+    GB: ["uk", "united kingdom", "britain", "europe", "emea", "eu"],
+    IE: ["ireland", "europe", "emea", "eu"],
+    US: ["us", "usa", "united states", "north america", "americas"],
+    CA: ["canada", "north america", "americas"],
+    AU: ["australia", "apac", "asia pacific", "oceania"],
+    IN: ["india", "apac", "asia"],
+    NG: ["nigeria", "africa", "emea"],
+    ZA: ["south africa", "africa", "emea"],
+  };
+  return (groups[userCode] || []).some((g) => new RegExp(`\\b${g}\\b`).test(r));
+}
+
+function isEligible(signal: any, user: any): boolean {
+  if (signal?.trust_tier === "low") return false;
+  if (signal?.expires_at && new Date(signal.expires_at).getTime() < Date.now()) return false;
+  const userCode = countryCode(user?.target_location);
+  if (!userCode) return true; // worldwide / not set
+  const wt = signal?.workplace_type || "onsite";
+  if (wt === "remote_worldwide") return true;
+  if (wt === "remote_regional") return signal?.remote_region ? regionCovers(signal.remote_region, userCode) : true;
+  const sigCode = countryCode(`${signal?.country || ""} ${signal?.location || ""}`);
+  return !sigCode || sigCode === userCode;
+}
+
+const SCAM_RULES: [string, RegExp][] = [
+  ["upfront_fee", /(registration|training|starter|application)\s+fee|pay (a|the) fee|deposit required/i],
+  ["commission_only", /commission[- ]only|unlimited earning|be your own boss/i],
+  ["crypto", /\b(crypto|bitcoin|forex|nft)\b.*\b(earn|income|trading)\b/i],
+  ["messaging_contact", /\b(telegram|whatsapp)\b/i],
+  ["wfh_scheme", /(earn|make) \$?£?\d+[k,]?\d* (a|per) (day|week) from home|no experience.*work from home|data entry from home/i],
+];
+
+async function checkDomain(domain: string, companyName: string) {
+  try {
+    const res = await fetch(`https://${domain}`, {
+      redirect: "follow",
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; VaylanceRadar/1.0)" },
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!res.ok) return { https_ok: false, mentions_employer: false };
+    const html = (await res.text()).slice(0, 200000).toLowerCase();
+    const token = companyName.toLowerCase().replace(/\b(ltd|limited|inc|plc|llc|group|the)\b/g, "").trim().split(/\s+/)[0] || "";
+    return { https_ok: res.url.startsWith("https://"), mentions_employer: token.length > 2 && html.includes(token) };
+  } catch {
+    return { https_ok: false, mentions_employer: false };
+  }
+}
+
+async function verifySignal(input: {
+  text: string; companyName: string; companyDomain: string | null;
+  official: boolean; trustedRemote: boolean; scamTone: boolean;
+}): Promise<{ tier: "high" | "medium" | "low"; flags: Record<string, unknown> }> {
+  const scamHits = SCAM_RULES.filter(([, re]) => re.test(input.text)).map(([name]) => name);
+  const flags: Record<string, unknown> = {
+    official_source: input.official,
+    trusted_remote_board: input.trustedRemote,
+    scam_rules: scamHits,
+    scam_tone: input.scamTone,
+    domain: input.companyDomain,
+  };
+  if (scamHits.length || input.scamTone) return { tier: "low", flags };
+  if (input.official) return { tier: "high", flags };
+  if (input.companyDomain) {
+    const d = await checkDomain(input.companyDomain, input.companyName);
+    Object.assign(flags, d);
+    if (d.https_ok && d.mentions_employer) return { tier: "high", flags };
+    if (input.trustedRemote && d.https_ok) return { tier: "high", flags };
+    return { tier: "medium", flags };
+  }
+  return { tier: "medium", flags };
+}
+
 const BLOCKED_COMPANY_DOMAINS = new Set([
   "linkedin.com", "facebook.com", "instagram.com", "x.com", "twitter.com", "youtube.com",
   "news.google.com", "google.com", "reuters.com", "bloomberg.com", "forbes.com", "businesswire.com",
@@ -477,72 +605,84 @@ serve(async (req) => {
       } catch (e) { console.error("NewsAPI failed:", e); }
     }
 
-    // SOURCE 2: Google News RSS — free, global, every sector.
-    // Remote-focused users get worldwide editions, not just the US edition.
-    const locales = prefQueries.remote
-      ? [
-          { hl: "en-US", gl: "US", ceid: "US:en" },
-          { hl: "en-GB", gl: "GB", ceid: "GB:en" },
-          { hl: "en-IN", gl: "IN", ceid: "IN:en" },
-        ]
-      : [{ hl: "en-US", gl: "US", ceid: "US:en" }];
+    // SOURCE 2: Google News RSS — country-aware editions for the user's target market.
+    const locales = resolveLocales(requesterPreferences?.target_location, prefQueries.remote);
+    const allNewsQueries = [...googleNewsQueries.slice(0, 10), ...EVERYDAY_QUERIES];
     try {
       const before = allArticles.length;
       const results = await Promise.allSettled(
-        googleNewsQueries.flatMap((q) => locales.map((loc) =>
+        allNewsQueries.flatMap((q) => locales.map((loc) =>
           fetch(`https://news.google.com/rss/search?q=${encodeURIComponent(q + " when:7d")}&hl=${loc.hl}&gl=${loc.gl}&ceid=${loc.ceid}`, {
             headers: { "User-Agent": "Mozilla/5.0 (compatible; VaylanceRadar/1.0)" },
-          }).then((r) => r.text())
+            signal: AbortSignal.timeout(12000),
+          }).then((r) => r.text()).then((xml) => ({ xml, gl: loc.gl }))
         ))
       );
       for (const r of results) {
         if (r.status === "fulfilled") {
-          for (const item of parseRssItems(r.value, "Google News", true)) pushArticle(item);
+          for (const item of parseRssItems(r.value.xml, `Google News ${r.value.gl}`, true)) pushArticle(item);
         }
       }
-      console.log(`Google News RSS: ${allArticles.length - before} articles`);
+      console.log(`Google News RSS (${locales.map((l) => l.gl).join(",")}): ${allArticles.length - before} articles`);
     } catch (e) { console.error("Google News RSS failed:", e); }
 
-    // SOURCE 3: Sector newswires (business, industry, public sector)
-    const RSS_FEEDS: { url: string; name: string }[] = [
-      { url: "https://techcrunch.com/category/venture/feed/", name: "TechCrunch" },
-      { url: "https://venturebeat.com/feed/", name: "VentureBeat" },
-      { url: "https://feeds.bbci.co.uk/news/business/rss.xml", name: "BBC Business" },
-      { url: "https://www.retaildive.com/feeds/news/", name: "Retail Dive" },
-      { url: "https://www.healthcaredive.com/feeds/news/", name: "Healthcare Dive" },
-      { url: "https://www.constructiondive.com/feeds/news/", name: "Construction Dive" },
-      { url: "https://www.supplychaindive.com/feeds/news/", name: "Supply Chain Dive" },
-      { url: "https://www.manufacturingdive.com/feeds/news/", name: "Manufacturing Dive" },
-      { url: "https://www.restaurantdive.com/feeds/news/", name: "Restaurant Dive" },
-      { url: "https://www.bankingdive.com/feeds/news/", name: "Banking Dive" },
-      { url: "https://www.hrdive.com/feeds/news/", name: "HR Dive" },
-      { url: "https://www.hotelmanagement.net/rss.xml", name: "Hotel Management" },
-      { url: "https://www.utilitydive.com/feeds/news/", name: "Utility Dive" },
-      { url: "https://www.k12dive.com/feeds/news/", name: "K-12 Dive" },
+    // SOURCE 3: Regional + sector newswires, plus vetted remote job boards.
+    const RSS_FEEDS: { url: string; name: string; remoteFeed?: boolean; regions?: string[] }[] = [
+      { url: "https://weworkremotely.com/remote-jobs.rss", name: "We Work Remotely", remoteFeed: true },
+      { url: "https://remoteok.com/remote-jobs.rss", name: "RemoteOK", remoteFeed: true },
+      { url: "https://feeds.bbci.co.uk/news/business/rss.xml", name: "BBC Business", regions: ["GB"] },
+      { url: "https://www.theguardian.com/uk/business/rss", name: "The Guardian Business", regions: ["GB"] },
+      { url: "https://www.uktech.news/feed", name: "UKTN", regions: ["GB"] },
+      { url: "https://sifted.eu/feed", name: "Sifted", regions: ["GB", "IE", "EU"] },
+      { url: "https://www.cbc.ca/webfeed/rss/rss-business", name: "CBC Business", regions: ["CA"] },
+      { url: "https://www.abc.net.au/news/feed/51892/rss.xml", name: "ABC Business", regions: ["AU"] },
+      { url: "https://techcrunch.com/category/venture/feed/", name: "TechCrunch", regions: ["US"] },
+      { url: "https://www.healthcaredive.com/feeds/news/", name: "Healthcare Dive", regions: ["US"] },
+      { url: "https://www.k12dive.com/feeds/news/", name: "K-12 Dive", regions: ["US"] },
+      { url: "https://www.retaildive.com/feeds/news/", name: "Retail Dive", regions: ["US"] },
+      { url: "https://www.supplychaindive.com/feeds/news/", name: "Supply Chain Dive", regions: ["US"] },
+      { url: "https://www.constructiondive.com/feeds/news/", name: "Construction Dive", regions: ["US"] },
+      { url: "https://www.restaurantdive.com/feeds/news/", name: "Restaurant Dive", regions: ["US"] },
     ];
+    const wanted = new Set(locales.map((l) => l.gl));
+    const activeFeeds = RSS_FEEDS.filter((f) =>
+      f.remoteFeed ? prefQueries.remote || wanted.size > 2 : !f.regions || f.regions.some((r) => wanted.has(r) || (r === "EU" && wanted.has("IE")))
+    );
     try {
       const before = allArticles.length;
       const results = await Promise.allSettled(
-        RSS_FEEDS.map((f) =>
+        activeFeeds.map((f) =>
           fetch(f.url, {
             headers: { "User-Agent": "Mozilla/5.0 (compatible; VaylanceRadar/1.0)" },
             signal: AbortSignal.timeout(12000),
           })
             .then((r) => r.text())
-            .then((xml) => ({ xml, name: f.name }))
+            .then((xml) => ({ xml, feed: f }))
         )
       );
 
       for (const r of results) {
         if (r.status === "fulfilled") {
-          for (const item of parseRssItems(r.value.xml, r.value.name, true)) pushArticle(item);
+          for (const item of parseRssItems(r.value.xml, r.value.feed.name, !r.value.feed.remoteFeed).slice(0, 15)) {
+            pushArticle({ ...item, remoteFeed: !!r.value.feed.remoteFeed });
+          }
         }
       }
-      console.log(`Sector RSS: ${allArticles.length - before} articles`);
-    } catch (e) { console.error("Sector RSS failed:", e); }
+      console.log(`Feeds: ${allArticles.length - before} articles`);
+    } catch (e) { console.error("Feed fetch failed:", e); }
 
-    // Cap work per scan so the function stays within its time budget.
-    const articles = allArticles.slice(0, 90);
+    // Round-robin across sources so one noisy source can't crowd out the rest.
+    const bySource = new Map<string, any[]>();
+    for (const a of allArticles) {
+      const key = a.sourceName || "other";
+      if (!bySource.has(key)) bySource.set(key, []);
+      bySource.get(key)!.push(a);
+    }
+    const articles: any[] = [];
+    const buckets = [...bySource.values()];
+    for (let idx = 0; articles.length < 90 && buckets.some((b) => b.length > idx); idx++) {
+      for (const b of buckets) if (b[idx] && articles.length < 90) articles.push(b[idx]);
+    }
     console.log(`Total unique articles: ${allArticles.length}, analysing ${articles.length}`);
 
     // STEP 2: Extract rich, cross-industry hiring signals
@@ -581,10 +721,16 @@ Return JSON only:
  "departments": ["2-4 departments likely to hire, e.g. Operations, Clinical, Field Sales"],
  "hiring_window": "e.g. 30-60 days",
  "outreach_angle": "one sentence the job seeker can actually use when contacting them",
- "confidence": 0-100
+ "confidence": 0-100,
+ "is_direct_vacancy": true if this is an actual job advert/vacancy, false if it is a news lead,
+ "workplace_type": "remote_worldwide|remote_regional|hybrid|onsite",
+ "remote_region": "for remote_regional only: e.g. UK, Europe, US, North America, EMEA; else empty string",
+ "country": "ISO country name of the job, e.g. United Kingdom, United States; empty if worldwide remote",
+ "sector": "Education|Healthcare|Public Sector|Retail|Hospitality|Logistics|Construction|Manufacturing|Technology|Finance|Energy|Other",
+ "scam_tone": true if the text shows scam signs (vague work-from-home, upfront fees, commission-only, crypto, Telegram/WhatsApp contact, unrealistic pay)
 }
 
-Set is_hiring_signal false if there is no credible hiring implication. Never use the news publisher, a social network, or a guessed domain as company_domain.
+Include everyday and frontline roles (teachers, teaching assistants, nurses, care workers, drivers, warehouse, retail, hospitality, admin) — not just senior or tech roles. Set is_hiring_signal false if there is no credible hiring implication. Never use the news publisher, a job board, a social network, or a guessed domain as company_domain.
 
 Source: ${article.sourceName}
 Title: ${article.title}
@@ -596,12 +742,32 @@ Description: ${article.description}`
           const parsed = JSON.parse(data.choices?.[0]?.message?.content || "{}");
           if (!parsed.is_hiring_signal || !parsed.company_name) return null;
           if (Number(parsed.confidence ?? 0) < 45) return null;
+          const companyDomain = normalizeCompanyDomain(parsed.company_domain, article.url);
+          const workplace = ["remote_worldwide", "remote_regional", "hybrid", "onsite"].includes(parsed.workplace_type)
+            ? parsed.workplace_type
+            : (article.remoteFeed ? "remote_worldwide" : "onsite");
+          const verification = await verifySignal({
+            text: `${article.title} ${article.description}`,
+            companyName: String(parsed.company_name),
+            companyDomain,
+            official: !!article.official,
+            trustedRemote: !!article.remoteFeed,
+            scamTone: !!parsed.scam_tone,
+          });
+          const isRemote = workplace.startsWith("remote");
+          // Remote roles must clear the strict bar: only High trust is published.
+          if (verification.tier === "low") return null;
+          if (isRemote && verification.tier !== "high") return null;
+          const kind = article.official || article.remoteFeed || parsed.is_direct_vacancy ? "posting" : "lead";
+          const published = new Date(article.publishedAt || Date.now());
+          const expires = new Date(published.getTime() + (kind === "posting" ? 21 : 45) * 86400000);
+          if (expires.getTime() < Date.now()) return null;
           return {
             company_name: String(parsed.company_name).slice(0, 160),
-            company_domain: normalizeCompanyDomain(parsed.company_domain, article.url),
+            company_domain: companyDomain,
             signal_type: parsed.signal_type || "Hiring Announcement",
             industry: parsed.industry || null,
-            location: parsed.location || null,
+            location: parsed.location || (workplace === "remote_worldwide" ? "Remote · Worldwide" : null),
             company_size: parsed.company_size || null,
             amount: parsed.amount || null,
             funding_stage: parsed.funding_stage && parsed.funding_stage !== "N-A" ? parsed.funding_stage : null,
@@ -614,7 +780,15 @@ Description: ${article.description}`
             confidence: clampMatch(parsed.confidence),
             source_name: article.sourceName || null,
             source_url: article.url,
-            published_at: article.publishedAt,
+            published_at: published.toISOString(),
+            kind,
+            trust_tier: verification.tier,
+            workplace_type: workplace,
+            remote_region: workplace === "remote_regional" ? (parsed.remote_region || null) : null,
+            country: parsed.country || null,
+            sector: parsed.sector || null,
+            check_flags: verification.flags,
+            expires_at: expires.toISOString(),
           };
         } catch { return null; }
       }));
@@ -645,6 +819,14 @@ Description: ${article.description}`
           outreach_angle: signal.outreach_angle,
           confidence: signal.confidence,
           source_name: signal.source_name,
+          kind: signal.kind,
+          trust_tier: signal.trust_tier,
+          workplace_type: signal.workplace_type,
+          remote_region: signal.remote_region,
+          country: signal.country,
+          sector: signal.sector,
+          check_flags: signal.check_flags,
+          expires_at: signal.expires_at,
         }).eq("id", existing.id);
         storedSignals.push({ id: existing.id, signal });
         continue;
@@ -655,13 +837,17 @@ Description: ${article.description}`
     }
     console.log(`Prepared ${storedSignals.length} signals for matching`);
 
-    if (storedSignals.length === 0 && requestingUserId) {
+    if (requestingUserId && storedSignals.length < 15) {
+      // Read from the verified pool built by earlier/scheduled scans.
       const { data: recentSignals } = await supabase
         .from("radar_signals")
         .select("*")
+        .neq("trust_tier", "low")
+        .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
         .order("created_at", { ascending: false })
-        .limit(25);
-      for (const signal of recentSignals || []) storedSignals.push({ id: signal.id, signal });
+        .limit(60);
+      const have = new Set(storedSignals.map((s) => s.id));
+      for (const signal of recentSignals || []) if (!have.has(signal.id)) storedSignals.push({ id: signal.id, signal });
     }
 
     // STEP 4: Match signals against user preferences
@@ -674,9 +860,10 @@ Description: ${article.description}`
 
     let alertsCreated = 0;
     let alertsUpdated = 0;
-    const matchLimit = storedSignals.slice(0, 40);
 
     for (const user of usersToMatch) {
+      // Hard eligibility filter BEFORE scoring (e.g. US-only remote for a UK user).
+      const matchLimit = storedSignals.filter(({ signal }) => isEligible(signal, user)).slice(0, 40);
       for (let i = 0; i < matchLimit.length; i += 5) {
         const chunk = matchLimit.slice(i, i + 5);
         const scored = await Promise.all(chunk.map(async ({ id: signalId, signal }) => ({

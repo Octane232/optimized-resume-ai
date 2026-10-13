@@ -754,6 +754,22 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index, targetRol
                         {s.signal_type}
                       </Badge>
                     )}
+                    {s.kind && (
+                      <Badge variant="outline" className="text-xs">
+                        {s.kind === 'posting' ? 'Open vacancy' : 'Early lead'}
+                      </Badge>
+                    )}
+                    {s.workplace_type?.startsWith('remote') && (
+                      <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/30">
+                        {s.workplace_type === 'remote_worldwide' ? 'Remote · Worldwide' : `Remote · ${s.remote_region || 'Regional'}`}
+                      </Badge>
+                    )}
+                    {s.trust_tier === 'high' && (
+                      <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/30">Verified employer</Badge>
+                    )}
+                    {s.sector && (
+                      <Badge variant="secondary" className="text-xs">{s.sector}</Badge>
+                    )}
                     {s.amount && (
                       <Badge variant="outline" className={`${getStageColor(s.funding_stage)} text-xs`}>
                         {[s.funding_stage, s.amount].filter(Boolean).join(' · ')}
@@ -970,6 +986,7 @@ const Scout: React.FC<ScoutProps> = ({ setActiveTab }) => {
   const { scanning, usageLoading, canScan, handleScan } = useRadarScan(fetchData);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'alerts' | 'all'>('alerts');
+  const [scope, setScope] = useState<'all' | 'remote' | 'public' | 'local'>('all');
   const preferences = useCareerPreferences();
 
   const handleUpgradeClick = () => {
@@ -983,7 +1000,14 @@ const Scout: React.FC<ScoutProps> = ({ setActiveTab }) => {
       ? alerts.map(a => ({ ...a.radar_signals, alert: a }))
       : signals;
 
-    return filterSignals(baseSignals, searchQuery);
+    const scoped = baseSignals.filter((s: any) => {
+      const wt = s?.workplace_type || 'onsite';
+      if (scope === 'remote') return wt.startsWith('remote') && s?.trust_tier === 'high';
+      if (scope === 'local') return !wt.startsWith('remote');
+      if (scope === 'public') return /education|healthcare|public/i.test(`${s?.sector || ''} ${s?.industry || ''}`);
+      return true;
+    });
+    return filterSignals(scoped, searchQuery);
   };
 
   const displaySignals = getDisplaySignals();
@@ -1012,6 +1036,26 @@ const Scout: React.FC<ScoutProps> = ({ setActiveTab }) => {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
       />
+
+      <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filter opportunities">
+        {([
+          ['all', 'All'],
+          ['remote', 'Verified remote'],
+          ['public', 'Schools, health & public sector'],
+          ['local', 'Local / on-site'],
+        ] as const).map(([key, label]) => (
+          <Button
+            key={key}
+            role="tab"
+            aria-selected={scope === key}
+            size="sm"
+            variant={scope === key ? 'default' : 'outline'}
+            onClick={() => setScope(key)}
+          >
+            {label}
+          </Button>
+        ))}
+      </div>
       
       <SignalsList
         signals={displaySignals}

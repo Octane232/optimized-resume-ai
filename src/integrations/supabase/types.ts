@@ -419,72 +419,96 @@ export type Database = {
       radar_signals: {
         Row: {
           amount: string | null
+          check_flags: Json
           company_domain: string | null
           company_name: string
           company_size: string | null
           confidence: number | null
+          country: string | null
           created_at: string
           departments: Json
           description: string | null
+          expires_at: string | null
           funding_stage: string | null
           hiring_window: string | null
           id: string
           industry: string | null
+          kind: string
           likely_roles: Json
           location: string | null
           outreach_angle: string | null
           published_at: string | null
+          remote_region: string | null
+          sector: string | null
           signal_type: string | null
           source_name: string | null
           source_url: string | null
+          trust_tier: string
           updated_at: string
           why_now: string | null
+          workplace_type: string
         }
         Insert: {
           amount?: string | null
+          check_flags?: Json
           company_domain?: string | null
           company_name: string
           company_size?: string | null
           confidence?: number | null
+          country?: string | null
           created_at?: string
           departments?: Json
           description?: string | null
+          expires_at?: string | null
           funding_stage?: string | null
           hiring_window?: string | null
           id?: string
           industry?: string | null
+          kind?: string
           likely_roles?: Json
           location?: string | null
           outreach_angle?: string | null
           published_at?: string | null
+          remote_region?: string | null
+          sector?: string | null
           signal_type?: string | null
           source_name?: string | null
           source_url?: string | null
+          trust_tier?: string
           updated_at?: string
           why_now?: string | null
+          workplace_type?: string
         }
         Update: {
           amount?: string | null
+          check_flags?: Json
           company_domain?: string | null
           company_name?: string
           company_size?: string | null
           confidence?: number | null
+          country?: string | null
           created_at?: string
           departments?: Json
           description?: string | null
+          expires_at?: string | null
           funding_stage?: string | null
           hiring_window?: string | null
           id?: string
           industry?: string | null
+          kind?: string
           likely_roles?: Json
           location?: string | null
           outreach_angle?: string | null
           published_at?: string | null
+          remote_region?: string | null
+          sector?: string | null
           signal_type?: string | null
           source_name?: string | null
           source_url?: string | null
+          trust_tier?: string
           updated_at?: string
           why_now?: string | null
+          workplace_type?: string
         }
         Relationships: []
       }
