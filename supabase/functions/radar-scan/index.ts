@@ -477,72 +477,84 @@ serve(async (req) => {
       } catch (e) { console.error("NewsAPI failed:", e); }
     }
 
-    // SOURCE 2: Google News RSS — free, global, every sector.
-    // Remote-focused users get worldwide editions, not just the US edition.
-    const locales = prefQueries.remote
-      ? [
-          { hl: "en-US", gl: "US", ceid: "US:en" },
-          { hl: "en-GB", gl: "GB", ceid: "GB:en" },
-          { hl: "en-IN", gl: "IN", ceid: "IN:en" },
-        ]
-      : [{ hl: "en-US", gl: "US", ceid: "US:en" }];
+    // SOURCE 2: Google News RSS — country-aware editions for the user's target market.
+    const locales = resolveLocales(requesterPreferences?.target_location, prefQueries.remote);
+    const allNewsQueries = [...googleNewsQueries.slice(0, 10), ...EVERYDAY_QUERIES];
     try {
       const before = allArticles.length;
       const results = await Promise.allSettled(
-        googleNewsQueries.flatMap((q) => locales.map((loc) =>
+        allNewsQueries.flatMap((q) => locales.map((loc) =>
           fetch(`https://news.google.com/rss/search?q=${encodeURIComponent(q + " when:7d")}&hl=${loc.hl}&gl=${loc.gl}&ceid=${loc.ceid}`, {
             headers: { "User-Agent": "Mozilla/5.0 (compatible; VaylanceRadar/1.0)" },
-          }).then((r) => r.text())
+            signal: AbortSignal.timeout(12000),
+          }).then((r) => r.text()).then((xml) => ({ xml, gl: loc.gl }))
         ))
       );
       for (const r of results) {
         if (r.status === "fulfilled") {
-          for (const item of parseRssItems(r.value, "Google News", true)) pushArticle(item);
+          for (const item of parseRssItems(r.value.xml, `Google News ${r.value.gl}`, true)) pushArticle(item);
         }
       }
-      console.log(`Google News RSS: ${allArticles.length - before} articles`);
+      console.log(`Google News RSS (${locales.map((l) => l.gl).join(",")}): ${allArticles.length - before} articles`);
     } catch (e) { console.error("Google News RSS failed:", e); }
 
-    // SOURCE 3: Sector newswires (business, industry, public sector)
-    const RSS_FEEDS: { url: string; name: string }[] = [
-      { url: "https://techcrunch.com/category/venture/feed/", name: "TechCrunch" },
-      { url: "https://venturebeat.com/feed/", name: "VentureBeat" },
-      { url: "https://feeds.bbci.co.uk/news/business/rss.xml", name: "BBC Business" },
-      { url: "https://www.retaildive.com/feeds/news/", name: "Retail Dive" },
-      { url: "https://www.healthcaredive.com/feeds/news/", name: "Healthcare Dive" },
-      { url: "https://www.constructiondive.com/feeds/news/", name: "Construction Dive" },
-      { url: "https://www.supplychaindive.com/feeds/news/", name: "Supply Chain Dive" },
-      { url: "https://www.manufacturingdive.com/feeds/news/", name: "Manufacturing Dive" },
-      { url: "https://www.restaurantdive.com/feeds/news/", name: "Restaurant Dive" },
-      { url: "https://www.bankingdive.com/feeds/news/", name: "Banking Dive" },
-      { url: "https://www.hrdive.com/feeds/news/", name: "HR Dive" },
-      { url: "https://www.hotelmanagement.net/rss.xml", name: "Hotel Management" },
-      { url: "https://www.utilitydive.com/feeds/news/", name: "Utility Dive" },
-      { url: "https://www.k12dive.com/feeds/news/", name: "K-12 Dive" },
+    // SOURCE 3: Regional + sector newswires, plus vetted remote job boards.
+    const RSS_FEEDS: { url: string; name: string; remoteFeed?: boolean; regions?: string[] }[] = [
+      { url: "https://weworkremotely.com/remote-jobs.rss", name: "We Work Remotely", remoteFeed: true },
+      { url: "https://remoteok.com/remote-jobs.rss", name: "RemoteOK", remoteFeed: true },
+      { url: "https://feeds.bbci.co.uk/news/business/rss.xml", name: "BBC Business", regions: ["GB"] },
+      { url: "https://www.theguardian.com/uk/business/rss", name: "The Guardian Business", regions: ["GB"] },
+      { url: "https://www.uktech.news/feed", name: "UKTN", regions: ["GB"] },
+      { url: "https://sifted.eu/feed", name: "Sifted", regions: ["GB", "IE", "EU"] },
+      { url: "https://www.cbc.ca/webfeed/rss/rss-business", name: "CBC Business", regions: ["CA"] },
+      { url: "https://www.abc.net.au/news/feed/51892/rss.xml", name: "ABC Business", regions: ["AU"] },
+      { url: "https://techcrunch.com/category/venture/feed/", name: "TechCrunch", regions: ["US"] },
+      { url: "https://www.healthcaredive.com/feeds/news/", name: "Healthcare Dive", regions: ["US"] },
+      { url: "https://www.k12dive.com/feeds/news/", name: "K-12 Dive", regions: ["US"] },
+      { url: "https://www.retaildive.com/feeds/news/", name: "Retail Dive", regions: ["US"] },
+      { url: "https://www.supplychaindive.com/feeds/news/", name: "Supply Chain Dive", regions: ["US"] },
+      { url: "https://www.constructiondive.com/feeds/news/", name: "Construction Dive", regions: ["US"] },
+      { url: "https://www.restaurantdive.com/feeds/news/", name: "Restaurant Dive", regions: ["US"] },
     ];
+    const wanted = new Set(locales.map((l) => l.gl));
+    const activeFeeds = RSS_FEEDS.filter((f) =>
+      f.remoteFeed ? prefQueries.remote || wanted.size > 2 : !f.regions || f.regions.some((r) => wanted.has(r) || (r === "EU" && wanted.has("IE")))
+    );
     try {
       const before = allArticles.length;
       const results = await Promise.allSettled(
-        RSS_FEEDS.map((f) =>
+        activeFeeds.map((f) =>
           fetch(f.url, {
             headers: { "User-Agent": "Mozilla/5.0 (compatible; VaylanceRadar/1.0)" },
             signal: AbortSignal.timeout(12000),
           })
             .then((r) => r.text())
-            .then((xml) => ({ xml, name: f.name }))
+            .then((xml) => ({ xml, feed: f }))
         )
       );
 
       for (const r of results) {
         if (r.status === "fulfilled") {
-          for (const item of parseRssItems(r.value.xml, r.value.name, true)) pushArticle(item);
+          for (const item of parseRssItems(r.value.xml, r.value.feed.name, !r.value.feed.remoteFeed).slice(0, 15)) {
+            pushArticle({ ...item, remoteFeed: !!r.value.feed.remoteFeed });
+          }
         }
       }
-      console.log(`Sector RSS: ${allArticles.length - before} articles`);
-    } catch (e) { console.error("Sector RSS failed:", e); }
+      console.log(`Feeds: ${allArticles.length - before} articles`);
+    } catch (e) { console.error("Feed fetch failed:", e); }
 
-    // Cap work per scan so the function stays within its time budget.
-    const articles = allArticles.slice(0, 90);
+    // Round-robin across sources so one noisy source can't crowd out the rest.
+    const bySource = new Map<string, any[]>();
+    for (const a of allArticles) {
+      const key = a.sourceName || "other";
+      if (!bySource.has(key)) bySource.set(key, []);
+      bySource.get(key)!.push(a);
+    }
+    const articles: any[] = [];
+    const buckets = [...bySource.values()];
+    for (let idx = 0; articles.length < 90 && buckets.some((b) => b.length > idx); idx++) {
+      for (const b of buckets) if (b[idx] && articles.length < 90) articles.push(b[idx]);
+    }
     console.log(`Total unique articles: ${allArticles.length}, analysing ${articles.length}`);
 
     // STEP 2: Extract rich, cross-industry hiring signals
