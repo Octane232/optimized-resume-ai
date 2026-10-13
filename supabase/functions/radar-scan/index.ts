@@ -581,10 +581,16 @@ Return JSON only:
  "departments": ["2-4 departments likely to hire, e.g. Operations, Clinical, Field Sales"],
  "hiring_window": "e.g. 30-60 days",
  "outreach_angle": "one sentence the job seeker can actually use when contacting them",
- "confidence": 0-100
+ "confidence": 0-100,
+ "is_direct_vacancy": true if this is an actual job advert/vacancy, false if it is a news lead,
+ "workplace_type": "remote_worldwide|remote_regional|hybrid|onsite",
+ "remote_region": "for remote_regional only: e.g. UK, Europe, US, North America, EMEA; else empty string",
+ "country": "ISO country name of the job, e.g. United Kingdom, United States; empty if worldwide remote",
+ "sector": "Education|Healthcare|Public Sector|Retail|Hospitality|Logistics|Construction|Manufacturing|Technology|Finance|Energy|Other",
+ "scam_tone": true if the text shows scam signs (vague work-from-home, upfront fees, commission-only, crypto, Telegram/WhatsApp contact, unrealistic pay)
 }
 
-Set is_hiring_signal false if there is no credible hiring implication. Never use the news publisher, a social network, or a guessed domain as company_domain.
+Include everyday and frontline roles (teachers, teaching assistants, nurses, care workers, drivers, warehouse, retail, hospitality, admin) — not just senior or tech roles. Set is_hiring_signal false if there is no credible hiring implication. Never use the news publisher, a job board, a social network, or a guessed domain as company_domain.
 
 Source: ${article.sourceName}
 Title: ${article.title}
@@ -596,12 +602,32 @@ Description: ${article.description}`
           const parsed = JSON.parse(data.choices?.[0]?.message?.content || "{}");
           if (!parsed.is_hiring_signal || !parsed.company_name) return null;
           if (Number(parsed.confidence ?? 0) < 45) return null;
+          const companyDomain = normalizeCompanyDomain(parsed.company_domain, article.url);
+          const workplace = ["remote_worldwide", "remote_regional", "hybrid", "onsite"].includes(parsed.workplace_type)
+            ? parsed.workplace_type
+            : (article.remoteFeed ? "remote_worldwide" : "onsite");
+          const verification = await verifySignal({
+            text: `${article.title} ${article.description}`,
+            companyName: String(parsed.company_name),
+            companyDomain,
+            official: !!article.official,
+            trustedRemote: !!article.remoteFeed,
+            scamTone: !!parsed.scam_tone,
+          });
+          const isRemote = workplace.startsWith("remote");
+          // Remote roles must clear the strict bar: only High trust is published.
+          if (verification.tier === "low") return null;
+          if (isRemote && verification.tier !== "high") return null;
+          const kind = article.official || article.remoteFeed || parsed.is_direct_vacancy ? "posting" : "lead";
+          const published = new Date(article.publishedAt || Date.now());
+          const expires = new Date(published.getTime() + (kind === "posting" ? 21 : 45) * 86400000);
+          if (expires.getTime() < Date.now()) return null;
           return {
             company_name: String(parsed.company_name).slice(0, 160),
-            company_domain: normalizeCompanyDomain(parsed.company_domain, article.url),
+            company_domain: companyDomain,
             signal_type: parsed.signal_type || "Hiring Announcement",
             industry: parsed.industry || null,
-            location: parsed.location || null,
+            location: parsed.location || (workplace === "remote_worldwide" ? "Remote · Worldwide" : null),
             company_size: parsed.company_size || null,
             amount: parsed.amount || null,
             funding_stage: parsed.funding_stage && parsed.funding_stage !== "N-A" ? parsed.funding_stage : null,
@@ -614,7 +640,15 @@ Description: ${article.description}`
             confidence: clampMatch(parsed.confidence),
             source_name: article.sourceName || null,
             source_url: article.url,
-            published_at: article.publishedAt,
+            published_at: published.toISOString(),
+            kind,
+            trust_tier: verification.tier,
+            workplace_type: workplace,
+            remote_region: workplace === "remote_regional" ? (parsed.remote_region || null) : null,
+            country: parsed.country || null,
+            sector: parsed.sector || null,
+            check_flags: verification.flags,
+            expires_at: expires.toISOString(),
           };
         } catch { return null; }
       }));
@@ -645,6 +679,14 @@ Description: ${article.description}`
           outreach_angle: signal.outreach_angle,
           confidence: signal.confidence,
           source_name: signal.source_name,
+          kind: signal.kind,
+          trust_tier: signal.trust_tier,
+          workplace_type: signal.workplace_type,
+          remote_region: signal.remote_region,
+          country: signal.country,
+          sector: signal.sector,
+          check_flags: signal.check_flags,
+          expires_at: signal.expires_at,
         }).eq("id", existing.id);
         storedSignals.push({ id: existing.id, signal });
         continue;
