@@ -64,6 +64,8 @@ const fetchAlerts = async (supabase: any, userId: string, limit: number, unreadO
     .from("radar_alerts")
     .select("id, signal_id, match_score, match_reasons, insight, is_read, created_at")
     .eq("user_id", userId)
+    .gte("match_score", 45)
+    .order("match_score", { ascending: false })
     .order("created_at", { ascending: false })
     .limit(limit);
   

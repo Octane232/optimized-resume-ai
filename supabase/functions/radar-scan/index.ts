@@ -108,6 +108,8 @@ const HIRING_HINTS = [
 const stripTags = (s: string) => s.replace(/<[^>]*>/g, "").replace(/&[a-z]+;/gi, " ").trim();
 
 // Everyday, frontline and public-sector hiring — not just corporate/tech.
+const MIN_ALERT_MATCH = 45;
+
 const EVERYDAY_QUERIES = [
   '"recruiting teachers" OR "teacher vacancies" OR "teaching assistants" hiring',
   '"school" "new teachers" recruitment',
@@ -607,7 +609,9 @@ serve(async (req) => {
 
     // SOURCE 2: Google News RSS — country-aware editions for the user's target market.
     const locales = resolveLocales(requesterPreferences?.target_location, prefQueries.remote);
-    const allNewsQueries = [...googleNewsQueries.slice(0, 10), ...EVERYDAY_QUERIES];
+    // Preference-driven queries dominate; generic everyday queries only fill gaps.
+    const everydayFill = prefQueries.googleNews.length >= 3 ? EVERYDAY_QUERIES.slice(0, 3) : EVERYDAY_QUERIES;
+    const allNewsQueries = [...prefQueries.googleNews, ...GOOGLE_NEWS_QUERIES.slice(0, Math.max(2, 10 - prefQueries.googleNews.length)), ...everydayFill];
     try {
       const before = allArticles.length;
       const results = await Promise.allSettled(
@@ -872,6 +876,11 @@ Description: ${article.description}`
         })));
         for (const { signalId, match } of scored) {
           const { data: existing } = await supabase.from("radar_alerts").select("id").eq("user_id", user.user_id).eq("signal_id", signalId).maybeSingle();
+          // Only keep genuinely relevant matches; drop weak ones from the feed.
+          if ((match.match_score || 0) < MIN_ALERT_MATCH) {
+            if (existing) await supabase.from("radar_alerts").delete().eq("id", existing.id);
+            continue;
+          }
           if (existing) {
             const { error } = await supabase.from("radar_alerts").update({ match_score: match.match_score, match_reasons: match.match_reasons, insight: match.insight }).eq("id", existing.id);
             if (!error) alertsUpdated++;
