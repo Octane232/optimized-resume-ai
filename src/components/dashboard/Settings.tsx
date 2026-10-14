@@ -26,7 +26,7 @@ const Settings = () => {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [careerPrefs, setCareerPrefs] = useState({ targetRole: '', targetIndustry: '' });
+  const [careerPrefs, setCareerPrefs] = useState({ targetRole: '', targetIndustry: '', targetLocation: 'Worldwide', workStyle: 'Any' });
   const [savingPrefs, setSavingPrefs] = useState(false);
   
   // PROBLEM 1 FIXED: Added password states
@@ -123,9 +123,14 @@ const Settings = () => {
         }));
       }
 
-      const { data: prefs } = await supabase.from('career_preferences').select('target_role, target_industry').eq('user_id', user.id).maybeSingle();
+      const { data: prefs } = await supabase.from('career_preferences').select('target_role, target_industry, target_location, work_style').eq('user_id', user.id).maybeSingle();
       if (prefs) {
-        setCareerPrefs({ targetRole: prefs.target_role || '', targetIndustry: prefs.target_industry || '' });
+        setCareerPrefs({
+          targetRole: prefs.target_role || '',
+          targetIndustry: prefs.target_industry || '',
+          targetLocation: prefs.target_location || 'Worldwide',
+          workStyle: prefs.work_style || 'Any',
+        });
       }
     } catch (error) {
       console.error('Error fetching settings data:', error);
@@ -210,6 +215,8 @@ const Settings = () => {
         user_id: user.id,
         target_role: careerPrefs.targetRole,
         target_industry: careerPrefs.targetIndustry,
+        target_location: careerPrefs.targetLocation,
+        work_style: careerPrefs.workStyle,
       }, { onConflict: 'user_id' });
       toast({ title: 'Saved!', description: 'Your job preferences have been updated. The radar will use these on the next scan.' });
     } catch (err) {
@@ -507,7 +514,34 @@ const Settings = () => {
                   className="bg-muted/30"
                 />
               </div>
+              <div>
+                <label htmlFor="pref-country" className="block text-sm font-semibold text-foreground mb-2">Country / Region</label>
+                <select
+                  id="pref-country"
+                  value={careerPrefs.targetLocation}
+                  onChange={(e) => setCareerPrefs(prev => ({ ...prev, targetLocation: e.target.value }))}
+                  className="flex h-10 w-full rounded-md border border-input bg-muted/30 px-3 py-2 text-sm text-foreground"
+                >
+                  {['Worldwide', 'United Kingdom', 'United States', 'Canada', 'Ireland / Europe', 'Australia', 'India', 'Nigeria', 'South Africa'].map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="pref-workstyle" className="block text-sm font-semibold text-foreground mb-2">Work Style</label>
+                <select
+                  id="pref-workstyle"
+                  value={careerPrefs.workStyle}
+                  onChange={(e) => setCareerPrefs(prev => ({ ...prev, workStyle: e.target.value }))}
+                  className="flex h-10 w-full rounded-md border border-input bg-muted/30 px-3 py-2 text-sm text-foreground"
+                >
+                  {['Any', 'Remote', 'Hybrid', 'On-site'].map(w => (
+                    <option key={w} value={w}>{w}</option>
+                  ))}
+                </select>
+              </div>
             </div>
+            <p className="text-xs text-muted-foreground mt-3">Remote jobs are only shown when the employer is verified.</p>
             <div className="flex gap-3 mt-6">
               <Button onClick={saveCareerPrefs} disabled={savingPrefs} className="bg-primary hover:bg-primary/90 font-semibold rounded-xl">
                 {savingPrefs ? 'Saving...' : 'Save Preferences'}
