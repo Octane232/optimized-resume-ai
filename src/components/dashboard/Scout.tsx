@@ -41,6 +41,13 @@ interface RadarSignal {
   departments?: string[] | null;
   confidence?: number | null;
   source_name?: string | null;
+  kind?: string | null;
+  trust_tier?: string | null;
+  workplace_type?: string | null;
+  remote_region?: string | null;
+  country?: string | null;
+  sector?: string | null;
+  expires_at?: string | null;
 }
 
 interface RadarAlert {
