@@ -865,6 +865,12 @@ Description: ${article.description}`
     let alertsCreated = 0;
     let alertsUpdated = 0;
 
+    // Fresh slate: a user-initiated scan replaces their previous feed entirely.
+    if (requestingUserId) {
+      const { error: clearError } = await supabase.from("radar_alerts").delete().eq("user_id", requestingUserId);
+      if (clearError) console.error("Failed to clear old alerts:", clearError.message);
+    }
+
     for (const user of usersToMatch) {
       // Hard eligibility filter BEFORE scoring (e.g. US-only remote for a UK user).
       const matchLimit = storedSignals.filter(({ signal }) => isEligible(signal, user)).slice(0, 40);
