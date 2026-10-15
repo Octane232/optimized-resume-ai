@@ -211,14 +211,33 @@ const Settings = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      await supabase.from('career_preferences').upsert({
+      const { data: prev } = await supabase.from('career_preferences')
+        .select('target_role, target_industry, target_location, work_style')
+        .eq('user_id', user.id).maybeSingle();
+      const norm = (v?: string | null) => (v || '').trim().toLowerCase();
+      const changed = !prev
+        || norm(prev.target_role) !== norm(careerPrefs.targetRole)
+        || norm(prev.target_industry) !== norm(careerPrefs.targetIndustry)
+        || norm(prev.target_location) !== norm(careerPrefs.targetLocation)
+        || norm(prev.work_style) !== norm(careerPrefs.workStyle);
+      const { error } = await supabase.from('career_preferences').upsert({
         user_id: user.id,
         target_role: careerPrefs.targetRole,
         target_industry: careerPrefs.targetIndustry,
         target_location: careerPrefs.targetLocation,
         work_style: careerPrefs.workStyle,
       }, { onConflict: 'user_id' });
-      toast({ title: 'Saved!', description: 'Your job preferences have been updated. The radar will use these on the next scan.' });
+      if (error) throw error;
+      if (changed && prev) {
+        // Old matches were scored against previous preferences — clear them so the feed stays accurate.
+        await supabase.from('radar_alerts').delete().eq('user_id', user.id);
+      }
+      toast({
+        title: 'Saved!',
+        description: changed && prev
+          ? 'Preferences updated and old Radar matches cleared. Press Scan Now for fresh matches.'
+          : 'Your job preferences have been updated. The radar will use these on the next scan.',
+      });
     } catch (err) {
       toast({ title: 'Error', description: 'Could not save preferences.', variant: 'destructive' });
     } finally {
