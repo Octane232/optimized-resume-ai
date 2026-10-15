@@ -522,17 +522,6 @@ serve(async (req) => {
   }
 
   try {
-    const SEED_SECRET = Deno.env.get("SEED_SECRET");
-    const providedSecret = req.headers.get("x-cron-secret");
-    const isCron = !!SEED_SECRET && providedSecret === SEED_SECRET;
-
-    const authHeader = req.headers.get("Authorization") || req.headers.get("authorization");
-    const hasUserJwt = !!authHeader && authHeader.toLowerCase().startsWith("bearer ");
-
-    if (!isCron && !hasUserJwt) {
-      return jsonResponse({ error: "Unauthorized" }, 401);
-    }
-
     const NEWS_API_KEY = Deno.env.get("NEWS_API_KEY");
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
@@ -542,6 +531,22 @@ serve(async (req) => {
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) throw new Error("Supabase not configured");
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
+
+    const SEED_SECRET = Deno.env.get("SEED_SECRET");
+    const providedSecret = req.headers.get("x-cron-secret");
+    let isCron = !!SEED_SECRET && !!providedSecret && providedSecret === SEED_SECRET;
+    if (!isCron && providedSecret) {
+      // Scheduled job token stored in the database vault.
+      const { data: ok } = await supabase.rpc("verify_radar_cron_token", { _token: providedSecret });
+      isCron = ok === true;
+    }
+
+    const authHeader = req.headers.get("Authorization") || req.headers.get("authorization");
+    const hasUserJwt = !isCron && !!authHeader && authHeader.toLowerCase().startsWith("bearer ");
+
+    if (!isCron && !hasUserJwt) {
+      return jsonResponse({ error: "Unauthorized" }, 401);
+    }
 
     let requestingUserId: string | null = null;
     if (hasUserJwt) {
