@@ -569,66 +569,6 @@ const Settings = () => {
           </CardContent>
         </Card>
 
-        {/* Notifications */}
-        <Card className="rounded-lg border-border shadow-none">
-          <CardHeader className="border-b border-border/60">
-            <CardTitle className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-xl">
-                <Bell className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-foreground">Notifications</h2>
-                <p className="text-sm text-muted-foreground font-normal">Manage your notification preferences</p>
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6 space-y-4">
-            <div className="flex items-center justify-between p-4 bg-accent/20 rounded-xl border border-border/50">
-              <div>
-                <p className="font-semibold text-foreground">Email Notifications</p>
-                <p className="text-sm text-muted-foreground">Resume tips and updates</p>
-              </div>
-              <Switch 
-                checked={notifications.emailNotifications}
-                onCheckedChange={(checked) => {
-                  const updated = {...notifications, emailNotifications: checked};
-                  setNotifications(updated);
-                  saveNotifications(updated);
-                }}
-              />
-            </div>
-            
-            <div className="flex items-center justify-between p-4 bg-accent/20 rounded-xl border border-border/50">
-              <div>
-                <p className="font-semibold text-foreground">Push Notifications</p>
-                <p className="text-sm text-muted-foreground">Browser notifications</p>
-              </div>
-              <Switch 
-                checked={notifications.pushNotifications}
-                onCheckedChange={(checked) => {
-                  const updated = {...notifications, pushNotifications: checked};
-                  setNotifications(updated);
-                  saveNotifications(updated);
-                }}
-              />
-            </div>
-            
-            <div className="flex items-center justify-between p-4 bg-accent/20 rounded-xl border border-border/50">
-              <div>
-                <p className="font-semibold text-foreground">Marketing Emails</p>
-                <p className="text-sm text-muted-foreground">Product updates and offers</p>
-              </div>
-              <Switch 
-                checked={notifications.marketingEmails}
-                onCheckedChange={(checked) => {
-                  const updated = {...notifications, marketingEmails: checked};
-                  setNotifications(updated);
-                  saveNotifications(updated);
-                }}
-              />
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Privacy & Security */}
         <Card className="rounded-lg border-border shadow-none lg:col-span-2">
@@ -662,16 +602,6 @@ const Settings = () => {
               </Button>
             </div>
             
-            {/* PROBLEM 3 FIXED: Coming soon state for 2FA */}
-            <div className="flex items-center justify-between p-4 bg-accent/20 rounded-xl border border-border/50">
-              <div>
-                <h3 className="font-semibold text-foreground mb-1">Two-Factor Authentication</h3>
-                <p className="text-sm text-muted-foreground">Add an extra layer of security</p>
-              </div>
-              <Button variant="outline" size="sm" className="rounded-xl" disabled>
-                Coming Soon
-              </Button>
-            </div>
             
             {/* PROBLEM 2 FIXED: Working delete account button */}
             <div className="flex items-center justify-between p-4 bg-destructive/10 rounded-xl border border-destructive/50">
