@@ -1067,7 +1067,40 @@ const Scout: React.FC<ScoutProps> = ({ setActiveTab }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'alerts' | 'all'>('alerts');
   const [scope, setScope] = useState<'all' | 'remote' | 'public' | 'local'>('all');
-  const preferences = useCareerPreferences();
+  const { preferences, setPreferences, loaded: prefsLoaded } = useCareerPreferences();
+  const { toast } = useToast();
+  const [savingSetup, setSavingSetup] = useState(false);
+  const needsSetup = prefsLoaded && !preferences?.target_role?.trim();
+
+  const guardedScan = () => {
+    if (needsSetup) {
+      toast({ title: 'Set your preferences first', description: 'Add your target role so the Radar scans for you.' });
+      return;
+    }
+    handleScan();
+  };
+
+  const saveSetup = async (p: RadarPrefs) => {
+    setSavingSetup(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Please sign in.');
+      const { error } = await supabase.from('career_preferences').upsert({
+        user_id: user.id,
+        target_role: p.target_role,
+        target_industry: p.target_industry,
+        target_location: p.target_location,
+        work_style: p.work_style,
+      }, { onConflict: 'user_id' });
+      if (error) throw error;
+      setPreferences(p);
+      handleScan();
+    } catch (e: any) {
+      toast({ title: 'Could not save preferences', description: e.message, variant: 'destructive' });
+    } finally {
+      setSavingSetup(false);
+    }
+  };
 
   const handleUpgradeClick = () => {
     if (setActiveTab) {
