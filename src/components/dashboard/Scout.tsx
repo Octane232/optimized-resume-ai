@@ -1131,12 +1131,16 @@ const Scout: React.FC<ScoutProps> = ({ setActiveTab }) => {
     <div className="p-6 space-y-6 max-w-5xl mx-auto">
       <HeaderSection 
         onMarkAllRead={markAllRead}
-        onScan={handleScan}
+        onScan={guardedScan}
         scanning={scanning}
-        usageLoading={usageLoading}
-        canScan={canScan}
+        usageLoading={usageLoading || !prefsLoaded}
+        canScan={canScan && !needsSetup}
       />
-      
+
+      {needsSetup ? (
+        <RadarSetup onSaved={saveSetup} saving={savingSetup} />
+      ) : (
+        <>
       <FocusBanner preferences={preferences} onEdit={() => setActiveTab?.('settings')} />
 
       <ExplainerBanner />
