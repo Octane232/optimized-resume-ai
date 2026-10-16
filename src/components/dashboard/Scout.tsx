@@ -172,29 +172,97 @@ const useRadarScan = (onScanComplete: () => void) => {
   return { scanning, usageLoading, canScan: canUse('radar_alert'), handleScan };
 };
 
+type RadarPrefs = {
+  target_role: string | null;
+  target_industry: string | null;
+  target_location: string | null;
+  experience_level: string | null;
+  work_style: string | null;
+};
+
 const useCareerPreferences = () => {
-  const [preferences, setPreferences] = useState<{
-    target_role: string | null;
-    target_industry: string | null;
-    target_location: string | null;
-    experience_level: string | null;
-    work_style: string | null;
-  } | null>(null);
+  const [preferences, setPreferences] = useState<RadarPrefs | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) { setLoaded(true); return; }
       const { data } = await supabase
         .from('career_preferences')
         .select('target_role, target_industry, target_location, experience_level, work_style')
         .eq('user_id', user.id)
         .maybeSingle();
       setPreferences(data ?? null);
+      setLoaded(true);
     })();
   }, []);
 
-  return preferences;
+  return { preferences, setPreferences, loaded };
+};
+
+const RADAR_INDUSTRIES = ['Technology', 'Education & Schools', 'Healthcare', 'Public Sector', 'Finance', 'Construction', 'Retail', 'Hospitality', 'Logistics', 'Manufacturing', 'Energy', 'Other'];
+const RADAR_LOCATIONS = ['Worldwide', 'United Kingdom', 'United States', 'Canada', 'Australia', 'Ireland', 'Germany', 'France', 'Netherlands', 'India', 'Nigeria', 'South Africa', 'United Arab Emirates', 'Singapore'];
+const RADAR_WORK_STYLES = ['Any', 'Remote', 'Hybrid', 'On-site'];
+
+const RadarSetup: React.FC<{ onSaved: (p: RadarPrefs) => void; saving: boolean }> = ({ onSaved, saving }) => {
+  const [role, setRole] = useState('');
+  const [industry, setIndustry] = useState('');
+  const [location, setLocation] = useState('Worldwide');
+  const [workStyle, setWorkStyle] = useState('Any');
+  const selectClass = 'w-full h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground';
+
+  return (
+    <Card className="border-primary/30">
+      <CardContent className="p-6 space-y-5">
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">Set up your Radar first</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Tell us what you're looking for so every match score reflects your goals.
+          </p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2 sm:col-span-2">
+            <label htmlFor="radar-role" className="text-sm font-medium text-foreground">Target role *</label>
+            <Input id="radar-role" value={role} onChange={(e) => setRole(e.target.value)} placeholder="e.g. Software Developer, Primary Teacher, Nurse" />
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="radar-industry" className="text-sm font-medium text-foreground">Industry</label>
+            <select id="radar-industry" className={selectClass} value={industry} onChange={(e) => setIndustry(e.target.value)}>
+              <option value="">Any industry</option>
+              {RADAR_INDUSTRIES.map((i) => <option key={i} value={i}>{i}</option>)}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="radar-location" className="text-sm font-medium text-foreground">Country / region</label>
+            <select id="radar-location" className={selectClass} value={location} onChange={(e) => setLocation(e.target.value)}>
+              {RADAR_LOCATIONS.map((l) => <option key={l} value={l}>{l}</option>)}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="radar-work" className="text-sm font-medium text-foreground">Work style</label>
+            <select id="radar-work" className={selectClass} value={workStyle} onChange={(e) => setWorkStyle(e.target.value)}>
+              {RADAR_WORK_STYLES.map((w) => <option key={w} value={w}>{w}</option>)}
+            </select>
+          </div>
+        </div>
+        <Button
+          className="gap-2"
+          disabled={!role.trim() || saving}
+          onClick={() => onSaved({
+            target_role: role.trim(),
+            target_industry: industry || null,
+            target_location: location,
+            work_style: workStyle,
+            experience_level: null,
+          })}
+        >
+          <Telescope className="w-4 h-4" />
+          {saving ? 'Saving...' : 'Save & run my first scan'}
+        </Button>
+      </CardContent>
+    </Card>
+  );
 };
 
 const FocusBanner: React.FC<{
@@ -999,7 +1067,40 @@ const Scout: React.FC<ScoutProps> = ({ setActiveTab }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'alerts' | 'all'>('alerts');
   const [scope, setScope] = useState<'all' | 'remote' | 'public' | 'local'>('all');
-  const preferences = useCareerPreferences();
+  const { preferences, setPreferences, loaded: prefsLoaded } = useCareerPreferences();
+  const { toast } = useToast();
+  const [savingSetup, setSavingSetup] = useState(false);
+  const needsSetup = prefsLoaded && !preferences?.target_role?.trim();
+
+  const guardedScan = () => {
+    if (needsSetup) {
+      toast({ title: 'Set your preferences first', description: 'Add your target role so the Radar scans for you.' });
+      return;
+    }
+    handleScan();
+  };
+
+  const saveSetup = async (p: RadarPrefs) => {
+    setSavingSetup(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Please sign in.');
+      const { error } = await supabase.from('career_preferences').upsert({
+        user_id: user.id,
+        target_role: p.target_role,
+        target_industry: p.target_industry,
+        target_location: p.target_location,
+        work_style: p.work_style,
+      }, { onConflict: 'user_id' });
+      if (error) throw error;
+      setPreferences(p);
+      handleScan();
+    } catch (e: any) {
+      toast({ title: 'Could not save preferences', description: e.message, variant: 'destructive' });
+    } finally {
+      setSavingSetup(false);
+    }
+  };
 
   const handleUpgradeClick = () => {
     if (setActiveTab) {
@@ -1030,12 +1131,16 @@ const Scout: React.FC<ScoutProps> = ({ setActiveTab }) => {
     <div className="p-6 space-y-6 max-w-5xl mx-auto">
       <HeaderSection 
         onMarkAllRead={markAllRead}
-        onScan={handleScan}
+        onScan={guardedScan}
         scanning={scanning}
-        usageLoading={usageLoading}
-        canScan={canScan}
+        usageLoading={usageLoading || !prefsLoaded}
+        canScan={canScan && !needsSetup}
       />
-      
+
+      {needsSetup ? (
+        <RadarSetup onSaved={saveSetup} saving={savingSetup} />
+      ) : (
+        <>
       <FocusBanner preferences={preferences} onEdit={() => setActiveTab?.('settings')} />
 
       <ExplainerBanner />
