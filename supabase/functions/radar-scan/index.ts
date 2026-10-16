@@ -811,14 +811,14 @@ serve(async (req) => {
                 role: "user",
                 content: `You are a hiring-intelligence analyst covering EVERY industry — technology, healthcare, retail, hospitality, construction, logistics, manufacturing, energy, education, finance, government, non-profit, agriculture, media, transport.
 
-Decide whether this news article implies an organisation is likely to hire soon. Hiring intent can come from: funding rounds, expansion, new locations/facilities/stores/plants/clinics, contract or tender wins, mergers/acquisitions, large investments, government programmes, seasonal ramp-ups, or an explicit hiring announcement. Ignore layoffs, opinion pieces, product reviews, and pure market commentary.
+Decide whether this news article implies an organisation is likely to hire soon. Hiring intent can come from: funding rounds, expansion, new locations/facilities/stores/plants/clinics, contract or tender wins (including official public-procurement award notices — the supplier is the company that will hire, not the buyer), new senior leaders (a new VP/Head/Chief usually builds a team within 60 days), mergers/acquisitions, large investments, government programmes, seasonal ramp-ups, or an explicit hiring announcement. Ignore layoffs, opinion pieces, product reviews, and pure market commentary.
 
 Return JSON only:
 {
  "is_hiring_signal": true|false,
  "company_name": "organisation name",
  "company_domain": "official company website hostname, such as stripe.com; empty string unless you are highly confident it belongs to this exact organisation",
- "signal_type": "Funding|Expansion|New Facility|Contract Win|Acquisition|Investment|Hiring Announcement|Public Programme",
+ "signal_type": "Funding|Expansion|New Facility|Contract Win|Leadership Hire|Acquisition|Investment|Hiring Announcement|Public Programme",
  "industry": "e.g. Healthcare, Retail, Construction, Logistics, Fintech, Education, Energy, Hospitality",
  "location": "city, region or country if known, else empty string",
  "company_size": "Startup|Small|Mid-market|Enterprise|Public sector|Unknown",
@@ -867,14 +867,14 @@ Description: ${article.description}`
           // Remote roles must clear the strict bar: only High trust is published.
           if (verification.tier === "low") return null;
           if (isRemote && verification.tier !== "high") return null;
-          const kind = article.official || article.remoteFeed || parsed.is_direct_vacancy ? "posting" : "lead";
+          const kind = !article.contractAward && (article.official || article.remoteFeed || parsed.is_direct_vacancy) ? "posting" : "lead";
           const published = new Date(article.publishedAt || Date.now());
           const expires = new Date(published.getTime() + (kind === "posting" ? 21 : 45) * 86400000);
           if (expires.getTime() < Date.now()) return null;
           return {
             company_name: String(parsed.company_name).slice(0, 160),
             company_domain: companyDomain,
-            signal_type: parsed.signal_type || "Hiring Announcement",
+            signal_type: article.contractAward ? "Contract Win" : (parsed.signal_type || "Hiring Announcement"),
             industry: parsed.industry || null,
             location: parsed.location || (workplace === "remote_worldwide" ? "Remote · Worldwide" : null),
             company_size: parsed.company_size || null,
