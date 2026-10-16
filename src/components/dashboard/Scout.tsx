@@ -757,8 +757,13 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index, targetRol
                       s.company_name
                     )}
                     {s.signal_type && (
-                      <Badge variant="outline" className="text-xs bg-primary/5 text-primary border-primary/20">
-                        {s.signal_type}
+                      <Badge
+                        variant="outline"
+                        className={s.signal_type === 'Contract Win'
+                          ? 'text-xs bg-accent/15 text-accent-foreground border-accent/40 font-semibold'
+                          : 'text-xs bg-primary/5 text-primary border-primary/20'}
+                      >
+                        {s.signal_type === 'Contract Win' && s.amount ? `Contract Win · ${s.amount}` : s.signal_type}
                       </Badge>
                     )}
                     {s.kind && (
