@@ -680,6 +680,106 @@ serve(async (req) => {
       console.log(`Feeds: ${allArticles.length - before} articles`);
     } catch (e) { console.error("Feed fetch failed:", e); }
 
+    // SOURCE 4: Official public contract awards — winners must staff up to deliver.
+    const fmtMoney = (amount: number, currency: string) =>
+      `${currency === "GBP" ? "£" : currency === "USD" ? "$" : currency + " "}${amount >= 1e6 ? (amount / 1e6).toFixed(1) + "M" : Math.round(amount / 1e3) + "k"}`;
+    const sinceDate = new Date(Date.now() - 7 * 86400000).toISOString().split("T")[0];
+    const wantsUK = wanted.has("GB") || wanted.size > 2;
+    const wantsUS = wanted.has("US") || wanted.size > 2;
+    const contractTasks: Promise<void>[] = [];
+    if (wantsUK) {
+      contractTasks.push((async () => {
+        const res = await fetch(
+          `https://www.contractsfinder.service.gov.uk/Published/Notices/OCDS/Search?stages=award&publishedFrom=${sinceDate}&limit=100`,
+          { signal: AbortSignal.timeout(15000) },
+        );
+        const data = await res.json();
+        let added = 0;
+        for (const rel of data?.releases || []) {
+          const award = rel.awards?.[0];
+          const supplier = award?.suppliers?.[0]?.name;
+          const amount = Number(award?.value?.amount ?? rel.tender?.value?.amount ?? 0);
+          if (!supplier || amount < 250000) continue;
+          const url = award?.documents?.find((d: any) => d.url)?.url || `https://www.contractsfinder.service.gov.uk/Notice/${String(rel.id).split("-").slice(0, 5).join("-")}`;
+          const value = fmtMoney(amount, award?.value?.currency || "GBP");
+          pushArticle({
+            title: `${supplier} awarded ${value} contract by ${rel.buyer?.name || "UK public body"}: ${rel.tender?.title || ""}`,
+            description: `Contract award. Supplier: ${supplier}. Buyer: ${rel.buyer?.name || ""}. Category: ${rel.tender?.classification?.description || ""}. ${String(rel.tender?.description || "").slice(0, 250)} Contract period ${rel.tender?.contractPeriod?.startDate?.slice(0, 10) || ""} to ${rel.tender?.contractPeriod?.endDate?.slice(0, 10) || ""}. Country: United Kingdom.`,
+            url,
+            sourceName: "UK Contracts Finder",
+            publishedAt: award?.datePublished || rel.date || new Date().toISOString(),
+            official: true,
+            contractAward: true,
+          });
+          added++;
+        }
+        console.log(`UK Contracts Finder: ${added} awards`);
+      })().catch((e) => console.error("Contracts Finder failed:", e)));
+    }
+    if (wantsUS) {
+      contractTasks.push((async () => {
+        const res = await fetch("https://api.usaspending.gov/api/v2/search/spending_by_award/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          signal: AbortSignal.timeout(15000),
+          body: JSON.stringify({
+            filters: {
+              award_type_codes: ["A", "B", "C", "D"],
+              time_period: [{ start_date: sinceDate, end_date: new Date().toISOString().split("T")[0], date_type: "new_awards_only" }],
+              award_amounts: [{ lower_bound: 1000000 }],
+            },
+            fields: ["Award ID", "Recipient Name", "Award Amount", "Awarding Agency", "Description", "Start Date", "generated_internal_id", "Place of Performance State Code"],
+            limit: 40,
+            sort: "Award Amount",
+            order: "desc",
+          }),
+        });
+        const data = await res.json();
+        let added = 0;
+        for (const a of data?.results || []) {
+          if (!a["Recipient Name"] || !a.generated_internal_id) continue;
+          const value = fmtMoney(Number(a["Award Amount"] || 0), "USD");
+          pushArticle({
+            title: `${a["Recipient Name"]} awarded ${value} federal contract by ${a["Awarding Agency"]}`,
+            description: `Contract award. ${String(a.Description || "").slice(0, 300)} Place of performance: ${a["Place of Performance State Code"] || ""}, United States. Start ${a["Start Date"] || ""}.`,
+            url: `https://www.usaspending.gov/award/${a.generated_internal_id}`,
+            sourceName: "USAspending.gov",
+            publishedAt: a["Start Date"] ? new Date(a["Start Date"]).toISOString() : new Date().toISOString(),
+            official: true,
+            contractAward: true,
+          });
+          added++;
+        }
+        console.log(`USAspending: ${added} awards`);
+      })().catch((e) => console.error("USAspending failed:", e)));
+    }
+    // Corporate newswire: contract wins, expansions and executive appointments across every sector.
+    contractTasks.push((async () => {
+      const feeds = [
+        { url: "https://www.prnewswire.com/rss/news-releases-list.rss", name: "PR Newswire" },
+        { url: "https://www.globenewswire.com/RssFeed/subjectcode/27-Contracts/feedTitle/GlobeNewswire%20-%20Contracts", name: "GlobeNewswire Contracts" },
+        { url: "https://www.globenewswire.com/RssFeed/subjectcode/45-Management%20Changes/feedTitle/GlobeNewswire%20-%20Management%20Changes", name: "GlobeNewswire Appointments" },
+      ];
+      const leadership = /\b(appoints|appointed|names|named|joins as|hires)\b.*\b(chief|ceo|cto|cfo|coo|vp|vice president|head of|director|president)\b/i;
+      const contract = /\b(awarded|wins|win|secures|selected|contract|tender|agreement|expands|expansion|opens|new facility)\b/i;
+      const results = await Promise.allSettled(feeds.map((f) =>
+        fetch(f.url, { headers: { "User-Agent": "Mozilla/5.0 (compatible; VaylanceRadar/1.0)" }, signal: AbortSignal.timeout(12000) })
+          .then((r) => r.text()).then((xml) => ({ xml, f }))
+      ));
+      let added = 0;
+      for (const r of results) {
+        if (r.status !== "fulfilled") continue;
+        for (const item of parseRssItems(r.value.xml, r.value.f.name, false)) {
+          const text = `${item.title} ${item.description}`;
+          if (!contract.test(text) && !leadership.test(text)) continue;
+          pushArticle(item);
+          if (++added >= 40) break;
+        }
+      }
+      console.log(`Newswires: ${added} contract/expansion/appointment releases`);
+    })().catch((e) => console.error("Newswire failed:", e)));
+    await Promise.allSettled(contractTasks);
+
     // Round-robin across sources so one noisy source can't crowd out the rest.
     const bySource = new Map<string, any[]>();
     for (const a of allArticles) {
