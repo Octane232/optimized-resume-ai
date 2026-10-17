@@ -15,14 +15,17 @@ Vaylance is a single **Hunter** workspace (the previous "Growth Mode" placeholde
 ## Feature Map
 
 ### Job Radar (Scout) — flagship
-Finds hiring signals *before* jobs are posted, across **all industries** (tech, healthcare, logistics, retail, energy, finance, education, hospitality…).
+Finds hiring signals *before* jobs are posted, across **all industries and countries**.
 
-- Scans cross-industry news and Google News / trade RSS feeds (funding, expansion, new offices, contracts)
-- AI resolves the real company, likely roles, location, and company size
-- AI matches each signal against the user's saved career preferences and returns a **% match**
-- Rich intel per signal: **Why now**, **Likely roles**, **Outreach angle**, **Confidence**
-- "Find Hiring Contact" deep-links to a LinkedIn people search for that company
-- Backed by `radar_signals` + `radar_alerts` (the old `scouted_jobs` table is deprecated)
+- **First-time calibration gate:** users must save a target role (plus optional industry, country/region, work style) before any scan runs or signals are shown
+- **Sources:** locale-aware Google News queries for the user's country, trade/newswire RSS (funding, expansion, contracts, executive appointments), and public procurement awards (UK Contracts Finder over £250k, USAspending over $1M)
+- **Trust checks:** scam/domain checks; remote roles are only shown at 70%+ legitimacy, with worldwide vs region-limited remote eligibility
+- **Fit score** from explicit role, industry, location/work-style and seniority dimensions; alerts below **45%** are dropped
+- **Fresh-slate scans:** Scan Now clears the visible feed instantly, purges the user's old `radar_alerts` server-side, matches only signals from the last **7 days**, and keeps one alert per company
+- Changing preferences in Settings clears stale alerts
+- **Background ingestion:** `pg_cron` calls `radar-scan` every 6 hours with a Vault-stored token checked by `verify_radar_cron_token`; user scans stay JWT- and quota-gated
+- Per signal: **Why now**, **Likely roles**, source link and date, proof badges (incl. Contract Win), editable outreach, Useful / Not useful feedback, one-click **Add to Mission Control**, and "Find Hiring Contact"
+- Backed by `radar_signals` (shared) + `radar_alerts` (per user); `scouted_jobs` is deprecated
 
 ### Resume + ATS
 The former "Resume Engine" — renamed because it is a scanner/optimizer, not a template builder.
@@ -63,7 +66,9 @@ The affiliate program pages were removed.
 
 ## Plans & Quotas
 
-There is **no in-app free trial** — trials, if any, are handled entirely by Stripe. Unpaid accounts sit on `free` (all feature limits `0`) and hit a paywall on every tool.
+**Testing access:** every new signup automatically gets **Pro for 30 days** (the `handle_new_user` trigger sets `profiles.plan = 'pro'` and an active subscription ending 30 days later). Afterwards the account falls back to Free.
+
+Free users get a taste of the core tools: 1 Radar scan/month with the top 3 signals visible (the rest blurred), 2 Interview Prep / Copilot sessions, and 2 DOCX rewrites. Other tools are paywalled.
 
 | | Free | Pro — $15/mo | Elite — $29/mo |
 |---|---|---|---|
@@ -73,10 +78,10 @@ There is **no in-app free trial** — trials, if any, are handled entirely by St
 | Cover Letters | 0 | 30 | 100 |
 | LinkedIn Optimizations | 0 | 15 | 50 |
 | Skill Gap Analyses | 0 | 15 | 50 |
-| Interview Prep sessions | 0 | 30 | 100 |
+| Interview Prep sessions | 2 | 30 | 100 |
 | Salary Insights | 0 | 10 | 30 |
-| Job Radar Alerts | 0 | 15 | 50 |
-| DOCX Rewrites | 0 | 10 | 50 |
+| Job Radar scans | 1 | 15 | 50 |
+| DOCX Rewrites | 2 | 10 | 50 |
 | Resume Uploads | 0 | 100 | 500 |
 | Priority Support | — | ✓ | ✓ |
 | ATS Resume Review | — | — | ✓ |
@@ -133,6 +138,7 @@ supabase/
 │   ├── analyze-skill-gap/  interview-feedback/  optimize-linkedin/
 │   ├── salary-intel/  apply-bundle/
 │   ├── radar-scan/  radar-alerts/  radar-mark-read/
+│   ├── job-search/  find-openings/   # Live listings + ATS boards (Greenhouse/Lever/Ashby)
 │   └── stripe-checkout/  stripe-webhook/  stripe-customer-portal/  check-subscription/
 └── migrations/
 ```
