@@ -1186,6 +1186,8 @@ const Scout: React.FC<ScoutProps> = ({ setActiveTab }) => {
         targetRole={preferences?.target_role}
         onUpgradeClick={handleUpgradeClick}
       />
+        </>
+      )}
     </div>
   );
 };
