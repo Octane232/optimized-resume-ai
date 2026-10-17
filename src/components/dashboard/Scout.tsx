@@ -170,6 +170,7 @@ const useRadarScan = (onScanComplete: () => Promise<void> | void, onScanStart?: 
       });
     } catch (error: any) {
       toast({ title: "Scan Failed", description: error.message || "Could not complete scan.", variant: "destructive" });
+      await onScanComplete();
     } finally {
       setScanning(false);
     }
