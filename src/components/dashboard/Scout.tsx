@@ -127,10 +127,15 @@ const useRadarData = () => {
     fetchData();
   }, []);
 
-  return { alerts, signals, loading, fetchData, markAllRead };
+  const clearFeed = () => {
+    setAlerts([]);
+    setSignals([]);
+  };
+
+  return { alerts, signals, loading, fetchData, markAllRead, clearFeed };
 };
 
-const useRadarScan = (onScanComplete: () => void) => {
+const useRadarScan = (onScanComplete: () => Promise<void> | void, onScanStart?: () => void) => {
   const { toast } = useToast();
   const { canUse, trackUsage, loading: usageLoading } = useUsageLimit();
   const [scanning, setScanning] = useState(false);
@@ -146,6 +151,7 @@ const useRadarScan = (onScanComplete: () => void) => {
     }
 
     setScanning(true);
+    onScanStart?.();
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('Please sign in to run a radar scan.');
@@ -156,12 +162,12 @@ const useRadarScan = (onScanComplete: () => void) => {
       if (error) throw error;
       
       await trackUsage('radar_alert');
+      await onScanComplete();
       
       toast({
         title: "Radar Scan Complete",
-        description: `Scored ${data?.signalsMatched || data?.signalsExtracted || 0} signals. ${data?.alertsCreated || data?.alertsUpdated || 0} matched your preferences.`,
+        description: `Scored ${data?.signalsMatched || data?.signalsExtracted || 0} fresh signals. ${data?.alertsCreated || data?.alertsUpdated || 0} matched your preferences.`,
       });
-      onScanComplete();
     } catch (error: any) {
       toast({ title: "Scan Failed", description: error.message || "Could not complete scan.", variant: "destructive" });
     } finally {
@@ -1034,6 +1040,23 @@ const SignalsList: React.FC<SignalsListProps> = ({
   const visibleSignals = hasFullAccess ? signals : signals.slice(0, 3);
   const lockedCount = signals.length - visibleSignals.length;
 
+  if (scanning) {
+    return (
+      <div className="space-y-4" aria-live="polite">
+        <div className="flex items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 p-4">
+          <span className="relative flex h-3 w-3">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+            <span className="relative inline-flex h-3 w-3 rounded-full bg-primary" />
+          </span>
+          <div>
+            <p className="text-sm font-medium text-foreground">Old findings cleared. Scanning for fresh signals…</p>
+            <p className="text-xs text-muted-foreground">This usually takes under a minute.</p>
+          </div>
+        </div>
+        <LoadingSkeleton />
+      </div>
+    );
+  }
   if (loading) return <LoadingSkeleton />;
   if (signals.length === 0) {
     return <EmptyState viewMode={viewMode} onScan={onScan} scanning={scanning} usageLoading={usageLoading} canScan={canScan} />;
@@ -1062,8 +1085,8 @@ interface ScoutProps {
 
 const Scout: React.FC<ScoutProps> = ({ setActiveTab }) => {
   const { tier } = useUsageLimit();
-  const { alerts, signals, loading, fetchData, markAllRead } = useRadarData();
-  const { scanning, usageLoading, canScan, handleScan } = useRadarScan(fetchData);
+  const { alerts, signals, loading, fetchData, markAllRead, clearFeed } = useRadarData();
+  const { scanning, usageLoading, canScan, handleScan } = useRadarScan(fetchData, clearFeed);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'alerts' | 'all'>('alerts');
   const [scope, setScope] = useState<'all' | 'remote' | 'public' | 'local'>('all');
