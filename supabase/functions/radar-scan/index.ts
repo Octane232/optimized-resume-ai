@@ -109,6 +109,7 @@ const stripTags = (s: string) => s.replace(/<[^>]*>/g, "").replace(/&[a-z]+;/gi,
 
 // Everyday, frontline and public-sector hiring — not just corporate/tech.
 const MIN_ALERT_MATCH = 45;
+const SIGNAL_RECENCY_DAYS = 7;
 
 const EVERYDAY_QUERIES = [
   '"recruiting teachers" OR "teacher vacancies" OR "teaching assistants" hiring',
@@ -553,6 +554,10 @@ serve(async (req) => {
       const user = await requireUser(authHeader, supabase);
       requestingUserId = user.id;
       await enforceQuota(supabase, user.id, user.tier, "radar_alert");
+      // Fresh slate: a user-initiated scan replaces their previous feed entirely,
+      // cleared up front so old findings never linger during or after the scan.
+      const { error: clearError } = await supabase.from("radar_alerts").delete().eq("user_id", requestingUserId);
+      if (clearError) console.error("Failed to clear old alerts:", clearError.message);
     }
 
     // Load the requesting user's career preferences so the scan searches for
