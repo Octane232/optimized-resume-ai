@@ -109,6 +109,7 @@ const stripTags = (s: string) => s.replace(/<[^>]*>/g, "").replace(/&[a-z]+;/gi,
 
 // Everyday, frontline and public-sector hiring — not just corporate/tech.
 const MIN_ALERT_MATCH = 45;
+const SIGNAL_RECENCY_DAYS = 7;
 
 const EVERYDAY_QUERIES = [
   '"recruiting teachers" OR "teacher vacancies" OR "teaching assistants" hiring',
@@ -553,6 +554,10 @@ serve(async (req) => {
       const user = await requireUser(authHeader, supabase);
       requestingUserId = user.id;
       await enforceQuota(supabase, user.id, user.tier, "radar_alert");
+      // Fresh slate: a user-initiated scan replaces their previous feed entirely,
+      // cleared up front so old findings never linger during or after the scan.
+      const { error: clearError } = await supabase.from("radar_alerts").delete().eq("user_id", requestingUserId);
+      if (clearError) console.error("Failed to clear old alerts:", clearError.message);
     }
 
     // Load the requesting user's career preferences so the scan searches for
@@ -947,11 +952,14 @@ Description: ${article.description}`
     console.log(`Prepared ${storedSignals.length} signals for matching`);
 
     if (requestingUserId && storedSignals.length < 15) {
-      // Read from the verified pool built by earlier/scheduled scans.
+      // Read from the verified pool built by earlier/scheduled scans — only recent
+      // discoveries, so old signals are not recycled into a fresh feed.
+      const recencyCutoff = new Date(Date.now() - SIGNAL_RECENCY_DAYS * 86400000).toISOString();
       const { data: recentSignals } = await supabase
         .from("radar_signals")
         .select("*")
         .neq("trust_tier", "low")
+        .gte("created_at", recencyCutoff)
         .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
         .order("created_at", { ascending: false })
         .limit(60);
@@ -970,15 +978,20 @@ Description: ${article.description}`
     let alertsCreated = 0;
     let alertsUpdated = 0;
 
-    // Fresh slate: a user-initiated scan replaces their previous feed entirely.
-    if (requestingUserId) {
-      const { error: clearError } = await supabase.from("radar_alerts").delete().eq("user_id", requestingUserId);
-      if (clearError) console.error("Failed to clear old alerts:", clearError.message);
-    }
-
     for (const user of usersToMatch) {
-      // Hard eligibility filter BEFORE scoring (e.g. US-only remote for a UK user).
-      const matchLimit = storedSignals.filter(({ signal }) => isEligible(signal, user)).slice(0, 40);
+      // Hard eligibility filter BEFORE scoring (e.g. US-only remote for a UK user),
+      // and at most one signal per company so one employer can't dominate the feed.
+      const seenCompanies = new Set<string>();
+      const matchLimit = storedSignals
+        .filter(({ signal }) => isEligible(signal, user))
+        .filter(({ signal }) => {
+          const key = normalise(signal?.company_name);
+          if (!key) return true;
+          if (seenCompanies.has(key)) return false;
+          seenCompanies.add(key);
+          return true;
+        })
+        .slice(0, 40);
       for (let i = 0; i < matchLimit.length; i += 5) {
         const chunk = matchLimit.slice(i, i + 5);
         const scored = await Promise.all(chunk.map(async ({ id: signalId, signal }) => ({
