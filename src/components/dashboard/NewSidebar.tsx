@@ -9,9 +9,6 @@ import {
   Linkedin,
   DollarSign,
   Crosshair,
-  Settings as SettingsIcon,
-  HelpCircle,
-  CreditCard,
   ChevronLeft,
   ChevronRight,
   ArrowRight,
@@ -65,11 +62,6 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
     { id: 'mission-control', label: 'Application Tracker', icon: Crosshair },
   ];
 
-  const toolItems: NavItem[] = [
-    { id: 'billing', label: 'Billing & Plan', icon: CreditCard },
-    { id: 'settings', label: 'Settings', icon: SettingsIcon },
-    { id: 'help', label: 'Help & Support', icon: HelpCircle },
-  ];
 
   const renderNavItem = (item: NavItem) => {
     const Icon = item.icon;
@@ -142,18 +134,6 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
         <TooltipProvider delayDuration={0}>
           {mainItems.map(renderNavItem)}
-
-          <div className="pt-5 pb-1">
-            {!collapsed ? (
-              <p className="px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Account
-              </p>
-            ) : (
-              <div className="border-t border-border mx-2" />
-            )}
-          </div>
-
-          {toolItems.map(renderNavItem)}
         </TooltipProvider>
       </nav>
 
