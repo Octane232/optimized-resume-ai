@@ -18,3 +18,7 @@
 - [ ] Replace the brand mark with the selected Radar Prism logo across public and dashboard surfaces.
 - [ ] Calibrate Job Radar preference matching and make landing-page example scores realistic.
 - [ ] Verify the updated brand and matching flow.
+- [x] Set Google title/description to "Find Jobs Before They're Posted" copy.
+- [x] Lower displayed prices to $9 Pro / $19 Elite.
+- [ ] Point Stripe checkout at $9/$19 prices (blocked: Stripe account mismatch).
+- [x] Show "Estimated hiring window · AI-estimated" with disclaimer on Radar cards.

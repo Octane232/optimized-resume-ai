@@ -14,7 +14,7 @@ const PLANS = [
     id: 'pro' as PlanId,
     label: 'Pro',
     icon: Sparkles,
-    monthly: '$24',
+    monthly: '$9',
     tagline: 'For active job seekers',
     popular: false,
     features: [
@@ -36,7 +36,7 @@ const PLANS = [
     id: 'elite' as PlanId,
     label: 'Elite',
     icon: Crown,
-    monthly: '$49',
+    monthly: '$19',
     tagline: 'For serious candidates',
     popular: true,
     features: [

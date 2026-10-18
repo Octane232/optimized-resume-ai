@@ -706,9 +706,13 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index, targetRol
         </span>
       )}
       {s.hiring_window && (
-        <span className="flex items-center gap-1">
-          <Clock className="w-3 h-3" />
-          Hiring: {s.hiring_window}
+        <span className="flex flex-col basis-full">
+          <span className="flex items-center gap-1 font-medium text-foreground">
+            <Clock className="w-3 h-3" />
+            Estimated hiring window
+          </span>
+          <span>{s.hiring_window.replace(/-/g, '–')} · AI-estimated</span>
+          <span className="text-[11px] italic">Based on the available business signals; not a confirmed hiring commitment.</span>
         </span>
       )}
       {s.published_at && (
