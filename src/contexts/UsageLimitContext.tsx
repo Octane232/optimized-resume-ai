@@ -18,8 +18,8 @@ export type UsageAction =
 // ===== Monthly limits per tier =====
 // free  = account with no active subscription (trial ended or cancelled)
 // trial = 3-day Stripe trial, fair-use caps
-// pro   = $24/month
-// elite = $49/month
+// pro   = $9/month
+// elite = $19/month
 export const PLAN_LIMITS: Record<SubscriptionTier, Record<UsageAction, number>> = {
   free: {
     resume_ats: 1,
