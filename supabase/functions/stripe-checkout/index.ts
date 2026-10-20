@@ -67,10 +67,13 @@ serve(async (req) => {
       }
     }
 
-    if (!customerId && user.email) {
-      // Reuse a live customer with the same email if one exists
+    const emailVerified = Boolean((user as any).email_confirmed_at || (user as any).confirmed_at);
+    if (!customerId && user.email && emailVerified) {
+      // Reuse a live customer with the same verified email, unless it belongs to another account
       const found = await stripe.customers.list({ email: user.email, limit: 1 });
-      if (found.data.length > 0) customerId = found.data[0].id;
+      const match = found.data[0];
+      const ownerId = match?.metadata?.supabase_user_id;
+      if (match && (!ownerId || ownerId === user.id)) customerId = match.id;
     }
 
     if (!customerId) {
@@ -108,8 +111,8 @@ serve(async (req) => {
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
-      success_url: `${req.headers.get("origin") || "https://vaylance.com"}/dashboard?upgrade=success`,
-      cancel_url: `${req.headers.get("origin") || "https://vaylance.com"}/dashboard?upgrade=cancelled`,
+      success_url: `${safeOrigin(req.headers.get("origin"))}/dashboard?upgrade=success`,
+      cancel_url: `${safeOrigin(req.headers.get("origin"))}/dashboard?upgrade=cancelled`,
       metadata: {
         supabase_user_id: user.id,
         plan,

@@ -187,9 +187,10 @@ serve(async (req) => {
     const domainRaw = typeof body.company_domain === "string" ? body.company_domain.trim().slice(0, 160) : "";
     if (!companyName) return json({ error: "company_name is required" }, 400);
 
-    const domain = domainRaw
-      ? domainRaw.replace(/^https?:\/\//, "").replace(/\/.*$/, "").toLowerCase()
+    const domainCandidate = domainRaw
+      ? domainRaw.replace(/^https?:\/\//, "").replace(/[\/?#].*$/, "").toLowerCase()
       : "";
+    const domain = isSafePublicDomain(domainCandidate) ? domainCandidate : "";
 
     // Step 1 — the company's own site always wins.
     if (domain) {

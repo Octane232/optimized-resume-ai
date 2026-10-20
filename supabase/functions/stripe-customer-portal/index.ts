@@ -101,9 +101,11 @@ serve(async (req: Request) => {
       }
     }
 
-    if (!customerId && user.email) {
+    const emailVerified = Boolean((user as any).email_confirmed_at || (user as any).confirmed_at);
+    if (!customerId && user.email && emailVerified) {
       const found = await stripe.customers.list({ email: user.email, limit: 1 });
-      if (found.data.length > 0) {
+      const ownerId = found.data[0]?.metadata?.supabase_user_id;
+      if (found.data.length > 0 && (!ownerId || ownerId === user.id)) {
         customerId = found.data[0].id;
         await supabase
           .from("profiles")

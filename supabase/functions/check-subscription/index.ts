@@ -49,8 +49,13 @@ serve(async (req) => {
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
 
-    // Find customer by email
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    // Only match Stripe customers by email once the user has proven they own that mailbox.
+    const emailVerified = Boolean((user as any).email_confirmed_at || (user as any).confirmed_at);
+    const customers = emailVerified
+      ? await stripe.customers.list({ email: user.email, limit: 1 })
+      : { data: [] as any[] };
+    const ownerId = customers.data[0]?.metadata?.supabase_user_id;
+    if (ownerId && ownerId !== user.id) customers.data = [];
 
     if (customers.data.length === 0) {
       logStep("No Stripe customer found, returning free tier");

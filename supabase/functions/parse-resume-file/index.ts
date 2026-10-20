@@ -248,7 +248,7 @@ const processFile = async (file: File, uint8Array: Uint8Array, fileName: string,
   }
   
   console.log(`Extracted text: ${cleanedText.length} chars`);
-  console.log(`Preview: ${cleanedText.substring(0, 500)}`);
+  console.log(`Extracted text length: ${cleanedText.length}`);
   
   return cleanedText;
 };
