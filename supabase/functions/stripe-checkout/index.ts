@@ -7,10 +7,10 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Stripe prices (test account)
+// Stripe prices (live account)
 const PRICE_IDS = {
-  pro_monthly: "price_1UJYnAJGlrb83xLfliOIIR3A",
-  elite_monthly: "price_1UJYnxJGlrb83xLfd90hI7Tw",
+  pro_monthly: "price_1URpXZJWRvoiSBe0Pd8kSbMX",
+  elite_monthly: "price_1USZ03JWRvoiSBe0B0Z2tdlG",
 };
 
 
@@ -20,7 +20,7 @@ serve(async (req) => {
   }
 
   try {
-    const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_TEST_API_KEY") || Deno.env.get("STRIPE_SECRET_KEY");
+    const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
 
     if (!STRIPE_SECRET_KEY) throw new Error("STRIPE_SECRET_KEY not configured");
 
