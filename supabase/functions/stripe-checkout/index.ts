@@ -8,6 +8,24 @@ const corsHeaders = {
 };
 
 // Stripe prices (live account)
+// Only send customers back to our own sites after checkout.
+function safeOrigin(origin: string | null): string {
+  const fallback = "https://vaylance.com";
+  if (!origin) return fallback;
+  try {
+    const u = new URL(origin);
+    const h = u.hostname.toLowerCase();
+    const ok =
+      (u.protocol === "https:" &&
+        (h === "vaylance.com" || h === "www.vaylance.com" ||
+          h.endsWith(".lovable.app") || h.endsWith(".lovableproject.com"))) ||
+      h === "localhost" || h === "127.0.0.1";
+    return ok ? u.origin : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 const PRICE_IDS = {
   pro_monthly: "price_1URpXZJWRvoiSBe0Pd8kSbMX",
   elite_monthly: "price_1USZ03JWRvoiSBe0B0Z2tdlG",
