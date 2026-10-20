@@ -46,7 +46,17 @@ const PaidManagement = () => {
     try {
       const { data, error } = await supabase.functions.invoke('stripe-customer-portal');
 
-      if (error) throw error;
+      if (error) {
+        const status = (error as { context?: Response }).context?.status;
+        if (status === 404) {
+          toast({
+            title: 'Complimentary access',
+            description: 'Your plan is a free tester grant, so there is no billing to manage. Upgrade anytime to start a paid plan.',
+          });
+          return;
+        }
+        throw error;
+      }
       if (!data?.url) throw new Error('No portal URL');
 
       window.open(data.url, '_blank');
