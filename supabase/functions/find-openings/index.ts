@@ -21,19 +21,41 @@ interface Opening {
 
 const TIMEOUT_MS = 6000;
 
+// Blocks private/internal hosts so callers can't make the server reach internal resources.
+function isSafePublicDomain(host: string): boolean {
+  if (!host || host.length > 253) return false;
+  if (!/^[a-z0-9.-]+$/.test(host)) return false; // no ports, IPv6, userinfo
+  if (!host.includes(".")) return false;
+  if (/^\d+(\.\d+){3}$/.test(host)) return false; // raw IPv4
+  if (/(^|\.)(localhost|local|internal|intranet|lan|home|corp)$/.test(host)) return false;
+  if (host.endsWith(".supabase.co") || host.endsWith(".supabase.internal")) return false;
+  return true;
+}
+
 async function fetchWithTimeout(url: string, init: RequestInit = {}) {
+  let parsed: URL;
+  try { parsed = new URL(url); } catch { throw new Error("Invalid URL"); }
+  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") throw new Error("Blocked protocol");
+  if (!isSafePublicDomain(parsed.hostname.toLowerCase())) throw new Error("Blocked host");
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
-    return await fetch(url, {
+    const res = await fetch(url, {
       ...init,
       signal: controller.signal,
-      redirect: "follow",
+      redirect: "manual",
       headers: {
         "User-Agent": "Mozilla/5.0 (compatible; VaylanceRadar/1.0)",
         ...(init.headers || {}),
       },
     });
+    const hops = (init as any).__hops ?? 0;
+    const loc = res.headers.get("location");
+    if (res.status >= 300 && res.status < 400 && loc && hops < 3) {
+      const next = new URL(loc, url).toString();
+      return await fetchWithTimeout(next, { ...init, __hops: hops + 1 } as RequestInit);
+    }
+    return res;
   } finally {
     clearTimeout(timer);
   }
@@ -187,9 +209,10 @@ serve(async (req) => {
     const domainRaw = typeof body.company_domain === "string" ? body.company_domain.trim().slice(0, 160) : "";
     if (!companyName) return json({ error: "company_name is required" }, 400);
 
-    const domain = domainRaw
-      ? domainRaw.replace(/^https?:\/\//, "").replace(/\/.*$/, "").toLowerCase()
+    const domainCandidate = domainRaw
+      ? domainRaw.replace(/^https?:\/\//, "").replace(/[\/?#].*$/, "").toLowerCase()
       : "";
+    const domain = isSafePublicDomain(domainCandidate) ? domainCandidate : "";
 
     // Step 1 — the company's own site always wins.
     if (domain) {
