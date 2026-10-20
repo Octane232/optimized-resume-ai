@@ -49,6 +49,13 @@ async function fetchWithTimeout(url: string, init: RequestInit = {}) {
         ...(init.headers || {}),
       },
     });
+    const hops = (init as any).__hops ?? 0;
+    const loc = res.headers.get("location");
+    if (res.status >= 300 && res.status < 400 && loc && hops < 3) {
+      const next = new URL(loc, url).toString();
+      return await fetchWithTimeout(next, { ...init, __hops: hops + 1 } as RequestInit);
+    }
+    return res;
   } finally {
     clearTimeout(timer);
   }
