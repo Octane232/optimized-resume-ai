@@ -66,7 +66,7 @@ The affiliate program pages were removed.
 
 ## Plans & Quotas
 
-**Testing access:** every new signup automatically gets **Pro for 30 days** (the `handle_new_user` trigger sets `profiles.plan = 'pro'` and an active subscription ending 30 days later). Afterwards the account falls back to Free.
+**Signup:** every new account starts on the **Free** plan (the `handle_new_user` trigger creates a Free profile and subscription). Pro/Elite are unlocked only via Stripe checkout.
 
 Free users get a taste of the core tools: 1 Radar scan/month with the top 3 signals visible (the rest blurred), 2 Interview Prep / Copilot sessions, and 2 DOCX rewrites. Other tools are paywalled.
 
