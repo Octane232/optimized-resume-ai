@@ -465,7 +465,7 @@ async function requireUser(authHeader: string | null, adminClient: any) {
     else if (raw === "premium" || raw === "elite") tier = "elite";
   }
 
-  return { id: data.user.id, tier };
+  return { id: data.user.id, tier: FREE_BETA ? "elite" : tier };
 }
 
 async function enforceQuota(adminClient: any, userId: string, tier: string, feature: string) {
