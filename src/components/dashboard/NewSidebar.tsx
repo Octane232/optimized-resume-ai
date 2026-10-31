@@ -22,7 +22,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { useUsageLimit } from '@/contexts/UsageLimitContext';
+import { useUsageLimit, FREE_BETA } from '@/contexts/UsageLimitContext';
 
 interface NewSidebarProps {
   activeTab: string;
@@ -144,7 +144,7 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
             <div className="rounded-xl border border-border bg-muted/50 p-3 flex items-center gap-2.5">
               <ShieldCheck className="w-4 h-4 text-primary shrink-0" />
               <div className="min-w-0">
-                <p className="text-sm font-semibold capitalize text-foreground">{tier} plan</p>
+                <p className="text-sm font-semibold capitalize text-foreground">{FREE_BETA ? "Free beta" : `${tier} plan`}</p>
                 <p className="text-xs text-muted-foreground">All tools unlocked</p>
               </div>
             </div>
