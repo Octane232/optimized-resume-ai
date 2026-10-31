@@ -1,3 +1,5 @@
+/** FREE BETA: every feature is unlocked and billing is hidden. Set to false to re-enable plans. */
+export const FREE_BETA = true;
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -302,7 +304,18 @@ export const UsageLimitProvider = ({ children }: { children: ReactNode }) => {
   const displayTier: 'Free' | 'Trial' | 'Pro' | 'Elite' =
     tier === 'free' ? 'Free' : tier === 'trial' ? 'Trial' : tier === 'pro' ? 'Pro' : 'Elite';
 
-  const usageLimitValue: UsageLimitContextType = {
+  const usageLimitValue: UsageLimitContextType = FREE_BETA ? {
+    tier: 'elite',
+    displayTier: 'Elite',
+    subscriptionEnd: null,
+    loading,
+    canUse: () => !loading,
+    getRemaining: () => 999,
+    getLimit: () => 999,
+    getCurrentUsage,
+    trackUsage,
+    refresh: fetchAll,
+  } : {
     tier,
     displayTier,
     subscriptionEnd,
@@ -316,8 +329,8 @@ export const UsageLimitProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const subscriptionValue: SubscriptionContextType = {
-    tier,
-    displayTier,
+    tier: FREE_BETA ? 'elite' : tier,
+    displayTier: FREE_BETA ? 'Elite' : displayTier,
     subscriptionEnd,
     loading,
     refresh: fetchAll,

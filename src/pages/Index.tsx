@@ -8,6 +8,7 @@ import TrustedBySection from '@/components/TrustedBySection';
 import FeaturesSection from '@/components/FeaturesSection';
 import HowItWorksSection from '@/components/HowItWorksSection';
 import PricingSection from '@/components/PricingSection';
+import { FREE_BETA } from '@/contexts/UsageLimitContext';
 import CTASection from '@/components/CTASection';
 import Footer from '@/components/Footer';
 import SEOHead from '@/components/SEOHead';
@@ -131,7 +132,7 @@ const Index = () => {
       <TrustedBySection />
       <div id="features"><FeaturesSection /></div>
       <HowItWorksSection />
-      <div id="pricing"><PricingSection /></div>
+      {!FREE_BETA && <div id="pricing"><PricingSection /></div>}
       <CTASection />
       <Footer />
     </div>

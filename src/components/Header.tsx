@@ -6,7 +6,6 @@ import VaylanceLogo from '@/components/VaylanceLogo';
 const navItems = [
   { label: 'Home', href: '#top' },
   { label: 'Features', href: '#features' },
-  { label: 'Pricing', href: '#pricing' },
   { label: 'About', to: '/about-us' },
 ];
 
