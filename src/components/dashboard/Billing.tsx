@@ -1,4 +1,4 @@
-import { useSubscription } from '@/contexts/UsageLimitContext';
+import { useSubscription, FREE_BETA } from '@/contexts/UsageLimitContext';
 import UsageHeader from './billing/UsageHeader';
 import PricingCards from './billing/PricingCards';
 import BillingFAQ from './billing/BillingFAQ';
@@ -15,6 +15,20 @@ const Billing = ({ setActiveTab }: BillingProps) => {
   
   const showPaidManagement = isPaid;
   
+  if (FREE_BETA) {
+    return (
+      <div className="space-y-6 max-w-3xl mx-auto">
+        <h1 className="text-2xl font-bold text-foreground">Billing & Plan</h1>
+        <div className="rounded-xl border border-border bg-card p-6">
+          <p className="text-lg font-semibold text-foreground">Free public beta</p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Every feature is unlocked with no limits while Vaylance is in beta. No card needed, nothing to pay.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="space-y-6 max-w-5xl mx-auto">
