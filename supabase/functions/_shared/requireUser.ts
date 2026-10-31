@@ -1,3 +1,4 @@
+export const FREE_BETA = true;
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SubscriptionTier, UsageAction, PLAN_LIMITS, getFeatureLimit, getRemainingUses } from "./tierLimits.ts";
 
@@ -114,6 +115,8 @@ export async function checkFeatureLimit(
   user: AuthedUser,
   action: UsageAction
 ): Promise<Response | null> {
+  // FREE BETA: all features unlocked for everyone until monetization is re-enabled.
+  if (FREE_BETA) return null;
   const limit = getFeatureLimit(user.tier, action);
 
   if (limit === 0) {

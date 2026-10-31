@@ -1,3 +1,4 @@
+const FREE_BETA = true;
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -468,6 +469,8 @@ async function requireUser(authHeader: string | null, adminClient: any) {
 }
 
 async function enforceQuota(adminClient: any, userId: string, tier: string, feature: string) {
+  // FREE BETA: unlimited scans for everyone until monetization is re-enabled.
+  if (FREE_BETA) return null;
   const tierLimit = PLAN_RADAR_LIMITS[tier] ?? 0;
 
   if (tierLimit === 0) {
