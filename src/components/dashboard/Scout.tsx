@@ -502,10 +502,17 @@ const eventLabel = (s: RadarSignal) => {
   return s.signal_type ? `recent ${s.signal_type.toLowerCase()}` : 'recent news';
 };
 
+const specificAngle = (s: RadarSignal, role?: string | null) => {
+  const raw = s.outreach_angle ? hedge(s.outreach_angle) : '';
+  if (raw && /\[your key skill\]/i.test(raw) && /congrat/i.test(raw)) return raw;
+  const r = role || s.likely_roles?.[0] || 'your team';
+  return `Congrats on the ${eventLabel(s)} — as a ${r}, I'd love to help with [your key skill] as you take this next step.`;
+};
+
 const buildOutreachDraft = (s: RadarSignal, role?: string | null) => {
   const trigger = hedge(s.description) || 'your recent news';
   const roleLine = role || s.likely_roles?.[0] || 'a role on your team';
-  const angle = s.outreach_angle && /\[your key skill\]/i.test(s.outreach_angle) ? `\n\n${hedge(s.outreach_angle)}` : '';
+  const angle = '';
   return `Hi [Name],
 
 Congrats on the ${eventLabel(s)}. I read that ${trigger.replace(/\.$/, '')}.
@@ -749,7 +756,7 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index, targetRol
     return (
       <div className="mb-3 p-3 rounded-lg bg-amber-500/5 border border-amber-500/20">
         <p className="text-xs font-semibold text-amber-600 mb-0.5 flex items-center gap-1">
-          <Zap className="w-3 h-3" /> Why they're hiring now
+          <Zap className="w-3 h-3" /> Why they may be hiring
         </p>
         <p className="text-sm text-foreground">{hedge(s.why_now)}</p>
       </div>
@@ -777,7 +784,7 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index, targetRol
         <p className="text-xs font-semibold text-primary mb-0.5 flex items-center gap-1">
           <Rocket className="w-3 h-3" /> Your outreach angle
         </p>
-        <p className="text-sm text-foreground">{hedge(s.outreach_angle)}</p>
+        <p className="text-sm text-foreground">{specificAngle(s, targetRole)}</p>
       </div>
     );
   };
@@ -963,7 +970,7 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index, targetRol
                 </Button>
                 {typeof s.confidence === 'number' && (
                   <Badge variant="secondary" className="text-xs">
-                    {s.confidence}% signal confidence
+                    {s.confidence}% confidence the news is accurate
                   </Badge>
                 )}
               </div>
