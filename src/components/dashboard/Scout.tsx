@@ -502,22 +502,42 @@ const eventLabel = (s: RadarSignal) => {
   return s.signal_type ? `recent ${s.signal_type.toLowerCase()}` : 'recent news';
 };
 
+const roleSkillExample = (role?: string | null) => {
+  const r = (role || '').toLowerCase();
+  if (/software|developer|engineer|programmer|\bdev\b/.test(r)) return 'Python and API integrations';
+  if (/nurse|health|care/.test(r)) return 'patient care and clinical documentation';
+  if (/teach|educat/.test(r)) return 'lesson planning and classroom support';
+  if (/sales|business development/.test(r)) return 'pipeline building and outreach';
+  if (/market|content|social media/.test(r)) return 'campaign management and content';
+  if (/data|analyst|analytics/.test(r)) return 'SQL and reporting dashboards';
+  if (/design|ux/.test(r)) return 'design systems and prototyping';
+  if (/support|customer/.test(r)) return 'customer support and issue resolution';
+  if (/financ|account/.test(r)) return 'financial reporting and reconciliation';
+  if (/hr|recruit|people/.test(r)) return 'recruiting and onboarding';
+  return 'hands-on experience in the field';
+};
+
 const specificAngle = (s: RadarSignal, role?: string | null) => {
   const raw = s.outreach_angle ? hedge(s.outreach_angle) : '';
-  if (raw && /\[your key skill\]/i.test(raw) && /congrat/i.test(raw)) return raw;
-  const r = role || s.likely_roles?.[0] || 'your team';
-  return `Congrats on the ${eventLabel(s)} — as a ${r}, I'd love to help with [your key skill] as you take this next step.`;
+  const r = (role || s.likely_roles?.[0] || 'your team').trim();
+  const skill = roleSkillExample(r);
+  if (raw) {
+    const filled = raw.replace(/\[your key skill\]/gi, skill).replace(/\s+,/g, ',').replace(/\s{2,}/g, ' ');
+    if (/congrat/i.test(filled)) return filled;
+  }
+  return `Congrats on the ${eventLabel(s)} — as a ${r}, I'd love to help with ${skill} as you take this next step.`;
 };
 
 const buildOutreachDraft = (s: RadarSignal, role?: string | null) => {
   const trigger = hedge(s.description) || 'your recent news';
-  const roleLine = role || s.likely_roles?.[0] || 'a role on your team';
+  const roleLine = (role || s.likely_roles?.[0] || 'a role on your team').trim();
+  const skill = roleSkillExample(roleLine);
   const angle = '';
   return `Hi [Name],
 
 Congrats on the ${eventLabel(s)}. I read that ${trigger.replace(/\.$/, '')}.
 
-If it leads to new openings, I'd love to be considered for ${roleLine}. My background in [your key skill] could be useful as the team takes this next step.${angle}
+If it leads to new openings, I'd love to be considered for ${roleLine}. My background in ${skill} could be useful as the team takes this next step.${angle}
 
 Would you be open to a 15-minute chat this week? I can share my resume and a few ideas on how I'd contribute.
 
