@@ -813,7 +813,7 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index, targetRol
       <div className="flex flex-wrap gap-1.5 mt-2">
         {alert.match_reasons.map((reason: string, i: number) => (
           isCaution(reason) ? (
-            <Badge key={i} variant="outline" className="text-xs bg-warning/10 text-warning border-warning/30 gap-1">
+            <Badge key={i} variant="outline" className="text-xs status-warning bg-muted border-border gap-1">
               <AlertTriangle className="w-3 h-3 shrink-0" /> {hedge(reason)}
             </Badge>
           ) : (
