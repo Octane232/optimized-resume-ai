@@ -330,6 +330,21 @@ const calculateWeightedFit = (
   return clampMatch(weightedScore / totalWeight);
 };
 
+const hedgeText = (text: unknown): string => {
+  if (typeof text !== "string") return "";
+  return text
+    .replace(/\b(necessitat(?:e|es|ing)|requir(?:e|es|ing)|driv(?:e|es|ing))\s+(?:new\s+|additional\s+)?(hiring|hires|new hires)\b/gi, "may lead to hiring")
+    .replace(/\bwill (?:need to )?hire\b/gi, "may hire")
+    .replace(/\bis (?:likely )?looking for\b/gi, "may be looking for");
+};
+
+// Fewer than 3 saved preference dimensions means the score is thinly evidenced; cap it.
+const evidenceCap = (score: number, preferences: any) => {
+  const count = [preferences?.target_role, preferences?.target_industry, preferences?.target_location || preferences?.work_style, preferences?.experience_level]
+    .filter((v) => normalise(v)).length;
+  return count < 3 ? Math.min(score, 79) : score;
+};
+
 const fallbackPreferenceScore = (signal: any, preferences: any) => {
   const targetRole = normalise(preferences?.target_role);
   const targetIndustry = normalise(preferences?.target_industry);
@@ -358,7 +373,7 @@ const fallbackPreferenceScore = (signal: any, preferences: any) => {
   if (dimensions.location_fit >= 70) reasons.push(remoteRequested ? "Remote work preference aligns" : `Location aligns with ${preferences.target_location}`);
   if (dimensions.seniority_fit >= 70) reasons.push(`Seniority aligns with ${preferences.experience_level}`);
 
-  const matchScore = calculateWeightedFit(dimensions, preferences);
+  const matchScore = evidenceCap(calculateWeightedFit(dimensions, preferences), preferences);
   return {
     dimensions,
     match_score: matchScore,
@@ -426,9 +441,9 @@ Hiring signal:
       seniority_fit: pick(parsed.seniority_fit, fallback.dimensions.seniority_fit),
     };
     return {
-      match_score: calculateWeightedFit(dimensions, preferences),
-      match_reasons: Array.isArray(parsed.match_reasons) && parsed.match_reasons.length ? parsed.match_reasons.slice(0, 4) : fallback.match_reasons,
-      insight: parsed.insight || fallback.insight,
+      match_score: evidenceCap(calculateWeightedFit(dimensions, preferences), preferences),
+      match_reasons: Array.isArray(parsed.match_reasons) && parsed.match_reasons.length ? parsed.match_reasons.slice(0, 4).map(hedgeText) : fallback.match_reasons,
+      insight: hedgeText(parsed.insight) || fallback.insight,
     };
   } catch {
     return fallback;
@@ -837,7 +852,7 @@ Return JSON only:
  "likely_roles": ["4-6 realistic job titles for THIS industry, not generic tech titles"],
  "departments": ["2-4 departments likely to hire, e.g. Operations, Clinical, Field Sales"],
  "hiring_window": "e.g. 30-60 days",
- "outreach_angle": "one sentence the job seeker can actually use when contacting them",
+ "outreach_angle": "one specific sentence naming the exact event, e.g. 'Congrats on the CT InsureTech acquisition — I'd love to help with [your key skill] as you integrate the teams.' Always keep the literal placeholder [your key skill]",
  "confidence": 0-100,
  "is_direct_vacancy": true if this is an actual job advert/vacancy, false if it is a news lead,
  "workplace_type": "remote_worldwide|remote_regional|hybrid|onsite",
@@ -846,6 +861,8 @@ Return JSON only:
  "sector": "Education|Healthcare|Public Sector|Retail|Hospitality|Logistics|Construction|Manufacturing|Technology|Finance|Energy|Other",
  "scam_tone": true if the text shows scam signs (vague work-from-home, upfront fees, commission-only, crypto, Telegram/WhatsApp contact, unrealistic pay)
 }
+
+Use hedged, honest language: events MAY lead to hiring. Never write "necessitate", "will hire", "requires new hires" or similar certainty — acquisitions and restructures can also bring consolidation or layoffs, so say so in why_now when relevant.
 
 Include everyday and frontline roles (teachers, teaching assistants, nurses, care workers, drivers, warehouse, retail, hospitality, admin) — not just senior or tech roles. Set is_hiring_signal false if there is no credible hiring implication. Never use the news publisher, a job board, a social network, or a guessed domain as company_domain.
 
@@ -893,7 +910,9 @@ Description: ${article.description}`
             likely_roles: Array.isArray(parsed.likely_roles) ? parsed.likely_roles.slice(0, 6) : [],
             departments: Array.isArray(parsed.departments) ? parsed.departments.slice(0, 4) : [],
             hiring_window: parsed.hiring_window || null,
-            outreach_angle: parsed.outreach_angle || null,
+            outreach_angle: hedgeText(parsed.outreach_angle) || null,
+            why_now: hedgeText(parsed.why_now) || parsed.why_now,
+            description: hedgeText(parsed.description) || parsed.description,
             confidence: clampMatch(parsed.confidence),
             source_name: article.sourceName || null,
             source_url: article.url,

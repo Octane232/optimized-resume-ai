@@ -3,7 +3,7 @@ import {
   Telescope, Search, MapPin, DollarSign, Clock, ExternalLink,
   Sparkles, Crown, Lock, Zap, TrendingUp, Rocket, Building2,
   Users, ArrowUpRight, RefreshCw, Bell, BellOff,
-  Plus, Check, Copy, ThumbsUp, ThumbsDown
+  Plus, Check, Copy, ThumbsUp, ThumbsDown, AlertTriangle
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
@@ -483,15 +483,34 @@ interface OpeningsResult {
   jobs: Opening[];
 }
 
+const hedge = (t?: string | null) => (t || '')
+  .replace(/\b(necessitat(?:e|es|ing)|requir(?:e|es|ing)|driv(?:e|es|ing))\s+(?:new\s+|additional\s+)?(hiring|hires|new hires)\b/gi, 'may lead to hiring')
+  .replace(/\bwill (?:need to )?hire\b/gi, 'may hire')
+  .replace(/\bis (?:likely )?looking for\b/gi, 'may be looking for');
+
+const isCaution = (reason: string) =>
+  /\b(no specific|not (?:provided|specified|align|match)|may not|doesn'?t|does not|mismatch|unclear|limited|unknown|could affect|gap)\b/i.test(reason);
+
+const isLowEvidence = (reasons?: string[] | null) =>
+  !!reasons?.some((r) => /no (?:specific )?(?:location|seniority|industry)[^.]*(?:provided|given|specified)/i.test(r));
+
+const eventLabel = (s: RadarSignal) => {
+  const d = s.description || '';
+  const m = d.match(/acquir(?:ed|es|ing)(?: of)? ([A-Z][\w&.-]*(?: [A-Z][\w&.-]*)*)/);
+  if (m) return `${m[1]} acquisition`;
+  if (s.amount) return `${s.amount} ${s.signal_type?.toLowerCase() || 'announcement'}`;
+  return s.signal_type ? `recent ${s.signal_type.toLowerCase()}` : 'recent news';
+};
+
 const buildOutreachDraft = (s: RadarSignal, role?: string | null) => {
-  const trigger = s.why_now || s.description || 'your recent growth';
+  const trigger = hedge(s.description) || 'your recent news';
   const roleLine = role || s.likely_roles?.[0] || 'a role on your team';
-  const angle = s.outreach_angle ? `\n\n${s.outreach_angle}` : '';
+  const angle = s.outreach_angle && /\[your key skill\]/i.test(s.outreach_angle) ? `\n\n${hedge(s.outreach_angle)}` : '';
   return `Hi [Name],
 
-I saw the news about ${s.company_name}${s.amount ? ` (${[s.funding_stage, s.amount].filter(Boolean).join(' · ')})` : ''}: ${trigger.replace(/\.$/, '')}. Congratulations.
+Congrats on the ${eventLabel(s)}. I read that ${trigger.replace(/\.$/, '')}.
 
-Teams usually grow fast after a move like this, and I'd love to be considered for ${roleLine} before it's posted publicly.${angle}
+If it leads to new openings, I'd love to be considered for ${roleLine}. My background in [your key skill] could be useful as the team takes this next step.${angle}
 
 Would you be open to a 15-minute chat this week? I can share my resume and a few ideas on how I'd contribute.
 
@@ -793,9 +812,15 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index, targetRol
     return (
       <div className="flex flex-wrap gap-1.5 mt-2">
         {alert.match_reasons.map((reason: string, i: number) => (
-          <Badge key={i} variant="outline" className="text-xs bg-primary/5 text-primary border-primary/20">
-            ✓ {reason}
-          </Badge>
+          isCaution(reason) ? (
+            <Badge key={i} variant="outline" className="text-xs bg-warning/10 text-warning border-warning/30 gap-1">
+              <AlertTriangle className="w-3 h-3 shrink-0" /> {hedge(reason)}
+            </Badge>
+          ) : (
+            <Badge key={i} variant="outline" className="text-xs bg-primary/5 text-primary border-primary/20">
+              ✓ {hedge(reason)}
+            </Badge>
+          )
         ))}
       </div>
     );
@@ -872,8 +897,17 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index, targetRol
 
                 {alert && (
                   <div className={`text-right shrink-0 ${getMatchColor(alert.match_score)}`}>
-                    <div className="text-2xl font-bold">{alert.match_score}%</div>
-                    <div className="text-xs">match</div>
+                    {isLowEvidence(alert.match_reasons) ? (
+                      <>
+                        <div className="text-2xl font-bold opacity-60">~{Math.min(alert.match_score, 79)}%</div>
+                        <div className="text-xs text-muted-foreground">example match · limited evidence</div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-2xl font-bold">{alert.match_score}%</div>
+                        <div className="text-xs">match</div>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
