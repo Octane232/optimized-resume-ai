@@ -751,7 +751,7 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index, targetRol
         <p className="text-xs font-semibold text-amber-600 mb-0.5 flex items-center gap-1">
           <Zap className="w-3 h-3" /> Why they're hiring now
         </p>
-        <p className="text-sm text-foreground">{s.why_now}</p>
+        <p className="text-sm text-foreground">{hedge(s.why_now)}</p>
       </div>
     );
   };
@@ -777,7 +777,7 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index, targetRol
         <p className="text-xs font-semibold text-primary mb-0.5 flex items-center gap-1">
           <Rocket className="w-3 h-3" /> Your outreach angle
         </p>
-        <p className="text-sm text-foreground">{s.outreach_angle}</p>
+        <p className="text-sm text-foreground">{hedge(s.outreach_angle)}</p>
       </div>
     );
   };
@@ -802,7 +802,7 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index, targetRol
     return (
       <div className="p-3 rounded-lg bg-primary/5 border border-primary/10 text-sm text-foreground">
         <Sparkles className="w-3.5 h-3.5 inline mr-1.5 text-primary" />
-        {alert.insight}
+        {hedge(alert.insight)}
       </div>
     );
   };
@@ -892,7 +892,7 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index, targetRol
                       </Badge>
                     )}
                   </h3>
-                  <p className="text-sm text-muted-foreground mt-1">{s.description}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{hedge(s.description)}</p>
                 </div>
 
                 {alert && (
