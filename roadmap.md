@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Deliver the approved phased Radar-led workflow: targeted outreach, signal-based resume tailoring, value proposals, contextual interview practice, outreach tracking, and opt-in alerts. Awaiting plan approval.
+
 - [x] Install and review Leonxlnx/taste-skill as the redesign framework.
 - [x] Audit the existing public site and authenticated dashboard against its guidance.
 - [x] Define and implement one cohesive, non-generic visual system across the website.
