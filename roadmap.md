@@ -1,6 +1,8 @@
 # Roadmap
 
-- [ ] Deliver the approved phased Radar-led workflow: targeted outreach, signal-based resume tailoring, value proposals, contextual interview practice, outreach tracking, and opt-in alerts. Awaiting plan approval.
+- [x] Implement Phase 1 targeted Radar outreach: contact searches, genuine-strength pitches, optional profile snippets, and saved pitch viewing.
+- [ ] Verify Phase 1 signed-in outreach-to-Mission-Control flow (blocked: external Supabase has no managed browser session).
+- [ ] Evaluate Phase 1 with five active job seekers before advancing to Phases 2–6 of the approved Radar-led plan.
 
 - [x] Install and review Leonxlnx/taste-skill as the redesign framework.
 - [x] Audit the existing public site and authenticated dashboard against its guidance.

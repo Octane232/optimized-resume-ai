@@ -493,12 +493,18 @@ const KanbanCard: React.FC<KanbanCardProps> = ({
       </div>
 
       {application.notes && (
-        <div className="flex items-center gap-1 text-muted-foreground text-xs mt-2">
-          <StickyNote className="w-3 h-3" aria-hidden="true" />
-          <span className="truncate">
-            {application.notes.slice(0, 40)}{application.notes.length > 40 ? '...' : ''}
-          </span>
-        </div>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="ghost" size="sm" className="mt-2 h-auto w-full justify-start gap-1 text-left whitespace-normal" aria-label={`View saved notes for ${application.company_name}`}>
+              <StickyNote className="w-3 h-3 shrink-0" aria-hidden="true" />
+              <span className="truncate">View notes &amp; saved pitch</span>
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl max-h-[85dvh] overflow-y-auto">
+            <DialogHeader><DialogTitle>{application.company_name} · {application.job_title}</DialogTitle></DialogHeader>
+            <div className="whitespace-pre-wrap break-words text-sm text-foreground">{application.notes}</div>
+          </DialogContent>
+        </Dialog>
       )}
 
       <div className="flex items-center gap-1 text-muted-foreground text-xs mt-2">
