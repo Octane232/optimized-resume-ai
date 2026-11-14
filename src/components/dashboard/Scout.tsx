@@ -18,6 +18,9 @@ import { motion } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 import { CompanyLogo } from '@/components/dashboard/CompanyLogo';
 import { matchTextClass } from '@/lib/matchTier';
+import RadarOutreachDialog from './RadarOutreachDialog';
+import { signalEvent } from '@/lib/radarOutreach';
+import { saveRadarOpportunity } from '@/lib/saveRadarOpportunity';
 
 // ===== Types =====
 interface RadarSignal {
@@ -494,56 +497,8 @@ const isCaution = (reason: string) =>
 const isLowEvidence = (reasons?: string[] | null) =>
   !!reasons?.some((r) => /no (?:specific )?(?:location|seniority|industry)[^.]*(?:provided|given|specified)/i.test(r));
 
-const eventLabel = (s: RadarSignal) => {
-  const d = s.description || '';
-  const m = d.match(/acquir(?:ed|es|ing)(?: of)? ([A-Z][\w&.-]*(?: [A-Z][\w&.-]*)*)/);
-  if (m) return `${m[1]} acquisition`;
-  if (s.amount) return `${s.amount} ${s.signal_type?.toLowerCase() || 'announcement'}`;
-  return s.signal_type ? `recent ${s.signal_type.toLowerCase()}` : 'recent news';
-};
-
-const roleSkillExample = (role?: string | null) => {
-  const r = (role || '').toLowerCase();
-  if (/software|developer|engineer|programmer|\bdev\b/.test(r)) return 'Python and API integrations';
-  if (/nurse|health|care/.test(r)) return 'patient care and clinical documentation';
-  if (/teach|educat/.test(r)) return 'lesson planning and classroom support';
-  if (/sales|business development/.test(r)) return 'pipeline building and outreach';
-  if (/market|content|social media/.test(r)) return 'campaign management and content';
-  if (/data|analyst|analytics/.test(r)) return 'SQL and reporting dashboards';
-  if (/design|ux/.test(r)) return 'design systems and prototyping';
-  if (/support|customer/.test(r)) return 'customer support and issue resolution';
-  if (/financ|account/.test(r)) return 'financial reporting and reconciliation';
-  if (/hr|recruit|people/.test(r)) return 'recruiting and onboarding';
-  return 'hands-on experience in the field';
-};
-
-const specificAngle = (s: RadarSignal, role?: string | null) => {
-  const raw = s.outreach_angle ? hedge(s.outreach_angle) : '';
-  const r = (role || s.likely_roles?.[0] || 'your team').trim();
-  const skill = roleSkillExample(r);
-  if (raw) {
-    const filled = raw.replace(/\[your key skill\]/gi, skill).replace(/\s+,/g, ',').replace(/\s{2,}/g, ' ');
-    if (/congrat/i.test(filled)) return filled;
-  }
-  return `Congrats on the ${eventLabel(s)} — as a ${r}, I'd love to help with ${skill} as you take this next step.`;
-};
-
-const buildOutreachDraft = (s: RadarSignal, role?: string | null) => {
-  const trigger = hedge(s.description) || 'your recent news';
-  const roleLine = (role || s.likely_roles?.[0] || 'a role on your team').trim();
-  const skill = roleSkillExample(roleLine);
-  const angle = '';
-  return `Hi [Name],
-
-Congrats on the ${eventLabel(s)}. I read that ${trigger.replace(/\.$/, '')}.
-
-If it leads to new openings, I'd love to be considered for ${roleLine}. My background in ${skill} could be useful as the team takes this next step.${angle}
-
-Would you be open to a 15-minute chat this week? I can share my resume and a few ideas on how I'd contribute.
-
-Best,
-[Your name]`;
-};
+const specificAngle = (s: RadarSignal, role?: string | null) =>
+  `Reference ${signalEvent(s)} and connect it to one of your genuine strengths${role?.trim() ? ` as a ${role.trim()}` : ''}. Any hiring opportunity is still unconfirmed.`;
 
 const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index, targetRole }) => {
   const s = signal;
@@ -552,18 +507,10 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index, targetRol
   const [openings, setOpenings] = useState<OpeningsResult | null>(null);
   const [showOpenings, setShowOpenings] = useState(false);
   const [showOutreach, setShowOutreach] = useState(false);
-  const [draft, setDraft] = useState(() => buildOutreachDraft(s, targetRole));
   const [tracking, setTracking] = useState(false);
   const [tracked, setTracked] = useState(false);
   const feedbackKey = `radar_feedback_${s.id}`;
   const [feedback, setFeedback] = useState<string | null>(() => localStorage.getItem(feedbackKey));
-
-  useEffect(() => { setDraft(buildOutreachDraft(s, targetRole)); }, [targetRole, s.id]);
-
-  const copyDraft = async () => {
-    await navigator.clipboard.writeText(draft);
-    toast({ title: 'Message copied', description: 'Paste it into LinkedIn or your email.' });
-  };
 
   const saveFeedback = async (value: 'up' | 'down') => {
     localStorage.setItem(feedbackKey, value);
@@ -585,28 +532,7 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index, targetRol
   const addToMissionControl = async () => {
     setTracking(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Please sign in again.');
-      const { data: existing } = await supabase
-        .from('job_applications').select('id')
-        .eq('user_id', user.id).ilike('company_name', s.company_name).limit(1);
-      if (existing?.length) { setTracked(true); toast({ title: 'Already in Mission Control' }); return; }
-      const notes = [
-        `Radar signal: ${s.signal_type || 'Hiring signal'}`,
-        s.why_now && `Why now: ${s.why_now}`,
-        s.outreach_angle && `Outreach angle: ${s.outreach_angle}`,
-        alert && `Match: ${alert.match_score}%`,
-      ].filter(Boolean).join('\n');
-      const { error } = await supabase.from('job_applications').insert({
-        user_id: user.id,
-        company_name: s.company_name,
-        job_title: targetRole || s.likely_roles?.[0] || 'Target role',
-        job_url: s.source_url || null,
-        location: s.location || null,
-        notes,
-        status: 'saved',
-      });
-      if (error) throw error;
+      await saveRadarOpportunity(s, targetRole || s.likely_roles?.[0] || 'Target role');
       setTracked(true);
       toast({ title: 'Added to Mission Control', description: `${s.company_name} is now tracked as Saved.` });
     } catch (e) {
@@ -1025,23 +951,10 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index, targetRol
 
               <ApplicationPanel />
 
-              <Dialog open={showOutreach} onOpenChange={setShowOutreach}>
-                <DialogContent className="max-w-lg">
-                  <DialogHeader>
-                    <DialogTitle>Outreach to {s.company_name}</DialogTitle>
-                  </DialogHeader>
-                  <p className="text-xs text-muted-foreground">Edit it, then copy into LinkedIn or email.</p>
-                  <Textarea value={draft} onChange={(e) => setDraft(e.target.value)} rows={11} className="text-sm" />
-                  <div className="flex justify-end gap-2">
-                    <Button variant="outline" size="sm" onClick={() => window.open(`https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${s.company_name} hiring manager`)}`, '_blank')}>
-                      Find on LinkedIn
-                    </Button>
-                    <Button size="sm" className="gap-2" onClick={copyDraft}>
-                      <Copy className="w-3.5 h-3.5" /> Copy message
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
+              {showOutreach && <RadarOutreachDialog
+                signal={s} targetRole={targetRole} open={showOutreach}
+                onOpenChange={setShowOutreach} onSaved={() => setTracked(true)}
+              />}
 
 
 
