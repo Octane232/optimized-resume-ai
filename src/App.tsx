@@ -2,7 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { OPEN_ACCESS } from "./config/openAccess";
 import { ThemeProvider } from "next-themes";
 import { lazy, Suspense } from "react";
 
@@ -53,14 +54,14 @@ const App = () => (
               <Suspense fallback={<LoadingFallback />}>
                 <Routes>
                 {/* Marketing Pages */}
-                <Route path="/" element={<Index />} />
+                <Route path="/" element={OPEN_ACCESS ? <Navigate to="/dashboard" replace /> : <Index />} />
                 <Route path="/features" element={<Index />} />
                 <Route path="/pricing" element={<Index />} />
                 <Route path="/enterprise" element={<Index />} />
                 <Route path="/resources" element={<Index />} />
 
                 {/* Authentication */}
-                <Route path="/auth" element={<Auth />} />
+                <Route path="/auth" element={OPEN_ACCESS ? <Navigate to="/dashboard" replace /> : <Auth />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
 
                 {/* Dashboard & Core Features */}
