@@ -1,3 +1,4 @@
+import { OPEN_ACCESS } from '@/config/openAccess';
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -133,7 +134,7 @@ const Dashboard = () => {
         if (isOAuthReturn) window.history.replaceState({}, '', '/dashboard');
         checkAuth();
       } else if (event === 'SIGNED_OUT') {
-        navigate('/auth');
+        if (OPEN_ACCESS) window.location.reload(); else navigate('/auth');
       }
     });
 
@@ -142,6 +143,13 @@ const Dashboard = () => {
       if (cancelled) return;
       if (session) {
         checkAuth();
+      } else if (OPEN_ACCESS) {
+        const { error } = await supabase.auth.signInAnonymously();
+        if (error) {
+          console.error('Guest access error:', error);
+          toast({ title: 'Could not open the app', description: 'Please refresh the page and try again.', variant: 'destructive' });
+          setLoading(false);
+        }
       } else if (!isOAuthReturn) {
         navigate('/auth');
       }
@@ -206,8 +214,8 @@ const Dashboard = () => {
         return;
       }
 
-      setUserEmail(user.email || '');
-      setUserInitials(getUserInitials(user.email || ''));
+      setUserEmail(user.email || (user.is_anonymous ? 'Guest' : ''));
+      setUserInitials(getUserInitials(user.email || 'Guest'));
 
       const { data: resumes } = await supabase
         .from('resumes')
