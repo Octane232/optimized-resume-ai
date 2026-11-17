@@ -7,7 +7,6 @@ const navSections = [
     title: 'Product',
     links: [
       { label: 'Features', to: '/#features' },
-      { label: 'Pricing', to: '/#pricing' },
       { label: 'Sign in', to: '/auth' },
     ],
   },

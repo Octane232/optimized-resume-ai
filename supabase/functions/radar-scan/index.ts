@@ -1,4 +1,8 @@
 const FREE_BETA = true;
+// Free-beta cost safeguards (estimates, not a provider billing cap).
+const BETA_DAILY_SCANS_PER_USER = 3;
+const BETA_DAILY_BUDGET_USD = 5;
+const EST_COST_PER_SCAN_USD = 0.05;
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -484,8 +488,23 @@ async function requireUser(authHeader: string | null, adminClient: any) {
 }
 
 async function enforceQuota(adminClient: any, userId: string, tier: string, feature: string) {
-  // FREE BETA: unlimited scans for everyone until monetization is re-enabled.
-  if (FREE_BETA) return null;
+  // FREE BETA: no plan limits, but protect costs with per-visitor and site-wide daily caps.
+  if (FREE_BETA) {
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { count: mine } = await adminClient.from("usage_events").select("id", { count: "exact", head: true })
+      .eq("feature", "radar_scan_beta").eq("user_id", userId).gte("created_at", since);
+    if ((mine ?? 0) >= BETA_DAILY_SCANS_PER_USER) {
+      throw new Error(`Daily scan limit reached (${BETA_DAILY_SCANS_PER_USER} per day during the free beta). Please try again tomorrow.`);
+    }
+    const { count: all } = await adminClient.from("usage_events").select("id", { count: "exact", head: true })
+      .eq("feature", "radar_scan_beta").gte("created_at", since);
+    if ((all ?? 0) * EST_COST_PER_SCAN_USD >= BETA_DAILY_BUDGET_USD) {
+      throw new Error("Job Radar is very busy today and has paused new scans. Please try again tomorrow.");
+    }
+    // Reserve the slot up front so parallel requests can't slip past the caps.
+    await adminClient.from("usage_events").insert({ user_id: userId, feature: "radar_scan_beta", metadata: { est_cost_usd: EST_COST_PER_SCAN_USD } });
+    return null;
+  }
   const tierLimit = PLAN_RADAR_LIMITS[tier] ?? 0;
 
   if (tierLimit === 0) {
