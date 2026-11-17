@@ -13,6 +13,8 @@ import {
   ChevronRight,
   ArrowRight,
   ShieldCheck,
+  ChevronDown,
+  MoreHorizontal,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -55,12 +57,18 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
     { id: 'briefing', label: 'Home / Briefing', icon: Home },
     { id: 'scout', label: 'Job Radar', icon: Telescope, badge: radarCount },
     { id: 'resume-engine', label: 'Resume + ATS', icon: FileText },
+    { id: 'mission-control', label: 'Application Tracker', icon: Crosshair },
+  ];
+
+  const moreItems: NavItem[] = [
     { id: 'interview-prep', label: 'Interview Coach', icon: Mic },
     { id: 'skill-gap', label: 'Skill Gap', icon: TrendingUp },
     { id: 'linkedin', label: 'LinkedIn Optimizer', icon: Linkedin },
     { id: 'salary-intel', label: 'Salary Intelligence', icon: DollarSign },
-    { id: 'mission-control', label: 'Application Tracker', icon: Crosshair },
   ];
+  const moreActive = moreItems.some((i) => i.id === activeTab);
+  const [moreOpen, setMoreOpen] = React.useState(moreActive);
+  React.useEffect(() => { if (moreActive) setMoreOpen(true); }, [moreActive]);
 
 
   const renderNavItem = (item: NavItem) => {
@@ -134,6 +142,24 @@ const NewSidebar: React.FC<NewSidebarProps> = ({
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
         <TooltipProvider delayDuration={0}>
           {mainItems.map(renderNavItem)}
+          <div className="pt-3">
+            <button
+              onClick={() => setMoreOpen(!moreOpen)}
+              aria-expanded={moreOpen}
+              className={cn(
+                'w-full flex items-center gap-3 rounded-lg px-3 py-2 text-left text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors',
+                collapsed && 'justify-center px-0'
+              )}
+            >
+              {collapsed ? <MoreHorizontal className="w-[18px] h-[18px]" /> : (
+                <>
+                  <span className="flex-1">More tools</span>
+                  <ChevronDown className={cn('w-4 h-4 transition-transform', moreOpen && 'rotate-180')} />
+                </>
+              )}
+            </button>
+            {moreOpen && <div className="mt-1 space-y-1">{moreItems.map(renderNavItem)}</div>}
+          </div>
         </TooltipProvider>
       </nav>
 
