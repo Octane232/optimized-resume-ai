@@ -1075,7 +1075,7 @@ Description: ${article.description}`
   } catch (error) {
     console.error("Radar scan error:", error);
     const message = error instanceof Error ? error.message : "Unknown error";
-    const status = message.includes("limit reached") || message.includes("expired") || message.includes("does not include")
+    const status = message.includes("limit reached") || message.includes("paused new scans") || message.includes("expired") || message.includes("does not include")
       ? 429
       : message.includes("Unauthorized")
         ? 401
