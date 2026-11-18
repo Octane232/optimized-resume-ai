@@ -49,6 +49,19 @@ export default function Blog() {
                   {section.paragraphs.map((paragraph) => <p key={paragraph} className="mb-4 leading-8 text-muted-foreground">{paragraph}</p>)}
                 </section>
               ))}
+              {article.sources && article.sources.length > 0 && (
+                <section className="mb-10">
+                  <h2 className="mb-4 text-2xl font-semibold">Sources</h2>
+                  <ol className="list-decimal space-y-3 pl-5 text-muted-foreground">
+                    {article.sources.map((source) => (
+                      <li key={source.url} className="leading-7">
+                        <a href={source.url} target="_blank" rel="noopener noreferrer" className="font-medium text-foreground underline underline-offset-4 hover:text-primary">{source.label}</a>
+                        {source.note ? <span> — {source.note}</span> : null}
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+              )}
             </div>
             <div className="border-t border-border py-8">
               <h2 className="mb-5 text-xl font-semibold">Keep reading</h2>
