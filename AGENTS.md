@@ -1,5 +1,7 @@
 # Project architecture decisions
 
+- Keep public blog articles in a typed content module rendered at /blog and /blog/:slug, outside guest-auth routing, so guides remain directly accessible and require no publishing backend.
+
 - Keep the homepage product-led: the hero renders a live in-app preview (sidebar, opportunity feed, metrics) instead of stock photography, so visitors see the real product.
 - Use one shared VaylanceLogo component for in-app brand marks so the public site and dashboard stay visually consistent.
 - Calculate Job Radar fit from explicit role, industry, location/work-style, and seniority dimensions so scores remain explainable and calibrated.

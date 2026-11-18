@@ -14,6 +14,7 @@ const navSections = [
     title: 'Company',
     links: [
       { label: 'About', to: '/about-us' },
+      { label: 'Blog', to: '/blog' },
     ],
   },
   {

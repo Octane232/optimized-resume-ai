@@ -1,5 +1,8 @@
 # Roadmap
 
+- [x] Add a public /blog with starter career guides, article pages, footer navigation and sitemap entries.
+- [x] Verify the public blog and article navigation on desktop and mobile.
+
 - [x] Implement Phase 1 targeted Radar outreach: contact searches, genuine-strength pitches, optional profile snippets, and saved pitch viewing.
 - [ ] Verify Phase 1 signed-in outreach-to-Mission-Control flow (blocked: external Supabase has no managed browser session).
 - [ ] Evaluate Phase 1 with five active job seekers before advancing to Phases 2–6 of the approved Radar-led plan.

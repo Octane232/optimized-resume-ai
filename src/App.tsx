@@ -19,6 +19,7 @@ const ForIndividuals = lazy(() => import("./pages/ForIndividuals"));
 const ForStudents = lazy(() => import("./pages/ForStudents"));
 const AboutUs = lazy(() => import("./pages/AboutUs"));
 const Contact = lazy(() => import("./pages/Contact"));
+const Blog = lazy(() => import("./pages/Blog"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Auth = lazy(() => import("./pages/Auth"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
@@ -77,6 +78,8 @@ const App = () => (
                 {/* Company Pages */}
                 <Route path="/about-us" element={<AboutUs />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/blog/:slug" element={<Blog />} />
 
                 {/* Legal Pages */}
                 <Route path="/terms" element={<TermsOfService />} />
