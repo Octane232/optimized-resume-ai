@@ -19,6 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 import { CompanyLogo } from '@/components/dashboard/CompanyLogo';
 import { matchTextClass } from '@/lib/matchTier';
 import RadarOutreachDialog from './RadarOutreachDialog';
+import { hiringPrecedent } from '@/lib/radarOutreach';
 import { signalEvent } from '@/lib/radarOutreach';
 import { saveRadarOpportunity } from '@/lib/saveRadarOpportunity';
 
@@ -544,7 +545,7 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index, targetRol
 
   const ProofBadge = () => {
     if (!openings) return (
-      <Badge variant="outline" className="text-xs font-normal">Postings not checked yet</Badge>
+      <Badge variant="outline" className="text-xs font-normal">Early lead</Badge>
     );
     if (openings.status === 'ats' && openings.jobs.length) return (
       <Badge variant="outline" className="text-xs bg-muted text-foreground border-border">Already posted · {openings.jobs.length} open</Badge>
@@ -554,7 +555,7 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index, targetRol
     );
     return (
       <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/30">
-        <Zap className="w-3 h-3 mr-1" /> Hiring signal · no posting yet
+        <Zap className="w-3 h-3 mr-1" /> Early lead · reach out before it's advertised
       </Badge>
     );
   };
@@ -649,8 +650,8 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index, targetRol
     return (
       <div className="mt-3 p-3 rounded-lg border border-border bg-muted/30">
         <p className="text-sm text-foreground">
-          No public application posted yet — you're early. Message the hiring lead using your outreach
-          angle before this goes public.
+          You're early: no advert yet. Use Draft Outreach to email or message the team now, before
+          other applicants see it.
         </p>
       </div>
     );
@@ -705,6 +706,9 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index, targetRol
           <Zap className="w-3 h-3" /> Why they may be hiring
         </p>
         <p className="text-sm text-foreground">{hedge(s.why_now)}</p>
+        <p className="text-xs text-muted-foreground mt-1">
+          Past pattern ({hiringPrecedent(s.signal_type).strength} evidence): {hiringPrecedent(s.signal_type).note}
+        </p>
       </div>
     );
   };
@@ -909,10 +913,10 @@ const SignalCard: React.FC<SignalCardProps> = ({ signal, alert, index, targetRol
                   variant="ghost"
                   size="sm"
                   className="gap-2"
-                  onClick={() => window.open(`https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${s.company_name} recruiter`)}`, '_blank')}
+                  onClick={() => setShowOutreach(true)}
                 >
                   <Users className="w-3.5 h-3.5" />
-                  Hiring Contact
+                  Email or LinkedIn contact
                 </Button>
                 {typeof s.confidence === 'number' && (
                   <Badge variant="secondary" className="text-xs">
@@ -1068,7 +1072,7 @@ const Scout: React.FC<ScoutProps> = ({ setActiveTab }) => {
   const { scanning, usageLoading, canScan, handleScan } = useRadarScan(fetchData, clearFeed);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'alerts' | 'all'>('alerts');
-  const [scope, setScope] = useState<'all' | 'remote' | 'public' | 'local'>('all');
+  const [scope, setScope] = useState<'all' | 'live' | 'early' | 'remote' | 'public' | 'local'>('all');
   const { preferences, setPreferences, loaded: prefsLoaded } = useCareerPreferences();
   const { toast } = useToast();
   const [savingSetup, setSavingSetup] = useState(false);
@@ -1117,6 +1121,8 @@ const Scout: React.FC<ScoutProps> = ({ setActiveTab }) => {
 
     const scoped = baseSignals.filter((s: any) => {
       const wt = s?.workplace_type || 'onsite';
+      if (scope === 'live') return s?.kind === 'posting';
+      if (scope === 'early') return s?.kind !== 'posting';
       if (scope === 'remote') return wt.startsWith('remote') && s?.trust_tier === 'high';
       if (scope === 'local') return !wt.startsWith('remote');
       if (scope === 'public') return /education|healthcare|public/i.test(`${s?.sector || ''} ${s?.industry || ''}`);
@@ -1159,6 +1165,8 @@ const Scout: React.FC<ScoutProps> = ({ setActiveTab }) => {
       <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filter opportunities">
         {([
           ['all', 'All'],
+          ['live', 'Live openings'],
+          ['early', 'Early leads'],
           ['remote', 'Verified remote'],
           ['public', 'Schools, health & public sector'],
           ['local', 'Local / on-site'],

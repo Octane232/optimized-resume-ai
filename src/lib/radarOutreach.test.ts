@@ -37,3 +37,21 @@ describe('Radar outreach evidence', () => {
     assert.equal(opportunityNotes(signal, 'Developer', drafts, 'CTO', notes).match(/--- Radar opportunity ---/g)?.length, 1);
   });
 });
+import { emailCandidates, hiringPrecedent, mailtoUrl } from './radarOutreach';
+describe('Radar email reach', () => {
+  test('builds first.last first, plus hiring inboxes', () => {
+    const r = emailCandidates('https://www.Acme.com/about', 'Sarah Jenkins');
+    assert.equal(r.patterns[0], 'sarah.jenkins@acme.com');
+    assert.ok(r.inboxes.includes('careers@acme.com'));
+  });
+  test('no domain means no guessed emails', () => {
+    assert.deepEqual(emailCandidates(null, 'Sarah Jenkins').patterns, []);
+  });
+  test('mailto keeps the address readable and encodes the body', () => {
+    assert.ok(mailtoUrl('a@b.com', 'Hi there', 'x&y').startsWith('mailto:a@b.com?subject=Hi%20there&body=x%26y'));
+  });
+  test('acquisitions are flagged as weak hiring evidence', () => {
+    assert.equal(hiringPrecedent('Acquisition').strength, 'weak');
+    assert.equal(hiringPrecedent('Funding').strength, 'strong');
+  });
+});

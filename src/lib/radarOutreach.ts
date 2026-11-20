@@ -10,6 +10,7 @@ export interface OutreachSignal {
   amount?: string | null;
   published_at?: string | null;
   likely_roles?: string[] | null;
+  company_domain?: string | null;
 }
 
 export const clean = (value: string) => value.trim().replace(/\s+/g, ' ').replace(/\s+,/g, ',');
@@ -76,4 +77,42 @@ export function opportunityNotes(signal: OutreachSignal, role: string, drafts?: 
     drafts && `Profile snippet:\n${drafts.headline}`,
     drafts && `Connection notes:\n${drafts.notes.join('\n\n')}`,
   ].filter(Boolean).join('\n\n')}`;
+}
+// ---- Email reach: public hiring inboxes + common name patterns (no scraping of people) ----
+export function cleanDomain(domain?: string | null): string | null {
+  const d = (domain || '').toLowerCase().trim().replace(/^https?:\/\//, '').replace(/^www\./, '').split(/[/?#]/)[0];
+  return /^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(d) ? d : null;
+}
+
+export function emailCandidates(domain?: string | null, fullName?: string) {
+  const d = cleanDomain(domain);
+  if (!d) return { patterns: [] as string[], inboxes: [] as string[] };
+  const parts = clean(fullName || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z\s-]/g, '').split(/\s+/).filter(Boolean);
+  const first = parts[0];
+  const last = parts.length > 1 ? parts[parts.length - 1] : '';
+  const patterns = first
+    ? (last ? [`${first}.${last}@${d}`, `${first}@${d}`, `${first[0]}${last}@${d}`] : [`${first}@${d}`])
+    : [];
+  return { patterns, inboxes: [`careers@${d}`, `jobs@${d}`, `talent@${d}`] };
+}
+
+export function mailtoUrl(to: string, subject: string, body: string) {
+  return `mailto:${encodeURIComponent(to).replace(/%40/g, '@')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
+// ---- Historical precedent: how often a signal type has led to hiring ----
+const PRECEDENT: Record<string, { strength: 'strong' | 'moderate' | 'weak'; note: string }> = {
+  'Funding': { strength: 'strong', note: 'Funded companies usually grow their team in the months after a raise.' },
+  'Investment': { strength: 'strong', note: 'New investment is commonly spent on hiring and expansion.' },
+  'Contract Win': { strength: 'strong', note: 'Large contracts usually need extra staff to deliver the work.' },
+  'New Facility': { strength: 'strong', note: 'New sites and offices are typically staffed locally.' },
+  'Expansion': { strength: 'strong', note: 'Expansion into new markets or sites usually means new roles.' },
+  'Hiring Announcement': { strength: 'strong', note: 'The company has publicly said it plans to hire.' },
+  'Public Programme': { strength: 'moderate', note: 'Funded public programmes often recruit delivery staff.' },
+  'Leadership Hire': { strength: 'moderate', note: 'New leaders sometimes rebuild their teams, but not always.' },
+  'Acquisition': { strength: 'weak', note: 'Acquisitions can lead to hiring, but also to merging teams or cuts.' },
+};
+export function hiringPrecedent(signalType?: string | null) {
+  return PRECEDENT[signalType || ''] || { strength: 'moderate' as const, note: 'Similar news has sometimes come before hiring.' };
 }

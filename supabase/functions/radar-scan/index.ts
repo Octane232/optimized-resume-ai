@@ -894,7 +894,11 @@ Description: ${article.description}`
           const data = await res.json();
           const parsed = JSON.parse(data.choices?.[0]?.message?.content || "{}");
           if (!parsed.is_hiring_signal || !parsed.company_name) return null;
-          if (Number(parsed.confidence ?? 0) < 45) return null;
+          if (Number(parsed.confidence ?? 0) < 60) return null;
+          // Weak hiring precedent (acquisitions, leadership moves, vague PR) must clear a higher bar.
+          const weakType = /acquisition|leadership hire/i.test(String(parsed.signal_type || ""));
+          if (weakType && Number(parsed.confidence ?? 0) < 80) return null;
+          if (!parsed.why_now || !(Array.isArray(parsed.likely_roles) && parsed.likely_roles.length)) return null;
           const companyDomain = normalizeCompanyDomain(parsed.company_domain, article.url);
           const workplace = ["remote_worldwide", "remote_regional", "hybrid", "onsite"].includes(parsed.workplace_type)
             ? parsed.workplace_type
